@@ -121,7 +121,7 @@ export default function AIAssistant() {
   }
 
   // Temporarily allow AI access for all users for testing
-  const isPremiumUser = true; // user?.subscriptionTier === 'premium' || user?.subscriptionTier === 'pro';
+  // const isPremiumUser = true; // user?.subscriptionTier === 'premium' || user?.subscriptionTier === 'pro';
 
   return (
     <div className="min-h-screen bg-gray-50">
