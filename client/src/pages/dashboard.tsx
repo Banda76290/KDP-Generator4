@@ -11,7 +11,7 @@ import ProjectsTable from "@/components/dashboard/ProjectsTable";
 import { Button } from "@/components/ui/button";
 import { Plus, Download } from "lucide-react";
 import { useState } from "react";
-import ProjectModal from "@/components/projects/ProjectModal";
+import { KDPProjectModal } from "@/components/projects/KDPProjectModal";
 
 export default function Dashboard() {
   const { toast } = useToast();
@@ -87,7 +87,7 @@ export default function Dashboard() {
 
       {/* Project Modal */}
       {showProjectModal && (
-        <ProjectModal 
+        <KDPProjectModal 
           isOpen={showProjectModal} 
           onClose={() => setShowProjectModal(false)} 
         />

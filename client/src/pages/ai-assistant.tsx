@@ -19,6 +19,9 @@ export default function AIAssistant() {
   const [prompt, setPrompt] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [generatedContent, setGeneratedContent] = useState("");
+  
+  // Temporarily allow AI for all users for testing
+  const isPremiumUser = true;
 
   const { data: generations } = useQuery({
     queryKey: ["/api/ai/generations"],
@@ -249,14 +252,14 @@ export default function AIAssistant() {
           )}
 
           {/* Recent Generations */}
-          {isPremiumUser && generations && generations.length > 0 && (
+          {isPremiumUser && Array.isArray(generations) && generations.length > 0 && (
             <Card className="mt-6">
               <CardHeader>
                 <CardTitle>Recent Generations</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {generations.slice(0, 5).map((generation: any) => (
+                  {(generations as any[]).slice(0, 5).map((generation: any) => (
                     <div key={generation.id} className="border-b border-gray-200 pb-4 last:border-b-0">
                       <div className="flex items-center justify-between mb-2">
                         <Badge variant="outline">{generation.type}</Badge>
