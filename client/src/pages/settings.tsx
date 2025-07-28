@@ -13,13 +13,32 @@ import Sidebar from "@/components/layout/Sidebar";
 import { useTheme } from "@/hooks/useTheme";
 
 export default function Settings() {
-  const { user } = useAuth() as { user: User | undefined };
+  const { user, isLoading } = useAuth();
   const { theme, setTheme } = useTheme();
 
   const getUserInitials = (firstName?: string, lastName?: string) => {
     if (!firstName && !lastName) return "U";
     return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
   };
+
+  // Si on est en cours de chargement, afficher un état de chargement
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="flex">
+          <Sidebar />
+          <main className="flex-1 ml-64 pt-16 p-8">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex items-center justify-center h-64">
+                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
