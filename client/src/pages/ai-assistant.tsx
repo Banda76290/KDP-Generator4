@@ -81,14 +81,15 @@ export default function AIAssistant() {
       return;
     }
 
-    if (user?.subscriptionTier === 'free') {
-      toast({
-        title: "Premium Feature",
-        description: "AI content generation requires a premium subscription",
-        variant: "destructive",
-      });
-      return;
-    }
+    // Temporarily allow AI access for all users for testing
+    // if (user?.subscriptionTier === 'free') {
+    //   toast({
+    //     title: "Premium Feature",
+    //     description: "AI content generation requires a premium subscription",
+    //     variant: "destructive",
+    //   });
+    //   return;
+    // }
 
     generateMutation.mutate({
       type: selectedType,
@@ -116,7 +117,8 @@ export default function AIAssistant() {
     return null;
   }
 
-  const isPremiumUser = user?.subscriptionTier === 'premium' || user?.subscriptionTier === 'pro';
+  // Temporarily allow AI access for all users for testing
+  const isPremiumUser = true; // user?.subscriptionTier === 'premium' || user?.subscriptionTier === 'pro';
 
   return (
     <div className="min-h-screen bg-gray-50">

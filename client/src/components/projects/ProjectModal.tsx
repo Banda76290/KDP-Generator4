@@ -166,7 +166,8 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
     }
   };
 
-  const isPremiumUser = user?.subscriptionTier === 'premium' || user?.subscriptionTier === 'pro';
+  // Temporarily allow AI access for all users for testing
+  const isPremiumUser = true; // user?.subscriptionTier === 'premium' || user?.subscriptionTier === 'pro';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

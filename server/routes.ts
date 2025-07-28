@@ -254,9 +254,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
-      if (user?.subscriptionTier === 'free') {
-        return res.status(403).json({ message: "AI features require a premium subscription" });
-      }
+      // Temporarily allow AI access for all users for testing
+      // if (user?.subscriptionTier === 'free') {
+      //   return res.status(403).json({ message: "AI features require a premium subscription" });
+      // }
 
       const { type, prompt, title } = req.body;
       if (!type || !prompt) {
