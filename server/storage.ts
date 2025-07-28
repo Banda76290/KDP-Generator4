@@ -22,7 +22,7 @@ import { eq, desc, and, gte, lte, sql, sum, count } from "drizzle-orm";
 export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
-  upsertUser(user: UpsertUser): Promise<User>;
+  upsertUser(user: UpsertUser & { id: string }): Promise<User>;
   updateUserStripeInfo(userId: string, stripeCustomerId: string, stripeSubscriptionId?: string): Promise<User>;
 
   // Project operations
@@ -60,7 +60,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async upsertUser(userData: UpsertUser): Promise<User> {
+  async upsertUser(userData: UpsertUser & { id: string }): Promise<User> {
     const [user] = await db
       .insert(users)
       .values(userData)
@@ -147,16 +147,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserSalesData(userId: string, startDate?: Date, endDate?: Date): Promise<SalesData[]> {
-    let query = db.select().from(salesData).where(eq(salesData.userId, userId));
+    let query;
     
     if (startDate && endDate) {
-      query = query.where(
+      query = db.select().from(salesData).where(
         and(
           eq(salesData.userId, userId),
           gte(salesData.reportDate, startDate),
           lte(salesData.reportDate, endDate)
         )
       );
+    } else {
+      query = db.select().from(salesData).where(eq(salesData.userId, userId));
     }
 
     return await query.orderBy(desc(salesData.reportDate));

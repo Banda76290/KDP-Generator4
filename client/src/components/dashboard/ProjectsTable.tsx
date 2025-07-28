@@ -86,17 +86,15 @@ export default function ProjectsTable() {
   }
 
   // Show only the 3 most recent projects
-  const recentProjects = (projects || []).slice(0, 3);
+  const recentProjects = Array.isArray(projects) ? projects.slice(0, 3) : [];
 
   return (
     <Card className="shadow-sm border border-gray-200">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold text-gray-900">Recent Projects</CardTitle>
-          <Link href="/projects">
-            <a className="text-primary hover:text-primary/80 text-sm font-medium">
-              View all projects
-            </a>
+          <Link href="/projects" className="text-primary hover:text-primary/80 text-sm font-medium">
+            View all projects
           </Link>
         </div>
       </CardHeader>
@@ -139,7 +137,7 @@ export default function ProjectsTable() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className={`w-10 h-10 ${getGradientClass(index)} rounded-lg flex items-center justify-center text-white font-semibold text-sm`}>
-                          {generateProjectInitials(project.title)}
+                          {generateProjectInitials(project.title || 'Untitled')}
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
@@ -154,8 +152,8 @@ export default function ProjectsTable() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge className={`${getStatusBadgeClass(project.status)} text-xs font-semibold`}>
-                        {project.status.replace('_', ' ')}
+                      <Badge className={`${getStatusBadgeClass(project.status || 'draft')} text-xs font-semibold`}>
+                        {(project.status || 'draft').replace('_', ' ')}
                       </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
