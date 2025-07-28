@@ -11,6 +11,8 @@ import Projects from "@/pages/projects";
 import Analytics from "@/pages/analytics";
 import KDPReports from "@/pages/kdp-reports";
 import AIAssistant from "@/pages/ai-assistant";
+import Subscription from "@/pages/subscription";
+import Settings from "@/pages/settings";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -26,6 +28,8 @@ function Router() {
           <Route path="/analytics" component={Analytics} />
           <Route path="/kdp-reports" component={KDPReports} />
           <Route path="/ai-assistant" component={AIAssistant} />
+          <Route path="/subscription" component={Subscription} />
+          <Route path="/settings" component={Settings} />
         </>
       )}
       <Route component={NotFound} />

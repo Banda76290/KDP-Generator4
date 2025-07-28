@@ -293,6 +293,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Subscription routes
+  app.post('/api/create-subscription', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.email) {
+        return res.status(400).json({ message: "User email is required" });
+      }
+
+      // For now, just redirect to a placeholder or handle subscription logic
+      // This would integrate with Stripe in a real implementation
+      res.json({ 
+        message: "Subscription feature coming soon",
+        redirectUrl: "/subscription"
+      });
+    } catch (error) {
+      console.error("Error creating subscription:", error);
+      res.status(500).json({ message: "Failed to create subscription" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

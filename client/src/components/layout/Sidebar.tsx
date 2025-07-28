@@ -42,9 +42,9 @@ export default function Sidebar() {
           const isActive = location === item.href;
           return (
             <Link key={item.name} href={item.href}>
-              <a
+              <span
                 className={cn(
-                  "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors",
+                  "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",
                   isActive
                     ? "bg-primary text-primary-foreground"
                     : "text-foreground hover:bg-muted"
@@ -64,7 +64,7 @@ export default function Sidebar() {
                     {item.badge}
                   </Badge>
                 )}
-              </a>
+              </span>
             </Link>
           );
         })}
@@ -77,9 +77,9 @@ export default function Sidebar() {
             const isActive = location === item.href;
             return (
               <Link key={item.name} href={item.href}>
-                <a
+                <span
                   className={cn(
-                    "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors",
+                    "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",
                     isActive
                       ? "bg-primary text-primary-foreground"
                       : "text-foreground hover:bg-muted"
@@ -87,7 +87,7 @@ export default function Sidebar() {
                 >
                   <item.icon className="w-5 h-5" />
                   <span>{item.name}</span>
-                </a>
+                </span>
               </Link>
             );
           })}
