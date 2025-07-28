@@ -1,0 +1,176 @@
+Développe une application web avancée, construite sur la plateforme Wix Studio, destinée à accompagner les auteurs dans la gestion de leurs projets de publication, notamment via Amazon KDP. Cette application ne doit pas être un simple site vitrine, mais une solution métier complète, intégrant les fonctionnalités suivantes :
+
+1. Gestion de projets d’écriture
+Permettre à chaque utilisateur connecté de créer, modifier et gérer plusieurs projets représentant des livres.
+
+Chaque projet doit contenir de nombreuses métadonnées : titre, sous-titre, auteur, liste de contributeurs, description, catégories, mots-clés, informations de publication, etc.
+
+Inclure un tableau de bord utilisateur pour visualiser, trier, filtrer et accéder à l’ensemble des projets créés.
+
+2. Importation et analyse de rapports de ventes Amazon KDP
+Permettre aux utilisateurs d’uploader leurs rapports de ventes KDP (au format Excel).
+
+Le système doit être capable de parser les fichiers et d’extraire les données pour les formats eBook, broché et relié.
+
+Stocker ces données dans une base de données structurée (collections Wix) pour permettre une analyse consolidée dans l’interface.
+
+3. Formulaires dynamiques intelligents
+Intégrer des formulaires configurés dynamiquement selon les types de projets ou les réponses de l’utilisateur.
+
+Affichage conditionnel : certains champs ne doivent apparaître que si certaines options sont activées (ex. : champs liés à l’IA uniquement visibles si l’utilisateur sélectionne "utilisation de l’IA").
+
+Utiliser des composants comme les repeaters pour la gestion de listes (ex. contributeurs, catégories, sous-sections).
+
+4. Génération de contenu assistée par intelligence artificielle
+Intégrer un module IA (via API externe comme OpenAI) permettant de :
+
+Générer automatiquement une structure de livre : titre, chapitres, sous-chapitres.
+
+Créer une couverture factice.
+
+Générer ou améliorer dynamiquement des textes descriptifs ou autres champs rédactionnels dans les projets.
+
+5. Gestion des utilisateurs et des abonnements
+Gérer les sessions utilisateurs et stocker leurs données de manière sécurisée.
+
+Synchroniser les niveaux d’abonnement (forfaits payants Wix ou base Airtable) avec la base de données pour conditionner l’accès à certaines fonctionnalités.
+
+6. Intégrations avec des services externes via Webhooks
+Mettre en place des webhooks sortants pour envoyer des données à des outils externes (ex. : Make, Zapier) selon des événements (ex. création ou mise à jour d’un projet).
+
+Prévoir une structure souple pour accueillir d’autres webhooks ultérieurement (ex. génération de contenu, synchronisation de fichiers, notifications).
+
+7. Widgets personnalisés et visualisation avancée
+Créer des widgets UI spécifiques, comme :
+
+un explorateur en arborescence pour visualiser la structure Projet → Livre → Medium → Version.
+
+des éléments visuels interactifs pour consulter ou modifier rapidement les blocs d’informations d’un projet.
+
+Objectif général
+L’application doit être un véritable assistant numérique pour auteurs indépendants, leur offrant une interface moderne, évolutive, connectée à l’IA et aux outils tiers, tout en restant construite sans code serveur lourd grâce à Wix Studio et ses intégrations (automations, collections, webhooks, fetchs HTTP, etc.).
+
+Souhaite-tu que je complète ce prompt avec des exemples de structure de base de données (collections), des schémas UI ou des modèles de flux Make ?
+
+
+
+
+
+
+
+
+Vous avez dit :
+Non, je en veux pas créer ce site sur Wix. C'est précisément l'inverse. Je veux que replit AI crée le site from scratch.
+
+
+ChatGPT a dit :
+Merci pour la précision. Voici la version adaptée du prompt à destination de Replit AI, pour lui demander de développer from scratch une application web complexe pour auteurs auto-édités, sans Wix ni plateforme no-code. Le prompt est formulé pour maximiser la compréhension de l’IA tout en conservant l’ensemble des fonctionnalités que tu veux conserver.
+
+🎯 Prompt Replit AI : développer une application web métier pour les auteurs auto-édités (type SaaS Amazon KDP)
+
+Je souhaite que tu crées une application web complète from scratch (frontend + backend + base de données), destinée aux auteurs auto-édités, afin de les aider à gérer leurs projets de publication sur des plateformes comme Amazon KDP.
+
+L’application doit être un SaaS professionnel, avec gestion des utilisateurs, abonnements, formulaires dynamiques, analyses de ventes et intégration d’outils d’intelligence artificielle. Tu dois proposer une architecture scalable (frameworks modernes recommandés) et coder le site sans utiliser de CMS ou de plateforme no-code comme Wix.
+
+✅ Fonctionnalités principales à développer :
+1. Gestion de projets d’écriture
+Chaque utilisateur peut créer plusieurs projets représentant des livres.
+
+Un projet contient les métadonnées suivantes : titre, sous-titre, auteur, contributeurs (liste), description, catégories (multi-niveaux), mots-clés, informations de publication, etc.
+
+Interface : tableau de bord pour consulter, modifier, filtrer et trier les projets.
+
+Base de données relationnelle ou NoSQL à définir selon performance et scalabilité.
+
+2. Import et analyse de rapports Amazon KDP
+Les utilisateurs peuvent uploader leurs rapports de ventes KDP (fichiers Excel ou CSV).
+
+Backend : parser ces fichiers, extraire les ventes selon les formats (eBook, broché, relié).
+
+Stockage en base structurée pour permettre :
+
+agrégation des données,
+
+visualisation par période, livre, marché, etc.
+
+affichage graphique (dashboards, histogrammes, courbes).
+
+3. Formulaires dynamiques et intelligents
+Création de formulaires contextuels :
+
+champs conditionnels (ex. : afficher les options IA seulement si la case "Utilisation de l’IA" est cochée),
+
+composants type repeaters pour listes imbriquées (ex. contributeurs, catégories, versions de livre),
+
+validation dynamique.
+
+Les règles d’affichage doivent être définies côté frontend et backend.
+
+4. Génération de contenu assistée par IA (via API OpenAI)
+Modules de génération automatique :
+
+structure de livre (titres, chapitres) à partir d’un prompt utilisateur,
+
+génération ou amélioration de description de livre,
+
+création de couverture factice (avec API image tierce ou placeholder).
+
+Les utilisateurs doivent pouvoir activer/désactiver l’usage de l’IA selon leur projet.
+
+5. Gestion des utilisateurs et abonnements
+Système complet d’inscription / connexion avec sécurité renforcée (JWT, hashing, 2FA possible).
+
+Gestion des abonnements freemium / premium :
+
+options activées selon niveau d’abonnement,
+
+intégration Stripe (ou autre) pour la facturation.
+
+Interface d’administration pour gérer les utilisateurs et leurs droits.
+
+6. Webhooks et intégrations
+Prévoir une architecture orientée événements permettant d’envoyer automatiquement des données à des outils tiers (ex. via webhooks vers Make, Zapier, ou autres).
+
+Chaque événement métier (création projet, ajout de chapitre, upload rapport) doit pouvoir être écouté pour déclencher une action tierce.
+
+7. Widgets personnalisés et UI avancée
+Intégration de widgets métiers comme :
+
+un explorateur en arborescence Projet > Livre > Version > Medium,
+
+des tableaux et cartes interactives pour naviguer dans les données des projets,
+
+des graphiques dynamiques pour la visualisation des ventes (via Chart.js, D3.js, Recharts ou équivalent).
+
+🧱 Contraintes techniques et suggestions d’architecture :
+Frontend : React, Next.js, Vue ou équivalent.
+
+Backend : Node.js (Express, NestJS), Python (FastAPI), Go ou autre langage adapté.
+
+Base de données : PostgreSQL, MongoDB ou Firestore selon structure choisie.
+
+Hébergement : Replit.dev pour dev/test, puis déploiement possible sur Vercel, Netlify ou un VPS.
+
+Authentification : JWT avec refresh tokens, ou Supabase/Auth0 en option.
+
+IA : intégration API OpenAI (GPT-4) avec gestion des quotas utilisateurs.
+
+🧩 Résultat attendu :
+Un MVP fonctionnel de cette application SaaS, contenant :
+
+gestion utilisateur et auth
+
+dashboard projet
+
+formulaire dynamique
+
+upload + parsing de fichiers KDP
+
+intégration de l’IA pour générer des contenus
+
+base de données relationnelle
+
+endpoints API REST/GraphQL documentés
+
+UI claire et responsive
+
