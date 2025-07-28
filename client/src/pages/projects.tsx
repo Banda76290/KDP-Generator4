@@ -3,9 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { useLocation } from "wouter";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
-import { KDPProjectModal } from "@/components/projects/KDPProjectModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,10 +18,9 @@ import type { ProjectWithRelations } from "@shared/schema";
 export default function Projects() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
-  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [editingProject, setEditingProject] = useState<ProjectWithRelations | null>(null);
 
   const { data: projects, isLoading: projectsLoading, error } = useQuery({
     queryKey: ["/api/projects"],
@@ -100,13 +99,7 @@ export default function Projects() {
   };
 
   const handleEditProject = (project: ProjectWithRelations) => {
-    setEditingProject(project);
-    setShowProjectModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowProjectModal(false);
-    setEditingProject(null);
+    setLocation(`/projects/edit/${project.id}`);
   };
 
   return (
@@ -122,7 +115,7 @@ export default function Projects() {
                 <h1 className="text-2xl font-bold text-gray-900">Projects</h1>
                 <p className="text-gray-600 mt-1">Manage your book projects and track their progress.</p>
               </div>
-              <Button onClick={() => setShowProjectModal(true)} className="bg-primary hover:bg-primary/90">
+              <Button onClick={() => setLocation("/projects/create")} className="bg-primary hover:bg-primary/90">
                 <Plus className="w-4 h-4 mr-2" />
                 New Project
               </Button>
@@ -183,7 +176,7 @@ export default function Projects() {
                   : "Get started by creating your first book project."}
               </p>
               {(!searchTerm && statusFilter === "all") && (
-                <Button onClick={() => setShowProjectModal(true)} className="bg-primary hover:bg-primary/90">
+                <Button onClick={() => setLocation("/projects/create")} className="bg-primary hover:bg-primary/90">
                   <Plus className="w-4 h-4 mr-2" />
                   Create Your First Project
                 </Button>
@@ -294,13 +287,6 @@ export default function Projects() {
         </main>
       </div>
 
-      {/* Project Modal */}
-      {showProjectModal && (
-        <KDPProjectModal
-          isOpen={showProjectModal} 
-          onClose={handleCloseModal}
-        />
-      )}
     </div>
   );
 }

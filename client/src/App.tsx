@@ -20,6 +20,8 @@ import AdminConfig from "@/pages/admin-config";
 import AdminAudit from "@/pages/admin-audit";
 import AdminBlogPosts from "@/pages/admin-blog-posts";
 import AdminBlogCategories from "@/pages/admin-blog-categories";
+import ProjectCreate from "@/pages/project-create";
+import ProjectEdit from "@/pages/project-edit";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -40,6 +42,8 @@ function Router() {
       <Route path="/admin/audit" component={AdminAudit} />
       <Route path="/admin/blog-posts" component={AdminBlogPosts} />
       <Route path="/admin/blog-categories" component={AdminBlogCategories} />
+      <Route path="/projects/create" component={ProjectCreate} />
+      <Route path="/projects/edit/:id" component={ProjectEdit} />
       <Route component={NotFound} />
     </Switch>
   );

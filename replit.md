@@ -137,6 +137,9 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Navigation**: Fixed "Create your first project" button to properly redirect to projects page
 - **Duplicate Variable Error**: Fixed duplicate `isPremiumUser` declaration in ai-assistant.tsx
 - **Modal Simplification**: Removed multi-tab structure from KDP project modal, consolidated into single form as requested
+- **Project Management Overhaul**: Replaced modal-based project creation/editing with dedicated pages for better UX
+- **Page Structure**: Created project-create.tsx and project-edit.tsx pages with proper layouts and form handling
+- **Navigation Update**: Updated all project-related navigation to use dedicated pages instead of modals
 
 ### Current Features Available
 - **Complete Dashboard**: KPI cards, sales charts, format distribution, recent projects table
