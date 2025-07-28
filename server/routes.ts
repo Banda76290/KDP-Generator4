@@ -83,9 +83,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/projects', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      console.log('Creating project for user:', userId);
+      console.log('Project data:', req.body);
       const projectData = insertProjectSchema.parse({ ...req.body, userId });
       
+      console.log('Parsed project data:', projectData);
       const project = await storage.createProject(projectData);
+      console.log('Created project:', project);
       
       // Add contributors if provided
       if (req.body.contributors && Array.isArray(req.body.contributors)) {
@@ -127,10 +131,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const fullProject = await storage.getProject(project.id, userId);
+      console.log('Returning full project:', fullProject);
       res.json(fullProject);
     } catch (error) {
       console.error("Error creating project:", error);
       if (error instanceof z.ZodError) {
+        console.log('Validation errors:', error.errors);
         return res.status(400).json({ message: "Invalid project data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to create project" });

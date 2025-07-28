@@ -96,7 +96,9 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
         keywords,
       };
       
+      console.log('Sending project data:', projectData);
       const project = await apiRequest("POST", "/api/projects", projectData);
+      console.log('Received project response:', project);
       
       // Create contributors if any
       if (contributors.length > 0) {
