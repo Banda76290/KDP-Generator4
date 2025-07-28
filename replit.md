@@ -143,7 +143,7 @@ The application is designed to be deployed on Replit with integrated authenticat
 
 ### Current Features Available
 - **Complete Dashboard**: KPI cards, sales charts, format distribution, recent projects table
-- **Project Management**: Simplified KDP project creation modal with single form containing all fields
+- **Project Management**: Complete KDP project creation and editing system with dedicated pages
 - **Projects Page**: Grid view of all projects with search, filtering, and management actions
 - **AI Assistant**: Content generation with various types (structure, descriptions, marketing)
 - **Analytics**: Sales analytics page (basic structure in place)
