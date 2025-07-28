@@ -34,8 +34,8 @@ interface Contributor {
 }
 
 const kdpFormSchema = insertProjectSchema.extend({
-  formats: z.array(z.enum(["ebook", "paperback", "hardcover"])).min(1, "Select at least one format"),
-});
+  formats: z.array(z.enum(["ebook", "paperback", "hardcover"])).optional(),
+}).partial();
 
 type KDPFormData = z.infer<typeof kdpFormSchema>;
 
@@ -126,9 +126,10 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
       setCategories([]);
     },
     onError: (error) => {
+      console.error('Project creation error:', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to create project",
         variant: "destructive",
       });
     },
@@ -760,9 +761,14 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
                 <Button 
                   type="button" 
                   variant="outline"
-                  onClick={() => form.handleSubmit((data) => {
-                    createProject.mutate({ ...data, status: 'draft' });
-                  })()}
+                  onClick={() => {
+                    console.log('Draft button clicked');
+                    console.log('Form values:', form.getValues());
+                    form.handleSubmit((data) => {
+                      console.log('Form submission data:', data);
+                      createProject.mutate({ ...data, status: 'draft' });
+                    })();
+                  }}
                   disabled={createProject.isPending}
                 >
                   {createProject.isPending ? "Saving..." : "Save as Draft"}
