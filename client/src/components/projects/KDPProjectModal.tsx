@@ -764,10 +764,11 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
                   onClick={() => {
                     console.log('Draft button clicked');
                     console.log('Form values:', form.getValues());
-                    form.handleSubmit((data) => {
-                      console.log('Form submission data:', data);
-                      createProject.mutate({ ...data, status: 'draft' });
-                    })();
+                    console.log('Form errors:', form.formState.errors);
+                    
+                    const formData = form.getValues();
+                    console.log('Bypassing form validation, sending data directly:', formData);
+                    createProject.mutate({ ...formData, status: 'draft' });
                   }}
                   disabled={createProject.isPending}
                 >

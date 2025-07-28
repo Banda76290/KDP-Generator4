@@ -20,21 +20,14 @@ function Router() {
 
   return (
     <Switch>
-      {/* Pages accessibles même sans authentification */}
+      {/* Always render all routes, handle auth in components */}
+      <Route path="/" component={isLoading || !isAuthenticated ? Landing : Dashboard} />
+      <Route path="/projects" component={Projects} />
+      <Route path="/analytics" component={Analytics} />
+      <Route path="/kdp-reports" component={KDPReports} />
+      <Route path="/ai-assistant" component={AIAssistant} />
       <Route path="/subscription" component={Subscription} />
       <Route path="/settings" component={Settings} />
-      
-      {isLoading || !isAuthenticated ? (
-        <Route path="/" component={Landing} />
-      ) : (
-        <>
-          <Route path="/" component={Dashboard} />
-          <Route path="/projects" component={Projects} />
-          <Route path="/analytics" component={Analytics} />
-          <Route path="/kdp-reports" component={KDPReports} />
-          <Route path="/ai-assistant" component={AIAssistant} />
-        </>
-      )}
       <Route component={NotFound} />
     </Switch>
   );

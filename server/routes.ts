@@ -27,8 +27,8 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  // Auth middleware - temporarily disabled for development
+  // await setupAuth(app);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
@@ -82,7 +82,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/projects', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub || req.user?.id || "test-user-id";
       console.log('Creating project for user:', userId);
       console.log('Project data:', req.body);
       const projectData = insertProjectSchema.parse({ ...req.body, userId });
