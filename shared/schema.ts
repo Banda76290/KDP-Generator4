@@ -10,6 +10,7 @@ import {
   decimal,
   boolean,
   pgEnum,
+  date,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
@@ -65,9 +66,52 @@ export const projects = pgTable("projects", {
   categories: text("categories").array(),
   keywords: text("keywords").array(),
   status: projectStatusEnum("status").default("draft"),
+  
+  // Language and Region
+  language: varchar("language").default("English"),
+  
+  // Series Information
+  seriesTitle: varchar("series_title"),
+  seriesNumber: integer("series_number"),
+  
+  // Edition and Version
+  editionNumber: varchar("edition_number"),
+  
+  // Author Information
+  authorPrefix: varchar("author_prefix"),
+  authorFirstName: varchar("author_first_name"),
+  authorMiddleName: varchar("author_middle_name"),
+  authorLastName: varchar("author_last_name"),
+  authorSuffix: varchar("author_suffix"),
+  
+  // Publishing Rights
+  publishingRights: varchar("publishing_rights").default("owned"), // "owned" or "public_domain"
+  
+  // Audience Information
+  hasExplicitContent: boolean("has_explicit_content").default(false),
+  readingAgeMin: varchar("reading_age_min"),
+  readingAgeMax: varchar("reading_age_max"),
+  
+  // Marketplace
+  primaryMarketplace: varchar("primary_marketplace").default("Amazon.com"),
+  
+  // Content Classification
+  isLowContentBook: boolean("is_low_content_book").default(false),
+  isLargePrintBook: boolean("is_large_print_book").default(false),
+  
+  // Publication Dates
+  publicationDate: date("publication_date"),
+  previouslyPublished: boolean("previously_published").default(false),
+  previousPublicationDate: date("previous_publication_date"),
+  releaseOption: varchar("release_option").default("immediate"), // "immediate" or "scheduled"
+  scheduledReleaseDate: date("scheduled_release_date"),
+  
+  // AI Integration
   useAI: boolean("use_ai").default(false),
   aiPrompt: text("ai_prompt"),
   aiContentType: varchar("ai_content_type"),
+  
+  // Original fields
   formats: formatEnum("formats").array(),
   publicationInfo: jsonb("publication_info"),
   coverImageUrl: varchar("cover_image_url"),
@@ -170,6 +214,16 @@ export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  contributors: z.array(z.object({
+    name: z.string().min(1, "Name is required"),
+    role: z.string().min(1, "Role is required"),
+    prefix: z.string().optional(),
+    firstName: z.string().optional(),
+    middleName: z.string().optional(),
+    lastName: z.string().optional(),
+    suffix: z.string().optional(),
+  })).optional(),
 });
 
 export const insertContributorSchema = createInsertSchema(contributors).omit({
