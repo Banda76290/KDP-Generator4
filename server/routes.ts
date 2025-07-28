@@ -518,6 +518,221 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Blog admin routes
+  app.get('/api/admin/blog/categories', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const categories = await storage.getBlogCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching blog categories:", error);
+      res.status(500).json({ message: "Failed to fetch blog categories" });
+    }
+  });
+
+  app.post('/api/admin/blog/categories', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const adminUser = req.admin;
+      const category = await storage.createBlogCategory(req.body);
+      
+      // Log admin action
+      await storage.addAuditLog({
+        userId: adminUser.id,
+        action: 'create',
+        resource: 'blog_category',
+        resourceId: category.id,
+        details: { name: category.name, slug: category.slug },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json(category);
+    } catch (error) {
+      console.error("Error creating blog category:", error);
+      res.status(500).json({ message: "Failed to create blog category" });
+    }
+  });
+
+  app.put('/api/admin/blog/categories/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const adminUser = req.admin;
+      const category = await storage.updateBlogCategory(id, req.body);
+      
+      // Log admin action
+      await storage.addAuditLog({
+        userId: adminUser.id,
+        action: 'update',
+        resource: 'blog_category',
+        resourceId: id,
+        details: req.body,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json(category);
+    } catch (error) {
+      console.error("Error updating blog category:", error);
+      res.status(500).json({ message: "Failed to update blog category" });
+    }
+  });
+
+  app.delete('/api/admin/blog/categories/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const adminUser = req.admin;
+      
+      await storage.deleteBlogCategory(id);
+      
+      // Log admin action
+      await storage.addAuditLog({
+        userId: adminUser.id,
+        action: 'delete',
+        resource: 'blog_category',
+        resourceId: id,
+        details: {},
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting blog category:", error);
+      res.status(500).json({ message: "Failed to delete blog category" });
+    }
+  });
+
+  app.get('/api/admin/blog/posts', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { search, status, limit = 20, offset = 0 } = req.query;
+      const result = await storage.getBlogPosts({
+        search: search as string,
+        status: status as string,
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string),
+      });
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching blog posts:", error);
+      res.status(500).json({ message: "Failed to fetch blog posts" });
+    }
+  });
+
+  app.get('/api/admin/blog/posts/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const post = await storage.getBlogPost(id);
+      if (!post) {
+        return res.status(404).json({ message: "Blog post not found" });
+      }
+      res.json(post);
+    } catch (error) {
+      console.error("Error fetching blog post:", error);
+      res.status(500).json({ message: "Failed to fetch blog post" });
+    }
+  });
+
+  app.post('/api/admin/blog/posts', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const adminUser = req.admin;
+      const postData = {
+        ...req.body,
+        authorId: adminUser.id,
+      };
+      const post = await storage.createBlogPost(postData);
+      
+      // Log admin action
+      await storage.addAuditLog({
+        userId: adminUser.id,
+        action: 'create',
+        resource: 'blog_post',
+        resourceId: post.id,
+        details: { title: post.title, status: post.status },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json(post);
+    } catch (error) {
+      console.error("Error creating blog post:", error);
+      res.status(500).json({ message: "Failed to create blog post" });
+    }
+  });
+
+  app.put('/api/admin/blog/posts/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const adminUser = req.admin;
+      const post = await storage.updateBlogPost(id, req.body);
+      
+      // Log admin action
+      await storage.addAuditLog({
+        userId: adminUser.id,
+        action: 'update',
+        resource: 'blog_post',
+        resourceId: id,
+        details: req.body,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json(post);
+    } catch (error) {
+      console.error("Error updating blog post:", error);
+      res.status(500).json({ message: "Failed to update blog post" });
+    }
+  });
+
+  app.put('/api/admin/blog/posts/:id/status', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      const adminUser = req.admin;
+      
+      const post = await storage.updateBlogPostStatus(id, status);
+      
+      // Log admin action
+      await storage.addAuditLog({
+        userId: adminUser.id,
+        action: 'update',
+        resource: 'blog_post',
+        resourceId: id,
+        details: { action: 'status_change', status },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json(post);
+    } catch (error) {
+      console.error("Error updating blog post status:", error);
+      res.status(500).json({ message: "Failed to update blog post status" });
+    }
+  });
+
+  app.delete('/api/admin/blog/posts/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const adminUser = req.admin;
+      
+      await storage.deleteBlogPost(id);
+      
+      // Log admin action
+      await storage.addAuditLog({
+        userId: adminUser.id,
+        action: 'delete',
+        resource: 'blog_post',
+        resourceId: id,
+        details: {},
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting blog post:", error);
+      res.status(500).json({ message: "Failed to delete blog post" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -8,7 +8,9 @@ import {
   Bot, 
   Crown, 
   Settings,
-  Shield
+  Shield,
+  FileText,
+  Folder
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -75,18 +77,51 @@ export default function Sidebar() {
               <span
                 className={cn(
                   "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",
-                  location.startsWith("/admin")
+                  location === "/admin"
                     ? "bg-primary text-primary-foreground"
                     : "text-foreground hover:bg-muted"
                 )}
               >
                 <Shield className="w-5 h-5" />
-                <span>Back Office</span>
+                <span>Dashboard</span>
                 <Badge variant="destructive" className="text-xs">
                   ADMIN
                 </Badge>
               </span>
             </Link>
+            
+            {/* Blog Admin Navigation */}
+            <div className="ml-4 mt-2 space-y-1">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-3">
+                Blog
+              </p>
+              <Link href="/admin/blog-posts">
+                <span
+                  className={cn(
+                    "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer",
+                    location === "/admin/blog-posts"
+                      ? "bg-muted text-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  )}
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>Articles</span>
+                </span>
+              </Link>
+              <Link href="/admin/blog-categories">
+                <span
+                  className={cn(
+                    "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer",
+                    location === "/admin/blog-categories"
+                      ? "bg-muted text-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  )}
+                >
+                  <Folder className="w-4 h-4" />
+                  <span>Catégories</span>
+                </span>
+              </Link>
+            </div>
           </div>
         )}
 

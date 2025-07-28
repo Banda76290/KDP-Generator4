@@ -189,11 +189,60 @@ export const adminAuditLog = pgTable("admin_audit_log", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Blog system tables
+export const blogCategories = pgTable("blog_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull().unique(),
+  slug: varchar("slug").notNull().unique(),
+  description: text("description"),
+  color: varchar("color").default("#3B82F6"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const blogPosts = pgTable("blog_posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: varchar("title").notNull(),
+  slug: varchar("slug").notNull().unique(),
+  excerpt: text("excerpt"),
+  content: text("content").notNull(),
+  featuredImage: varchar("featured_image"),
+  authorId: varchar("author_id").notNull().references(() => users.id),
+  categoryId: varchar("category_id").references(() => blogCategories.id),
+  status: varchar("status").default("draft"), // draft, published, archived
+  publishedAt: timestamp("published_at"),
+  metaTitle: varchar("meta_title"),
+  metaDescription: text("meta_description"),
+  tags: text("tags").array(),
+  viewCount: integer("view_count").default(0),
+  isCommentEnabled: boolean("is_comment_enabled").default(true),
+  isFeatured: boolean("is_featured").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const blogComments = pgTable("blog_comments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  postId: varchar("post_id").notNull().references(() => blogPosts.id, { onDelete: "cascade" }),
+  authorId: varchar("author_id").references(() => users.id),
+  authorName: varchar("author_name"),
+  authorEmail: varchar("author_email"),
+  content: text("content").notNull(),
+  status: varchar("status").default("pending"), // pending, approved, rejected, spam
+  parentId: varchar("parent_id"),
+  isVerified: boolean("is_verified").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   projects: many(projects),
   salesData: many(salesData),
   aiGenerations: many(aiGenerations),
+  blogPosts: many(blogPosts),
+  blogComments: many(blogComments),
 }));
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
@@ -233,6 +282,39 @@ export const aiGenerationsRelations = relations(aiGenerations, ({ one }) => ({
     fields: [aiGenerations.projectId],
     references: [projects.id],
   }),
+}));
+
+// Blog relations
+export const blogCategoriesRelations = relations(blogCategories, ({ many }) => ({
+  posts: many(blogPosts),
+}));
+
+export const blogPostsRelations = relations(blogPosts, ({ one, many }) => ({
+  author: one(users, {
+    fields: [blogPosts.authorId],
+    references: [users.id],
+  }),
+  category: one(blogCategories, {
+    fields: [blogPosts.categoryId],
+    references: [blogCategories.id],
+  }),
+  comments: many(blogComments),
+}));
+
+export const blogCommentsRelations = relations(blogComments, ({ one, many }) => ({
+  post: one(blogPosts, {
+    fields: [blogComments.postId],
+    references: [blogPosts.id],
+  }),
+  author: one(users, {
+    fields: [blogComments.authorId],
+    references: [users.id],
+  }),
+  parent: one(blogComments, {
+    fields: [blogComments.parentId],
+    references: [blogComments.id],
+  }),
+  replies: many(blogComments),
 }));
 
 export const systemConfigRelations = relations(systemConfig, ({ one }) => ({
@@ -315,4 +397,39 @@ export type ProjectWithRelations = Project & {
   contributors: Contributor[];
   salesData: SalesData[];
   user: User;
+};
+
+// Blog types
+export type BlogCategory = typeof blogCategories.$inferSelect;
+export type InsertBlogCategory = z.infer<typeof insertBlogCategorySchema>;
+export type BlogPost = typeof blogPosts.$inferSelect;
+export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
+export type BlogComment = typeof blogComments.$inferSelect;
+export type InsertBlogComment = z.infer<typeof insertBlogCommentSchema>;
+
+// Blog Zod schemas
+export const insertBlogCategorySchema = createInsertSchema(blogCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  viewCount: true,
+});
+
+export const insertBlogCommentSchema = createInsertSchema(blogComments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Blog post with relations
+export type BlogPostWithRelations = BlogPost & {
+  author: User;
+  category?: BlogCategory;
+  comments: BlogComment[];
 };
