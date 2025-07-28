@@ -20,6 +20,10 @@ function Router() {
 
   return (
     <Switch>
+      {/* Pages accessibles même sans authentification */}
+      <Route path="/subscription" component={Subscription} />
+      <Route path="/settings" component={Settings} />
+      
       {isLoading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (
@@ -29,8 +33,6 @@ function Router() {
           <Route path="/analytics" component={Analytics} />
           <Route path="/kdp-reports" component={KDPReports} />
           <Route path="/ai-assistant" component={AIAssistant} />
-          <Route path="/subscription" component={Subscription} />
-          <Route path="/settings" component={Settings} />
         </>
       )}
       <Route component={NotFound} />
