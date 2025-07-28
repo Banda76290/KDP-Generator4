@@ -30,13 +30,6 @@ export default function Sidebar() {
 
   return (
     <aside className="bg-white dark:bg-background w-64 min-h-screen border-r border-border fixed left-0 top-16 bottom-0 overflow-y-auto">
-      <div className="p-4 border-b border-border">
-        <img 
-          src={logoImage} 
-          alt="KDP Generator" 
-          className="h-8 w-auto object-contain"
-        />
-      </div>
       <nav className="p-4 space-y-2">
         {navigation.map((item) => {
           const isActive = location === item.href;

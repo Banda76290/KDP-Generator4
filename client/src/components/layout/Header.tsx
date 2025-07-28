@@ -1,4 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
+import type { User } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -6,7 +7,7 @@ import { Bell, ChevronDown, Settings, LogOut, Crown } from "lucide-react";
 import logoImage from "@assets/image_1753719885932.png";
 
 export default function Header() {
-  const { user } = useAuth();
+  const { user } = useAuth() as { user: User | undefined };
 
   const getUserInitials = (firstName?: string, lastName?: string) => {
     if (!firstName && !lastName) return "U";
@@ -18,11 +19,13 @@ export default function Header() {
       <div className="flex items-center justify-between px-6 h-full">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
-            <img 
-              src={logoImage} 
-              alt="KDP Generator" 
-              className="h-10 w-auto object-contain"
-            />
+            <a href="/" className="cursor-pointer">
+              <img 
+                src={logoImage} 
+                alt="KDP Generator" 
+                className="h-10 w-auto object-contain hover:opacity-80 transition-opacity"
+              />
+            </a>
           </div>
         </div>
         
