@@ -8,6 +8,24 @@ import { aiService } from "./services/aiService";
 import { parseKDPReport } from "./services/kdpParser";
 import { z } from "zod";
 
+// Admin middleware to check if user has admin or superadmin role
+const isAdmin = async (req: any, res: any, next: any) => {
+  try {
+    const userId = req.user.claims.sub;
+    const user = await storage.getUser(userId);
+    
+    if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+    
+    req.admin = user;
+    next();
+  } catch (error) {
+    console.error("Error checking admin permissions:", error);
+    res.status(500).json({ message: "Failed to verify admin permissions" });
+  }
+};
+
 // Configure multer for file uploads
 const upload = multer({ 
   storage: multer.memoryStorage(),
@@ -319,6 +337,184 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating subscription:", error);
       res.status(500).json({ message: "Failed to create subscription" });
+    }
+  });
+
+  // Admin routes
+  app.get('/api/admin/stats', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const stats = await storage.getSystemStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching system stats:", error);
+      res.status(500).json({ message: "Failed to fetch system stats" });
+    }
+  });
+
+  app.get('/api/admin/users', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { search, limit = 50, offset = 0 } = req.query;
+      const result = await storage.getAllUsers(
+        search as string,
+        parseInt(limit as string),
+        parseInt(offset as string)
+      );
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.put('/api/admin/users/:userId/role', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { role } = req.body;
+      const { userId } = req.params;
+      const adminUser = req.admin;
+
+      if (!['user', 'admin', 'superadmin'].includes(role)) {
+        return res.status(400).json({ message: "Invalid role" });
+      }
+
+      // Only superadmin can assign superadmin role
+      if (role === 'superadmin' && adminUser.role !== 'superadmin') {
+        return res.status(403).json({ message: "Only superadmin can assign superadmin role" });
+      }
+
+      const updatedUser = await storage.updateUserRole(userId, role);
+      
+      // Log admin action
+      await storage.addAuditLog({
+        userId: adminUser.id,
+        action: 'update',
+        resource: 'user',
+        resourceId: userId,
+        details: { oldRole: updatedUser.role, newRole: role },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      res.status(500).json({ message: "Failed to update user role" });
+    }
+  });
+
+  app.put('/api/admin/users/:userId/deactivate', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const adminUser = req.admin;
+
+      const updatedUser = await storage.deactivateUser(userId);
+      
+      // Log admin action
+      await storage.addAuditLog({
+        userId: adminUser.id,
+        action: 'update',
+        resource: 'user',
+        resourceId: userId,
+        details: { action: 'deactivated' },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error deactivating user:", error);
+      res.status(500).json({ message: "Failed to deactivate user" });
+    }
+  });
+
+  app.put('/api/admin/users/:userId/reactivate', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const adminUser = req.admin;
+
+      const updatedUser = await storage.reactivateUser(userId);
+      
+      // Log admin action
+      await storage.addAuditLog({
+        userId: adminUser.id,
+        action: 'update',
+        resource: 'user',
+        resourceId: userId,
+        details: { action: 'reactivated' },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error reactivating user:", error);
+      res.status(500).json({ message: "Failed to reactivate user" });
+    }
+  });
+
+  app.get('/api/admin/projects', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { limit = 50, offset = 0 } = req.query;
+      const result = await storage.getAllProjects(
+        parseInt(limit as string),
+        parseInt(offset as string)
+      );
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching all projects:", error);
+      res.status(500).json({ message: "Failed to fetch projects" });
+    }
+  });
+
+  app.get('/api/admin/config', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const config = await storage.getSystemConfig();
+      res.json(config);
+    } catch (error) {
+      console.error("Error fetching system config:", error);
+      res.status(500).json({ message: "Failed to fetch system config" });
+    }
+  });
+
+  app.put('/api/admin/config', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { key, value, description } = req.body;
+      const adminUser = req.admin;
+
+      if (!key || !value) {
+        return res.status(400).json({ message: "Key and value are required" });
+      }
+
+      const config = await storage.updateSystemConfig(key, value, description, adminUser.id);
+      
+      // Log admin action
+      await storage.addAuditLog({
+        userId: adminUser.id,
+        action: 'update',
+        resource: 'system_config',
+        resourceId: key,
+        details: { key, value, description },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      res.json(config);
+    } catch (error) {
+      console.error("Error updating system config:", error);
+      res.status(500).json({ message: "Failed to update system config" });
+    }
+  });
+
+  app.get('/api/admin/audit-logs', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { limit = 100, offset = 0 } = req.query;
+      const result = await storage.getAuditLogs(
+        parseInt(limit as string),
+        parseInt(offset as string)
+      );
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching audit logs:", error);
+      res.status(500).json({ message: "Failed to fetch audit logs" });
     }
   });
 

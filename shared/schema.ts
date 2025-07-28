@@ -27,6 +27,13 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
+// User role enum
+export const userRoleEnum = pgEnum("user_role", [
+  "user",
+  "admin",
+  "superadmin"
+]);
+
 // User storage table.
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -34,9 +41,12 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  role: userRoleEnum("role").default("user"),
   subscriptionTier: varchar("subscription_tier").default("free"),
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
+  isActive: boolean("is_active").default(true),
+  lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -157,6 +167,28 @@ export const aiGenerations = pgTable("ai_generations", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// System configuration table for admin settings
+export const systemConfig = pgTable("system_config", {
+  key: varchar("key").primaryKey(),
+  value: text("value"),
+  description: text("description"),
+  updatedBy: varchar("updated_by").references(() => users.id),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Admin audit log table
+export const adminAuditLog = pgTable("admin_audit_log", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  action: varchar("action").notNull(), // create, update, delete, login, export
+  resource: varchar("resource").notNull(), // user, project, system_config
+  resourceId: varchar("resource_id"),
+  details: jsonb("details"),
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   projects: many(projects),
@@ -203,6 +235,20 @@ export const aiGenerationsRelations = relations(aiGenerations, ({ one }) => ({
   }),
 }));
 
+export const systemConfigRelations = relations(systemConfig, ({ one }) => ({
+  updatedByUser: one(users, {
+    fields: [systemConfig.updatedBy],
+    references: [users.id],
+  }),
+}));
+
+export const adminAuditLogRelations = relations(adminAuditLog, ({ one }) => ({
+  user: one(users, {
+    fields: [adminAuditLog.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -241,6 +287,13 @@ export const insertAiGenerationSchema = createInsertSchema(aiGenerations).omit({
   createdAt: true,
 });
 
+export const insertSystemConfigSchema = createInsertSchema(systemConfig);
+
+export const insertAuditLogSchema = createInsertSchema(adminAuditLog).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -252,6 +305,10 @@ export type InsertSalesData = z.infer<typeof insertSalesDataSchema>;
 export type SalesData = typeof salesData.$inferSelect;
 export type InsertAiGeneration = z.infer<typeof insertAiGenerationSchema>;
 export type AiGeneration = typeof aiGenerations.$inferSelect;
+export type InsertSystemConfig = z.infer<typeof insertSystemConfigSchema>;
+export type SystemConfig = typeof systemConfig.$inferSelect;
+export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
+export type AuditLog = typeof adminAuditLog.$inferSelect;
 
 // Project with relations type
 export type ProjectWithRelations = Project & {

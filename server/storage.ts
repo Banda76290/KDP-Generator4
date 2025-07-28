@@ -4,6 +4,8 @@ import {
   contributors,
   salesData,
   aiGenerations,
+  systemConfig,
+  adminAuditLog,
   type User,
   type UpsertUser,
   type Project,
@@ -15,9 +17,13 @@ import {
   type InsertSalesData,
   type AiGeneration,
   type InsertAiGeneration,
+  type SystemConfig,
+  type InsertSystemConfig,
+  type AuditLog,
+  type InsertAuditLog,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, gte, lte, sql, sum, count } from "drizzle-orm";
+import { eq, desc, and, gte, lte, sql, sum, count, like, or } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -52,6 +58,29 @@ export interface IStorage {
   // AI operations
   getUserAiGenerations(userId: string): Promise<AiGeneration[]>;
   addAiGeneration(generation: InsertAiGeneration): Promise<AiGeneration>;
+
+  // Admin operations
+  getAllUsers(searchTerm?: string, limit?: number, offset?: number): Promise<{users: User[], total: number}>;
+  updateUserRole(userId: string, role: "user" | "admin" | "superadmin"): Promise<User>;
+  deactivateUser(userId: string): Promise<User>;
+  reactivateUser(userId: string): Promise<User>;
+  getAllProjects(limit?: number, offset?: number): Promise<{projects: ProjectWithRelations[], total: number}>;
+  getSystemStats(): Promise<{
+    totalUsers: number;
+    totalProjects: number;
+    totalRevenue: number;
+    aiGenerationsCount: number;
+    activeUsers: number;
+    recentSignups: number;
+  }>;
+  
+  // System configuration
+  getSystemConfig(): Promise<SystemConfig[]>;
+  updateSystemConfig(key: string, value: string, description?: string, updatedBy?: string): Promise<SystemConfig>;
+  
+  // Audit log
+  addAuditLog(log: InsertAuditLog): Promise<AuditLog>;
+  getAuditLogs(limit?: number, offset?: number): Promise<{logs: AuditLog[], total: number}>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -253,6 +282,155 @@ export class DatabaseStorage implements IStorage {
   async addAiGeneration(generation: InsertAiGeneration): Promise<AiGeneration> {
     const [newGeneration] = await db.insert(aiGenerations).values(generation).returning();
     return newGeneration;
+  }
+
+  // Admin operations implementation
+  async getAllUsers(searchTerm?: string, limit = 50, offset = 0): Promise<{users: User[], total: number}> {
+    let whereCondition;
+    if (searchTerm) {
+      whereCondition = or(
+        like(users.email, `%${searchTerm}%`),
+        like(users.firstName, `%${searchTerm}%`),
+        like(users.lastName, `%${searchTerm}%`)
+      );
+    }
+
+    const [userList, totalResult] = await Promise.all([
+      db.select().from(users)
+        .where(whereCondition)
+        .limit(limit)
+        .offset(offset)
+        .orderBy(desc(users.createdAt)),
+      db.select({ count: count() }).from(users).where(whereCondition)
+    ]);
+
+    return {
+      users: userList,
+      total: totalResult[0].count as number
+    };
+  }
+
+  async updateUserRole(userId: string, role: "user" | "admin" | "superadmin"): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ role, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async deactivateUser(userId: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async reactivateUser(userId: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ isActive: true, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async getAllProjects(limit = 50, offset = 0): Promise<{projects: ProjectWithRelations[], total: number}> {
+    const [projectList, totalResult] = await Promise.all([
+      db.query.projects.findMany({
+        with: {
+          contributors: true,
+          salesData: true,
+          user: true,
+        },
+        limit,
+        offset,
+        orderBy: [desc(projects.createdAt)],
+      }),
+      db.select({ count: count() }).from(projects)
+    ]);
+
+    return {
+      projects: projectList as ProjectWithRelations[],
+      total: totalResult[0].count as number
+    };
+  }
+
+  async getSystemStats(): Promise<{
+    totalUsers: number;
+    totalProjects: number;
+    totalRevenue: number;
+    aiGenerationsCount: number;
+    activeUsers: number;
+    recentSignups: number;
+  }> {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const [
+      totalUsersResult,
+      totalProjectsResult,
+      totalRevenueResult,
+      aiGenerationsResult,
+      activeUsersResult,
+      recentSignupsResult,
+    ] = await Promise.all([
+      db.select({ count: count() }).from(users),
+      db.select({ count: count() }).from(projects),
+      db.select({ total: sum(salesData.revenue) }).from(salesData),
+      db.select({ count: count() }).from(aiGenerations),
+      db.select({ count: count() }).from(users).where(eq(users.isActive, true)),
+      db.select({ count: count() }).from(users).where(gte(users.createdAt, thirtyDaysAgo)),
+    ]);
+
+    return {
+      totalUsers: totalUsersResult[0].count as number,
+      totalProjects: totalProjectsResult[0].count as number,
+      totalRevenue: Number(totalRevenueResult[0].total || 0),
+      aiGenerationsCount: aiGenerationsResult[0].count as number,
+      activeUsers: activeUsersResult[0].count as number,
+      recentSignups: recentSignupsResult[0].count as number,
+    };
+  }
+
+  async getSystemConfig(): Promise<SystemConfig[]> {
+    return await db.select().from(systemConfig).orderBy(systemConfig.key);
+  }
+
+  async updateSystemConfig(key: string, value: string, description?: string, updatedBy?: string): Promise<SystemConfig> {
+    const [config] = await db
+      .insert(systemConfig)
+      .values({ key, value, description, updatedBy, updatedAt: new Date() })
+      .onConflictDoUpdate({
+        target: systemConfig.key,
+        set: { value, description, updatedBy, updatedAt: new Date() }
+      })
+      .returning();
+    return config;
+  }
+
+  async addAuditLog(log: InsertAuditLog): Promise<AuditLog> {
+    const [auditLog] = await db.insert(adminAuditLog).values(log).returning();
+    return auditLog;
+  }
+
+  async getAuditLogs(limit = 100, offset = 0): Promise<{logs: AuditLog[], total: number}> {
+    const [logs, totalResult] = await Promise.all([
+      db.query.adminAuditLog.findMany({
+        with: { user: true },
+        limit,
+        offset,
+        orderBy: [desc(adminAuditLog.createdAt)],
+      }),
+      db.select({ count: count() }).from(adminAuditLog)
+    ]);
+
+    return {
+      logs: logs as AuditLog[],
+      total: totalResult[0].count as number
+    };
   }
 }
 

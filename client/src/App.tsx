@@ -14,6 +14,10 @@ import KDPReports from "@/pages/kdp-reports";
 import AIAssistant from "@/pages/ai-assistant";
 import Subscription from "@/pages/subscription";
 import Settings from "@/pages/settings";
+import AdminDashboard from "@/pages/admin-dashboard";
+import AdminUsers from "@/pages/admin-users";
+import AdminConfig from "@/pages/admin-config";
+import AdminAudit from "@/pages/admin-audit";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -28,6 +32,10 @@ function Router() {
       <Route path="/ai-assistant" component={AIAssistant} />
       <Route path="/subscription" component={Subscription} />
       <Route path="/settings" component={Settings} />
+      <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin/users" component={AdminUsers} />
+      <Route path="/admin/config" component={AdminConfig} />
+      <Route path="/admin/audit" component={AdminAudit} />
       <Route component={NotFound} />
     </Switch>
   );
