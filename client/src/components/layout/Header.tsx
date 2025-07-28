@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Bell, ChevronDown, Settings, LogOut, Crown } from "lucide-react";
 import logoImage from "@assets/image_1753719885932.png";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Header() {
   const { user } = useAuth() as { user: User | undefined };
@@ -30,6 +31,9 @@ export default function Header() {
         </div>
         
         <div className="flex items-center space-x-4">
+          {/* Theme Toggle */}
+          <ThemeToggle />
+          
           {/* Notification Bell */}
           <Button variant="ghost" size="sm" className="relative p-2 text-muted-foreground hover:text-foreground">
             <Bell className="w-5 h-5" />
