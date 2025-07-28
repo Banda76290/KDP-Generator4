@@ -10,9 +10,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bell, User as UserIcon, Shield, Palette, Download, Trash2 } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function Settings() {
   const { user } = useAuth() as { user: User | undefined };
+  const { theme, setTheme } = useTheme();
 
   const getUserInitials = (firstName?: string, lastName?: string) => {
     if (!firstName && !lastName) return "U";
@@ -206,7 +208,10 @@ export default function Settings() {
                         Toggle between light and dark themes
                       </p>
                     </div>
-                    <Switch />
+                    <Switch 
+                      checked={theme === "dark"} 
+                      onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+                    />
                   </div>
 
                   <Separator />
@@ -215,7 +220,7 @@ export default function Settings() {
                     <Label htmlFor="timezone">Timezone</Label>
                     <select 
                       id="timezone"
-                      className="w-full p-2 border border-input rounded-md bg-background"
+                      className="w-full p-2 border border-input rounded-md bg-background text-foreground"
                       defaultValue="Europe/Paris"
                     >
                       <option value="Europe/Paris">Europe/Paris (CET)</option>

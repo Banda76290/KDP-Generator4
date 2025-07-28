@@ -200,25 +200,25 @@ export default function Subscription() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2">Feature</th>
-                        <th className="text-center py-2">Free</th>
-                        <th className="text-center py-2">Pro</th>
-                        <th className="text-center py-2">Enterprise</th>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-2 text-foreground">Feature</th>
+                        <th className="text-center py-2 text-foreground">Free</th>
+                        <th className="text-center py-2 text-foreground">Pro</th>
+                        <th className="text-center py-2 text-foreground">Enterprise</th>
                       </tr>
                     </thead>
                     <tbody className="space-y-2">
-                      <tr className="border-b">
-                        <td className="py-2 flex items-center gap-2">
+                      <tr className="border-b border-border">
+                        <td className="py-2 flex items-center gap-2 text-foreground">
                           <BookOpen className="h-4 w-4" />
                           Project Management
                         </td>
-                        <td className="text-center py-2">3 projects</td>
-                        <td className="text-center py-2">Unlimited</td>
-                        <td className="text-center py-2">Unlimited</td>
+                        <td className="text-center py-2 text-muted-foreground">3 projects</td>
+                        <td className="text-center py-2 text-foreground">Unlimited</td>
+                        <td className="text-center py-2 text-foreground">Unlimited</td>
                       </tr>
-                      <tr className="border-b">
-                        <td className="py-2 flex items-center gap-2">
+                      <tr className="border-b border-border">
+                        <td className="py-2 flex items-center gap-2 text-foreground">
                           <Bot className="h-4 w-4" />
                           AI Content Generation
                         </td>
@@ -226,23 +226,23 @@ export default function Subscription() {
                         <td className="text-center py-2"><Check className="h-4 w-4 text-success mx-auto" /></td>
                         <td className="text-center py-2"><Check className="h-4 w-4 text-success mx-auto" /></td>
                       </tr>
-                      <tr className="border-b">
-                        <td className="py-2 flex items-center gap-2">
+                      <tr className="border-b border-border">
+                        <td className="py-2 flex items-center gap-2 text-foreground">
                           <TrendingUp className="h-4 w-4" />
                           Advanced Analytics
                         </td>
-                        <td className="text-center py-2">Basic</td>
-                        <td className="text-center py-2">Advanced</td>
-                        <td className="text-center py-2">Custom</td>
+                        <td className="text-center py-2 text-muted-foreground">Basic</td>
+                        <td className="text-center py-2 text-foreground">Advanced</td>
+                        <td className="text-center py-2 text-foreground">Custom</td>
                       </tr>
-                      <tr className="border-b">
-                        <td className="py-2 flex items-center gap-2">
+                      <tr className="border-b border-border">
+                        <td className="py-2 flex items-center gap-2 text-foreground">
                           <Zap className="h-4 w-4" />
                           Priority Support
                         </td>
-                        <td className="text-center py-2">Community</td>
+                        <td className="text-center py-2 text-muted-foreground">Community</td>
                         <td className="text-center py-2"><Check className="h-4 w-4 text-success mx-auto" /></td>
-                        <td className="text-center py-2">Dedicated</td>
+                        <td className="text-center py-2 text-foreground">Dedicated</td>
                       </tr>
                     </tbody>
                   </table>
