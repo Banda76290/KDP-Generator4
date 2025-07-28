@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; // No longer needed
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -58,7 +58,6 @@ const contributorRoles = [
 ];
 
 export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
-  const [activeTab, setActiveTab] = useState("basic");
   const [contributors, setContributors] = useState<Contributor[]>([]);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -184,7 +183,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-900 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-2xl font-bold">Create KDP Project</h2>
+          <h2 className="text-2xl font-bold">Paperback Details</h2>
           <Button variant="ghost" size="sm" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
@@ -192,15 +191,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
           <form onSubmit={form.handleSubmit((data) => createProject.mutate({ ...data, status: 'in_review' }))}>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="basic">Basic Info</TabsTrigger>
-                <TabsTrigger value="author">Author & Rights</TabsTrigger>
-                <TabsTrigger value="audience">Audience & Market</TabsTrigger>
-                <TabsTrigger value="publishing">Publishing</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="basic" className="space-y-6">
+            <div className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -279,9 +270,8 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
                     </div>
                   </CardContent>
                 </Card>
-              </TabsContent>
 
-              <TabsContent value="author" className="space-y-6">
+                {/* Primary Author */}
                 <Card>
                   <CardHeader>
                     <CardTitle>Primary Author</CardTitle>
@@ -447,9 +437,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
                     </RadioGroup>
                   </CardContent>
                 </Card>
-              </TabsContent>
 
-              <TabsContent value="audience" className="space-y-6">
                 {/* Primary Audience */}
                 <Card>
                   <CardHeader>
@@ -642,9 +630,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
                     </p>
                   </CardContent>
                 </Card>
-              </TabsContent>
 
-              <TabsContent value="publishing" className="space-y-6">
                 {/* Publication Date */}
                 <Card>
                   <CardHeader>
@@ -750,8 +736,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
                     )}
                   </CardContent>
                 </Card>
-              </TabsContent>
-            </Tabs>
+            </div>
 
             <div className="flex justify-between items-center pt-6 border-t mt-6">
               <Button type="button" variant="outline" onClick={onClose}>
