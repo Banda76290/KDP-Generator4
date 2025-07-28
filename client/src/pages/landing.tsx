@@ -3,10 +3,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Bot, Upload, BarChart3, Zap, BookOpen } from "lucide-react";
 import logoImage from "@assets/image_1753719885932.png";
+import SEOHead from "@/components/SEOHead";
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-orange-50">
+    <>
+      <SEOHead
+        title="KDP Generator - Complete Author Publishing Management Platform"
+        description="Professional tools for independent authors and publishers. Manage Amazon KDP projects, track sales analytics, generate content with AI, and optimize your publishing workflow. Start free today!"
+        keywords="KDP, Kindle Direct Publishing, author tools, book publishing, self publishing, sales analytics, AI content generation, Amazon KDP dashboard, publishing management"
+        canonicalUrl="https://kdpgenerator.com"
+        ogType="website"
+      />
+      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-orange-50">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
@@ -285,6 +294,7 @@ export default function Landing() {
           </p>
         </div>
       </footer>
-    </div>
+      </div>
+    </>
   );
 }
