@@ -228,7 +228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error processing KDP report:", error);
-      res.status(500).json({ message: "Failed to process KDP report", error: error.message });
+      res.status(500).json({ message: "Failed to process KDP report", error: (error as Error).message });
     }
   });
 
@@ -279,7 +279,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(result);
     } catch (error) {
       console.error("Error generating AI content:", error);
-      res.status(500).json({ message: "Failed to generate AI content", error: error.message });
+      res.status(500).json({ message: "Failed to generate AI content", error: (error as Error).message });
     }
   });
 

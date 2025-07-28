@@ -188,7 +188,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
         </div>
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-          <form onSubmit={form.handleSubmit((data) => createProject.mutate(data))}>
+          <form onSubmit={form.handleSubmit((data) => createProject.mutate({ ...data, status: 'in_review' }))}>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="basic">Basic Info</TabsTrigger>
@@ -755,8 +755,15 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
                 Cancel
               </Button>
               <div className="flex gap-2">
-                <Button type="button" variant="outline">
-                  Save as Draft
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={() => form.handleSubmit((data) => {
+                    createProject.mutate({ ...data, status: 'draft' });
+                  })()}
+                  disabled={createProject.isPending}
+                >
+                  {createProject.isPending ? "Saving..." : "Save as Draft"}
                 </Button>
                 <Button 
                   type="submit" 
