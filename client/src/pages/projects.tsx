@@ -70,12 +70,12 @@ export default function Projects() {
   }
 
   // Filter projects based on search and status
-  const filteredProjects = projects?.filter((project: ProjectWithRelations) => {
+  const filteredProjects = Array.isArray(projects) ? projects.filter((project: ProjectWithRelations) => {
     const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          project.subtitle?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || project.status === statusFilter;
     return matchesSearch && matchesStatus;
-  }) || [];
+  }) : [];
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -234,8 +234,8 @@ export default function Projects() {
                   <CardContent>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <Badge className={getStatusColor(project.status)}>
-                          {project.status.replace('_', ' ')}
+                        <Badge className={getStatusColor(project.status || 'draft')}>
+                          {(project.status || 'draft').replace('_', ' ')}
                         </Badge>
                         {project.useAI && (
                           <Badge variant="secondary" className="text-xs">

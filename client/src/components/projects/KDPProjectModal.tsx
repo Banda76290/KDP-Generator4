@@ -109,7 +109,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
         }
       }
       
-      return response;
+      return project;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
