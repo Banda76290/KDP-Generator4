@@ -11,7 +11,9 @@ import {
   Shield,
   FileText,
   Folder,
-  Zap
+  Zap,
+  Variable,
+  Tags
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -133,7 +135,7 @@ export default function Sidebar() {
                     : "text-foreground hover:bg-muted"
                 )}
               >
-                <Settings className="w-5 h-5" />
+                <Variable className="w-5 h-5" />
                 <span>Variables IA</span>
               </span>
             </Link>
@@ -165,8 +167,8 @@ export default function Sidebar() {
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                   )}
                 >
-                  <Folder className="w-4 h-4" />
-                  <span>Categories</span>
+                  <Tags className="w-4 h-4" />
+                  <span>Catégories</span>
                 </span>
               </Link>
             </div>
