@@ -139,10 +139,12 @@ export default function EditBook() {
       });
 
       // Set separate state arrays
-      if (typeof book.keywords === 'string') {
+      if (book.keywords && typeof book.keywords === 'string') {
         setKeywords(book.keywords.split(',').map((k: string) => k.trim()).filter((k: string) => k));
       } else if (Array.isArray(book.keywords)) {
         setKeywords(book.keywords);
+      } else {
+        setKeywords([]);
       }
       
       setCategories(Array.isArray(book.categories) ? book.categories : []);
@@ -424,7 +426,7 @@ export default function EditBook() {
                         <SelectValue placeholder="Select a project" />
                       </SelectTrigger>
                       <SelectContent>
-                        {projects.map((project: any) => (
+                        {(projects as any[]).map((project: any) => (
                           <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>
                         ))}
                       </SelectContent>
@@ -793,7 +795,7 @@ export default function EditBook() {
                       <div className="flex items-start space-x-2">
                         <Checkbox
                           id="isLowContentBook"
-                          checked={form.watch("isLowContentBook")}
+                          checked={form.watch("isLowContentBook") || false}
                           onCheckedChange={(checked) => form.setValue("isLowContentBook", checked as boolean)}
                           className="mt-1"
                         />
@@ -806,7 +808,7 @@ export default function EditBook() {
                   <div className="space-y-2">
                     <Label htmlFor="primaryMarketplace">Primary Marketplace</Label>
                     <Select 
-                      value={form.watch("primaryMarketplace")} 
+                      value={form.watch("primaryMarketplace") || ""} 
                       onValueChange={(value) => form.setValue("primaryMarketplace", value)}
                     >
                       <SelectTrigger>
@@ -903,7 +905,7 @@ export default function EditBook() {
                   <div className="space-y-2">
                     <Label htmlFor="primaryMarketplace">Primary Marketplace</Label>
                     <Select 
-                      value={form.watch("primaryMarketplace")} 
+                      value={form.watch("primaryMarketplace") || ""} 
                       onValueChange={(value) => form.setValue("primaryMarketplace", value)}
                     >
                       <SelectTrigger>

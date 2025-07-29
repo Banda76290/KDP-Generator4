@@ -85,37 +85,25 @@ export default function EditProject() {
 
   if (projectLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="flex pt-16">
-          <Sidebar />
-          <main className="flex-1 min-w-0 p-4 md:p-6 md:ml-64">
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin" />
-            </div>
-          </main>
+      <Layout>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin" />
         </div>
-      </div>
+      </Layout>
     );
   }
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="flex pt-16">
-          <Sidebar />
-          <main className="flex-1 min-w-0 p-4 md:p-6 md:ml-64">
-            <div className="text-center py-12">
-              <h1 className="text-2xl font-bold text-gray-900 mb-4">Project Not Found</h1>
-              <Button onClick={() => setLocation("/projects")} variant="outline">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Projects
-              </Button>
-            </div>
-          </main>
+      <Layout>
+        <div className="text-center py-12">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Project Not Found</h1>
+          <Button onClick={() => setLocation("/projects")} variant="outline">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Projects
+          </Button>
         </div>
-      </div>
+      </Layout>
     );
   }
 
