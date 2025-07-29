@@ -167,7 +167,7 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Preview System**: Shows available variables and their current values before generation
 - **Cost Tracking**: Automatic calculation of generation costs based on token usage
 
-### Book Creation and Project Integration Fixes (29 Juillet 2025 - Latest)
+### Book Creation and Project Integration Fixes (29 Juillet 2025)
 - **Book-Project Linking**: Fixed critical issue where books were created without proper project association
 - **URL Parameter Extraction**: Corrected projectId extraction from URL parameters using window.location.search
 - **Form Pre-selection**: Books created via "Add Book" button now properly pre-select the parent project
@@ -176,10 +176,23 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Alphabetical Sorting**: Added A-Z and Z-A sorting options to Projects page with null-safe comparison
 - **Data Integrity**: Books now properly appear in their associated project cards on Projects page
 
+### Complete Project Duplication System (29 Juillet 2025 - Latest)
+- **Full Project Duplication**: Complete system for duplicating projects with all associated books and contributors
+- **Intelligent Naming**: Smart suffix system (" (copy)", " (copy 2)", " (copy 3)", etc.) with conflict detection
+- **Book Duplication**: All books are duplicated with appropriate naming and linked to the new project
+- **Contributors Duplication**: Contributors are copied for each duplicated book maintaining roles
+- **Delete Functionality**: Implemented project deletion with confirmation dialog and proper cleanup
+- **Enhanced getProject Function**: Fixed function to load all books and calculate revenue statistics
+- **Real-time Updates**: Proper cache invalidation ensures UI updates immediately after operations
+- **Error Handling**: Comprehensive error handling with user-friendly toast notifications
+
 ### Current Features Available
 - **Complete Dashboard**: KPI cards, sales charts, format distribution, recent projects table
 - **Project Management**: Complete KDP project creation and editing system with dedicated pages
 - **Projects Page**: Grid view of all projects with search, filtering, and management actions
+  - Complete project duplication with all books and contributors
+  - Project deletion with confirmation dialog
+  - Intelligent naming with conflict resolution
 - **Book Editing Interface**: Complete 3-tab KDP-style interface (Paperback Details, Content, Rights & Pricing)
   - Save as Draft functionality for all tabs
   - Save and Continue with automatic tab progression
