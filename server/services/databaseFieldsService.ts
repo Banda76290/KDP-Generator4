@@ -122,6 +122,8 @@ class DatabaseFieldsService {
 
   // Get all available database fields for AI prompt variables
   getAvailableFields(): DatabaseField[] {
+    console.log('Getting available fields...');
+    
     const dynamicFields: DatabaseField[] = [
       // Extract from books table
       ...this.extractFieldsFromTable('books', schema.books, 'Livre'),
@@ -130,6 +132,8 @@ class DatabaseFieldsService {
       // Extract from users table
       ...this.extractFieldsFromTable('users', schema.users, 'Auteur')
     ];
+    
+    console.log('Extracted dynamic fields:', dynamicFields.length);
     
     // Add computed/calculated fields
     const computedFields: DatabaseField[] = [
@@ -169,6 +173,8 @@ class DatabaseFieldsService {
   // Organize fields by category for display
   getCategorizedFields(): Record<string, DatabaseField[]> {
     const fields = this.getAvailableFields();
+    console.log('Total fields found:', fields.length);
+    
     const categories: Record<string, DatabaseField[]> = {
       'Livre': [],
       'Projet': [],
@@ -177,6 +183,7 @@ class DatabaseFieldsService {
     };
 
     fields.forEach(field => {
+      console.log(`Processing field: ${field.field} from table: ${field.table}`);
       if (field.table === 'books') {
         categories['Livre'].push(field);
       } else if (field.table === 'projects') {
@@ -188,6 +195,7 @@ class DatabaseFieldsService {
       }
     });
 
+    console.log('Categories result:', Object.keys(categories).map(key => `${key}: ${categories[key].length}`));
     return categories;
   }
 

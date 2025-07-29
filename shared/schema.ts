@@ -246,26 +246,7 @@ export const aiUsageLimits = pgTable("ai_usage_limits", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// AI Functions table - Configurable AI features available on the site
-export const aiFunctions = pgTable("ai_functions", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  key: varchar("key").notNull().unique(), // unique identifier like 'book_description', 'chapter_structure'
-  name: text("name").notNull(), // display name like 'Book Description Generator'
-  description: text("description"), // what this function does
-  category: varchar("category").notNull(), // 'content', 'marketing', 'structure', etc.
-  isActive: boolean("is_active").default(true), // can be enabled/disabled
-  requiresBookContext: boolean("requires_book_context").default(false), // needs book data
-  requiresProjectContext: boolean("requires_project_context").default(false), // needs project data
-  defaultModel: varchar("default_model").default("gpt-4o"), // default AI model to use
-  defaultSystemPrompt: text("default_system_prompt"), // default system prompt
-  defaultUserPromptTemplate: text("default_user_prompt_template"), // template with variables
-  maxTokens: integer("max_tokens").default(2000),
-  temperature: decimal("temperature", { precision: 3, scale: 2 }).default("0.7"),
-  availableForTiers: text("available_for_tiers").array().default(['free', 'premium']), // which subscription tiers can use this
-  sortOrder: integer("sort_order").default(0), // for ordering in UI
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+
 
 // System configuration table for admin settings
 export const systemConfig = pgTable("system_config", {
