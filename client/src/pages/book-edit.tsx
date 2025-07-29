@@ -902,9 +902,6 @@ export default function EditBook() {
                 <CardHeader>
                   <CardTitle>Set your pricing and distribution preferences
 </CardTitle>
-                  <CardDescription>
-                    Set your pricing and distribution preferences
-                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* Distribution Rights */}
