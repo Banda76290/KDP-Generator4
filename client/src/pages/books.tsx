@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import type { Book, Project } from "@shared/schema";
 
-type SortOption = "title-asc" | "title-desc" | "date-asc" | "date-desc" | "status-asc" | "status-desc";
+type SortOption = "title-asc" | "title-desc" | "date-asc" | "date-desc" | "status-asc" | "status-desc" | "lastModified" | "monthlyRevenue" | "totalRevenue";
 
 export default function BooksPage() {
   const { toast } = useToast();
@@ -179,6 +179,18 @@ function BooksContent() {
       return matchesSearch && matchesStatus && matchesFormat && matchesAssignment;
     })
     .sort((a: Book, b: Book) => {
+      const getLastModifiedDate = (book: Book) => {
+        return new Date(book.updatedAt || book.createdAt || 0);
+      };
+
+      const getCurrentMonthRevenue = (book: Book) => {
+        return parseFloat(book.monthlyRevenue || '0');
+      };
+
+      const getTotalRevenue = (book: Book) => {
+        return parseFloat(book.totalRevenue || '0');
+      };
+
       switch (sortBy) {
         case "title-asc":
           return a.title.localeCompare(b.title);
@@ -192,6 +204,12 @@ function BooksContent() {
           return (a.status || '').localeCompare(b.status || '');
         case "status-desc":
           return (b.status || '').localeCompare(a.status || '');
+        case "lastModified":
+          return getLastModifiedDate(b).getTime() - getLastModifiedDate(a).getTime();
+        case "monthlyRevenue":
+          return getCurrentMonthRevenue(b) - getCurrentMonthRevenue(a);
+        case "totalRevenue":
+          return getTotalRevenue(b) - getTotalRevenue(a);
         default:
           return 0;
       }
@@ -325,8 +343,11 @@ function BooksContent() {
             </SelectItem>
             <SelectItem value="date-asc">Oldest First</SelectItem>
             <SelectItem value="date-desc">Newest First</SelectItem>
+            <SelectItem value="lastModified">Last Modified</SelectItem>
             <SelectItem value="status-asc">Status A-Z</SelectItem>
             <SelectItem value="status-desc">Status Z-A</SelectItem>
+            <SelectItem value="monthlyRevenue">Most Profitable This Month</SelectItem>
+            <SelectItem value="totalRevenue">Highest Total Revenue</SelectItem>
           </SelectContent>
         </Select>
       </div>

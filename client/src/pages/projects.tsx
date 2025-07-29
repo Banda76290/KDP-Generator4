@@ -186,12 +186,18 @@ export default function Projects() {
           return (b.name || "").localeCompare(a.name || "");
         case "createdAt":
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case "createdAt-asc":
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
         case "lastModified":
           return getLastModifiedDate(b).getTime() - getLastModifiedDate(a).getTime();
         case "monthlyRevenue":
           return getCurrentMonthRevenue(b) - getCurrentMonthRevenue(a);
         case "totalRevenue":
           return getTotalRevenue(b) - getTotalRevenue(a);
+        case "status-asc":
+          return (a.status || '').localeCompare(b.status || '');
+        case "status-desc":
+          return (b.status || '').localeCompare(a.status || '');
         default:
           return 0;
       }
@@ -292,10 +298,13 @@ export default function Projects() {
                 <SelectContent>
                   <SelectItem value="alphabetical">Alphabetical (A-Z)</SelectItem>
                   <SelectItem value="alphabetical-desc">Alphabetical (Z-A)</SelectItem>
-                  <SelectItem value="createdAt">Creation Date</SelectItem>
+                  <SelectItem value="createdAt">Newest First</SelectItem>
+                  <SelectItem value="createdAt-asc">Oldest First</SelectItem>
                   <SelectItem value="lastModified">Last Modified</SelectItem>
+                  <SelectItem value="status-asc">Status A-Z</SelectItem>
+                  <SelectItem value="status-desc">Status Z-A</SelectItem>
                   <SelectItem value="monthlyRevenue">Most Profitable This Month</SelectItem>
-                  <SelectItem value="totalRevenue">Most Profitable All Time</SelectItem>
+                  <SelectItem value="totalRevenue">Highest Total Revenue</SelectItem>
                 </SelectContent>
               </Select>
             </div>
