@@ -83,6 +83,29 @@ export default function Projects() {
     },
   });
 
+  // Book duplication mutation
+  const duplicateBook = useMutation({
+    mutationFn: async (bookId: string) => {
+      console.log("Duplicating book:", bookId);
+      return await apiRequest("POST", `/api/books/${bookId}/duplicate`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Book duplicated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+    },
+    onError: (error) => {
+      console.error("Book duplication failed:", error);
+      toast({
+        title: "Error",
+        description: "Failed to duplicate book",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Redirect to home if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -207,6 +230,10 @@ export default function Projects() {
     if (confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
       deleteProject.mutate(projectId);
     }
+  };
+
+  const handleDuplicateBook = (bookId: string) => {
+    duplicateBook.mutate(bookId);
   };
 
   return (
@@ -394,15 +421,23 @@ export default function Projects() {
                                   <Badge className={getStatusColor(book.status || 'draft')}>
                                     {(book.status || 'draft').replace('_', ' ')}
                                   </Badge>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 w-6 p-0"
-                                    onClick={() => setLocation(`/books/edit/${book.id}`)}
-                                    title="Edit book"
-                                  >
-                                    <Edit className="w-3 h-3" />
-                                  </Button>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                        <MoreHorizontal className="w-3 h-3" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem onClick={() => setLocation(`/books/edit/${book.id}`)}>
+                                        <Edit className="w-3 h-3 mr-2" />
+                                        Edit
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleDuplicateBook(book.id)}>
+                                        <Copy className="w-3 h-3 mr-2" />
+                                        Duplicate
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
                                 </div>
                               </div>
                               

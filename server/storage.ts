@@ -427,7 +427,6 @@ export class DatabaseStorage implements IStorage {
         format: originalBook.format,
         publicationInfo: originalBook.publicationInfo as any,
         coverImageUrl: originalBook.coverImageUrl,
-        totalSales: 0,
         totalRevenue: "0.00",
         monthlyRevenue: "0.00",
       };
@@ -472,6 +471,101 @@ export class DatabaseStorage implements IStorage {
 
   async createBook(book: InsertBook): Promise<Book> {
     const [newBook] = await db.insert(books).values(book).returning();
+    return newBook;
+  }
+
+  async duplicateBook(bookId: string, userId: string): Promise<Book> {
+    console.log(`Duplicating book ${bookId} for user ${userId}`);
+    
+    // Get the original book
+    const originalBook = await this.getBook(bookId, userId);
+    if (!originalBook) {
+      throw new Error("Book not found");
+    }
+
+    // Get all books in the same project to avoid title conflicts
+    const projectBooks = await db.select().from(books).where(eq(books.projectId, originalBook.projectId));
+    
+    // Generate unique book name
+    const generateUniqueBookName = (baseName: string): string => {
+      const cleanName = baseName.replace(/ \(copy( \d+)?\)$/, '');
+      let newName = `${cleanName} (copy)`;
+      
+      // Check if this name already exists
+      if (!projectBooks.some(b => b.title === newName)) {
+        return newName;
+      }
+      
+      // Find the next available number
+      let counter = 2;
+      while (projectBooks.some(b => b.title === `${cleanName} (copy ${counter})`)) {
+        counter++;
+      }
+      
+      return `${cleanName} (copy ${counter})`;
+    };
+
+    const newBookTitle = generateUniqueBookName(originalBook.title);
+    console.log(`Duplicating book: ${originalBook.title} -> ${newBookTitle}`);
+
+    // Create duplicated book data
+    const duplicatedBookData: InsertBook = {
+      userId,
+      projectId: originalBook.projectId,
+      title: newBookTitle,
+      subtitle: originalBook.subtitle,
+      description: originalBook.description,
+      categories: originalBook.categories,
+      keywords: originalBook.keywords,
+      status: originalBook.status,
+      language: originalBook.language,
+      seriesTitle: originalBook.seriesTitle,
+      seriesNumber: originalBook.seriesNumber,
+      editionNumber: originalBook.editionNumber,
+      authorPrefix: originalBook.authorPrefix,
+      authorFirstName: originalBook.authorFirstName,
+      authorMiddleName: originalBook.authorMiddleName,
+      authorLastName: originalBook.authorLastName,
+      authorSuffix: originalBook.authorSuffix,
+      publishingRights: originalBook.publishingRights,
+      hasExplicitContent: originalBook.hasExplicitContent,
+      readingAgeMin: originalBook.readingAgeMin,
+      readingAgeMax: originalBook.readingAgeMax,
+      primaryMarketplace: originalBook.primaryMarketplace,
+      isLowContentBook: originalBook.isLowContentBook,
+      isLargePrintBook: originalBook.isLargePrintBook,
+      publicationDate: originalBook.publicationDate,
+      previouslyPublished: originalBook.previouslyPublished,
+      previousPublicationDate: originalBook.previousPublicationDate,
+      releaseOption: originalBook.releaseOption,
+      scheduledReleaseDate: originalBook.scheduledReleaseDate,
+      useAI: originalBook.useAI,
+      aiPrompt: originalBook.aiPrompt,
+      aiContentType: originalBook.aiContentType,
+      format: originalBook.format,
+      publicationInfo: originalBook.publicationInfo as any,
+      coverImageUrl: originalBook.coverImageUrl,
+      totalRevenue: "0.00",
+      monthlyRevenue: "0.00",
+    };
+
+    const newBook = await this.createBook(duplicatedBookData);
+    console.log(`Created new book: ${newBook.id} - ${newBook.title}`);
+
+    // Duplicate contributors for this book
+    const originalContributors = await this.getBookContributors(originalBook.id);
+    console.log(`Found ${originalContributors.length} contributors for book ${originalBook.title}`);
+    
+    for (const contributor of originalContributors) {
+      await this.addContributor({
+        bookId: newBook.id,
+        name: contributor.name,
+        role: contributor.role,
+      });
+      console.log(`Added contributor: ${contributor.name} (${contributor.role})`);
+    }
+
+    console.log(`Completed book duplication: ${newBook.id}`);
     return newBook;
   }
 

@@ -318,6 +318,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // New route for duplicating books
+  app.post('/api/books/:id/duplicate', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id || "test-user-id";
+      const bookId = req.params.id;
+      
+      console.log(`Duplicating book ${bookId} for user ${userId}`);
+      
+      const duplicatedBook = await storage.duplicateBook(bookId, userId);
+      
+      console.log(`Successfully duplicated book: ${duplicatedBook.id}`);
+      res.json(duplicatedBook);
+    } catch (error) {
+      console.error("Error duplicating book:", error);
+      res.status(500).json({ message: "Failed to duplicate book" });
+    }
+  });
+
   // Contributors routes
   app.post('/api/contributors', isAuthenticated, async (req: any, res) => {
     try {
