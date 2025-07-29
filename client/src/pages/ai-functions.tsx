@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Copy, Play, Settings, BookOpen, User, Building, HelpCircle, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import Layout from '@/components/Layout';
 
 interface AIFunction {
@@ -66,7 +66,7 @@ export default function AIFunctions() {
   const [customTemperature, setCustomTemperature] = useState('');
   const [generatedContent, setGeneratedContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
 
   // Fetch AI functions
   const { data: aiFunctions, isLoading: functionsLoading } = useQuery({
@@ -211,41 +211,29 @@ export default function AIFunctions() {
 
   return (
     <Layout>
-      <TooltipProvider>
         <div className="container mx-auto px-6 py-8 pt-24">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
               <h1 className="text-3xl font-bold text-foreground">AI Functions</h1>
-              <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
-                <TooltipTrigger asChild>
+              <Dialog open={isGuideOpen} onOpenChange={setIsGuideOpen}>
+                <DialogTrigger asChild>
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="h-8 px-3" 
-                    onClick={() => setIsTooltipOpen(!isTooltipOpen)}
+                    className="h-8 px-3"
                   >
                     <HelpCircle className="h-4 w-4 mr-2" />
                     Configuration Guide
                   </Button>
-                </TooltipTrigger>
-                <TooltipContent 
-                  side="bottom" 
-                  className="max-w-2xl p-6" 
-                  sideOffset={10}
-                  onPointerDownOutside={(e) => e.preventDefault()}
-                >
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-semibold text-lg">AI Functions Configuration Guide</h4>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-6 w-6 p-0"
-                        onClick={() => setIsTooltipOpen(false)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-semibold">AI Functions Configuration Guide</DialogTitle>
+                    <DialogDescription>
+                      Complete guide to configure and use AI functions effectively
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-4">
                     
                     <div className="space-y-3 text-sm">
                       <div>
@@ -293,8 +281,8 @@ export default function AIFunctions() {
                       </div>
                     </div>
                   </div>
-                </TooltipContent>
-              </Tooltip>
+                </DialogContent>
+              </Dialog>
             </div>
             <p className="text-muted-foreground">
               Generate intelligent content for your publishing projects using configurable AI functions
@@ -538,7 +526,6 @@ export default function AIFunctions() {
           </div>
         </div>
         </div>
-      </TooltipProvider>
     </Layout>
   );
 }
