@@ -244,21 +244,23 @@ export default function Projects() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredProjects.map((project: ProjectWithRelations) => (
-                <Card key={project.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center space-x-4 flex-1">
-                        <div className="w-12 h-12 gradient-blue-purple rounded-lg flex items-center justify-center text-white font-semibold text-sm">
+                <Card key={project.id} className="hover:shadow-lg transition-shadow h-fit">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start space-x-3 flex-1 min-w-0">
+                        <div className="w-12 h-12 gradient-blue-purple rounded-lg flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
                           {generateProjectInitials(project.name || 'Project')}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <CardTitle className="text-base font-medium text-gray-900 truncate">
+                          <CardTitle className="text-base font-medium text-gray-900 leading-tight mb-1">
                             {project.name}
                           </CardTitle>
                           {project.description && (
-                            <p className="text-sm text-gray-600 truncate mt-1">{project.description}</p>
+                            <p className="text-sm text-gray-600 leading-relaxed break-words">
+                              {project.description}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -296,20 +298,20 @@ export default function Projects() {
                           </div>
                           {project.books.map((book: any) => (
                             <div key={book.id} className="border rounded-lg p-3 bg-gray-50 space-y-2">
-                              <div className="flex items-start justify-between">
+                              <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
-                                  <h4 className="text-sm font-medium text-gray-900 truncate">{book.title}</h4>
-                                  <div className="flex items-center gap-2 mt-1">
-                                    <Badge variant="outline" className="text-xs">
+                                  <h4 className="text-sm font-medium text-gray-900 leading-tight break-words">{book.title}</h4>
+                                  <div className="flex flex-wrap items-center gap-2 mt-1">
+                                    <Badge variant="outline" className="text-xs flex-shrink-0">
                                       {book.format}
                                     </Badge>
-                                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                                    <div className="flex items-center gap-1 text-xs text-gray-500 flex-shrink-0">
                                       <Globe className="w-3 h-3" />
                                       {book.language || 'English'}
                                     </div>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex flex-col items-end gap-1 flex-shrink-0">
                                   <Badge className={getStatusColor(book.status || 'draft')} size="sm">
                                     {(book.status || 'draft').replace('_', ' ')}
                                   </Badge>
