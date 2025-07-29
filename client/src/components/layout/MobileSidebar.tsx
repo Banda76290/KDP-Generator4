@@ -105,18 +105,18 @@ export default function MobileSidebar({ open, onOpenChange }: MobileSidebarProps
               </div>
               
               <div className="space-y-1">
-                <Link href="/admin/dashboard">
+                <Link href="/admin">
                   <span
                     className={cn(
                       "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",
-                      location === "/admin/dashboard"
+                      location === "/admin"
                         ? "bg-primary text-primary-foreground"
                         : "text-foreground hover:bg-muted"
                     )}
                     onClick={handleLinkClick}
                   >
-                    <BarChart3 className="w-5 h-5" />
-                    <span>Admin Dashboard</span>
+                    <Shield className="w-5 h-5" />
+                    <span>Dashboard</span>
                   </span>
                 </Link>
                 
@@ -135,17 +135,17 @@ export default function MobileSidebar({ open, onOpenChange }: MobileSidebarProps
                   </span>
                 </Link>
                 
-                <Link href="/admin/config">
+                <Link href="/admin/ai-config">
                   <span
                     className={cn(
                       "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",
-                      location === "/admin/config"
+                      location === "/admin/ai-config"
                         ? "bg-primary text-primary-foreground"
                         : "text-foreground hover:bg-muted"
                     )}
                     onClick={handleLinkClick}
                   >
-                    <Zap className="w-5 h-5" />
+                    <Bot className="w-5 h-5" />
                     <span>AI Configuration</span>
                   </span>
                 </Link>

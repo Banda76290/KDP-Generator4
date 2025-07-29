@@ -93,6 +93,21 @@ export default function Sidebar() {
               </span>
             </Link>
             
+            {/* User Management */}
+            <Link href="/admin/users">
+              <span
+                className={cn(
+                  "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",
+                  location === "/admin/users"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-foreground hover:bg-muted"
+                )}
+              >
+                <Settings className="w-5 h-5" />
+                <span>User Management</span>
+              </span>
+            </Link>
+            
             {/* AI Configuration */}
             <Link href="/admin/ai-config">
               <span
