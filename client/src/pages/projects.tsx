@@ -101,9 +101,9 @@ export default function Projects() {
 
       switch (sortBy) {
         case "alphabetical":
-          return a.name.localeCompare(b.name);
+          return (a.name || "").localeCompare(b.name || "");
         case "alphabetical-desc":
-          return b.name.localeCompare(a.name);
+          return (b.name || "").localeCompare(a.name || "");
         case "createdAt":
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         case "lastModified":
