@@ -34,10 +34,7 @@ export default function Projects() {
     mutationFn: async (project: ProjectWithRelations) => {
       console.log("Starting duplication for project:", project.name);
       try {
-        const result = await apiRequest("POST", `/api/projects`, {
-          name: `${project.name} (copy)`,
-          description: project.description,
-        });
+        const result = await apiRequest("POST", `/api/projects/${project.id}/duplicate`, {});
         console.log("Duplication successful:", result);
         return result;
       } catch (error) {
@@ -49,7 +46,7 @@ export default function Projects() {
       console.log("onSuccess called with:", data);
       toast({
         title: "Success",
-        description: "Project duplicated successfully",
+        description: "Project and all books duplicated successfully",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
     },

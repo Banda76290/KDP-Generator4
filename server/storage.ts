@@ -50,6 +50,7 @@ export interface IStorage {
   createProject(project: InsertProject): Promise<Project>;
   updateProject(projectId: string, userId: string, updates: Partial<InsertProject>): Promise<Project>;
   deleteProject(projectId: string, userId: string): Promise<void>;
+  duplicateProject(projectId: string, userId: string): Promise<ProjectWithRelations>;
 
   // Book operations
   getUserBooks(userId: string): Promise<Book[]>;
@@ -245,6 +246,120 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProject(projectId: string, userId: string): Promise<void> {
     await db.delete(projects).where(and(eq(projects.id, projectId), eq(projects.userId, userId)));
+  }
+
+  async duplicateProject(projectId: string, userId: string): Promise<ProjectWithRelations> {
+    // Get the original project
+    const originalProject = await this.getProject(projectId, userId);
+    if (!originalProject) {
+      throw new Error("Project not found");
+    }
+
+    // Create the new project with " (copy)" suffix
+    const duplicatedProjectData: InsertProject = {
+      title: `${originalProject.title} (copy)`,
+      name: `${originalProject.name} (copy)`,
+      description: originalProject.description,
+      userId,
+      categories: originalProject.categories,
+      keywords: originalProject.keywords,
+      status: originalProject.status,
+      useAi: originalProject.useAi,
+      aiPrompt: originalProject.aiPrompt,
+      aiContentType: originalProject.aiContentType,
+      formats: originalProject.formats,
+      publicationInfo: originalProject.publicationInfo as any,
+      coverImageUrl: originalProject.coverImageUrl,
+      totalSales: 0,
+      totalRevenue: "0.00",
+      language: originalProject.language,
+      seriesTitle: originalProject.seriesTitle,
+      seriesNumber: originalProject.seriesNumber,
+      editionNumber: originalProject.editionNumber,
+      authorPrefix: originalProject.authorPrefix,
+      authorFirstName: originalProject.authorFirstName,
+      authorMiddleName: originalProject.authorMiddleName,
+      authorLastName: originalProject.authorLastName,
+      authorSuffix: originalProject.authorSuffix,
+      publishingRights: originalProject.publishingRights,
+      hasExplicitContent: originalProject.hasExplicitContent,
+      readingAgeMin: originalProject.readingAgeMin,
+      readingAgeMax: originalProject.readingAgeMax,
+      primaryMarketplace: originalProject.primaryMarketplace,
+      isLowContentBook: originalProject.isLowContentBook,
+      isLargePrintBook: originalProject.isLargePrintBook,
+      publicationDate: originalProject.publicationDate,
+      previouslyPublished: originalProject.previouslyPublished,
+      previousPublicationDate: originalProject.previousPublicationDate,
+      releaseOption: originalProject.releaseOption,
+      scheduledReleaseDate: originalProject.scheduledReleaseDate,
+    };
+
+    const newProject = await this.createProject(duplicatedProjectData);
+
+    // Duplicate all books from the original project
+    for (const originalBook of originalProject.books) {
+      const duplicatedBookData: InsertBook = {
+        userId,
+        projectId: newProject.id,
+        title: `${originalBook.title} (copy)`,
+        subtitle: originalBook.subtitle,
+        description: originalBook.description,
+        categories: originalBook.categories,
+        keywords: originalBook.keywords,
+        status: originalBook.status,
+        language: originalBook.language,
+        seriesTitle: originalBook.seriesTitle,
+        seriesNumber: originalBook.seriesNumber,
+        editionNumber: originalBook.editionNumber,
+        authorPrefix: originalBook.authorPrefix,
+        authorFirstName: originalBook.authorFirstName,
+        authorMiddleName: originalBook.authorMiddleName,
+        authorLastName: originalBook.authorLastName,
+        authorSuffix: originalBook.authorSuffix,
+        publishingRights: originalBook.publishingRights,
+        hasExplicitContent: originalBook.hasExplicitContent,
+        readingAgeMin: originalBook.readingAgeMin,
+        readingAgeMax: originalBook.readingAgeMax,
+        primaryMarketplace: originalBook.primaryMarketplace,
+        isLowContentBook: originalBook.isLowContentBook,
+        isLargePrintBook: originalBook.isLargePrintBook,
+        publicationDate: originalBook.publicationDate,
+        previouslyPublished: originalBook.previouslyPublished,
+        previousPublicationDate: originalBook.previousPublicationDate,
+        releaseOption: originalBook.releaseOption,
+        scheduledReleaseDate: originalBook.scheduledReleaseDate,
+        useAI: originalBook.useAI,
+        aiPrompt: originalBook.aiPrompt,
+        aiContentType: originalBook.aiContentType,
+        format: originalBook.format,
+        publicationInfo: originalBook.publicationInfo as any,
+        coverImageUrl: originalBook.coverImageUrl,
+        totalSales: 0,
+        totalRevenue: "0.00",
+        monthlyRevenue: "0.00",
+      };
+
+      const newBook = await this.createBook(duplicatedBookData);
+
+      // Duplicate contributors for this book
+      const originalContributors = await this.getBookContributors(originalBook.id);
+      for (const contributor of originalContributors) {
+        await this.addContributor({
+          bookId: newBook.id,
+          name: contributor.name,
+          role: contributor.role,
+        });
+      }
+    }
+
+    // Return the complete duplicated project with all relations
+    const duplicatedProject = await this.getProject(newProject.id, userId);
+    if (!duplicatedProject) {
+      throw new Error("Failed to retrieve duplicated project");
+    }
+
+    return duplicatedProject;
   }
 
   // Book operations

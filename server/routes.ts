@@ -168,6 +168,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // New route for duplicating projects with all books
+  app.post('/api/projects/:id/duplicate', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id || "test-user-id";
+      const projectId = req.params.id;
+      
+      console.log(`Duplicating project ${projectId} for user ${userId}`);
+      
+      const duplicatedProject = await storage.duplicateProject(projectId, userId);
+      
+      console.log(`Successfully duplicated project: ${duplicatedProject.id}`);
+      res.json(duplicatedProject);
+    } catch (error) {
+      console.error("Error duplicating project:", error);
+      res.status(500).json({ message: "Failed to duplicate project" });
+    }
+  });
+
   app.put('/api/projects/:id', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
