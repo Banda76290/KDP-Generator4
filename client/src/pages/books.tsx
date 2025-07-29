@@ -25,7 +25,10 @@ import {
   MoreVertical, 
   AlertTriangle,
   Plus,
-  Trash2
+  Trash2,
+  Globe,
+  TrendingUp,
+  DollarSign
 } from "lucide-react";
 import type { Book, Project } from "@shared/schema";
 
@@ -428,6 +431,14 @@ function BooksContent() {
                     </Badge>
                   </div>
 
+                  {/* Language */}
+                  {book.language && (
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <Globe className="h-4 w-4" />
+                      <span>{book.language}</span>
+                    </div>
+                  )}
+
                   {/* Project Assignment */}
                   <div className="space-y-2">
                     {book.projectId ? (
@@ -462,13 +473,25 @@ function BooksContent() {
                     )}
                   </div>
 
-                  {/* Revenue */}
-                  {book.totalRevenue && parseFloat(book.totalRevenue) > 0 && (
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Revenue: </span>
-                      <span className="font-medium">${book.totalRevenue}</span>
+                  {/* Revenue Statistics */}
+                  <div className="grid grid-cols-2 gap-3 text-xs border-t pt-3">
+                    <div>
+                      <div className="flex items-center gap-1 text-muted-foreground mb-1">
+                        <TrendingUp className="h-3 w-3" />
+                        This Month
+                      </div>
+                      <div className="font-medium">${parseFloat(book.monthlyRevenue || '0').toFixed(2)}</div>
+                      <div className="text-muted-foreground">{book.monthlySales || 0} sales</div>
                     </div>
-                  )}
+                    <div>
+                      <div className="flex items-center gap-1 text-muted-foreground mb-1">
+                        <DollarSign className="h-3 w-3" />
+                        Total
+                      </div>
+                      <div className="font-medium">${parseFloat(book.totalRevenue || '0').toFixed(2)}</div>
+                      <div className="text-muted-foreground">{book.totalSales || 0} sales</div>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
