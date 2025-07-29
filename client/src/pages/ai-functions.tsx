@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { useAdmin } from "@/hooks/useAdmin";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,6 +46,7 @@ interface AIFunction {
 export default function AIFunctions() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAdmin } = useAdmin();
   const [selectedFunction, setSelectedFunction] = useState<string>("");
   const [selectedBook, setSelectedBook] = useState<string>("");
   const [selectedProject, setSelectedProject] = useState<string>("");
@@ -54,7 +56,7 @@ export default function AIFunctions() {
   const [activeTab, setActiveTab] = useState("functions");
   const [previewValues, setPreviewValues] = useState<Record<string, any>>({});
 
-  // Check authentication
+  // Check authentication and admin access
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       toast({
@@ -67,7 +69,19 @@ export default function AIFunctions() {
       }, 500);
       return;
     }
-  }, [isAuthenticated, isLoading, toast]);
+    
+    if (!isLoading && isAuthenticated && !isAdmin) {
+      toast({
+        title: "Accès refusé",
+        description: "Cette page est réservée aux administrateurs",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1000);
+      return;
+    }
+  }, [isAuthenticated, isLoading, isAdmin, toast]);
 
   // Fetch available AI functions
   const { data: aiFunctions, isLoading: functionsLoading } = useQuery({
@@ -200,218 +214,141 @@ export default function AIFunctions() {
       <Header />
       <div className="flex">
         <Sidebar />
-        <main className="flex-1 p-6">
+        <main className="flex-1 ml-64 mt-16 p-6">
           <div className="max-w-6xl mx-auto space-y-6">
             {/* Header */}
             <div className="flex items-center gap-4">
               <div className="p-3 bg-blue-600 rounded-lg">
-                <Bot className="w-5 h-5 text-white" />
+                <Settings className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Fonctionnalités IA Configurables</h1>
-                <p className="text-gray-600">Utilisez l'IA avec des prompts et modèles personnalisés</p>
+                <h1 className="text-2xl font-bold text-gray-900">Configuration des Variables IA</h1>
+                <p className="text-gray-600">Configurez les variables disponibles pour toutes les fonctions IA</p>
               </div>
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="functions">Configuration</TabsTrigger>
-                <TabsTrigger value="advanced">Paramètres Avancés</TabsTrigger>
-                <TabsTrigger value="results">Résultats</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="functions">Variables Disponibles</TabsTrigger>
+                <TabsTrigger value="advanced">Documentation</TabsTrigger>
               </TabsList>
 
-              {/* Configuration Tab */}
+              {/* Variables Tab */}
               <TabsContent value="functions" className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Function Selection */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Sélectionner une Fonction IA</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {functionsLoading ? (
-                        <div className="text-center py-8">Chargement des fonctions...</div>
-                      ) : (
-                        <div className="grid grid-cols-1 gap-3">
-                          {(aiFunctions as AIFunction[])?.map((func) => {
-                            const IconComponent = functionIcons[func.type] || Bot;
-                            return (
-                              <div
-                                key={func.type}
-                                className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                                  selectedFunction === func.type
-                                    ? 'border-blue-500 bg-blue-50'
-                                    : 'border-gray-200 hover:border-gray-300'
-                                }`}
-                                onClick={() => setSelectedFunction(func.type)}
-                              >
-                                <div className="flex items-start gap-3">
-                                  <IconComponent className="w-5 h-5 text-blue-600 mt-0.5" />
-                                  <div className="flex-1">
-                                    <h3 className="font-medium">{func.name}</h3>
-                                    <p className="text-sm text-gray-600">{func.description}</p>
-                                  </div>
-                                  {selectedFunction === func.type && (
-                                    <Badge>Sélectionné</Badge>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  {/* Context Configuration */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Contexte des Données</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <Label htmlFor="project">Projet (optionnel)</Label>
-                        <Select value={selectedProject} onValueChange={(value) => handleContextChange('project', value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner un projet" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">Aucun projet</SelectItem>
-                            {(projects as any)?.map((project: any) => (
-                              <SelectItem key={project.id} value={project.id}>
-                                {project.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="book">Livre (optionnel)</Label>
-                        <Select value={selectedBook} onValueChange={(value) => handleContextChange('book', value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner un livre" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">Aucun livre</SelectItem>
-                            {(books as any)?.map((book: any) => (
-                              <SelectItem key={book.id} value={book.id}>
-                                {book.title}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Preview of available variables */}
-                      {(selectedBook || selectedProject) && (
-                        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                          <h4 className="font-medium mb-2">Aperçu des variables disponibles :</h4>
-                          <div className="text-sm space-y-1">
-                            {Object.entries(previewValues).map(([key, value]) => (
-                              <div key={key} className="flex items-center gap-2">
-                                <code className="px-1 bg-gray-200 rounded text-xs">{`{${key}}`}</code>
-                                <span className="text-gray-600">=</span>
-                                <span className="text-gray-800">{String(value || '[non défini]').substring(0, 50)}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Generate Button */}
-                <div className="flex justify-center">
-                  <Button
-                    onClick={handleGenerate}
-                    disabled={!selectedFunction || generateMutation.isPending}
-                    size="lg"
-                    className="px-8"
-                  >
-                    {generateMutation.isPending ? (
-                      <>
-                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                        Génération en cours...
-                      </>
-                    ) : (
-                      <>
-                        <Wand2 className="w-4 h-4 mr-2" />
-                        Générer le Contenu
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </TabsContent>
-
-              {/* Advanced Settings Tab */}
-              <TabsContent value="advanced" className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Paramètres Avancés</CardTitle>
+                    <CardTitle>Variables Disponibles par Catégorie</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label htmlFor="customModel">Modèle Personnalisé (optionnel)</Label>
-                      <Select value={customModel} onValueChange={setCustomModel}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Utiliser le modèle par défaut" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="">Par défaut</SelectItem>
-                          <SelectItem value="gpt-4o">GPT-4o</SelectItem>
-                          <SelectItem value="gpt-4o-mini">GPT-4o Mini</SelectItem>
-                          <SelectItem value="gpt-4">GPT-4</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="customPrompt">Prompt Personnalisé (optionnel)</Label>
-                      <Textarea
-                        id="customPrompt"
-                        rows={6}
-                        value={customPrompt}
-                        onChange={(e) => setCustomPrompt(e.target.value)}
-                        placeholder="Remplace le prompt par défaut. Utilisez {variable_name} pour insérer des variables."
-                      />
-                    </div>
+                  <CardContent>
+                    {fieldsLoading ? (
+                      <div className="text-center py-8">Chargement des variables...</div>
+                    ) : (
+                      <div className="space-y-6">
+                        {Object.entries(databaseFields || {}).map(([category, fields]) => (
+                          <div key={category}>
+                            <h3 className="text-lg font-semibold mb-3 text-gray-900">{category}</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                              {fields.map((field: any) => (
+                                <div key={`${field.table}-${field.field}`} className="p-3 border rounded-lg bg-gray-50">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <code className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm font-mono">
+                                      {`{${field.field}}`}
+                                    </code>
+                                    <Badge variant="outline" className="text-xs">
+                                      {field.type}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-sm text-gray-600">{field.description}</p>
+                                  {field.options && (
+                                    <div className="mt-2">
+                                      <p className="text-xs text-gray-500">Options:</p>
+                                      <p className="text-xs text-gray-600">{field.options.join(', ')}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
 
-              {/* Results Tab */}
-              <TabsContent value="results" className="space-y-6">
+              {/* Documentation Tab */}
+              <TabsContent value="advanced" className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle>Contenu Généré</CardTitle>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={copyToClipboard}
-                          disabled={!generatedContent}
-                        >
-                          <Copy className="w-4 h-4 mr-2" />
-                          Copier
-                        </Button>
+                    <CardTitle>Documentation des Variables</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div>
+                      <h3 className="text-lg font-semibold mb-3">Comment utiliser les variables :</h3>
+                      <div className="bg-blue-50 p-4 rounded-lg space-y-3">
+                        <p className="text-sm">
+                          • Les variables sont automatiquement remplacées par les valeurs réelles des utilisateurs
+                        </p>
+                        <p className="text-sm">
+                          • Utilisez la syntaxe <code className="px-1 bg-white rounded">{`{nom_variable}`}</code> dans vos prompts
+                        </p>
+                        <p className="text-sm">
+                          • Les variables sont organisées par contexte : Livre, Projet, Auteur, Système
+                        </p>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    {generatedContent ? (
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <pre className="whitespace-pre-wrap text-sm">{generatedContent}</pre>
+
+                    <div>
+                      <h3 className="text-lg font-semibold mb-3">Exemples d'utilisation :</h3>
+                      <div className="space-y-4">
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <h4 className="font-medium mb-2">Génération de description :</h4>
+                          <code className="text-sm text-gray-700 block">
+                            "Créez une description marketing pour le livre {`{title}`} de {`{fullAuthorName}`}. 
+                            Le livre est écrit en {`{language}`} et appartient à la catégorie {`{primaryCategory}`}. 
+                            Prix: {`{ebookPrice}`}€"
+                          </code>
+                        </div>
+
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <h4 className="font-medium mb-2">Génération de structure :</h4>
+                          <code className="text-sm text-gray-700 block">
+                            "Créez un plan détaillé pour le livre {`{title}`} qui fait {`{manuscriptPages}`} pages. 
+                            Public cible: {`{targetAudience}`}. Incluez {`{expectedLength}`} mots environ."
+                          </code>
+                        </div>
+
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <h4 className="font-medium mb-2">Contenu marketing :</h4>
+                          <code className="text-sm text-gray-700 block">
+                            "Créez du contenu promotionnel pour {`{bookFullTitle}`} de {`{fullAuthorName}`}. 
+                            Mots-clés: {`{keywords}`}. Date de sortie: {`{currentDate}`}"
+                          </code>
+                        </div>
                       </div>
-                    ) : (
-                      <div className="text-center py-12 text-gray-500">
-                        <Bot className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                        <p>Aucun contenu généré pour le moment</p>
-                        <p className="text-sm">Configurez une fonction et générez du contenu pour voir les résultats ici</p>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-semibold mb-3">Variables spéciales :</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-3 border rounded-lg">
+                          <code className="text-blue-600 font-mono text-sm">{`{fullAuthorName}`}</code>
+                          <p className="text-sm text-gray-600 mt-1">Prénom + Nom complet</p>
+                        </div>
+                        <div className="p-3 border rounded-lg">
+                          <code className="text-blue-600 font-mono text-sm">{`{bookFullTitle}`}</code>
+                          <p className="text-sm text-gray-600 mt-1">Titre + Sous-titre</p>
+                        </div>
+                        <div className="p-3 border rounded-lg">
+                          <code className="text-blue-600 font-mono text-sm">{`{currentDate}`}</code>
+                          <p className="text-sm text-gray-600 mt-1">Date du jour</p>
+                        </div>
+                        <div className="p-3 border rounded-lg">
+                          <code className="text-blue-600 font-mono text-sm">{`{currentYear}`}</code>
+                          <p className="text-sm text-gray-600 mt-1">Année actuelle</p>
+                        </div>
                       </div>
-                    )}
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>

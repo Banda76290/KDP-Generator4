@@ -22,7 +22,6 @@ const navigation = [
   { name: "Sales Analytics", href: "/analytics", icon: TrendingUp },
   { name: "KDP Reports", href: "/kdp-reports", icon: Upload },
   { name: "AI Assistant", href: "/ai-assistant", icon: Bot, badge: "PRO" },
-  { name: "AI Functions", href: "/ai-functions", icon: Settings, badge: "PRO" },
 ];
 
 const accountNavigation = [
@@ -103,6 +102,21 @@ export default function Sidebar() {
               >
                 <Bot className="w-5 h-5" />
                 <span>AI Configuration</span>
+              </span>
+            </Link>
+
+            {/* AI Variables */}
+            <Link href="/admin/ai-variables">
+              <span
+                className={cn(
+                  "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",
+                  location === "/admin/ai-variables"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-foreground hover:bg-muted"
+                )}
+              >
+                <Settings className="w-5 h-5" />
+                <span>Variables IA</span>
               </span>
             </Link>
 

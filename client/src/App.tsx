@@ -38,7 +38,7 @@ function Router() {
       <Route path="/analytics" component={Analytics} />
       <Route path="/kdp-reports" component={KDPReports} />
       <Route path="/ai-assistant" component={AIAssistant} />
-      <Route path="/ai-functions" component={AIFunctions} />
+      <Route path="/admin/ai-variables" component={AIFunctions} />
       <Route path="/subscription" component={Subscription} />
       <Route path="/settings" component={Settings} />
       <Route path="/admin" component={AdminDashboard} />
