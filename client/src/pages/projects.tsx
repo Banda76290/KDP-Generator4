@@ -112,17 +112,17 @@ export default function Projects() {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Projets</h1>
-                <p className="text-gray-600 mt-1">Gérez vos projets de livres et suivez leur progression.</p>
+                <h1 className="text-2xl font-bold text-gray-900">Projects</h1>
+                <p className="text-gray-600 mt-1">Manage your book projects and track their progress.</p>
               </div>
               <div className="flex gap-2">
                 <Button onClick={() => setLocation("/projects/create")} variant="outline">
                   <Plus className="w-4 h-4 mr-2" />
-                  Créer un Projet
+                  Create Project
                 </Button>
                 <Button onClick={() => setLocation("/books/create")} className="bg-primary hover:bg-primary/90">
                   <Plus className="w-4 h-4 mr-2" />
-                  Créer un Livre
+                  Create Book
                 </Button>
               </div>
             </div>
@@ -185,11 +185,11 @@ export default function Projects() {
                 <div className="flex gap-2 justify-center">
                   <Button onClick={() => setLocation("/projects/create")} variant="outline">
                     <Plus className="w-4 h-4 mr-2" />
-                    Créer votre Premier Projet
+                    Create Your First Project
                   </Button>
                   <Button onClick={() => setLocation("/books/create")} className="bg-primary hover:bg-primary/90">
                     <Plus className="w-4 h-4 mr-2" />
-                    Créer votre Premier Livre
+                    Create Your First Book
                   </Button>
                 </div>
               )}
@@ -246,7 +246,7 @@ export default function Projects() {
                       
                       {project.books && project.books.length > 0 && (
                         <div>
-                          <p className="text-sm text-gray-600 mb-1">Livres ({project.books.length}):</p>
+                          <p className="text-sm text-gray-600 mb-1">Books ({project.books.length}):</p>
                           <div className="flex flex-wrap gap-1">
                             {project.books.slice(0, 3).map((book: any) => (
                               <Badge key={book.id} variant="outline" className="text-xs">

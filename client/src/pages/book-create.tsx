@@ -126,16 +126,16 @@ export default function CreateBook() {
       queryClient.invalidateQueries({ queryKey: ["/api/books"] });
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       toast({
-        title: "Livre créé",
-        description: "Votre livre a été créé avec succès.",
+        title: "Book Created",
+        description: "Your book has been created successfully.",
       });
       setLocation("/projects");
     },
     onError: (error) => {
       console.error('Book creation error:', error);
       toast({
-        title: "Erreur",
-        description: error.message || "Impossible de créer le livre",
+        title: "Error",
+        description: error.message || "Failed to create book",
         variant: "destructive",
       });
     },
@@ -198,14 +198,14 @@ export default function CreateBook() {
                 className="mb-4"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Retour aux projets
+                Back to Projects
               </Button>
               <div className="flex items-center space-x-3">
                 <BookOpen className="h-8 w-8 text-primary" />
                 <div>
-                  <h1 className="text-3xl font-bold">Créer un Nouveau Livre</h1>
+                  <h1 className="text-3xl font-bold">Create New Book</h1>
                   <p className="text-muted-foreground">
-                    Créez un livre KDP avec tous les détails nécessaires
+                    Create a KDP book with all necessary details
                   </p>
                 </div>
               </div>
@@ -218,9 +218,9 @@ export default function CreateBook() {
                     {/* Project Selection */}
                     <Card>
                       <CardHeader>
-                        <CardTitle>Projet de Rattachement</CardTitle>
+                        <CardTitle>Project Assignment</CardTitle>
                         <CardDescription>
-                          Sélectionnez le projet auquel rattacher ce livre
+                          Select the project to assign this book to
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
@@ -229,7 +229,7 @@ export default function CreateBook() {
                           onValueChange={(value) => form.setValue("projectId", value)}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Sélectionnez un projet (optionnel)" />
+                            <SelectValue placeholder="Select a project (optional)" />
                           </SelectTrigger>
                           <SelectContent>
                             {(projects as any[]).map((project: any) => (
@@ -245,9 +245,9 @@ export default function CreateBook() {
                     {/* Format Selection */}
                     <Card>
                       <CardHeader>
-                        <CardTitle>Format du Livre</CardTitle>
+                        <CardTitle>Book Format</CardTitle>
                         <CardDescription>
-                          Choisissez le format de publication
+                          Choose the publication format
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
@@ -261,11 +261,11 @@ export default function CreateBook() {
                           </div>
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="paperback" id="paperback" />
-                            <Label htmlFor="paperback">Paperback (Livre de poche)</Label>
+                            <Label htmlFor="paperback">Paperback</Label>
                           </div>
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="hardcover" id="hardcover" />
-                            <Label htmlFor="hardcover">Hardcover (Couverture rigide)</Label>
+                            <Label htmlFor="hardcover">Hardcover</Label>
                           </div>
                         </RadioGroup>
                       </CardContent>
@@ -275,13 +275,13 @@ export default function CreateBook() {
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                           <CheckCircle className="h-5 w-5 text-green-600" />
-                          Détails de Base
+                          Basic Details
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         {/* Language */}
                         <div>
-                          <Label htmlFor="language">Langue</Label>
+                          <Label htmlFor="language">Language</Label>
                           <Select value={form.watch("language") ?? ""} onValueChange={(value) => form.setValue("language", value)}>
                             <SelectTrigger>
                               <SelectValue />
@@ -296,7 +296,7 @@ export default function CreateBook() {
 
                         {/* Book Title */}
                         <div>
-                          <Label htmlFor="title">Titre du Livre</Label>
+                          <Label htmlFor="title">Book Title</Label>
                           <Input
                             {...form.register("title")}
                             placeholder="From Zero to Hero with Google Analytics"

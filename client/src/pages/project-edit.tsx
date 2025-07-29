@@ -1,19 +1,15 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { X, Plus, Trash2, CheckCircle, ArrowLeft, BookOpen, Loader2 } from "lucide-react";
+import { ArrowLeft, Folder, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertProjectSchema, type InsertProject } from "@shared/schema";
@@ -21,147 +17,55 @@ import { z } from "zod";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 
-interface Contributor {
-  id: string;
-  role: string;
-  prefix: string;
-  firstName: string;
-  middleName: string;
-  lastName: string;
-  suffix: string;
-}
+const projectFormSchema = insertProjectSchema.extend({});
 
-const kdpFormSchema = insertProjectSchema.extend({
-  formats: z.array(z.enum(["ebook", "paperback", "hardcover"])).optional(),
-}).partial();
+type ProjectFormData = z.infer<typeof projectFormSchema>;
 
-type KDPFormData = z.infer<typeof kdpFormSchema>;
-
-const languages = [
-  "English", "Spanish", "French", "German", "Italian", "Portuguese", "Japanese", "Chinese (Simplified)", 
-  "Chinese (Traditional)", "Korean", "Arabic", "Hindi", "Russian", "Dutch", "Swedish", "Norwegian"
-];
-
-const marketplaces = [
-  "Amazon.com", "Amazon.co.uk", "Amazon.de", "Amazon.fr", "Amazon.es", "Amazon.it", 
-  "Amazon.co.jp", "Amazon.ca", "Amazon.com.au", "Amazon.in", "Amazon.com.br", "Amazon.com.mx"
-];
-
-const readingAges = [
-  "Baby-2 years", "3-5 years", "6-8 years", "9-12 years", "13-17 years", "18+ years"
-];
-
-const contributorRoles = [
-  "Author", "Co-author", "Editor", "Illustrator", "Translator", "Photographer", "Designer"
-];
-
-export default function ProjectEdit() {
-  const [location] = useLocation();
-  const projectId = location.split('/').pop() as string;
-  const [, setLocation] = useLocation();
-  const [contributors, setContributors] = useState<Contributor[]>([]);
-  const [keywords, setKeywords] = useState<string[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
+export default function EditProject() {
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Extract project ID from URL
+  const projectId = location.split('/').pop();
 
-  const form = useForm<KDPFormData>({
-    resolver: zodResolver(kdpFormSchema),
+  const form = useForm<ProjectFormData>({
+    resolver: zodResolver(projectFormSchema),
     defaultValues: {
-      title: "",
-      subtitle: "",
+      name: "",
       description: "",
-      language: "English",
-      authorFirstName: "",
-      authorLastName: "",
-      publishingRights: "owned",
-      hasExplicitContent: false,
-      primaryMarketplace: "Amazon.com",
-      isLowContentBook: false,
-      isLargePrintBook: false,
-      previouslyPublished: false,
-      releaseOption: "immediate",
-      useAI: false,
-      formats: [],
-      categories: [],
-      keywords: [],
+      status: "draft",
     },
   });
 
-  const { data: project, isLoading, error } = useQuery({
+  // Fetch project data
+  const { data: project, isLoading: projectLoading } = useQuery({
     queryKey: ["/api/projects", projectId],
     enabled: !!projectId,
   });
 
   // Populate form when project data is loaded
   useEffect(() => {
-    if (project && typeof project === 'object') {
-      const projectData = project as any;
+    if (project) {
       form.reset({
-        title: projectData.title || "",
-        subtitle: projectData.subtitle || "",
-        description: projectData.description || "",
-        language: projectData.language || "English",
-        authorFirstName: projectData.authorFirstName || "",
-        authorLastName: projectData.authorLastName || "",
-        authorPrefix: projectData.authorPrefix || "",
-        authorMiddleName: projectData.authorMiddleName || "",
-        authorSuffix: projectData.authorSuffix || "",
-        seriesTitle: projectData.seriesTitle || "",
-        seriesNumber: projectData.seriesNumber || 0,
-        editionNumber: projectData.editionNumber || "",
-        publishingRights: projectData.publishingRights || "owned",
-        hasExplicitContent: projectData.hasExplicitContent || false,
-        readingAgeMin: projectData.readingAgeMin || "",
-        readingAgeMax: projectData.readingAgeMax || "",
-        primaryMarketplace: projectData.primaryMarketplace || "Amazon.com",
-        isLowContentBook: projectData.isLowContentBook || false,
-        isLargePrintBook: projectData.isLargePrintBook || false,
-        previouslyPublished: projectData.previouslyPublished || false,
-        previousPublicationDate: projectData.previousPublicationDate || "",
-        releaseOption: projectData.releaseOption || "immediate",
-        scheduledReleaseDate: projectData.scheduledReleaseDate || "",
-        useAI: projectData.useAI || false,
-        formats: projectData.formats || [],
-        categories: projectData.categories || [],
-        keywords: projectData.keywords || [],
+        name: project.name || "",
+        description: project.description || "",
+        status: project.status || "draft",
       });
-      setCategories(projectData.categories || []);
-      setKeywords(projectData.keywords || []);
-      setContributors(projectData.contributors || []);
     }
   }, [project, form]);
 
   const updateProject = useMutation({
-    mutationFn: async (data: KDPFormData) => {
-      const projectData = {
-        ...data,
-        categories,
-        keywords,
-      };
+    mutationFn: async (data: ProjectFormData) => {
+      console.log('Updating project:', projectId, data);
       
-      console.log('Updating project data:', projectData);
-      const updatedProject = await apiRequest("PUT", `/api/projects/${projectId}`, projectData);
-      console.log('Received updated project response:', updatedProject);
+      const updatedProject = await apiRequest("PUT", `/api/projects/${projectId}`, {
+        name: data.name,
+        description: data.description,
+        status: data.status,
+      });
       
-      // Update contributors if any
-      if (contributors.length > 0) {
-        // First delete existing contributors
-        const existingContributors = await apiRequest("GET", `/api/contributors?projectId=${projectId}`);
-        for (const contributor of existingContributors || []) {
-          await apiRequest("DELETE", `/api/contributors/${contributor.id}`);
-        }
-        
-        // Then create new ones
-        for (const contributor of contributors) {
-          await apiRequest("POST", "/api/contributors", {
-            projectId: projectId,
-            name: `${contributor.firstName} ${contributor.lastName}`.trim(),
-            role: contributor.role,
-          });
-        }
-      }
-      
+      console.log('Project updated:', updatedProject);
       return updatedProject;
     },
     onSuccess: () => {
@@ -169,7 +73,7 @@ export default function ProjectEdit() {
       queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId] });
       toast({
         title: "Project Updated",
-        description: "Your KDP project has been updated successfully.",
+        description: "Your project has been updated successfully.",
       });
       setLocation("/projects");
     },
@@ -183,79 +87,15 @@ export default function ProjectEdit() {
     },
   });
 
-  const addContributor = () => {
-    const newContributor: Contributor = {
-      id: Date.now().toString(),
-      role: "Author",
-      prefix: "",
-      firstName: "",
-      middleName: "",
-      lastName: "",
-      suffix: "",
-    };
-    setContributors([...contributors, newContributor]);
-  };
-
-  const updateContributor = (id: string, field: keyof Contributor, value: string) => {
-    setContributors(contributors.map(c => 
-      c.id === id ? { ...c, [field]: value } : c
-    ));
-  };
-
-  const removeContributor = (id: string) => {
-    setContributors(contributors.filter(c => c.id !== id));
-  };
-
-  const addKeyword = (keyword: string) => {
-    if (keyword.trim() && !keywords.includes(keyword.trim()) && keywords.length < 7) {
-      setKeywords([...keywords, keyword.trim()]);
-    }
-  };
-
-  const removeKeyword = (keyword: string) => {
-    setKeywords(keywords.filter(k => k !== keyword));
-  };
-
-  const addCategory = (category: string) => {
-    if (category.trim() && !categories.includes(category.trim()) && categories.length < 3) {
-      setCategories([...categories, category.trim()]);
-    }
-  };
-
-  const removeCategory = (category: string) => {
-    setCategories(categories.filter(c => c !== category));
-  };
-
-  if (isLoading) {
+  if (projectLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-background">
+      <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="flex">
+        <div className="flex pt-16">
           <Sidebar />
-          <main className="flex-1 ml-64 pt-16">
-            <div className="container mx-auto px-4 py-8 max-w-4xl">
-              <div className="mb-6">
-                <Button variant="ghost" onClick={() => setLocation("/projects")} className="mb-4">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Retour aux projets
-                </Button>
-                <div className="flex items-center space-x-3">
-                  <Skeleton className="h-8 w-8 rounded" />
-                  <div>
-                    <Skeleton className="h-8 w-48 mb-2" />
-                    <Skeleton className="h-4 w-64" />
-                  </div>
-                </div>
-              </div>
-              <Card>
-                <CardContent className="py-8">
-                  <div className="space-y-4">
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-20 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                  </div>
-                </CardContent>
-              </Card>
+          <main className="flex-1 ml-64 p-6">
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin" />
             </div>
           </main>
         </div>
@@ -263,30 +103,19 @@ export default function ProjectEdit() {
     );
   }
 
-  if (error || !project) {
+  if (!project) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-background">
+      <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="flex">
+        <div className="flex pt-16">
           <Sidebar />
-          <main className="flex-1 ml-64 pt-16">
-            <div className="container mx-auto px-4 py-8 max-w-4xl">
-              <Button variant="ghost" onClick={() => setLocation("/projects")} className="mb-4">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Retour aux projets
+          <main className="flex-1 ml-64 p-6">
+            <div className="text-center py-12">
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">Project Not Found</h1>
+              <Button onClick={() => setLocation("/projects")} variant="outline">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Projects
               </Button>
-              <Card>
-                <CardContent className="py-8">
-                  <div className="text-center">
-                    <h3 className="text-lg font-semibold text-destructive mb-2">
-                      {error ? "Erreur de chargement" : "Projet non trouvé"}
-                    </h3>
-                    <p className="text-muted-foreground">
-                      {error ? "Impossible de charger les données du projet." : "Ce projet n'existe pas ou vous n'avez pas les permissions pour le voir."}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </main>
         </div>
@@ -295,578 +124,85 @@ export default function ProjectEdit() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-background">
+    <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="flex">
+      <div className="flex pt-16">
         <Sidebar />
-        <main className="flex-1 ml-64 pt-16">
-          <div className="container mx-auto px-4 py-8 max-w-4xl">
-            <div className="mb-6">
-              <Button
-                variant="ghost"
-                onClick={() => setLocation("/projects")}
-                className="mb-4"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Retour aux projets
-              </Button>
-              <div className="flex items-center space-x-3">
-                <BookOpen className="h-8 w-8 text-primary" />
-                <div>
-                  <h1 className="text-3xl font-bold">Modifier le Projet</h1>
-                  <p className="text-muted-foreground">
-                    Modifier "{(project as any)?.title || 'Projet'}"
-                  </p>
-                </div>
+        <main className="flex-1 ml-64 p-6">
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-center space-x-2 mb-6">
+              <ArrowLeft 
+                className="w-5 h-5 text-gray-600 cursor-pointer hover:text-gray-800" 
+                onClick={() => setLocation("/projects")} 
+              />
+              <Folder className="w-6 h-6 text-blue-500" />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Edit Project</h1>
+                <p className="text-gray-600">Update your project details</p>
               </div>
             </div>
 
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border">
               <div className="p-6">
-                <form onSubmit={form.handleSubmit((data) => updateProject.mutate({ ...data, status: 'in_review' }))}>
+                <form onSubmit={form.handleSubmit((data) => updateProject.mutate(data))}>
                   <div className="space-y-6">
+                    {/* Basic Information */}
                     <Card>
                       <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <CheckCircle className="h-5 w-5 text-green-600" />
-                          Basic Details
-                        </CardTitle>
+                        <CardTitle>Project Information</CardTitle>
+                        <CardDescription>
+                          Basic details about your project
+                        </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {/* Language */}
                         <div>
-                          <Label htmlFor="language">Language</Label>
-                          <Select value={form.watch("language") ?? ""} onValueChange={(value) => form.setValue("language", value)}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {languages.map((lang) => (
-                                <SelectItem key={lang} value={lang}>{lang}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        {/* Book Title */}
-                        <div>
-                          <Label htmlFor="title">Book Title</Label>
+                          <Label htmlFor="name">Project Name</Label>
                           <Input
-                            {...form.register("title")}
-                            placeholder="From Zero to Hero with Google Analytics"
+                            id="name"
+                            {...form.register("name")}
+                            placeholder="Enter project name..."
                             className="mt-1"
                           />
-                          {form.formState.errors.title && (
-                            <p className="text-red-500 text-sm mt-1">{form.formState.errors.title.message}</p>
+                          {form.formState.errors.name && (
+                            <p className="text-sm text-red-600 mt-1">
+                              {form.formState.errors.name.message}
+                            </p>
                           )}
                         </div>
 
-                        {/* Subtitle */}
                         <div>
-                          <Label htmlFor="subtitle">Subtitle (Optional)</Label>
-                          <Input
-                            {...form.register("subtitle")}
-                            placeholder="Turn statistics into winning strategies"
+                          <Label htmlFor="description">Description</Label>
+                          <Textarea
+                            id="description"
+                            {...form.register("description")}
+                            placeholder="Describe your project..."
+                            rows={4}
                             className="mt-1"
                           />
+                          {form.formState.errors.description && (
+                            <p className="text-sm text-red-600 mt-1">
+                              {form.formState.errors.description.message}
+                            </p>
+                          )}
                         </div>
 
-                        {/* Series */}
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="seriesTitle">Series Title (Optional)</Label>
-                            <Input
-                              {...form.register("seriesTitle")}
-                              placeholder="From Zero to Hero"
-                              className="mt-1"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="seriesNumber">Series Number</Label>
-                            <Input
-                              {...form.register("seriesNumber", { valueAsNumber: true })}
-                              type="number"
-                              placeholder="1"
-                              className="mt-1"
-                            />
-                          </div>
-                        </div>
-
-                        {/* Edition Number */}
                         <div>
-                          <Label htmlFor="editionNumber">Edition Number (Optional)</Label>
-                          <Input
-                            {...form.register("editionNumber")}
-                            placeholder="1"
-                            className="mt-1"
-                          />
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Primary Author */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Primary Author</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-5 gap-2">
-                          <div>
-                            <Label>Prefix</Label>
-                            <Input
-                              {...form.register("authorPrefix")}
-                              placeholder="Dr."
-                              className="mt-1"
-                            />
-                          </div>
-                          <div>
-                            <Label>First Name</Label>
-                            <Input
-                              {...form.register("authorFirstName")}
-                              placeholder="Sébastien"
-                              className="mt-1"
-                            />
-                          </div>
-                          <div>
-                            <Label>Middle Name</Label>
-                            <Input
-                              {...form.register("authorMiddleName")}
-                              className="mt-1"
-                            />
-                          </div>
-                          <div>
-                            <Label>Last Name</Label>
-                            <Input
-                              {...form.register("authorLastName")}
-                              placeholder="JULLIARD-BESSON"
-                              className="mt-1"
-                            />
-                          </div>
-                          <div>
-                            <Label>Suffix</Label>
-                            <Input
-                              {...form.register("authorSuffix")}
-                              placeholder="PhD"
-                              className="mt-1"
-                            />
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Contributors */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Contributors</CardTitle>
-                        <CardDescription>
-                          Add up to 9 contributors. They'll display on Amazon using the order you enter below.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        {contributors.map((contributor) => (
-                          <div key={contributor.id} className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded">
-                            <Select 
-                              value={contributor.role} 
-                              onValueChange={(value) => updateContributor(contributor.id, "role", value)}
-                            >
-                              <SelectTrigger className="w-32">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {contributorRoles.map((role) => (
-                                  <SelectItem key={role} value={role}>{role}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <Input
-                              placeholder="Prefix"
-                              value={contributor.prefix}
-                              onChange={(e) => updateContributor(contributor.id, "prefix", e.target.value)}
-                              className="w-20"
-                            />
-                            <Input
-                              placeholder="First Name"
-                              value={contributor.firstName}
-                              onChange={(e) => updateContributor(contributor.id, "firstName", e.target.value)}
-                              className="flex-1"
-                            />
-                            <Input
-                              placeholder="Middle Name"
-                              value={contributor.middleName}
-                              onChange={(e) => updateContributor(contributor.id, "middleName", e.target.value)}
-                              className="flex-1"
-                            />
-                            <Input
-                              placeholder="Last Name"
-                              value={contributor.lastName}
-                              onChange={(e) => updateContributor(contributor.id, "lastName", e.target.value)}
-                              className="flex-1"
-                            />
-                            <Input
-                              placeholder="Suffix"
-                              value={contributor.suffix}
-                              onChange={(e) => updateContributor(contributor.id, "suffix", e.target.value)}
-                              className="w-20"
-                            />
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => removeContributor(contributor.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ))}
-                        
-                        {contributors.length < 9 && (
-                          <Button type="button" variant="outline" onClick={addContributor} className="w-full">
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add Another
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
-
-                    {/* Description */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Description</CardTitle>
-                        <CardDescription>
-                          Summarize your book. This will be your product description on Amazon.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <Textarea
-                          {...form.register("description")}
-                          placeholder="In the world of digital marketing, understanding data is essential to making informed decisions..."
-                          rows={6}
-                          className="resize-none"
-                        />
-                        <div className="text-sm text-gray-500 mt-1">
-                          {form.watch("description")?.length || 0} characters
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Publishing Rights */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Publishing Rights</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <RadioGroup
-                          value={form.watch("publishingRights") ?? "owned"}
-                          onValueChange={(value) => form.setValue("publishingRights", value)}
-                        >
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="owned" id="owned" />
-                            <Label htmlFor="owned">I own the copyright and I hold necessary publishing rights</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="public_domain" id="public_domain" />
-                            <Label htmlFor="public_domain">This is a public domain work</Label>
-                          </div>
-                        </RadioGroup>
-                      </CardContent>
-                    </Card>
-
-                    {/* Primary Audience */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Primary Audience</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div>
-                          <Label className="text-base font-medium">Sexually Explicit Images or Title</Label>
-                          <p className="text-sm text-gray-600 mb-2">
-                            Does the book's cover or interior contain sexually explicit images, or does the book's title contain sexually explicit language?
-                          </p>
-                          <RadioGroup
-                            value={form.watch("hasExplicitContent") ? "yes" : "no"}
-                            onValueChange={(value) => form.setValue("hasExplicitContent", value === "yes")}
+                          <Label htmlFor="status">Status</Label>
+                          <Select 
+                            value={form.watch("status") || "draft"} 
+                            onValueChange={(value) => form.setValue("status", value as any)}
                           >
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="yes" id="explicit-yes" />
-                              <Label htmlFor="explicit-yes">Yes</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="no" id="explicit-no" />
-                              <Label htmlFor="explicit-no">No</Label>
-                            </div>
-                          </RadioGroup>
+                            <SelectTrigger className="mt-1">
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="draft">Draft</SelectItem>
+                              <SelectItem value="in_review">In Review</SelectItem>
+                              <SelectItem value="published">Published</SelectItem>
+                              <SelectItem value="archived">Archived</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
-
-                        <div>
-                          <Label className="text-base font-medium">Reading age (Optional)</Label>
-                          <p className="text-sm text-gray-600 mb-2">
-                            Choose the youngest and oldest ages at which a person could enjoy this book.
-                          </p>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <Label>Minimum</Label>
-                              <Select value={form.watch("readingAgeMin") ?? ""} onValueChange={(value) => form.setValue("readingAgeMin", value)}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select one" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {readingAges.map((age) => (
-                                    <SelectItem key={age} value={age}>{age}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div>
-                              <Label>Maximum</Label>
-                              <Select value={form.watch("readingAgeMax") ?? ""} onValueChange={(value) => form.setValue("readingAgeMax", value)}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select one" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {readingAges.map((age) => (
-                                    <SelectItem key={age} value={age}>{age}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Primary Marketplace */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Primary marketplace</CardTitle>
-                        <CardDescription>
-                          Choose the location where you expect the majority of your book sales.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <Select value={form.watch("primaryMarketplace") ?? ""} onValueChange={(value) => form.setValue("primaryMarketplace", value)}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {marketplaces.map((marketplace) => (
-                              <SelectItem key={marketplace} value={marketplace}>{marketplace}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </CardContent>
-                    </Card>
-
-                    {/* Categories */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Categories</CardTitle>
-                        <CardDescription>
-                          Choose up to three categories that describe your book.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex flex-wrap gap-2">
-                          {categories.map((category) => (
-                            <Badge key={category} variant="secondary" className="flex items-center gap-1">
-                              {category}
-                              <X
-                                className="h-3 w-3 cursor-pointer"
-                                onClick={() => removeCategory(category)}
-                              />
-                            </Badge>
-                          ))}
-                        </div>
-                        {categories.length < 3 && (
-                          <div className="flex gap-2">
-                            <Input
-                              placeholder="Enter category (e.g., Business Technology, Web Marketing)"
-                              onKeyPress={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault();
-                                  addCategory(e.currentTarget.value);
-                                  e.currentTarget.value = "";
-                                }
-                              }}
-                            />
-                            <Button type="button" variant="outline">Edit categories</Button>
-                          </div>
-                        )}
-
-                        {/* Content Classification */}
-                        <div className="space-y-4 pt-4 border-t">
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="low-content"
-                              checked={form.watch("isLowContentBook") ?? false}
-                              onCheckedChange={(checked) => form.setValue("isLowContentBook", !!checked)}
-                            />
-                            <Label htmlFor="low-content">Low-content book (content is 16-point font size or greater)</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="large-print"
-                              checked={form.watch("isLargePrintBook") ?? false}
-                              onCheckedChange={(checked) => form.setValue("isLargePrintBook", !!checked)}
-                            />
-                            <Label htmlFor="large-print">Large-print book (content is 16-point font size or greater)</Label>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Keywords */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Keywords</CardTitle>
-                        <CardDescription>
-                          Choose up to 7 keywords highlighting your book's unique traits.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex flex-wrap gap-2">
-                          {keywords.map((keyword) => (
-                            <Badge key={keyword} variant="secondary" className="flex items-center gap-1">
-                              {keyword}
-                              <X
-                                className="h-3 w-3 cursor-pointer"
-                                onClick={() => removeKeyword(keyword)}
-                              />
-                            </Badge>
-                          ))}
-                        </div>
-                        {keywords.length < 7 && (
-                          <div className="grid grid-cols-2 gap-2">
-                            <Input
-                              placeholder="Google Analytics"
-                              onKeyPress={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault();
-                                  addKeyword(e.currentTarget.value);
-                                  e.currentTarget.value = "";
-                                }
-                              }}
-                            />
-                            <Input
-                              placeholder="GA4"
-                              onKeyPress={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault();
-                                  addKeyword(e.currentTarget.value);
-                                  e.currentTarget.value = "";
-                                }
-                              }}
-                            />
-                          </div>
-                        )}
-                        <p className="text-sm text-gray-600">
-                          {7 - keywords.length} keywords remaining
-                        </p>
-                      </CardContent>
-                    </Card>
-
-                    {/* Publication Date */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Publication Date</CardTitle>
-                        <CardDescription>
-                          The publication date tells readers when the book was originally published.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <RadioGroup
-                          value={form.watch("previouslyPublished") ? "previously" : "same"}
-                          onValueChange={(value) => form.setValue("previouslyPublished", value === "previously")}
-                        >
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="same" id="same-date" />
-                            <Label htmlFor="same-date">Publication date and release date are the same</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="previously" id="previously" />
-                            <Label htmlFor="previously">My book was previously published</Label>
-                          </div>
-                        </RadioGroup>
-
-                        {form.watch("previouslyPublished") && (
-                          <div>
-                            <Label htmlFor="previousPublicationDate">Previous Publication Date</Label>
-                            <Input
-                              {...form.register("previousPublicationDate")}
-                              type="date"
-                              className="mt-1"
-                            />
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-
-                    {/* Release Date */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Release Date</CardTitle>
-                        <CardDescription>
-                          Choose when to make your book available on Amazon.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <RadioGroup
-                          value={form.watch("releaseOption") ?? "immediate"}
-                          onValueChange={(value) => form.setValue("releaseOption", value)}
-                        >
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="immediate" id="immediate" />
-                            <Label htmlFor="immediate">Release my book for sale now</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="scheduled" id="scheduled" />
-                            <Label htmlFor="scheduled">Schedule my book's release</Label>
-                          </div>
-                        </RadioGroup>
-
-                        {form.watch("releaseOption") === "scheduled" && (
-                          <div>
-                            <Label htmlFor="scheduledReleaseDate">Scheduled Release Date</Label>
-                            <Input
-                              {...form.register("scheduledReleaseDate")}
-                              type="date"
-                              className="mt-1"
-                            />
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-
-                    {/* Formats */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Publication Formats</CardTitle>
-                        <CardDescription>
-                          Choose which formats you want to publish.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          {(["ebook", "paperback", "hardcover"] as const).map((format) => (
-                            <div key={format} className="flex items-center space-x-2">
-                              <Checkbox
-                                id={format}
-                                checked={form.watch("formats")?.includes(format)}
-                                onCheckedChange={(checked) => {
-                                  const currentFormats = form.watch("formats") || [];
-                                  if (checked) {
-                                    form.setValue("formats", [...currentFormats, format]);
-                                  } else {
-                                    form.setValue("formats", currentFormats.filter(f => f !== format));
-                                  }
-                                }}
-                              />
-                              <Label htmlFor={format} className="capitalize">{format}</Label>
-                            </div>
-                          ))}
-                        </div>
-                        {form.formState.errors.formats && (
-                          <p className="text-red-500 text-sm mt-1">{form.formState.errors.formats.message}</p>
-                        )}
                       </CardContent>
                     </Card>
                   </div>
@@ -875,28 +211,20 @@ export default function ProjectEdit() {
                     <Button type="button" variant="outline" onClick={() => setLocation("/projects")}>
                       Cancel
                     </Button>
-                    <div className="flex gap-2">
-                      <Button 
-                        type="button" 
-                        variant="outline"
-                        onClick={() => {
-                          console.log('Draft button clicked');
-                          const formData = form.getValues();
-                          console.log('Saving as draft:', formData);
-                          updateProject.mutate({ ...formData, status: 'draft' });
-                        }}
-                        disabled={updateProject.isPending}
-                      >
-                        {updateProject.isPending ? "Saving..." : "Save as Draft"}
-                      </Button>
-                      <Button 
-                        type="submit" 
-                        disabled={updateProject.isPending}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-black"
-                      >
-                        {updateProject.isPending ? "Updating..." : "Save and Continue"}
-                      </Button>
-                    </div>
+                    <Button 
+                      type="submit" 
+                      disabled={updateProject.isPending}
+                      className="bg-blue-500 hover:bg-blue-600"
+                    >
+                      {updateProject.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Updating...
+                        </>
+                      ) : (
+                        "Update Project"
+                      )}
+                    </Button>
                   </div>
                 </form>
               </div>

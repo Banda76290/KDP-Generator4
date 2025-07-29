@@ -1,6 +1,7 @@
 import {
   users,
   projects,
+  books,
   contributors,
   salesData,
   aiGenerations,
@@ -14,6 +15,8 @@ import {
   type Project,
   type InsertProject,
   type ProjectWithRelations,
+  type Book,
+  type InsertBook,
   type Contributor,
   type InsertContributor,
   type SalesData,
@@ -48,10 +51,17 @@ export interface IStorage {
   updateProject(projectId: string, userId: string, updates: Partial<InsertProject>): Promise<Project>;
   deleteProject(projectId: string, userId: string): Promise<void>;
 
+  // Book operations
+  getUserBooks(userId: string): Promise<Book[]>;
+  getBook(bookId: string, userId: string): Promise<Book | undefined>;
+  createBook(book: InsertBook): Promise<Book>;
+  updateBook(bookId: string, userId: string, updates: Partial<InsertBook>): Promise<Book>;
+  deleteBook(bookId: string, userId: string): Promise<void>;
+
   // Contributor operations
-  getProjectContributors(projectId: string): Promise<Contributor[]>;
+  getBookContributors(bookId: string): Promise<Contributor[]>;
   addContributor(contributor: InsertContributor): Promise<Contributor>;
-  removeContributor(contributorId: string, projectId: string): Promise<void>;
+  removeContributor(contributorId: string, bookId: string): Promise<void>;
 
   // Sales data operations
   getUserSalesData(userId: string, startDate?: Date, endDate?: Date): Promise<SalesData[]>;
@@ -184,6 +194,34 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProject(projectId: string, userId: string): Promise<void> {
     await db.delete(projects).where(and(eq(projects.id, projectId), eq(projects.userId, userId)));
+  }
+
+  // Book operations
+  async getUserBooks(userId: string): Promise<Book[]> {
+    return await db.select().from(books).where(eq(books.userId, userId)).orderBy(desc(books.updatedAt));
+  }
+
+  async getBook(bookId: string, userId: string): Promise<Book | undefined> {
+    const [book] = await db.select().from(books).where(and(eq(books.id, bookId), eq(books.userId, userId)));
+    return book;
+  }
+
+  async createBook(book: InsertBook): Promise<Book> {
+    const [newBook] = await db.insert(books).values(book).returning();
+    return newBook;
+  }
+
+  async updateBook(bookId: string, userId: string, updates: Partial<InsertBook>): Promise<Book> {
+    const [updatedBook] = await db
+      .update(books)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(eq(books.id, bookId), eq(books.userId, userId)))
+      .returning();
+    return updatedBook;
+  }
+
+  async deleteBook(bookId: string, userId: string): Promise<void> {
+    await db.delete(books).where(and(eq(books.id, bookId), eq(books.userId, userId)));
   }
 
   async getBookContributors(bookId: string): Promise<Contributor[]> {

@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema } from "@shared/schema";
+import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema } from "@shared/schema";
 import { aiService } from "./services/aiService";
 import { parseKDPReport } from "./services/kdpParser";
 import { z } from "zod";
@@ -109,18 +109,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const project = await storage.createProject(projectData);
       console.log('Created project:', project);
       
-      // Add contributors if provided
-      if (req.body.contributors && Array.isArray(req.body.contributors)) {
-        for (const contributorData of req.body.contributors) {
-          if (contributorData.name && contributorData.role) {
-            await storage.addContributor({
-              projectId: project.id,
-              name: contributorData.name,
-              role: contributorData.role,
-            });
-          }
-        }
-      }
+      // Contributors are now handled at book level, not project level
 
       // Generate AI content if requested
       if (req.body.useAI && req.body.aiPrompt && req.body.aiContentType) {
@@ -188,14 +177,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Contributors routes
-  app.post('/api/projects/:projectId/contributors', isAuthenticated, async (req: any, res) => {
+  // Books routes
+  app.post('/api/books', isAuthenticated, async (req: any, res) => {
     try {
-      const contributorData = insertContributorSchema.parse({
-        ...req.body,
-        projectId: req.params.projectId,
-      });
+      const userId = req.user?.claims?.sub;
+      console.log('Creating book for user:', userId);
+      console.log('Book data:', req.body);
       
+      const bookData = insertBookSchema.parse({ ...req.body, userId });
+      console.log('Parsed book data:', bookData);
+      
+      const book = await storage.createBook(bookData);
+      console.log('Created book:', book);
+      
+      res.json(book);
+    } catch (error) {
+      console.error("Error creating book:", error);
+      if (error instanceof z.ZodError) {
+        console.log('Book validation errors:', error.errors);
+        return res.status(400).json({ message: "Invalid book data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create book" });
+    }
+  });
+
+  app.get('/api/books', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const books = await storage.getUserBooks(userId);
+      res.json(books);
+    } catch (error) {
+      console.error("Error fetching books:", error);
+      res.status(500).json({ message: "Failed to fetch books" });
+    }
+  });
+
+  app.get('/api/books/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const book = await storage.getBook(req.params.id, userId);
+      if (!book) {
+        return res.status(404).json({ message: "Book not found" });
+      }
+      res.json(book);
+    } catch (error) {
+      console.error("Error fetching book:", error);
+      res.status(500).json({ message: "Failed to fetch book" });
+    }
+  });
+
+  app.put('/api/books/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const updates = insertBookSchema.partial().parse(req.body);
+      
+      const book = await storage.updateBook(req.params.id, userId, updates);
+      res.json(book);
+    } catch (error) {
+      console.error("Error updating book:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid book data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update book" });
+    }
+  });
+
+  app.delete('/api/books/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      await storage.deleteBook(req.params.id, userId);
+      res.json({ message: "Book deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting book:", error);
+      res.status(500).json({ message: "Failed to delete book" });
+    }
+  });
+
+  // Contributors routes
+  app.post('/api/contributors', isAuthenticated, async (req: any, res) => {
+    try {
+      const contributorData = insertContributorSchema.parse(req.body);
       const contributor = await storage.addContributor(contributorData);
       res.json(contributor);
     } catch (error) {
@@ -233,7 +294,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const record of salesRecords) {
         const salesData = await storage.addSalesData({
           userId,
-          projectId: record.projectId,
+          bookId: record.projectId || record.bookId, // Handle both for compatibility
           reportDate: record.reportDate,
           format: record.format,
           marketplace: record.marketplace,
