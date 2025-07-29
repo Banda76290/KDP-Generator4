@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
@@ -23,7 +24,8 @@ import {
   Copy, 
   MoreVertical, 
   AlertTriangle,
-  Plus
+  Plus,
+  Trash2
 } from "lucide-react";
 import type { Book, Project } from "@shared/schema";
 
@@ -78,6 +80,7 @@ function BooksContent() {
   const [filterFormat, setFilterFormat] = useState<string>("all");
   const [filterAssignment, setFilterAssignment] = useState<string>("all");
   const [sortBy, setSortBy] = useState<SortOption>("title-asc");
+  const [bookToDelete, setBookToDelete] = useState<Book | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -124,6 +127,28 @@ function BooksContent() {
         description: "Book duplicated successfully",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/books"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation for deleting book
+  const deleteBookMutation = useMutation({
+    mutationFn: async (bookId: string) => {
+      return apiRequest("DELETE", `/api/books/${bookId}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Book deleted successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
     },
     onError: (error: Error) => {
       toast({
@@ -371,6 +396,15 @@ function BooksContent() {
                         <Copy className="h-4 w-4 mr-2" />
                         Duplicate
                       </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => setBookToDelete(book)}
+                        className="text-destructive focus:text-destructive"
+                        disabled={deleteBookMutation.isPending}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -441,6 +475,32 @@ function BooksContent() {
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!bookToDelete} onOpenChange={() => setBookToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Book</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{bookToDelete?.title}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (bookToDelete) {
+                  deleteBookMutation.mutate(bookToDelete.id);
+                  setBookToDelete(null);
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
