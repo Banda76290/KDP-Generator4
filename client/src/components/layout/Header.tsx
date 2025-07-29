@@ -11,7 +11,7 @@ interface HeaderProps {
   onMenuClick?: () => void;
 }
 
-export default function Header({ onMenuClick }: HeaderProps = {}) {
+export default function Header({ onMenuClick }: HeaderProps = { onMenuClick: undefined }) {
   const { user } = useAuth() as { user: User | undefined };
 
   const getUserInitials = (firstName?: string, lastName?: string) => {
@@ -28,7 +28,10 @@ export default function Header({ onMenuClick }: HeaderProps = {}) {
             variant="ghost"
             size="sm"
             className="md:hidden p-2"
-            onClick={onMenuClick}
+            onClick={() => {
+              console.log('Menu burger clicked!');
+              onMenuClick?.();
+            }}
           >
             <Menu className="h-5 w-5" />
           </Button>
@@ -61,8 +64,8 @@ export default function Header({ onMenuClick }: HeaderProps = {}) {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center space-x-2 p-2 hover:bg-muted">
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src={user?.profileImageUrl} alt="User Avatar" />
-                  <AvatarFallback>{getUserInitials(user?.firstName, user?.lastName)}</AvatarFallback>
+                  <AvatarImage src={user?.profileImageUrl || undefined} alt="User Avatar" />
+                  <AvatarFallback>{getUserInitials(user?.firstName || undefined, user?.lastName || undefined)}</AvatarFallback>
                 </Avatar>
                 <span className="text-sm font-medium text-foreground">
                   {user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'User'}

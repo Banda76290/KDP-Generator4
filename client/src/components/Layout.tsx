@@ -10,14 +10,22 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const handleMenuClick = () => {
+    console.log('Layout handleMenuClick called, setting mobile menu to true');
+    setMobileMenuOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-background">
-      <Header onMenuClick={() => setMobileMenuOpen(true)} />
+      <Header onMenuClick={handleMenuClick} />
       <div className="flex">
         <Sidebar />
         <MobileSidebar 
           open={mobileMenuOpen} 
-          onOpenChange={setMobileMenuOpen} 
+          onOpenChange={(open) => {
+            console.log('MobileSidebar onOpenChange called with:', open);
+            setMobileMenuOpen(open);
+          }} 
         />
         <main className="flex-1 min-w-0 p-4 md:p-6 pt-16 md:ml-64">
           {children}
