@@ -11,7 +11,7 @@ interface HeaderProps {
   onMenuClick?: () => void;
 }
 
-export default function Header({ onMenuClick }: HeaderProps = { onMenuClick: undefined }) {
+export default function Header({ onMenuClick }: HeaderProps) {
   const { user } = useAuth() as { user: User | undefined };
 
   const getUserInitials = (firstName?: string, lastName?: string) => {
