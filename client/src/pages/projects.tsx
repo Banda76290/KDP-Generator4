@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, BarChart3, BookOpen, Globe, DollarSign, TrendingUp } from "lucide-react";
+import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, BarChart3, BookOpen, Globe, DollarSign, TrendingUp, ArrowUpDown } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { ProjectWithRelations } from "@shared/schema";
 
@@ -21,6 +21,7 @@ export default function Projects() {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("createdAt"); // Default sort by creation date
 
   const { data: projects, isLoading: projectsLoading, error } = useQuery({
     queryKey: ["/api/projects"],
@@ -68,13 +69,49 @@ export default function Projects() {
     return null;
   }
 
-  // Filter projects based on search and status
-  const filteredProjects = Array.isArray(projects) ? projects.filter((project: any) => {
-    const matchesSearch = project.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || project.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  }) : [];
+  // Filter and sort projects
+  const filteredProjects = Array.isArray(projects) ? projects
+    .filter((project: any) => {
+      const matchesSearch = project.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           project.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = statusFilter === "all" || project.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a: any, b: any) => {
+      const getCurrentMonthRevenue = (project: any) => {
+        if (!project.books || !Array.isArray(project.books)) return 0;
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        return project.books.reduce((total: number, book: any) => {
+          // For now, we'll use monthlyRevenue field if available
+          return total + (parseFloat(book.monthlyRevenue) || 0);
+        }, 0);
+      };
+
+      const getLastModifiedDate = (project: any) => {
+        if (!project.books || !Array.isArray(project.books)) return new Date(project.updatedAt);
+        const dates = project.books.map((book: any) => new Date(book.updatedAt));
+        dates.push(new Date(project.updatedAt));
+        return new Date(Math.max(...dates.map(d => d.getTime())));
+      };
+
+      const getTotalRevenue = (project: any) => {
+        return parseFloat(project.totalRevenue) || 0;
+      };
+
+      switch (sortBy) {
+        case "createdAt":
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case "lastModified":
+          return getLastModifiedDate(b).getTime() - getLastModifiedDate(a).getTime();
+        case "monthlyRevenue":
+          return getCurrentMonthRevenue(b) - getCurrentMonthRevenue(a);
+        case "totalRevenue":
+          return getTotalRevenue(b) - getTotalRevenue(a);
+        default:
+          return 0;
+      }
+    }) : [];
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -127,7 +164,7 @@ export default function Projects() {
               </div>
             </div>
 
-            {/* Filters */}
+            {/* Filters and Sort */}
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -148,6 +185,18 @@ export default function Projects() {
                   <SelectItem value="draft">Draft</SelectItem>
                   <SelectItem value="in_review">In Review</SelectItem>
                   <SelectItem value="published">Published</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[220px]">
+                  <ArrowUpDown className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Sort by..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="createdAt">Date de création</SelectItem>
+                  <SelectItem value="lastModified">Dernière modification</SelectItem>
+                  <SelectItem value="monthlyRevenue">Plus rentable ce mois</SelectItem>
+                  <SelectItem value="totalRevenue">Plus rentable (tout temps)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
