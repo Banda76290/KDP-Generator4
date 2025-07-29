@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import Layout from "@/components/Layout";
 
 interface DatabaseField {
   table: string;
@@ -122,7 +123,7 @@ export default function AIVariables() {
   }
 
   return (
-    <div className="min-h-screen bg-background ml-64 mt-16">
+    <Layout>
       <div className="container mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -270,6 +271,6 @@ export default function AIVariables() {
           </Card>
         )}
       </div>
-    </div>
+    </Layout>
   );
 }

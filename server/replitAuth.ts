@@ -66,15 +66,43 @@ async function upsertUser(
 
 export async function setupAuth(app: Express) {
   app.set("trust proxy", 1);
+  
+  // In development, setup minimal auth  
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Setting up development auth - REPLIT_DOMAINS not configured');
+    
+    // Create development user in database
+    try {
+      await storage.upsertUser({
+        id: "dev-user-123",
+        email: "dev@example.com",
+        firstName: "Developer",
+        lastName: "User",
+        profileImageUrl: null,
+        role: "superadmin",
+        subscriptionTier: "premium"
+      });
+      console.log('Development user created with superadmin privileges');
+    } catch (error) {
+      console.error('Error creating development user:', error);
+    }
+    
+    // Mock auth endpoints for development
+    app.get("/api/login", (req, res) => {
+      res.redirect("/");
+    });
+    
+    app.get("/api/logout", (req, res) => {
+      res.redirect("/");
+    });
+    
+    return;
+  }
+
+  // Full passport setup for production
   app.use(getSession());
   app.use(passport.initialize());
   app.use(passport.session());
-
-  // Skip auth setup in development if domains not configured
-  if (!process.env.REPLIT_DOMAINS) {
-    console.log('Skipping auth setup - REPLIT_DOMAINS not configured');
-    return;
-  }
 
   const config = await getOidcConfig();
 
@@ -132,15 +160,26 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  // Skip auth in development if not configured
-  if (!process.env.REPLIT_DOMAINS) {
-    console.log('Auth bypass - REPLIT_DOMAINS not configured');
+  // In development, always bypass auth when Replit domains not set for production
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Development mode - bypassing auth, REPLIT_DOMAINS:', process.env.REPLIT_DOMAINS);
+    // Create mock user session
+    req.user = {
+      claims: {
+        sub: "dev-user-123",
+        email: "dev@example.com",
+        first_name: "Developer",
+        last_name: "User",
+        profile_image_url: null
+      },
+      expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
+    };
     return next();
   }
   
   const user = req.user as any;
 
-  if (!req.isAuthenticated() || !user.expires_at) {
+  if (!req.isAuthenticated() || !user?.expires_at) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
