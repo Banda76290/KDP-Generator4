@@ -238,8 +238,6 @@ export default function Projects() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      
-
                       {/* Books List */}
                       {project.books && project.books.length > 0 ? (
                         <div className="space-y-3">
@@ -262,9 +260,20 @@ export default function Projects() {
                                     </div>
                                   </div>
                                 </div>
-                                <Badge className={getStatusColor(book.status || 'draft')} size="sm">
-                                  {(book.status || 'draft').replace('_', ' ')}
-                                </Badge>
+                                <div className="flex items-center gap-2">
+                                  <Badge className={getStatusColor(book.status || 'draft')} size="sm">
+                                    {(book.status || 'draft').replace('_', ' ')}
+                                  </Badge>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 w-6 p-0"
+                                    onClick={() => setLocation(`/books/edit/${book.id}`)}
+                                    title="Edit book"
+                                  >
+                                    <Edit className="w-3 h-3" />
+                                  </Button>
+                                </div>
                               </div>
                               
                               {/* Book Revenue Stats */}
@@ -330,10 +339,6 @@ export default function Projects() {
                           </div>
                         </div>
                       </div>
-                      
-                      
-
-                      {/* Contributors section removed for now - will be at book level */}
                     </div>
                   </CardContent>
                 </Card>

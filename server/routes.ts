@@ -257,6 +257,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch('/api/books/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const updates = insertBookSchema.partial().parse(req.body);
+      
+      const book = await storage.updateBook(req.params.id, userId, updates);
+      res.json(book);
+    } catch (error) {
+      console.error("Error updating book:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid book data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update book" });
+    }
+  });
+
   app.delete('/api/books/:id', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;

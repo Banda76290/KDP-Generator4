@@ -23,6 +23,7 @@ import AdminBlogCategories from "@/pages/admin-blog-categories";
 import ProjectCreate from "@/pages/project-create-simple";
 import ProjectEdit from "@/pages/project-edit";
 import BookCreate from "@/pages/book-create";
+import BookEdit from "@/pages/book-edit";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -46,6 +47,7 @@ function Router() {
       <Route path="/projects/create" component={ProjectCreate} />
       <Route path="/projects/edit/:id" component={ProjectEdit} />
       <Route path="/books/create" component={BookCreate} />
+      <Route path="/books/edit/:bookId" component={BookEdit} />
       <Route component={NotFound} />
     </Switch>
   );
