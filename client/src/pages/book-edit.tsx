@@ -464,7 +464,7 @@ export default function EditBook() {
                   <div className="space-y-2">
                     <Label htmlFor="language" className="text-sm font-medium">Language *</Label>
                     <p className="text-sm text-gray-600">
-                      What language is your book written in? <a href="#" className="text-blue-600 underline cursor-pointer">Supported languages</a>
+                      What language is your book written in?
                     </p>
                     <Select 
                       value={form.watch("language") || ""} 
