@@ -100,6 +100,10 @@ export default function Projects() {
       };
 
       switch (sortBy) {
+        case "alphabetical":
+          return a.name.localeCompare(b.name);
+        case "alphabetical-desc":
+          return b.name.localeCompare(a.name);
         case "createdAt":
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         case "lastModified":
@@ -193,6 +197,8 @@ export default function Projects() {
                   <SelectValue placeholder="Sort by..." />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="alphabetical">Alphabetical (A-Z)</SelectItem>
+                  <SelectItem value="alphabetical-desc">Alphabetical (Z-A)</SelectItem>
                   <SelectItem value="createdAt">Creation Date</SelectItem>
                   <SelectItem value="lastModified">Last Modified</SelectItem>
                   <SelectItem value="monthlyRevenue">Most Profitable This Month</SelectItem>
