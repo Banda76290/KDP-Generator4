@@ -540,6 +540,9 @@ export default function EditBook() {
                   {/* Edition Number */}
                   <div className="space-y-2">
                     <Label htmlFor="editionNumber">Edition Number</Label>
+                    <p className="text-sm text-gray-600">
+                      The edition number tells readers whether the book is an original or updated version. Note: This cannot be changed after the book is published.
+                    </p>
                     <Input
                       id="editionNumber"
                       type="number"
