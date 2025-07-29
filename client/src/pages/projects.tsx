@@ -60,6 +60,29 @@ export default function Projects() {
     },
   });
 
+  // Delete mutation
+  const deleteProject = useMutation({
+    mutationFn: async (projectId: string) => {
+      console.log("Deleting project:", projectId);
+      return await apiRequest("DELETE", `/api/projects/${projectId}`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Project deleted successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+    },
+    onError: (error) => {
+      console.error("Delete failed:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete project",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Redirect to home if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -178,6 +201,12 @@ export default function Projects() {
   const handleDuplicateProject = (project: ProjectWithRelations) => {
     console.log("Duplicating project:", project);
     duplicateProject.mutate(project);
+  };
+
+  const handleDeleteProject = (projectId: string) => {
+    if (confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
+      deleteProject.mutate(projectId);
+    }
   };
 
   return (
@@ -326,7 +355,10 @@ export default function Projects() {
                             <BarChart3 className="w-4 h-4 mr-2" />
                             Analytics
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600">
+                          <DropdownMenuItem 
+                            className="text-red-600"
+                            onClick={() => handleDeleteProject(project.id)}
+                          >
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
                           </DropdownMenuItem>
