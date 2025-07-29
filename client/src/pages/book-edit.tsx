@@ -900,7 +900,8 @@ export default function EditBook() {
               {activeTab === "pricing" && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Paperback Rights & Pricing</CardTitle>
+                  <CardTitle>Set your pricing and distribution preferences
+</CardTitle>
                   <CardDescription>
                     Set your pricing and distribution preferences
                   </CardDescription>
