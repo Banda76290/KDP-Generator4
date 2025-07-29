@@ -30,7 +30,9 @@ interface Contributor {
   suffix: string;
 }
 
-const bookFormSchema = insertBookSchema;
+const bookFormSchema = insertBookSchema.extend({
+  projectId: z.string().min(1, "Project selection is required"),
+});
 type BookFormData = z.infer<typeof bookFormSchema>;
 
 const languages = [
@@ -433,6 +435,30 @@ export default function EditBook() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  {/* Project Selection */}
+                  <div className="space-y-2">
+                    <Label htmlFor="projectId" className="text-sm font-medium">Project *</Label>
+                    <p className="text-sm text-gray-600">
+                      Select the project this book belongs to.
+                    </p>
+                    <Select 
+                      value={form.watch("projectId") || ""} 
+                      onValueChange={(value) => form.setValue("projectId", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a project" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {projects.map((project: any) => (
+                          <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {form.formState.errors.projectId && (
+                      <p className="text-sm text-red-600">{form.formState.errors.projectId.message}</p>
+                    )}
+                  </div>
+
                   {/* Language */}
                   <div className="space-y-2">
                     <Label htmlFor="language" className="text-sm font-medium">Language *</Label>
