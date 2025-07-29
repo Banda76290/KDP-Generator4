@@ -167,6 +167,15 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Preview System**: Shows available variables and their current values before generation
 - **Cost Tracking**: Automatic calculation of generation costs based on token usage
 
+### Book Creation and Project Integration Fixes (29 Juillet 2025 - Latest)
+- **Book-Project Linking**: Fixed critical issue where books were created without proper project association
+- **URL Parameter Extraction**: Corrected projectId extraction from URL parameters using window.location.search
+- **Form Pre-selection**: Books created via "Add Book" button now properly pre-select the parent project
+- **Project Selection Field**: Added mandatory project selection dropdown in book creation form
+- **Validation Enhancement**: Added projectId validation to prevent books from being orphaned
+- **Alphabetical Sorting**: Added A-Z and Z-A sorting options to Projects page with null-safe comparison
+- **Data Integrity**: Books now properly appear in their associated project cards on Projects page
+
 ### Current Features Available
 - **Complete Dashboard**: KPI cards, sales charts, format distribution, recent projects table
 - **Project Management**: Complete KDP project creation and editing system with dedicated pages
