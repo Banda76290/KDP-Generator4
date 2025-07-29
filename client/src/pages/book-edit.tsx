@@ -852,9 +852,6 @@ export default function EditBook() {
                 <CardHeader>
                   <CardTitle>Upload your manuscript and configure content settings
 </CardTitle>
-                  <CardDescription>
-                    Upload your manuscript and configure content settings
-                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
