@@ -180,11 +180,13 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Full Project Duplication**: Complete system for duplicating projects with all associated books and contributors
 - **Intelligent Naming**: Smart suffix system (" (copy)", " (copy 2)", " (copy 3)", etc.) with conflict detection
 - **Book Duplication**: All books are duplicated with appropriate naming and linked to the new project
+- **Individual Book Duplication**: Added book-level duplication from project cards with dropdown menus
 - **Contributors Duplication**: Contributors are copied for each duplicated book maintaining roles
 - **Delete Functionality**: Implemented project deletion with confirmation dialog and proper cleanup
 - **Enhanced getProject Function**: Fixed function to load all books and calculate revenue statistics
 - **Real-time Updates**: Proper cache invalidation ensures UI updates immediately after operations
 - **Error Handling**: Comprehensive error handling with user-friendly toast notifications
+- **Future-Proof Design**: Duplication system automatically handles new database fields and UI elements
 
 ### Current Features Available
 - **Complete Dashboard**: KPI cards, sales charts, format distribution, recent projects table
