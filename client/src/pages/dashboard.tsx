@@ -2,8 +2,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import Header from "@/components/layout/Header";
-import Sidebar from "@/components/layout/Sidebar";
+import Layout from "@/components/Layout";
 import KPICards from "@/components/dashboard/KPICards";
 import SalesChart from "@/components/dashboard/SalesChart";
 import FormatChart from "@/components/dashboard/FormatChart";
@@ -45,11 +44,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="flex pt-16">
-        <Sidebar />
-        <main className="flex-1 min-w-0 p-4 md:p-6 md:ml-64">
+    <Layout>
           {/* Dashboard Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
@@ -81,8 +76,6 @@ export default function Dashboard() {
 
           {/* Recent Projects Table */}
           <ProjectsTable />
-        </main>
-      </div>
-    </div>
+    </Layout>
   );
 }

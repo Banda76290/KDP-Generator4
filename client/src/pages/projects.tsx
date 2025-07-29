@@ -5,8 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useLocation } from "wouter";
-import Header from "@/components/layout/Header";
-import Sidebar from "@/components/layout/Sidebar";
+import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -243,11 +242,7 @@ export default function Projects() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="flex pt-16">
-        <Sidebar />
-        <main className="flex-1 min-w-0 p-4 md:p-6 md:ml-64">
+    <Layout>
           {/* Projects Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
@@ -519,8 +514,6 @@ export default function Projects() {
               ))}
             </div>
           )}
-        </main>
-      </div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!projectToDelete} onOpenChange={() => setProjectToDelete(null)}>
@@ -547,6 +540,6 @@ export default function Projects() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </Layout>
   );
 }
