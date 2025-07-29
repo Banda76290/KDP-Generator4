@@ -51,6 +51,7 @@ function Router() {
       <Route path="/admin/blog-posts" component={AdminBlogPosts} />
       <Route path="/admin/blog-categories" component={AdminBlogCategories} />
       <Route path="/projects/create" component={ProjectCreate} />
+      <Route path="/project-create-simple" component={ProjectCreate} />
       <Route path="/projects/edit/:id" component={ProjectEdit} />
       <Route path="/books/create" component={BookCreate} />
       <Route path="/books/edit/:bookId" component={BookEdit} />

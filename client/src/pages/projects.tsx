@@ -153,7 +153,7 @@ export default function Projects() {
                 <p className="text-gray-600 mt-1">Manage your book projects and track their progress.</p>
               </div>
               <div className="flex gap-2">
-                <Button onClick={() => setLocation("/projects/create")} variant="outline">
+                <Button onClick={() => setLocation("/project-create-simple")} variant="outline">
                   <Plus className="w-4 h-4 mr-2" />
                   Create Project
                 </Button>
@@ -232,7 +232,7 @@ export default function Projects() {
               </p>
               {(!searchTerm && statusFilter === "all") && (
                 <div className="flex gap-2 justify-center">
-                  <Button onClick={() => setLocation("/projects/create")} variant="outline">
+                  <Button onClick={() => setLocation("/project-create-simple")} variant="outline">
                     <Plus className="w-4 h-4 mr-2" />
                     Create Your First Project
                   </Button>
