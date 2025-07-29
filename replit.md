@@ -189,6 +189,14 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Error Handling**: Comprehensive error handling with user-friendly toast notifications
 - **Future-Proof Design**: Duplication system automatically handles new database fields and UI elements
 
+### Custom Dialog System Implementation (29 Juillet 2025)
+- **Native Popup Replacement**: Replaced all native browser confirm() popups with custom AlertDialog components
+- **Consistent UI Experience**: All confirmation dialogs now use shadcn/ui AlertDialog for consistency
+- **Projects Page**: Replaced native confirm for project deletion with custom dialog
+- **Book Edit Page**: Replaced native confirm for book deletion with custom dialog
+- **User Preference Compliance**: Implemented user's preferred dialog style across entire application
+- **Maintained Original Text**: Preserved all existing confirmation messages while upgrading UI components
+
 ### Current Features Available
 - **Complete Dashboard**: KPI cards, sales charts, format distribution, recent projects table
 - **Project Management**: Complete KDP project creation and editing system with dedicated pages
