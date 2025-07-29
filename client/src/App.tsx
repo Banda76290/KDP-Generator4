@@ -9,6 +9,7 @@ import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Projects from "@/pages/projects";
+import Books from "@/pages/books";
 import Analytics from "@/pages/analytics";
 import KDPReports from "@/pages/kdp-reports";
 import AIAssistant from "@/pages/ai-assistant";
@@ -36,6 +37,7 @@ function Router() {
       {/* Always render all routes, handle auth in components */}
       <Route path="/" component={isLoading || !isAuthenticated ? Landing : Dashboard} />
       <Route path="/projects" component={Projects} />
+      <Route path="/books" component={Books} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/kdp-reports" component={KDPReports} />
       <Route path="/ai-assistant" component={AIAssistant} />

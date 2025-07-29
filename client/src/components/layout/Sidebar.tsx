@@ -20,6 +20,7 @@ import logoImage from "@assets/image_1753719885932.png";
 const navigation = [
   { name: "Dashboard", href: "/", icon: BarChart3 },
   { name: "Projects", href: "/projects", icon: FolderOpen },
+  { name: "Books", href: "/books", icon: FileText },
   { name: "Sales Analytics", href: "/analytics", icon: TrendingUp },
   { name: "KDP Reports", href: "/kdp-reports", icon: Upload },
   { name: "AI Assistant", href: "/ai-assistant", icon: Bot, badge: "PRO" },
