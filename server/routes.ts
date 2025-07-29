@@ -987,8 +987,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get database fields for AI prompts
-  app.get("/api/ai/database-fields", isAuthenticated, async (req, res) => {
+  // Get database fields for AI prompts (Admin only)
+  app.get("/api/ai/database-fields", isAuthenticated, isAdmin, async (req, res) => {
     try {
       const { databaseFieldsService } = await import('./services/databaseFieldsService');
       const fields = databaseFieldsService.getCategorizedFields();
