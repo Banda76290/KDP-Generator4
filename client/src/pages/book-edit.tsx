@@ -57,6 +57,7 @@ export default function EditBook() {
   const [contributors, setContributors] = useState<Contributor[]>([]);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState("details");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -134,20 +135,20 @@ export default function EditBook() {
   });
 
   const updateBook = useMutation({
-    mutationFn: async (data: BookFormData) => {
-      const bookData = {
-        ...data,
+    mutationFn: async (data: { bookData: BookFormData; shouldNavigate?: boolean; nextTab?: string }) => {
+      const formattedData = {
+        ...data.bookData,
         categories,
         keywords,
       };
       
-      console.log('Updating book data:', bookData);
-      const updatedBook = await apiRequest("PATCH", `/api/books/${bookId}`, bookData);
+      console.log('Updating book data:', formattedData);
+      const updatedBook = await apiRequest("PATCH", `/api/books/${bookId}`, formattedData);
       console.log('Received updated book response:', updatedBook);
       
-      return updatedBook;
+      return { updatedBook, shouldNavigate: data.shouldNavigate, nextTab: data.nextTab };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["/api/books"] });
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       queryClient.invalidateQueries({ queryKey: [`/api/books/${bookId}`] });
@@ -155,7 +156,12 @@ export default function EditBook() {
         title: "Book Updated",
         description: "Your book has been updated successfully.",
       });
-      setLocation("/projects");
+      
+      if (result.nextTab) {
+        setActiveTab(result.nextTab);
+      } else if (result.shouldNavigate) {
+        setLocation("/projects");
+      }
     },
     onError: (error) => {
       console.error('Book update error:', error);
@@ -234,7 +240,27 @@ export default function EditBook() {
   };
 
   const onSubmit = (data: BookFormData) => {
-    updateBook.mutate(data);
+    updateBook.mutate({ bookData: data, shouldNavigate: true });
+  };
+
+  const handleSaveAsDraft = (data: BookFormData) => {
+    const draftData = {
+      ...data,
+      status: "draft",
+    };
+    
+    updateBook.mutate({ bookData: draftData });
+  };
+
+  const handleSaveAndContinue = (data: BookFormData) => {
+    let nextTab = "";
+    if (activeTab === "details") {
+      nextTab = "content";
+    } else if (activeTab === "content") {
+      nextTab = "pricing";
+    }
+    
+    updateBook.mutate({ bookData: data, nextTab });
   };
 
   const handleDelete = () => {
@@ -322,19 +348,34 @@ export default function EditBook() {
                 <nav className="-mb-px flex space-x-8">
                   <button
                     type="button"
-                    className="border-orange-500 text-orange-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+                    onClick={() => setActiveTab("details")}
+                    className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                      activeTab === "details"
+                        ? "border-orange-500 text-orange-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
                   >
                     Paperback Details
                   </button>
                   <button
                     type="button"
-                    className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+                    onClick={() => setActiveTab("content")}
+                    className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                      activeTab === "content"
+                        ? "border-orange-500 text-orange-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
                   >
                     Paperback Content
                   </button>
                   <button
                     type="button"
-                    className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+                    onClick={() => setActiveTab("pricing")}
+                    className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                      activeTab === "pricing"
+                        ? "border-orange-500 text-orange-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
                   >
                     Paperback Rights & Pricing
                   </button>
@@ -342,6 +383,7 @@ export default function EditBook() {
               </div>
 
               {/* Paperback Details Tab */}
+              {activeTab === "details" && (
               <Card>
                 <CardHeader>
                   <CardTitle>Paperback Details</CardTitle>
@@ -689,6 +731,184 @@ export default function EditBook() {
                   </div>
                 </CardContent>
               </Card>
+              )}
+
+              {/* Paperback Content Tab */}
+              {activeTab === "content" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Paperback Content</CardTitle>
+                  <CardDescription>
+                    Upload your manuscript and configure content settings
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+                    <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Upload Your Manuscript</h3>
+                    <p className="text-gray-600 mb-4">
+                      Upload your completed manuscript in PDF format
+                    </p>
+                    <Button variant="outline">
+                      Choose File
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Print Options</Label>
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="bleedSettings" />
+                        <Label htmlFor="bleedSettings">This book has bleed settings</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="largeBook" />
+                        <Label htmlFor="largeBook">This is a large book (over 828 pages)</Label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="printLength">Print Length (pages)</Label>
+                    <Input
+                      id="printLength"
+                      type="number"
+                      min="24"
+                      placeholder="100"
+                      {...form.register("printLength", { valueAsNumber: true })}
+                    />
+                    <p className="text-sm text-gray-500">
+                      Minimum 24 pages required for paperback printing
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+              )}
+
+              {/* Paperback Rights & Pricing Tab */}
+              {activeTab === "pricing" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Paperback Rights & Pricing</CardTitle>
+                  <CardDescription>
+                    Set your pricing and distribution preferences
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Distribution Rights */}
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Territories</Label>
+                    <p className="text-sm text-gray-600">
+                      Select the territories where you have rights to sell this book.
+                    </p>
+                    <RadioGroup defaultValue="worldwide">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="worldwide" id="worldwide" />
+                        <Label htmlFor="worldwide">All territories (worldwide rights)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="individual" id="individual" />
+                        <Label htmlFor="individual">Individual territories</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  {/* Primary Marketplace */}
+                  <div className="space-y-2">
+                    <Label htmlFor="primaryMarketplace">Primary Marketplace</Label>
+                    <Select 
+                      value={form.watch("primaryMarketplace")} 
+                      onValueChange={(value) => form.setValue("primaryMarketplace", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select primary marketplace" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {marketplaces.map((marketplace) => (
+                          <SelectItem key={marketplace} value={marketplace}>{marketplace}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Pricing */}
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Pricing, royalties, and distribution</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="listPrice">List Price (USD)</Label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                          <Input
+                            id="listPrice"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            className="pl-8"
+                            placeholder="9.99"
+                            {...form.register("listPrice")}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="printCost">Print Cost</Label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                          <Input
+                            id="printCost"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            className="pl-8"
+                            placeholder="0.00"
+                            {...form.register("printCost")}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="royaltyRate">Royalty Rate</Label>
+                        <Select 
+                          value={form.watch("royaltyRate")} 
+                          onValueChange={(value) => form.setValue("royaltyRate", value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select royalty" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="60">60%</SelectItem>
+                            <SelectItem value="70">70%</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ISBN */}
+                  <div className="space-y-2">
+                    <Label htmlFor="isbn">ISBN (Optional)</Label>
+                    <Input
+                      id="isbn"
+                      placeholder="Enter ISBN if you have one"
+                      {...form.register("isbn")}
+                    />
+                    <p className="text-sm text-gray-500">
+                      Leave blank to get a free Amazon ISBN
+                    </p>
+                  </div>
+
+                  {/* Terms & Conditions */}
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Terms & Conditions</Label>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="acceptTerms" />
+                      <Label htmlFor="acceptTerms" className="text-sm">
+                        I confirm that I agree to and am in compliance with the KDP Terms and Conditions
+                      </Label>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              )}
 
               {/* Action Buttons */}
               <div className="flex justify-between">
@@ -699,23 +919,59 @@ export default function EditBook() {
                 >
                   Cancel
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={updateBook.isPending}
-                  className="bg-orange-600 hover:bg-orange-700"
-                >
-                  {updateBook.isPending ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Updating...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Update Book
-                    </>
+                <div className="flex space-x-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={form.handleSubmit(handleSaveAsDraft)}
+                    disabled={updateBook.isPending}
+                  >
+                    {updateBook.isPending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Save as Draft"
+                    )}
+                  </Button>
+                  {activeTab !== "pricing" && (
+                    <Button
+                      type="button"
+                      onClick={form.handleSubmit(handleSaveAndContinue)}
+                      disabled={updateBook.isPending}
+                      className="bg-orange-600 hover:bg-orange-700"
+                    >
+                      {updateBook.isPending ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        "Save and Continue"
+                      )}
+                    </Button>
                   )}
-                </Button>
+                  {activeTab === "pricing" && (
+                    <Button
+                      type="submit"
+                      disabled={updateBook.isPending}
+                      className="bg-orange-600 hover:bg-orange-700"
+                    >
+                      {updateBook.isPending ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Updating...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Update Book
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
               </div>
             </form>
           </div>
