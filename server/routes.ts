@@ -109,6 +109,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const projectData = {
         title: req.body.name, // Frontend sends 'name', database expects 'title'
+        name: req.body.name,  // Also store in 'name' field for consistency
         description: req.body.description || null,
         userId,
         status: 'draft' as const,
@@ -172,9 +173,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       console.log('Updating project:', req.params.id, req.body);
       
-      // Only accept name and description for project updates
-      const updateSchema = insertProjectSchema.pick({ name: true, description: true }).partial();
-      const updates = updateSchema.parse(req.body);
+      // Map frontend fields to database fields
+      const updates: any = {};
+      if (req.body.name !== undefined) {
+        updates.title = req.body.name; // Frontend sends 'name', database expects 'title'
+        updates.name = req.body.name;  // Also update the 'name' field for consistency
+      }
+      if (req.body.description !== undefined) {
+        updates.description = req.body.description;
+      }
       
       console.log('Parsed updates:', updates);
       const project = await storage.updateProject(req.params.id, userId, updates);
