@@ -244,6 +244,9 @@ export default function EditBook() {
   };
 
   const handleSaveAsDraft = (data: BookFormData) => {
+    console.log('Save as Draft clicked - Form data:', data);
+    console.log('Save as Draft clicked - Form errors:', form.formState.errors);
+    
     const draftData = {
       ...data,
       status: "draft",
@@ -253,6 +256,9 @@ export default function EditBook() {
   };
 
   const handleSaveAndContinue = (data: BookFormData) => {
+    console.log('Save and Continue clicked - Form data:', data);
+    console.log('Save and Continue clicked - Form errors:', form.formState.errors);
+    
     let nextTab = "";
     if (activeTab === "details") {
       nextTab = "content";
@@ -261,6 +267,14 @@ export default function EditBook() {
     }
     
     updateBook.mutate({ bookData: data, nextTab });
+  };
+
+  // Debug function to test button clicks
+  const handleTestClick = () => {
+    console.log('Test button clicked!');
+    console.log('Current form state:', form.formState);
+    console.log('Current form errors:', form.formState.errors);
+    console.log('Current form values:', form.getValues());
   };
 
   const handleDelete = () => {
@@ -923,7 +937,17 @@ export default function EditBook() {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={form.handleSubmit(handleSaveAsDraft)}
+                    onClick={handleTestClick}
+                  >
+                    Test Click
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      console.log('Save as Draft button clicked');
+                      form.handleSubmit(handleSaveAsDraft)();
+                    }}
                     disabled={updateBook.isPending}
                   >
                     {updateBook.isPending ? (
@@ -938,7 +962,10 @@ export default function EditBook() {
                   {activeTab !== "pricing" && (
                     <Button
                       type="button"
-                      onClick={form.handleSubmit(handleSaveAndContinue)}
+                      onClick={() => {
+                        console.log('Save and Continue button clicked');
+                        form.handleSubmit(handleSaveAndContinue)();
+                      }}
                       disabled={updateBook.isPending}
                       className="bg-orange-600 hover:bg-orange-700"
                     >
