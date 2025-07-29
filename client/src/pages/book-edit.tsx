@@ -157,6 +157,9 @@ export default function EditBook() {
         ...data.bookData,
         categories,
         keywords,
+        // Convert numeric fields to proper types as expected by schema
+        editionNumber: data.bookData.editionNumber ? String(data.bookData.editionNumber) : undefined,
+        seriesNumber: data.bookData.seriesNumber ? Number(data.bookData.seriesNumber) : undefined,
       };
       
       console.log(isCreating ? 'Creating book data:' : 'Updating book data:', formattedData);
