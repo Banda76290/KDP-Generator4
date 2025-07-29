@@ -193,10 +193,10 @@ export default function Projects() {
                   <SelectValue placeholder="Sort by..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="createdAt">Date de création</SelectItem>
-                  <SelectItem value="lastModified">Dernière modification</SelectItem>
-                  <SelectItem value="monthlyRevenue">Plus rentable ce mois</SelectItem>
-                  <SelectItem value="totalRevenue">Plus rentable (tout temps)</SelectItem>
+                  <SelectItem value="createdAt">Creation Date</SelectItem>
+                  <SelectItem value="lastModified">Last Modified</SelectItem>
+                  <SelectItem value="monthlyRevenue">Most Profitable This Month</SelectItem>
+                  <SelectItem value="totalRevenue">Most Profitable All Time</SelectItem>
                 </SelectContent>
               </Select>
             </div>
