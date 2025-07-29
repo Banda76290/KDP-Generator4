@@ -29,6 +29,30 @@ export default function Projects() {
     enabled: isAuthenticated,
   });
 
+  // Duplication mutation
+  const duplicateProject = useMutation({
+    mutationFn: async (project: ProjectWithRelations) => {
+      return await apiRequest(`/api/projects`, "POST", {
+        name: `${project.name} (copy)`,
+        description: project.description,
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Project duplicated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to duplicate project",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Redirect to home if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -93,7 +117,7 @@ export default function Projects() {
         if (!project.books || !Array.isArray(project.books)) return new Date(project.updatedAt);
         const dates = project.books.map((book: any) => new Date(book.updatedAt));
         dates.push(new Date(project.updatedAt));
-        return new Date(Math.max(...dates.map(d => d.getTime())));
+        return new Date(Math.max(...dates.map((d: Date) => d.getTime())));
       };
 
       const getTotalRevenue = (project: any) => {
@@ -143,33 +167,6 @@ export default function Projects() {
   const handleEditProject = (project: ProjectWithRelations) => {
     setLocation(`/projects/edit/${project.id}`);
   };
-
-  // Duplication mutation
-  const duplicateProject = useMutation({
-    mutationFn: async (project: ProjectWithRelations) => {
-      return await apiRequest(`/api/projects`, {
-        method: "POST",
-        body: JSON.stringify({
-          name: `${project.name} (copy)`,
-          description: project.description,
-        }),
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Project duplicated successfully",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to duplicate project",
-        variant: "destructive",
-      });
-    },
-  });
 
   const handleDuplicateProject = (project: ProjectWithRelations) => {
     duplicateProject.mutate(project);
@@ -354,7 +351,7 @@ export default function Projects() {
                                   </div>
                                 </div>
                                 <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                                  <Badge className={getStatusColor(book.status || 'draft')} size="sm">
+                                  <Badge className={getStatusColor(book.status || 'draft')}>
                                     {(book.status || 'draft').replace('_', ' ')}
                                   </Badge>
                                   <Button
