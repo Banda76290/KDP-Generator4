@@ -67,12 +67,22 @@ export default function EditBook() {
   // Get projectId from URL if present
   const urlParams = new URLSearchParams((location || '').split('?')[1] || '');
   const preSelectedProjectId = urlParams.get('projectId');
+  
+  console.log('BookEdit Debug:', { 
+    bookId, 
+    isCreating, 
+    location, 
+    preSelectedProjectId,
+    fullUrl: window.location.href 
+  });
 
   // Fetch existing book data (only if editing)
   const { data: book, isLoading: bookLoading, error } = useQuery<Book>({
     queryKey: [`/api/books/${bookId}`],
     enabled: !isCreating, // Only fetch if we're not creating (i.e., if we have a bookId)
   });
+  
+  console.log('Query State:', { book, bookLoading, error, isCreating });
 
   const form = useForm<BookFormData>({
     resolver: zodResolver(bookFormSchema),
@@ -314,7 +324,7 @@ export default function EditBook() {
     );
   }
 
-  if (error || !book) {
+  if (!isCreating && (error || !book)) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
