@@ -430,7 +430,7 @@ export default function EditBook() {
               {activeTab === "details" && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Paperback Details</CardTitle>
+                  <CardTitle>Basic information about your book</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* Project Selection */}
