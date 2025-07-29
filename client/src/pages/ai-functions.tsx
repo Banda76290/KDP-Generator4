@@ -9,9 +9,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { Copy, Play, Settings, BookOpen, User, Building } from 'lucide-react';
+import { Copy, Play, Settings, BookOpen, User, Building, HelpCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import Layout from '@/components/Layout';
 
 interface AIFunction {
   key: string;
@@ -173,14 +175,14 @@ export default function AIFunctions() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="w-96">
           <CardHeader>
-            <CardTitle>Connexion requise</CardTitle>
+            <CardTitle>Login Required</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground mb-4">
-              Vous devez être connecté pour accéder aux fonctionnalités IA.
+              You must be logged in to access AI functions.
             </p>
             <Button onClick={() => window.location.href = '/api/login'}>
-              Se connecter
+              Sign In
             </Button>
           </CardContent>
         </Card>
@@ -193,7 +195,7 @@ export default function AIFunctions() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Chargement des fonctionnalités IA...</p>
+          <p className="text-muted-foreground">Loading AI functions...</p>
         </div>
       </div>
     );
@@ -207,21 +209,56 @@ export default function AIFunctions() {
   }, {});
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-6 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Fonctionnalités IA</h1>
-          <p className="text-muted-foreground">
-            Générez du contenu intelligent pour vos projets d'édition
-          </p>
-        </div>
+    <Layout>
+      <TooltipProvider>
+        <div className="container mx-auto px-6 py-8">
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <h1 className="text-3xl font-bold text-foreground">AI Functions</h1>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <HelpCircle className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-md p-4">
+                  <div className="space-y-3">
+                    <h4 className="font-semibold">AI Functions Configuration Guide</h4>
+                    
+                    <div className="space-y-2 text-sm">
+                      <p><strong>1. System Overview:</strong></p>
+                      <p>AI Functions use dynamic variables extracted from your database (books, projects, authors) to generate personalized content with configurable AI models and prompts.</p>
+                      
+                      <p><strong>2. Configuration Process:</strong></p>
+                      <p>• <strong>Variables:</strong> View available variables at /admin/ai-variables (37 Book, 5 Project, 10 Author, 4 System variables)</p>
+                      <p>• <strong>Prompts:</strong> Create templates at /admin/ai-config using {'{variable_name}'} format</p>
+                      <p>• <strong>Models:</strong> Configure gpt-4o, gpt-4o-mini with pricing and limits</p>
+                      <p>• <strong>Usage Limits:</strong> Set token quotas by subscription tier (Free: 1K, Basic: 10K, Premium: 100K tokens/month)</p>
+                      
+                      <p><strong>3. Usage Workflow:</strong></p>
+                      <p>• Select an AI function • Choose a book/project for context • Variables auto-populate • Generate content with real data substitution</p>
+                      
+                      <p><strong>4. Variable Examples:</strong></p>
+                      <p>• {'{title}'} - Book title • {'{genre}'} - Book genre • {'{author_name}'} - Author name • {'{pages}'} - Page count • {'{price}'} - Book price</p>
+                      
+                      <p><strong>5. Best Practices:</strong></p>
+                      <p>• Use gpt-4o-mini for simple tasks to save costs • Combine multiple variables for richer context • Test with real book data • Monitor usage limits</p>
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+            <p className="text-muted-foreground">
+              Generate intelligent content for your publishing projects using configurable AI functions
+            </p>
+          </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Functions List */}
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
-                <CardTitle>Fonctionnalités disponibles</CardTitle>
+                <CardTitle>Available Functions</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="space-y-4 p-6">
@@ -273,8 +310,8 @@ export default function AIFunctions() {
               <Tabs defaultValue="configuration" className="space-y-6">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="configuration">Configuration</TabsTrigger>
-                  <TabsTrigger value="advanced">Paramètres avancés</TabsTrigger>
-                  <TabsTrigger value="results">Résultats</TabsTrigger>
+                  <TabsTrigger value="advanced">Advanced Settings</TabsTrigger>
+                  <TabsTrigger value="results">Results</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="configuration" className="space-y-6">
@@ -287,10 +324,10 @@ export default function AIFunctions() {
                       {/* Context Selection */}
                       {selectedFunction.requiresBookContext && (
                         <div>
-                          <Label htmlFor="book-select">Sélectionner un livre</Label>
+                          <Label htmlFor="book-select">Select a Book</Label>
                           <Select value={selectedBook} onValueChange={setSelectedBook}>
                             <SelectTrigger>
-                              <SelectValue placeholder="Choisissez un livre..." />
+                              <SelectValue placeholder="Choose a book..." />
                             </SelectTrigger>
                             <SelectContent>
                               {(books as any[] || []).map((book: any) => (
@@ -305,10 +342,10 @@ export default function AIFunctions() {
 
                       {selectedFunction.requiresProjectContext && (
                         <div>
-                          <Label htmlFor="project-select">Sélectionner un projet</Label>
+                          <Label htmlFor="project-select">Select a Project</Label>
                           <Select value={selectedProject} onValueChange={setSelectedProject}>
                             <SelectTrigger>
-                              <SelectValue placeholder="Choisissez un projet..." />
+                              <SelectValue placeholder="Choose a project..." />
                             </SelectTrigger>
                             <SelectContent>
                               {(projects as any[] || []).map((project: any) => (
@@ -323,7 +360,7 @@ export default function AIFunctions() {
 
                       {/* Available Variables */}
                       <div>
-                        <Label>Variables disponibles</Label>
+                        <Label>Available Variables</Label>
                         <div className="border rounded-lg p-4 bg-muted/50 mt-2">
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                             {getAvailableVariables().map((field) => (
@@ -353,7 +390,7 @@ export default function AIFunctions() {
                         className="w-full"
                       >
                         <Play className="w-4 h-4 mr-2" />
-                        {isGenerating ? 'Génération en cours...' : 'Générer le contenu'}
+                        {isGenerating ? 'Generating...' : 'Generate Content'}
                       </Button>
                     </CardContent>
                   </Card>
@@ -362,11 +399,11 @@ export default function AIFunctions() {
                 <TabsContent value="advanced" className="space-y-6">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Paramètres avancés</CardTitle>
+                      <CardTitle>Advanced Settings</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div>
-                        <Label htmlFor="custom-prompt">Prompt personnalisé</Label>
+                        <Label htmlFor="custom-prompt">Custom Prompt</Label>
                         <Textarea
                           id="custom-prompt"
                           value={customPrompt}
@@ -378,7 +415,7 @@ export default function AIFunctions() {
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="custom-model">Modèle IA</Label>
+                          <Label htmlFor="custom-model">AI Model</Label>
                           <Input
                             id="custom-model"
                             value={customModel}
@@ -387,7 +424,7 @@ export default function AIFunctions() {
                           />
                         </div>
                         <div>
-                          <Label htmlFor="custom-temperature">Température</Label>
+                          <Label htmlFor="custom-temperature">Temperature</Label>
                           <Input
                             id="custom-temperature"
                             type="number"
@@ -408,7 +445,7 @@ export default function AIFunctions() {
                   <Card>
                     <CardHeader>
                       <div className="flex items-center justify-between">
-                        <CardTitle>Contenu généré</CardTitle>
+                        <CardTitle>Generated Content</CardTitle>
                         {generatedContent && (
                           <Button
                             variant="outline"
@@ -416,7 +453,7 @@ export default function AIFunctions() {
                             onClick={() => copyToClipboard(generatedContent)}
                           >
                             <Copy className="w-4 h-4 mr-2" />
-                            Copier
+                            Copy
                           </Button>
                         )}
                       </div>
@@ -431,8 +468,8 @@ export default function AIFunctions() {
                       ) : (
                         <div className="text-center text-muted-foreground py-12">
                           <Play className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                          <p>Aucun contenu généré pour le moment</p>
-                          <p className="text-sm">Utilisez l'onglet Configuration pour générer du contenu</p>
+                          <p>No content generated yet</p>
+                          <p className="text-sm">Use the Configuration tab to generate content</p>
                         </div>
                       )}
                     </CardContent>
@@ -443,16 +480,17 @@ export default function AIFunctions() {
               <Card>
                 <CardContent className="text-center py-12">
                   <Settings className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-semibold mb-2">Sélectionnez une fonctionnalité</h3>
+                  <h3 className="text-lg font-semibold mb-2">Select a Function</h3>
                   <p className="text-muted-foreground">
-                    Choisissez une fonctionnalité IA dans la liste de gauche pour commencer
+                    Choose an AI function from the left panel to get started
                   </p>
                 </CardContent>
               </Card>
             )}
           </div>
         </div>
-      </div>
-    </div>
+        </div>
+      </TooltipProvider>
+    </Layout>
   );
 }
