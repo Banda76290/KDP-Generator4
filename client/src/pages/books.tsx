@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
+import { isUnauthorizedError } from "@/lib/authUtils";
+import Header from "@/components/layout/Header";
+import Sidebar from "@/components/layout/Sidebar";
 import { 
   Search, 
   Filter, 
@@ -26,6 +30,49 @@ import type { Book, Project } from "@shared/schema";
 type SortOption = "title-asc" | "title-desc" | "date-asc" | "date-desc" | "status-asc" | "status-desc";
 
 export default function BooksPage() {
+  const { toast } = useToast();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  // Redirect to home if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      toast({
+        title: "Unauthorized",
+        description: "You are logged out. Logging in again...",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 500);
+      return;
+    }
+  }, [isAuthenticated, isLoading, toast]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="flex pt-16">
+        <Sidebar />
+        <main className="flex-1 min-w-0 p-4 md:p-6 md:ml-64">
+          <BooksContent />
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function BooksContent() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterFormat, setFilterFormat] = useState<string>("all");
@@ -110,13 +157,13 @@ export default function BooksPage() {
         case "title-desc":
           return b.title.localeCompare(a.title);
         case "date-asc":
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
         case "date-desc":
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
         case "status-asc":
-          return a.status.localeCompare(b.status);
+          return (a.status || '').localeCompare(b.status || '');
         case "status-desc":
-          return b.status.localeCompare(a.status);
+          return (b.status || '').localeCompare(a.status || '');
         default:
           return 0;
       }
@@ -159,7 +206,7 @@ export default function BooksPage() {
   const unassignedBooksCount = books.filter((book: Book) => !book.projectId).length;
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="w-full">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold">Books</h1>
