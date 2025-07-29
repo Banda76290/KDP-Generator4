@@ -68,7 +68,7 @@ export default function CreateProject() {
         });
       } else if (data.createNewBook) {
         // Redirect to book creation with project pre-selected
-        setLocation(`/books/create?projectId=${project.id}`);
+        setLocation(`/books/create-advanced?projectId=${project.id}`);
         return project;
       }
       

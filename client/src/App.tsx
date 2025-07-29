@@ -54,6 +54,7 @@ function Router() {
       <Route path="/project-create-simple" component={ProjectCreate} />
       <Route path="/projects/edit/:id" component={ProjectEdit} />
       <Route path="/books/create" component={BookCreate} />
+      <Route path="/books/create-advanced" component={BookEdit} />
       <Route path="/books/edit/:bookId" component={BookEdit} />
       <Route component={NotFound} />
     </Switch>

@@ -53,7 +53,7 @@ const contributorRoles = [
 
 export default function EditBook() {
   const { bookId } = useParams();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [contributors, setContributors] = useState<Contributor[]>([]);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -61,10 +61,17 @@ export default function EditBook() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch existing book data
+  // Check if this is creation mode
+  const isCreating = !bookId;
+  
+  // Get projectId from URL if present
+  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const preSelectedProjectId = urlParams.get('projectId');
+
+  // Fetch existing book data (only if editing)
   const { data: book, isLoading: bookLoading, error } = useQuery<Book>({
     queryKey: [`/api/books/${bookId}`],
-    enabled: !!bookId,
+    enabled: !!bookId && !isCreating,
   });
 
   const form = useForm<BookFormData>({
@@ -86,7 +93,7 @@ export default function EditBook() {
       useAI: false,
       format: "ebook",
       status: "draft",
-      projectId: "",
+      projectId: preSelectedProjectId || "",
       categories: [],
       keywords: [],
     },
@@ -134,7 +141,7 @@ export default function EditBook() {
     queryKey: ["/api/projects"],
   });
 
-  const updateBook = useMutation({
+  const saveBook = useMutation({
     mutationFn: async (data: { bookData: BookFormData; shouldNavigate?: boolean; nextTab?: string }) => {
       const formattedData = {
         ...data.bookData,
@@ -142,32 +149,51 @@ export default function EditBook() {
         keywords,
       };
       
-      console.log('Updating book data:', formattedData);
-      const updatedBook = await apiRequest("PATCH", `/api/books/${bookId}`, formattedData);
-      console.log('Received updated book response:', updatedBook);
+      console.log(isCreating ? 'Creating book data:' : 'Updating book data:', formattedData);
       
-      return { updatedBook, shouldNavigate: data.shouldNavigate, nextTab: data.nextTab };
+      if (isCreating) {
+        const createdBook = await apiRequest("POST", `/api/books`, formattedData);
+        console.log('Received created book response:', createdBook);
+        return { book: createdBook, shouldNavigate: data.shouldNavigate, nextTab: data.nextTab };
+      } else {
+        const updatedBook = await apiRequest("PATCH", `/api/books/${bookId}`, formattedData);
+        console.log('Received updated book response:', updatedBook);
+        return { book: updatedBook, shouldNavigate: data.shouldNavigate, nextTab: data.nextTab };
+      }
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["/api/books"] });
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
-      queryClient.invalidateQueries({ queryKey: [`/api/books/${bookId}`] });
+      if (!isCreating) {
+        queryClient.invalidateQueries({ queryKey: [`/api/books/${bookId}`] });
+      }
       toast({
-        title: "Book Updated",
-        description: "Your book has been updated successfully.",
+        title: isCreating ? "Book Created" : "Book Updated",
+        description: `Your book has been ${isCreating ? 'created' : 'updated'} successfully.`,
       });
       
-      if (result.nextTab) {
-        setActiveTab(result.nextTab);
-      } else if (result.shouldNavigate) {
-        setLocation("/projects");
+      if (isCreating && result.book) {
+        // After creation, redirect to edit mode with the new book ID
+        if (result.nextTab) {
+          setLocation(`/books/edit/${result.book.id}?tab=${result.nextTab}`);
+        } else if (result.shouldNavigate) {
+          setLocation("/projects");
+        } else {
+          setLocation(`/books/edit/${result.book.id}`);
+        }
+      } else {
+        if (result.nextTab) {
+          setActiveTab(result.nextTab);
+        } else if (result.shouldNavigate) {
+          setLocation("/projects");
+        }
       }
     },
     onError: (error) => {
-      console.error('Book update error:', error);
+      console.error(isCreating ? 'Book creation error:' : 'Book update error:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to update book",
+        description: error.message || `Failed to ${isCreating ? 'create' : 'update'} book`,
         variant: "destructive",
       });
     },
@@ -240,7 +266,7 @@ export default function EditBook() {
   };
 
   const onSubmit = (data: BookFormData) => {
-    updateBook.mutate({ bookData: data, shouldNavigate: true });
+    saveBook.mutate({ bookData: data, shouldNavigate: true });
   };
 
   const handleSaveAsDraft = (data: BookFormData) => {
@@ -249,7 +275,7 @@ export default function EditBook() {
       status: "draft" as const,
     };
     
-    updateBook.mutate({ bookData: draftData });
+    saveBook.mutate({ bookData: draftData });
   };
 
   const handleSaveAndContinue = (data: BookFormData) => {
@@ -260,7 +286,7 @@ export default function EditBook() {
       nextTab = "pricing";
     }
     
-    updateBook.mutate({ bookData: data, nextTab });
+    saveBook.mutate({ bookData: data, nextTab });
   };
 
   const handleDelete = () => {
@@ -328,18 +354,20 @@ export default function EditBook() {
                   <span>Back</span>
                 </Button>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">Edit Book</h1>
-                  <p className="text-gray-600">Update your book details and settings</p>
+                  <h1 className="text-3xl font-bold text-gray-900">{isCreating ? 'Create Book' : 'Edit Book'}</h1>
+                  <p className="text-gray-600">{isCreating ? 'Set up your new book with all the details' : 'Update your book details and settings'}</p>
                 </div>
               </div>
-              <Button
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={deleteBook.isPending}
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete Book
-              </Button>
+              {!isCreating && (
+                <Button
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={deleteBook.isPending}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Book
+                </Button>
+              )}
             </div>
 
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -969,9 +997,9 @@ export default function EditBook() {
                       const formData = form.getValues();
                       handleSaveAsDraft(formData);
                     }}
-                    disabled={updateBook.isPending}
+                    disabled={saveBook.isPending}
                   >
-                    {updateBook.isPending ? (
+                    {saveBook.isPending ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         Saving...
@@ -987,10 +1015,10 @@ export default function EditBook() {
                         const formData = form.getValues();
                         handleSaveAndContinue(formData);
                       }}
-                      disabled={updateBook.isPending}
+                      disabled={saveBook.isPending}
                       className="bg-orange-600 hover:bg-orange-700"
                     >
-                      {updateBook.isPending ? (
+                      {saveBook.isPending ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                           Saving...
@@ -1003,18 +1031,18 @@ export default function EditBook() {
                   {activeTab === "pricing" && (
                     <Button
                       type="submit"
-                      disabled={updateBook.isPending}
+                      disabled={saveBook.isPending}
                       className="bg-orange-600 hover:bg-orange-700"
                     >
-                      {updateBook.isPending ? (
+                      {saveBook.isPending ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Updating...
+                          {isCreating ? 'Creating...' : 'Updating...'}
                         </>
                       ) : (
                         <>
                           <CheckCircle className="w-4 h-4 mr-2" />
-                          Update Book
+                          {isCreating ? 'Create Book' : 'Update Book'}
                         </>
                       )}
                     </Button>

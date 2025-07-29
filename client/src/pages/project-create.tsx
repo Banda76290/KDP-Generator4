@@ -120,7 +120,7 @@ export default function ProjectCreate() {
       
       if (createBookToo) {
         // Redirect to book creation page with project ID
-        setLocation(`/books/create?projectId=${project.id}`);
+        setLocation(`/books/create-advanced?projectId=${project.id}`);
       } else {
         setLocation("/projects");
       }
