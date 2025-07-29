@@ -101,21 +101,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/projects', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub || req.user?.id || "test-user-id";
-      console.log('Creating project for user:', userId);
-      console.log('Project data:', req.body);
-      // Only accept name and description for simple project creation  
-      const createSchema = insertProjectSchema.pick({ name: true, description: true });
-      const projectData = createSchema.parse(req.body);
-      // Map name to title for database compatibility (legacy field)
-      const fullProjectData = { 
-        ...projectData, 
-        title: projectData.name, // Legacy field for database compatibility
-        userId 
+
+      // Validate and prepare project data
+      if (!req.body.name) {
+        return res.status(400).json({ message: "Project name is required" });
+      }
+      
+      const projectData = {
+        title: req.body.name, // Frontend sends 'name', database expects 'title'
+        description: req.body.description || null,
+        userId,
+        status: 'draft' as const,
+        totalSales: 0,
+        totalRevenue: '0.00',
+        language: 'English',
+        publishingRights: 'owned',
+        hasExplicitContent: false,
+        primaryMarketplace: 'Amazon.com',
+        isLowContentBook: false,
+        isLargePrintBook: false,
+        previouslyPublished: false,
+        releaseOption: 'immediate',
+        useAi: false
       };
       
-      console.log('Parsed project data:', fullProjectData);
-      const project = await storage.createProject(fullProjectData);
-      console.log('Created project:', project);
+      const project = await storage.createProject(projectData);
       
       // Contributors are now handled at book level, not project level
 
@@ -146,7 +156,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const fullProject = await storage.getProject(project.id, userId);
-      console.log('Returning full project:', fullProject);
       res.json(fullProject);
     } catch (error) {
       console.error("Error creating project:", error);
