@@ -17,8 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertBookSchema, type InsertBook } from "@shared/schema";
 import { z } from "zod";
-import Header from "@/components/layout/Header";
-import Sidebar from "@/components/layout/Sidebar";
+import Layout from "@/components/Layout";
 
 interface Contributor {
   id: string;
@@ -185,11 +184,7 @@ export default function CreateBook() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-background">
-      <Header />
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 ml-64 pt-16">
+    <Layout>
           <div className="container mx-auto px-4 py-8 max-w-4xl">
             <div className="mb-6">
               <Button
@@ -545,8 +540,6 @@ export default function CreateBook() {
               </div>
             </div>
           </div>
-        </main>
-      </div>
-    </div>
+    </Layout>
   );
 }

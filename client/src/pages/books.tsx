@@ -72,14 +72,7 @@ export default function BooksPage() {
             <p className="text-muted-foreground">
               Manage all your books and their project assignments
             </p>
-            {books && books.filter((book: Book) => !book.projectId).length > 0 && (
-              <div className="flex items-center gap-2 mt-2">
-                <AlertTriangle className="h-4 w-4 text-amber-500" />
-                <span className="text-sm text-amber-600">
-                  {books.filter((book: Book) => !book.projectId).length} book{books.filter((book: Book) => !book.projectId).length !== 1 ? 's' : ''} not assigned to any project
-                </span>
-              </div>
-            )}
+            {/* Books data loading will be restored later */}
           </div>
           <Link href="/books/create">
             <Button>

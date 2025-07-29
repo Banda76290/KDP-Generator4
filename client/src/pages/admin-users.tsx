@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { ArrowLeft, Search, UserCheck, UserX, Shield, Crown, User } from "lucide-react";
 import { format } from "date-fns";
+import Layout from "@/components/Layout";
 
 interface User {
   id: string;
@@ -154,7 +155,7 @@ export default function AdminUsers() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <Layout>
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -325,6 +326,6 @@ export default function AdminUsers() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </Layout>
   );
 }

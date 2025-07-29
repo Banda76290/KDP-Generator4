@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Crown, Check, X, Zap, BookOpen, Bot, TrendingUp } from "lucide-react";
-import Header from "@/components/layout/Header";
-import Sidebar from "@/components/layout/Sidebar";
+import Layout from "@/components/Layout";
 
 const plans = [
   {
@@ -82,11 +81,7 @@ export default function Subscription() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 ml-64 pt-16 p-8">
+    <Layout>
           <div className="max-w-6xl mx-auto">
             {/* Header */}
             <div className="text-center mb-12">
@@ -250,8 +245,6 @@ export default function Subscription() {
               </CardContent>
             </Card>
           </div>
-        </main>
-      </div>
-    </div>
+    </Layout>
   );
 }

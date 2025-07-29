@@ -4,8 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import Header from "@/components/layout/Header";
-import Sidebar from "@/components/layout/Sidebar";
+import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -143,11 +142,7 @@ export default function KDPReports() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="flex pt-16">
-        <Sidebar />
-        <main className="flex-1 min-w-0 p-4 md:p-6 md:ml-64">
+    <Layout>
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-gray-900">KDP Reports</h1>
             <p className="text-gray-600 mt-1">Upload and analyze your Amazon KDP sales reports.</p>
@@ -293,8 +288,6 @@ export default function KDPReports() {
               </CardContent>
             </Card>
           </div>
-        </main>
-      </div>
-    </div>
+    </Layout>
   );
 }

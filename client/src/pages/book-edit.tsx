@@ -18,8 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertBookSchema, type Book } from "@shared/schema";
 import { z } from "zod";
-import Header from "@/components/layout/Header";
-import Sidebar from "@/components/layout/Sidebar";
+import Layout from "@/components/Layout";
 
 interface Contributor {
   id: string;
@@ -313,50 +312,34 @@ export default function EditBook() {
 
   if (bookLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="flex">
-          <Sidebar />
-          <main className="flex-1 p-8">
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-                <p className="text-gray-600">Loading book details...</p>
-              </div>
-            </div>
-          </main>
+      <Layout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-gray-600">Loading book details...</p>
+          </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   if (!isCreating && (error || !book)) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="flex">
-          <Sidebar />
-          <main className="flex-1 p-8">
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-900 mb-4">Book Not Found</h1>
-              <p className="text-gray-600 mb-4">The book you're looking for doesn't exist or you don't have permission to edit it.</p>
-              <Button onClick={() => setLocation("/projects")}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Projects
-              </Button>
-            </div>
-          </main>
+      <Layout>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Book Not Found</h1>
+          <p className="text-gray-600 mb-4">The book you're looking for doesn't exist or you don't have permission to edit it.</p>
+          <Button onClick={() => setLocation("/projects")}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Projects
+          </Button>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 min-w-0 p-4 md:p-8 pt-24 md:pt-20 md:ml-64">
+    <Layout>
           <div className="max-w-4xl mx-auto w-full">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
@@ -1081,8 +1064,6 @@ export default function EditBook() {
               </div>
             </form>
           </div>
-        </main>
-      </div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
@@ -1107,6 +1088,6 @@ export default function EditBook() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </Layout>
   );
 }

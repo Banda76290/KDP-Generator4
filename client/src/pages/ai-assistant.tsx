@@ -123,11 +123,7 @@ export default function AIAssistant() {
   // const isPremiumUser = true; // user?.subscriptionTier === 'premium' || user?.subscriptionTier === 'pro';
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="flex pt-16">
-        <Sidebar />
-        <main className="flex-1 min-w-0 p-4 md:p-6 md:ml-64">
+    <Layout>
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
@@ -276,8 +272,6 @@ export default function AIAssistant() {
               </CardContent>
             </Card>
           )}
-        </main>
-      </div>
-    </div>
+    </Layout>
   );
 }

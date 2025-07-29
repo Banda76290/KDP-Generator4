@@ -8,8 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bell, User as UserIcon, Shield, Palette, Download, Trash2 } from "lucide-react";
-import Header from "@/components/layout/Header";
-import Sidebar from "@/components/layout/Sidebar";
+import Layout from "@/components/Layout";
 import { useTheme } from "@/hooks/useTheme";
 
 export default function Settings() {
@@ -24,28 +23,18 @@ export default function Settings() {
   // Si on est en cours de chargement, afficher un état de chargement
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="flex">
-          <Sidebar />
-          <main className="flex-1 ml-64 pt-16 p-8">
+      <Layout>
             <div className="max-w-4xl mx-auto">
               <div className="flex items-center justify-center h-64">
                 <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
               </div>
             </div>
-          </main>
-        </div>
-      </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 ml-64 pt-16 p-8">
+    <Layout>
           <div className="max-w-4xl mx-auto space-y-8">
             {/* Header */}
             <div>
@@ -295,8 +284,6 @@ export default function Settings() {
               </CardContent>
             </Card>
           </div>
-        </main>
-      </div>
-    </div>
+    </Layout>
   );
 }

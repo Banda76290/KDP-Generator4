@@ -35,11 +35,7 @@ export default function Analytics() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="flex pt-16">
-        <Sidebar />
-        <main className="flex-1 min-w-0 p-4 md:p-6 md:ml-64">
+    <Layout>
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-gray-900">Sales Analytics</h1>
             <p className="text-gray-600 mt-1">Detailed analysis of your publishing performance.</p>
@@ -53,8 +49,6 @@ export default function Analytics() {
               <p className="text-gray-600">Advanced analytics features coming soon...</p>
             </CardContent>
           </Card>
-        </main>
-      </div>
-    </div>
+    </Layout>
   );
 }

@@ -14,8 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertProjectSchema, type InsertProject } from "@shared/schema";
 import { z } from "zod";
-import Header from "@/components/layout/Header";
-import Sidebar from "@/components/layout/Sidebar";
+import Layout from "@/components/Layout";
 
 const projectFormSchema = insertProjectSchema.pick({ name: true, description: true });
 
@@ -121,11 +120,7 @@ export default function EditProject() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="flex pt-16">
-        <Sidebar />
-        <main className="flex-1 min-w-0 p-4 md:p-6 md:ml-64">
+    <Layout>
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center space-x-2 mb-6">
               <ArrowLeft 
@@ -211,8 +206,6 @@ export default function EditProject() {
               </div>
             </div>
           </div>
-        </main>
-      </div>
-    </div>
+    </Layout>
   );
 }
