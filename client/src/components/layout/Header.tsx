@@ -29,14 +29,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
             size="sm"
             className="md:hidden p-2"
             onClick={() => {
-              console.log('Menu burger clicked!');
-              console.log('onMenuClick function:', onMenuClick);
-              if (onMenuClick) {
-                console.log('Calling onMenuClick...');
-                onMenuClick();
-              } else {
-                console.log('onMenuClick is undefined!');
-              }
+              onMenuClick?.();
             }}
           >
             <Menu className="h-5 w-5" />

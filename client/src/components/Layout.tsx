@@ -11,7 +11,6 @@ export default function Layout({ children }: LayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleMenuClick = () => {
-    console.log('Layout handleMenuClick called, setting mobile menu to true');
     setMobileMenuOpen(true);
   };
 
@@ -22,10 +21,7 @@ export default function Layout({ children }: LayoutProps) {
         <Sidebar />
         <MobileSidebar 
           open={mobileMenuOpen} 
-          onOpenChange={(open) => {
-            console.log('MobileSidebar onOpenChange called with:', open);
-            setMobileMenuOpen(open);
-          }} 
+          onOpenChange={setMobileMenuOpen}
         />
         <main className="flex-1 min-w-0 p-4 md:p-6 pt-16 md:ml-64">
           {children}

@@ -62,6 +62,7 @@ export default function MobileSidebar({ open, onOpenChange }: MobileSidebarProps
           </SheetTitle>
         </SheetHeader>
         
+        <div className="flex-1 overflow-y-auto">
         <nav className="p-4 space-y-2">
           {navigation.map((item) => {
             const isActive = location === item.href;
@@ -177,6 +178,7 @@ export default function MobileSidebar({ open, onOpenChange }: MobileSidebarProps
             </div>
           </div>
         </nav>
+        </div>
       </SheetContent>
     </Sheet>
   );
