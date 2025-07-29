@@ -103,10 +103,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user?.claims?.sub || req.user?.id || "test-user-id";
       console.log('Creating project for user:', userId);
       console.log('Project data:', req.body);
-      const projectData = insertProjectSchema.parse({ ...req.body, userId });
+      // Only accept name and description for simple project creation  
+      const createSchema = insertProjectSchema.pick({ name: true, description: true });
+      const projectData = createSchema.parse(req.body);
+      const fullProjectData = { ...projectData, userId };
       
-      console.log('Parsed project data:', projectData);
-      const project = await storage.createProject(projectData);
+      console.log('Parsed project data:', fullProjectData);
+      const project = await storage.createProject(fullProjectData);
       console.log('Created project:', project);
       
       // Contributors are now handled at book level, not project level
@@ -153,9 +156,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/projects/:id', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const updates = insertProjectSchema.partial().parse(req.body);
+      console.log('Updating project:', req.params.id, req.body);
       
+      // Only accept name and description for project updates
+      const updateSchema = insertProjectSchema.pick({ name: true, description: true }).partial();
+      const updates = updateSchema.parse(req.body);
+      
+      console.log('Parsed updates:', updates);
       const project = await storage.updateProject(req.params.id, userId, updates);
+      console.log('Updated project:', project);
+      
       res.json(project);
     } catch (error) {
       console.error("Error updating project:", error);

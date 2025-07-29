@@ -18,7 +18,7 @@ import { z } from "zod";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 
-const projectFormSchema = insertProjectSchema.extend({
+const projectFormSchema = insertProjectSchema.pick({ name: true, description: true }).extend({
   attachExistingBook: z.boolean().optional(),
   selectedBookId: z.string().optional(),
   createNewBook: z.boolean().optional(),
