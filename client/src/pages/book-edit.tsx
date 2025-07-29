@@ -943,7 +943,9 @@ export default function EditBook() {
                     variant="outline"
                     onClick={() => {
                       console.log('Save as Draft button clicked');
-                      form.handleSubmit(handleSaveAsDraft)();
+                      const formData = form.getValues();
+                      console.log('Form data direct call:', formData);
+                      handleSaveAsDraft(formData);
                     }}
                     disabled={updateBook.isPending}
                   >
@@ -961,7 +963,9 @@ export default function EditBook() {
                       type="button"
                       onClick={() => {
                         console.log('Save and Continue button clicked');
-                        form.handleSubmit(handleSaveAndContinue)();
+                        const formData = form.getValues();
+                        console.log('Form data direct call:', formData);
+                        handleSaveAndContinue(formData);
                       }}
                       disabled={updateBook.isPending}
                       className="bg-orange-600 hover:bg-orange-700"
