@@ -59,6 +59,7 @@ export default function ProjectCreate() {
   const [contributors, setContributors] = useState<Contributor[]>([]);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [createBookToo, setCreateBookToo] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -78,7 +79,7 @@ export default function ProjectCreate() {
       isLargePrintBook: false,
       previouslyPublished: false,
       releaseOption: "immediate",
-      useAI: false,
+      useAi: false,
       formats: [],
       categories: [],
       keywords: [],
@@ -110,13 +111,20 @@ export default function ProjectCreate() {
       
       return project;
     },
-    onSuccess: () => {
+    onSuccess: (project) => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       toast({
         title: "Project Created",
         description: "Your KDP project has been created successfully.",
       });
-      setLocation("/projects");
+      
+      if (createBookToo) {
+        // Redirect to book creation page with project ID
+        setLocation(`/books/create?projectId=${project.id}`);
+      } else {
+        setLocation("/projects");
+      }
+      
       form.reset();
       setContributors([]);
       setKeywords([]);
@@ -750,6 +758,25 @@ export default function ProjectCreate() {
                         )}
                       </CardContent>
                     </Card>
+
+                    {/* Create Book Option */}
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="create-book-too"
+                            checked={createBookToo}
+                            onCheckedChange={(checked) => setCreateBookToo(!!checked)}
+                          />
+                          <Label htmlFor="create-book-too" className="text-base">
+                            Also create a book in this project after creation
+                          </Label>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2 ml-6">
+                          This will take you directly to the book creation form after the project is created.
+                        </p>
+                      </CardContent>
+                    </Card>
                   </div>
 
                   <div className="flex justify-between items-center pt-6 border-t mt-6">
@@ -771,14 +798,14 @@ export default function ProjectCreate() {
                         }}
                         disabled={createProject.isPending}
                       >
-                        {createProject.isPending ? "Saving..." : "Save as Draft"}
+                        {createProject.isPending ? "Creating..." : "Create Project"}
                       </Button>
                       <Button 
                         type="submit" 
                         disabled={createProject.isPending}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-black"
+                        className="bg-primary hover:bg-primary/90"
                       >
-                        {createProject.isPending ? "Creating..." : "Save and Continue"}
+                        {createProject.isPending ? "Creating..." : createBookToo ? "Create Project & Book" : "Create Project"}
                       </Button>
                     </div>
                   </div>
