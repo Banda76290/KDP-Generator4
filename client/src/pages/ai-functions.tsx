@@ -27,12 +27,13 @@ import {
   Lightbulb
 } from "lucide-react";
 
-interface Variable {
-  name: string;
+interface DatabaseField {
+  table: string;
+  field: string;
+  displayName: string;
+  type: 'text' | 'number' | 'date' | 'boolean' | 'select';
   description: string;
-  type: 'text' | 'number' | 'select';
   options?: string[];
-  required: boolean;
 }
 
 interface AIFunction {
@@ -45,11 +46,13 @@ export default function AIFunctions() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading, user } = useAuth();
   const [selectedFunction, setSelectedFunction] = useState<string>("");
-  const [variables, setVariables] = useState<Record<string, any>>({});
+  const [selectedBook, setSelectedBook] = useState<string>("");
+  const [selectedProject, setSelectedProject] = useState<string>("");
   const [customPrompt, setCustomPrompt] = useState("");
   const [customModel, setCustomModel] = useState("");
   const [generatedContent, setGeneratedContent] = useState("");
   const [activeTab, setActiveTab] = useState("functions");
+  const [previewValues, setPreviewValues] = useState<Record<string, any>>({});
 
   // Check authentication
   useEffect(() => {
@@ -72,17 +75,28 @@ export default function AIFunctions() {
     enabled: isAuthenticated,
   });
 
-  // Fetch variables for selected function
-  const { data: functionVariables, isLoading: variablesLoading } = useQuery({
-    queryKey: ["/api/ai/functions", selectedFunction, "variables"],
-    enabled: isAuthenticated && !!selectedFunction,
+  // Fetch database fields
+  const { data: databaseFields, isLoading: fieldsLoading } = useQuery({
+    queryKey: ["/api/ai/database-fields"],
+    enabled: isAuthenticated,
+  });
+
+  // Fetch user projects and books
+  const { data: projects } = useQuery({
+    queryKey: ["/api/projects"],
+    enabled: isAuthenticated,
+  });
+
+  const { data: books } = useQuery({
+    queryKey: ["/api/books"],
+    enabled: isAuthenticated,
   });
 
   // Generation mutation
   const generateMutation = useMutation({
     mutationFn: async (data: {
       functionType: string;
-      variables: Record<string, any>;
+      context: { bookId?: string; projectId?: string; userId?: string };
       customPrompt?: string;
       customModel?: string;
     }) => {
@@ -109,12 +123,27 @@ export default function AIFunctions() {
     },
   });
 
-  // Handle variable change
-  const handleVariableChange = (variableName: string, value: any) => {
-    setVariables(prev => ({
-      ...prev,
-      [variableName]: value
-    }));
+  // Fetch field values for preview
+  const previewMutation = useMutation({
+    mutationFn: async (context: { bookId?: string; projectId?: string }) => {
+      return await apiRequest("POST", "/api/ai/field-values", { context });
+    },
+    onSuccess: (values) => {
+      setPreviewValues(values);
+    },
+  });
+
+  // Handle context change
+  const handleContextChange = (field: string, value: string) => {
+    if (field === 'book') {
+      setSelectedBook(value);
+      const context = { bookId: value, projectId: selectedProject };
+      previewMutation.mutate(context);
+    } else if (field === 'project') {
+      setSelectedProject(value);
+      const context = { bookId: selectedBook, projectId: value };
+      previewMutation.mutate(context);
+    }
   };
 
   // Handle generation
@@ -128,22 +157,12 @@ export default function AIFunctions() {
       return;
     }
 
-    // Check required variables
-    const requiredVars = (functionVariables as Variable[])?.filter(v => v.required) || [];
-    const missingVars = requiredVars.filter(v => !variables[v.name]);
-    
-    if (missingVars.length > 0) {
-      toast({
-        title: "Variables manquantes",
-        description: `Variables requises: ${missingVars.map(v => v.description).join(', ')}`,
-        variant: "destructive"
-      });
-      return;
-    }
-
     generateMutation.mutate({
       functionType: selectedFunction,
-      variables,
+      context: {
+        bookId: selectedBook || undefined,
+        projectId: selectedProject || undefined
+      },
       customPrompt: customPrompt || undefined,
       customModel: customModel || undefined
     });
@@ -238,67 +257,59 @@ export default function AIFunctions() {
                     </CardContent>
                   </Card>
 
-                  {/* Variables Configuration */}
+                  {/* Context Configuration */}
                   <Card>
                     <CardHeader>
-                      <CardTitle>Variables de la Fonction</CardTitle>
+                      <CardTitle>Contexte des Données</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {!selectedFunction ? (
-                        <div className="text-center py-8 text-gray-500">
-                          Sélectionnez une fonction pour voir les variables disponibles
-                        </div>
-                      ) : variablesLoading ? (
-                        <div className="text-center py-8">Chargement des variables...</div>
-                      ) : (
-                        <div className="space-y-4">
-                          {(functionVariables as Variable[])?.map((variable) => (
-                            <div key={variable.name}>
-                              <Label htmlFor={variable.name} className="flex items-center gap-2">
-                                {variable.description}
-                                {variable.required && <Badge variant="outline" className="text-xs">Requis</Badge>}
-                              </Label>
-                              
-                              {variable.type === 'select' ? (
-                                <Select
-                                  value={variables[variable.name] || ''}
-                                  onValueChange={(value) => handleVariableChange(variable.name, value)}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue placeholder={`Sélectionner ${variable.description.toLowerCase()}`} />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {variable.options?.map((option) => (
-                                      <SelectItem key={option} value={option}>
-                                        {option}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              ) : variable.type === 'number' ? (
-                                <Input
-                                  id={variable.name}
-                                  type="number"
-                                  value={variables[variable.name] || ''}
-                                  onChange={(e) => handleVariableChange(variable.name, parseInt(e.target.value) || '')}
-                                  placeholder={variable.description}
-                                />
-                              ) : (
-                                <Input
-                                  id={variable.name}
-                                  value={variables[variable.name] || ''}
-                                  onChange={(e) => handleVariableChange(variable.name, e.target.value)}
-                                  placeholder={variable.description}
-                                />
-                              )}
-                            </div>
-                          ))}
-                          
-                          {(functionVariables as Variable[])?.length === 0 && (
-                            <div className="text-center py-4 text-gray-500">
-                              Aucune variable requise pour cette fonction
-                            </div>
-                          )}
+                      <div>
+                        <Label htmlFor="project">Projet (optionnel)</Label>
+                        <Select value={selectedProject} onValueChange={(value) => handleContextChange('project', value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner un projet" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Aucun projet</SelectItem>
+                            {(projects as any)?.map((project: any) => (
+                              <SelectItem key={project.id} value={project.id}>
+                                {project.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="book">Livre (optionnel)</Label>
+                        <Select value={selectedBook} onValueChange={(value) => handleContextChange('book', value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner un livre" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Aucun livre</SelectItem>
+                            {(books as any)?.map((book: any) => (
+                              <SelectItem key={book.id} value={book.id}>
+                                {book.title}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Preview of available variables */}
+                      {(selectedBook || selectedProject) && (
+                        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                          <h4 className="font-medium mb-2">Aperçu des variables disponibles :</h4>
+                          <div className="text-sm space-y-1">
+                            {Object.entries(previewValues).map(([key, value]) => (
+                              <div key={key} className="flex items-center gap-2">
+                                <code className="px-1 bg-gray-200 rounded text-xs">{`{${key}}`}</code>
+                                <span className="text-gray-600">=</span>
+                                <span className="text-gray-800">{String(value || '[non défini]').substring(0, 50)}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </CardContent>

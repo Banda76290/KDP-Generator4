@@ -947,6 +947,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // New AI Configuration routes for database fields
+  app.post("/api/ai/generate-configured", isAuthenticated, async (req: any, res) => {
+    try {
+      const { functionType, context, customPrompt, customModel } = req.body;
+      
+      if (!functionType) {
+        return res.status(400).json({ message: "Function type is required" });
+      }
+
+      // Import the AI service
+      const { aiConfigService } = await import('./services/aiConfigService');
+      
+      const result = await aiConfigService.generateContent({
+        functionType,
+        context: context || { userId: req.user?.claims?.sub },
+        customPrompt,
+        customModel
+      });
+
+      res.json(result);
+    } catch (error) {
+      console.error("AI generation error:", error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to generate AI content" 
+      });
+    }
+  });
+
+  // Get available AI functions
+  app.get("/api/ai/functions", isAuthenticated, async (req, res) => {
+    try {
+      const { aiConfigService } = await import('./services/aiConfigService');
+      const functions = aiConfigService.getAvailableFunctions();
+      res.json(functions);
+    } catch (error) {
+      console.error("Error fetching AI functions:", error);
+      res.status(500).json({ message: "Failed to fetch AI functions" });
+    }
+  });
+
+  // Get database fields for AI prompts
+  app.get("/api/ai/database-fields", isAuthenticated, async (req, res) => {
+    try {
+      const { databaseFieldsService } = await import('./services/databaseFieldsService');
+      const fields = databaseFieldsService.getFieldsByCategory();
+      res.json(fields);
+    } catch (error) {
+      console.error("Error fetching database fields:", error);
+      res.status(500).json({ message: "Failed to fetch database fields" });
+    }
+  });
+
+  // Get field values for a specific context
+  app.post("/api/ai/field-values", isAuthenticated, async (req: any, res) => {
+    try {
+      const { context } = req.body;
+      const { databaseFieldsService } = await import('./services/databaseFieldsService');
+      
+      const finalContext = {
+        ...context,
+        userId: context?.userId || req.user?.claims?.sub
+      };
+      
+      const values = await databaseFieldsService.getFieldValues(finalContext);
+      res.json(values);
+    } catch (error) {
+      console.error("Error fetching field values:", error);
+      res.status(500).json({ message: "Failed to fetch field values" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

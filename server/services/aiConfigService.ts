@@ -1,4 +1,5 @@
 import { OpenAI } from 'openai';
+import { databaseFieldsService, type DatabaseField } from './databaseFieldsService';
 
 interface Variable {
   name: string;
@@ -24,7 +25,11 @@ interface AIPromptTemplate {
 
 interface AIGenerationRequest {
   functionType: string;
-  variables: Record<string, any>;
+  context: {
+    bookId?: string;
+    projectId?: string;
+    userId?: string;
+  };
   customPrompt?: string;
   customModel?: string;
 }
@@ -49,68 +54,50 @@ class AIConfigService {
         id: '1',
         name: 'Générateur de Description',
         type: 'description',
-        systemPrompt: 'Tu es un expert en marketing éditorial. Tu écris des descriptions de livres captivantes et professionnelles.',
-        userPromptTemplate: 'Créez une description marketing attractive pour le livre "{title}" dans le genre {genre}. Public cible: {target_audience}. La description doit être en {language} et faire environ 150-200 mots.',
+        systemPrompt: 'Tu es un expert en marketing éditorial. Tu écris des descriptions de livres captivantes et professionnelles qui convertissent les lecteurs potentiels en acheteurs.',
+        userPromptTemplate: 'Créez une description marketing attractive pour le livre "{title}" dans la catégorie {primaryCategory}. Public cible: {targetAudience}. La description doit être écrite en {language} et faire environ 150-200 mots. Prix: {ebookPrice}€. Mots-clés à intégrer naturellement: {keywords}.',
         model: 'gpt-4o',
         maxTokens: 500,
         temperature: 0.7,
         isActive: true,
-        isDefault: true,
-        variables: [
-          { name: 'title', description: 'Titre du livre', type: 'text', required: true },
-          { name: 'genre', description: 'Genre du livre', type: 'select', options: ['Fiction', 'Non-fiction', 'Romance', 'Thriller'], required: true },
-          { name: 'target_audience', description: 'Public cible', type: 'text', required: false },
-          { name: 'language', description: 'Langue', type: 'select', options: ['Français', 'English'], required: false }
-        ]
+        isDefault: true
       },
       {
         id: '2',
         name: 'Générateur de Structure',
         type: 'structure',
-        systemPrompt: 'Tu es un consultant éditorial expert en structuration de livres. Tu créés des plans détaillés et logiques.',
-        userPromptTemplate: 'Créez un plan détaillé pour le livre "{title}" dans le genre {genre}. Le livre doit faire environ {pages} pages. Incluez les chapitres principaux avec un résumé de chaque section.',
+        systemPrompt: 'Tu es un consultant éditorial expert en structuration de livres. Tu créés des plans détaillés et logiques qui guident efficacement le processus d\'écriture.',
+        userPromptTemplate: 'Créez un plan détaillé pour le livre "{title}" (sous-titre: {subtitle}) dans la catégorie {primaryCategory}. Le livre doit faire environ {manuscriptPages} pages et {expectedLength} mots. Public cible: {targetAudience}. Incluez les chapitres principaux avec un résumé de chaque section et les points clés à développer.',
         model: 'gpt-4o',
         maxTokens: 1000,
         temperature: 0.6,
         isActive: true,
-        isDefault: true,
-        variables: [
-          { name: 'title', description: 'Titre du livre', type: 'text', required: true },
-          { name: 'genre', description: 'Genre du livre', type: 'text', required: true },
-          { name: 'pages', description: 'Nombre de pages', type: 'number', required: false }
-        ]
+        isDefault: true
       },
       {
         id: '3',
         name: 'Générateur de Marketing',
         type: 'marketing',
-        systemPrompt: 'Tu es un spécialiste du marketing éditorial. Tu créés du contenu promotionnel efficace pour les livres.',
-        userPromptTemplate: 'Créez du contenu marketing pour promouvoir le livre "{title}" de {author}. Incluez: 1) Un pitch elevator de 30 secondes, 2) 3 posts pour réseaux sociaux, 3) Une annonce publicitaire courte.',
+        systemPrompt: 'Tu es un spécialiste du marketing éditorial. Tu créés du contenu promotionnel efficace qui génère des ventes et engage l\'audience cible.',
+        userPromptTemplate: 'Créez du contenu marketing pour promouvoir le livre "{bookFullTitle}" de {fullAuthorName}. Prix: {ebookPrice}€ (eBook), {paperbackPrice}€ (papier). Catégorie: {primaryCategory}. Public cible: {targetAudience}. Incluez: 1) Un pitch elevator de 30 secondes, 2) 3 posts pour réseaux sociaux, 3) Une annonce publicitaire courte, 4) Email de lancement.',
         model: 'gpt-4o-mini',
         maxTokens: 800,
         temperature: 0.8,
         isActive: true,
-        isDefault: true,
-        variables: [
-          { name: 'title', description: 'Titre du livre', type: 'text', required: true },
-          { name: 'author', description: 'Nom de l\'auteur', type: 'text', required: true }
-        ]
+        isDefault: true
       }
     ];
 
     return mockConfigs.find(config => config.type === type && config.isActive) || null;
   }
 
-  // Replace variables in prompt template
-  private replaceVariables(template: string, variables: Record<string, any>): string {
-    let result = template;
+  // Replace variables in prompt template using database values
+  private async replaceVariables(template: string, context: { bookId?: string; projectId?: string; userId?: string }): Promise<string> {
+    // Get field values from database
+    const fieldValues = await databaseFieldsService.getFieldValues(context);
     
-    Object.entries(variables).forEach(([key, value]) => {
-      const regex = new RegExp(`{${key}}`, 'g');
-      result = result.replace(regex, String(value || `[${key}]`));
-    });
-
-    return result;
+    // Replace variables in template
+    return databaseFieldsService.replaceVariables(template, fieldValues);
   }
 
   // Generate AI content using configuration
@@ -130,8 +117,8 @@ class AIConfigService {
     const model = request.customModel || config.model;
     
     // Build the prompt
-    const systemPrompt = this.replaceVariables(config.systemPrompt, request.variables);
-    const userPrompt = request.customPrompt || this.replaceVariables(config.userPromptTemplate, request.variables);
+    const systemPrompt = await this.replaceVariables(config.systemPrompt, request.context);
+    const userPrompt = request.customPrompt || await this.replaceVariables(config.userPromptTemplate, request.context);
 
     try {
       const completion = await this.openai.chat.completions.create({
@@ -179,10 +166,14 @@ class AIConfigService {
     return inputCost + outputCost;
   }
 
-  // Get available variables for a function type
-  getVariablesForFunction(functionType: string): Variable[] {
-    const config = this.getConfigByType(functionType);
-    return config?.variables || [];
+  // Get available database fields for a function type
+  getVariablesForFunction(functionType: string): DatabaseField[] {
+    return databaseFieldsService.getAvailableFields();
+  }
+
+  // Get fields grouped by category
+  getFieldsByCategory(): Record<string, DatabaseField[]> {
+    return databaseFieldsService.getFieldsByCategory();
   }
 
   // Get all available AI functions

@@ -156,14 +156,15 @@ The application is designed to be deployed on Replit with integrated authenticat
 
 ### Advanced AI Functions System (29 Juillet 2025 - Final Update)
 - **Configurable AI Functions**: Complete system allowing configuration of each AI feature individually
-- **Dynamic Variable System**: Variables can be injected into prompts with {variable_name} syntax
+- **Database Variable System**: Variables automatically extracted from database fields (books, projects, users)
+- **Dynamic Field Injection**: Real-time replacement of {field_name} with actual database values
 - **Model Selection**: Each function can use different AI models (GPT-4o, GPT-4o-mini, etc.)
 - **Custom Prompts**: System and user prompts are fully configurable per function
-- **Variable Types**: Support for text, number, and select dropdown variables
-- **AI Functions Page**: New user interface for accessing configured AI functions with dynamic forms
-- **Backend Service**: AIConfigService handles prompt templating and variable replacement
-- **Real Configuration**: Functions include description generator, structure creator, marketing content, etc.
-- **Parameter Control**: Max tokens, temperature, and model selection per function
+- **Context-Aware Generation**: Select specific books/projects to populate variables automatically
+- **AI Functions Page**: New user interface with context selection and variable preview
+- **Backend Services**: AIConfigService + DatabaseFieldsService for field extraction and replacement
+- **Real Field Mapping**: Title, language, genre, author, price, etc. automatically injected
+- **Preview System**: Shows available variables and their current values before generation
 - **Cost Tracking**: Automatic calculation of generation costs based on token usage
 
 ### Current Features Available
