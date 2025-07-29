@@ -991,7 +991,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/ai/database-fields", isAuthenticated, async (req, res) => {
     try {
       const { databaseFieldsService } = await import('./services/databaseFieldsService');
-      const fields = databaseFieldsService.getFieldsByCategory();
+      const fields = databaseFieldsService.getCategorizedFields();
       res.json(fields);
     } catch (error) {
       console.error("Error fetching database fields:", error);
