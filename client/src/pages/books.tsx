@@ -64,15 +64,37 @@ export default function BooksPage() {
     return null;
   }
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="flex pt-16">
-        <Sidebar />
-        <main className="flex-1 min-w-0 p-4 md:p-6 md:ml-64">
-          <BooksContent />
-        </main>
+    <Layout>
+      <div className="w-full">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold">Books</h1>
+            <p className="text-muted-foreground">
+              Manage all your books and their project assignments
+            </p>
+            {books && books.filter((book: Book) => !book.projectId).length > 0 && (
+              <div className="flex items-center gap-2 mt-2">
+                <AlertTriangle className="h-4 w-4 text-amber-500" />
+                <span className="text-sm text-amber-600">
+                  {books.filter((book: Book) => !book.projectId).length} book{books.filter((book: Book) => !book.projectId).length !== 1 ? 's' : ''} not assigned to any project
+                </span>
+              </div>
+            )}
+          </div>
+          <Link href="/books/create">
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Book
+            </Button>
+          </Link>
+        </div>
+
+        {/* Rest of the content will be added later */}
+        <div className="text-center py-8">
+          <p>Books page converted to Layout - content loading...</p>
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 }
 

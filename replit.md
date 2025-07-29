@@ -220,6 +220,9 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Automatic Close**: Navigation drawer closes automatically when user selects a menu item
 - **Complete Feature Parity**: Mobile navigation includes all desktop features (main nav, admin section, account section)
 - **Modern UI Standards**: Follows mobile navigation best practices with overlay, animations, and accessibility
+- **Layout Architecture Fix**: Converted all pages from direct Header/Sidebar imports to unified Layout component
+- **Scrollable Menu**: Added overflow-y-auto to mobile navigation for long menu lists
+- **Consistent Experience**: Mobile navigation now works consistently across all authenticated pages
 
 ### Current Features Available
 - **Complete Dashboard**: KPI cards, sales charts, format distribution, recent projects table
