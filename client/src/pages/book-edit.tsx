@@ -394,7 +394,10 @@ export default function EditBook() {
                 <CardContent className="space-y-6">
                   {/* Language */}
                   <div className="space-y-2">
-                    <Label htmlFor="language">Language *</Label>
+                    <Label htmlFor="language" className="text-sm font-medium">Language *</Label>
+                    <p className="text-sm text-gray-600">
+                      What language is your book written in? <span className="text-blue-600 underline cursor-pointer">Supported languages</span>
+                    </p>
                     <Select 
                       value={form.watch("language")} 
                       onValueChange={(value) => form.setValue("language", value)}
@@ -412,7 +415,11 @@ export default function EditBook() {
 
                   {/* Book Title */}
                   <div className="space-y-2">
-                    <Label htmlFor="title">Book Title *</Label>
+                    <Label htmlFor="title" className="text-sm font-medium">Book Title *</Label>
+                    <p className="text-sm text-gray-600">
+                      Enter your title as it should appear on the book cover and in the catalog. Some
+                      customers use long titles to help with keyword searches.
+                    </p>
                     <Input
                       id="title"
                       placeholder="Enter your book title"
@@ -425,7 +432,8 @@ export default function EditBook() {
 
                   {/* Subtitle */}
                   <div className="space-y-2">
-                    <Label htmlFor="subtitle">Subtitle</Label>
+                    <Label htmlFor="subtitle" className="text-sm font-medium">Subtitle</Label>
+                    <p className="text-sm text-gray-600">Optional subtitle for your book</p>
                     <Input
                       id="subtitle"
                       placeholder="Enter subtitle (optional)"
@@ -434,24 +442,30 @@ export default function EditBook() {
                   </div>
 
                   {/* Series Information */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="seriesTitle">Series Title</Label>
-                      <Input
-                        id="seriesTitle"
-                        placeholder="Enter series name (if applicable)"
-                        {...form.register("seriesTitle")}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="seriesNumber">Volume Number</Label>
-                      <Input
-                        id="seriesNumber"
-                        type="number"
-                        min="1"
-                        placeholder="1"
-                        {...form.register("seriesNumber", { valueAsNumber: true })}
-                      />
+                  <div className="space-y-4">
+                    <Label className="text-sm font-medium">Series Information</Label>
+                    <p className="text-sm text-gray-600">
+                      Does this book belong to a series? You can add it to a series here or leave optional.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="seriesTitle" className="text-sm">Series Title</Label>
+                        <Input
+                          id="seriesTitle"
+                          placeholder="Enter series name (if applicable)"
+                          {...form.register("seriesTitle")}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="seriesNumber" className="text-sm">Volume Number</Label>
+                        <Input
+                          id="seriesNumber"
+                          type="number"
+                          min="1"
+                          placeholder="1"
+                          {...form.register("seriesNumber", { valueAsNumber: true })}
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -469,10 +483,13 @@ export default function EditBook() {
 
                   {/* Author Information */}
                   <div className="space-y-4">
-                    <Label className="text-base font-semibold">Author Information</Label>
+                    <Label className="text-sm font-medium">Authors</Label>
+                    <p className="text-sm text-gray-600">
+                      List the primary author's author display name as you would like to see it in the catalog. Use "and" between multiple names, not "&".
+                    </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="authorFirstName">First Name *</Label>
+                        <Label htmlFor="authorFirstName" className="text-sm">First Name *</Label>
                         <Input
                           id="authorFirstName"
                           placeholder="Author's first name"
@@ -483,7 +500,7 @@ export default function EditBook() {
                         )}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="authorLastName">Last Name *</Label>
+                        <Label htmlFor="authorLastName" className="text-sm">Last Name *</Label>
                         <Input
                           id="authorLastName"
                           placeholder="Author's last name"
@@ -498,8 +515,12 @@ export default function EditBook() {
 
                   {/* Contributors */}
                   <div className="space-y-4">
+                    <Label className="text-sm font-medium">Contributors</Label>
+                    <p className="text-sm text-gray-600">
+                      Who else contributed to this book? Include editors, translators, narrators and anyone whose names you'd like to appear on the detail page.
+                    </p>
                     <div className="flex items-center justify-between">
-                      <Label className="text-base font-semibold">Contributors</Label>
+                      <span className="text-sm text-gray-500">Add contributors</span>
                       <Button type="button" variant="outline" size="sm" onClick={addContributor}>
                         <Plus className="w-4 h-4 mr-2" />
                         Add Contributor
@@ -546,39 +567,54 @@ export default function EditBook() {
 
                   {/* Description */}
                   <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
+                    <Label htmlFor="description" className="text-sm font-medium">Description</Label>
+                    <p className="text-sm text-gray-600">
+                      Provide a description that will entice readers to buy your book. What is your book about? What makes it interesting? What should readers expect? This can be copied from the back cover of your book.
+                    </p>
                     <Textarea
                       id="description"
                       placeholder="Enter a compelling book description that will attract readers..."
                       className="min-h-[120px]"
                       {...form.register("description")}
                     />
-                    <p className="text-sm text-gray-500">
-                      Write a compelling description that will appear on your book's detail page.
-                    </p>
+                    <div className="text-sm text-gray-500">
+                      <p>4000 characters remaining</p>
+                    </div>
                   </div>
 
                   {/* Publishing Rights */}
                   <div className="space-y-4">
-                    <Label className="text-base font-semibold">Publishing Rights</Label>
+                    <Label className="text-sm font-medium">Publishing Rights</Label>
+                    <p className="text-sm text-gray-600">
+                      Choose the option that applies to your book. Choosing the wrong option may result in your content being blocked. <span className="text-blue-600 underline cursor-pointer">Learn more about content guidelines</span>
+                    </p>
                     <RadioGroup 
                       value={form.watch("publishingRights")} 
                       onValueChange={(value) => form.setValue("publishingRights", value as any)}
                     >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="owned" id="owned" />
-                        <Label htmlFor="owned">I own the copyright and hold publishing rights</Label>
+                      <div className="flex items-start space-x-2">
+                        <RadioGroupItem value="owned" id="owned" className="mt-1" />
+                        <div className="flex-1">
+                          <Label htmlFor="owned" className="text-sm font-medium">I own the copyright and hold publishing rights</Label>
+                          <p className="text-sm text-gray-600 mt-1">You wrote the book yourself, bought the rights from someone else, or work for the publisher that holds the rights.</p>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="public-domain" id="public-domain" />
-                        <Label htmlFor="public-domain">This is a public domain work</Label>
+                      <div className="flex items-start space-x-2">
+                        <RadioGroupItem value="public-domain" id="public-domain" className="mt-1" />
+                        <div className="flex-1">
+                          <Label htmlFor="public-domain" className="text-sm font-medium">This is a public domain work</Label>
+                          <p className="text-sm text-gray-600 mt-1">The content is in the public domain and you have the right to publish it.</p>
+                        </div>
                       </div>
                     </RadioGroup>
                   </div>
 
                   {/* Categories */}
                   <div className="space-y-4">
-                    <Label className="text-base font-semibold">Categories</Label>
+                    <Label className="text-sm font-medium">Categories</Label>
+                    <p className="text-sm text-gray-600">
+                      Choose up to 2 categories that best describe your book. This will help customers find your book. You can search by keyword, see all categories, or browse by subject.
+                    </p>
                     <div className="flex flex-wrap gap-2 mb-2">
                       {categories.map((category) => (
                         <Badge key={category} variant="secondary" className="flex items-center gap-1">
@@ -620,7 +656,10 @@ export default function EditBook() {
 
                   {/* Keywords */}
                   <div className="space-y-4">
-                    <Label className="text-base font-semibold">Keywords</Label>
+                    <Label className="text-sm font-medium">Keywords</Label>
+                    <p className="text-sm text-gray-600">
+                      Enter up to 7 keywords or short phrases that describe the content, topic, theme or type of your book. Separate keywords with commas.
+                    </p>
                     <div className="flex flex-wrap gap-2 mb-2">
                       {keywords.map((keyword) => (
                         <Badge key={keyword} variant="secondary" className="flex items-center gap-1">
@@ -657,55 +696,61 @@ export default function EditBook() {
                         Add
                       </Button>
                     </div>
-                    <p className="text-sm text-gray-500">Add up to 7 keywords to help readers discover your book.</p>
+                    <div className="text-sm text-gray-500">
+                      <p>Examples: vampires, romance, cooking, gardening, mystery, young adult</p>
+                    </div>
                   </div>
 
                   {/* Additional Options */}
                   <div className="space-y-4">
-                    <Label className="text-base font-semibold">Additional Options</Label>
+                    <Label className="text-sm font-medium">Additional Options</Label>
                     
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-2">
+                    <div className="space-y-4">
+                      <div className="flex items-start space-x-2">
                         <Checkbox
                           id="hasExplicitContent"
                           checked={form.watch("hasExplicitContent")}
                           onCheckedChange={(checked) => form.setValue("hasExplicitContent", checked as boolean)}
+                          className="mt-1"
                         />
-                        <Label htmlFor="hasExplicitContent">This book contains explicit content</Label>
+                        <div className="flex-1">
+                          <Label htmlFor="hasExplicitContent" className="text-sm font-medium">Adult content</Label>
+                          <p className="text-sm text-gray-600 mt-1">Check this box if your book contains content unsuitable for minors under 18</p>
+                        </div>
                       </div>
 
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="isLowContentBook"
-                          checked={form.watch("isLowContentBook")}
-                          onCheckedChange={(checked) => form.setValue("isLowContentBook", checked as boolean)}
-                        />
-                        <Label htmlFor="isLowContentBook">This is a low-content book (journals, planners, etc.)</Label>
-                      </div>
-
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="isLargePrintBook"
-                          checked={form.watch("isLargePrintBook")}
-                          onCheckedChange={(checked) => form.setValue("isLargePrintBook", checked as boolean)}
-                        />
-                        <Label htmlFor="isLargePrintBook">This is a large print book</Label>
-                      </div>
-
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="previouslyPublished"
-                          checked={form.watch("previouslyPublished")}
-                          onCheckedChange={(checked) => form.setValue("previouslyPublished", checked as boolean)}
-                        />
-                        <Label htmlFor="previouslyPublished">This book has been previously published</Label>
-                      </div>
-
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-start space-x-2">
                         <Checkbox
                           id="useAI"
                           checked={form.watch("useAI")}
                           onCheckedChange={(checked) => form.setValue("useAI", checked as boolean)}
+                          className="mt-1"
+                        />
+                        <div className="flex-1">
+                          <Label htmlFor="useAI" className="text-sm font-medium">AI-generated content</Label>
+                          <p className="text-sm text-gray-600 mt-1">Check this box if this content has been generated using AI tools. When you check this box, you must also acknowledge that your use of AI-generated content follows all applicable guidelines. <span className="text-blue-600 underline cursor-pointer">Learn more</span></p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start space-x-2">
+                        <Checkbox
+                          id="previouslyPublished"
+                          checked={form.watch("previouslyPublished")}
+                          onCheckedChange={(checked) => form.setValue("previouslyPublished", checked as boolean)}
+                          className="mt-1"
+                        />
+                        <div className="flex-1">
+                          <Label htmlFor="previouslyPublished" className="text-sm font-medium">Previously published content</Label>
+                          <p className="text-sm text-gray-600 mt-1">Check this box if your content is at least 10% different from a version that has been previously published or sold on Amazon or elsewhere, or if the content is new to Amazon</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start space-x-2">
+                        <Checkbox
+                          id="isLowContentBook"
+                          checked={form.watch("isLowContentBook")}
+                          onCheckedChange={(checked) => form.setValue("isLowContentBook", checked as boolean)}
+                          className="mt-1"
                         />
                         <Label htmlFor="useAI">AI was used in creating this book</Label>
                       </div>
