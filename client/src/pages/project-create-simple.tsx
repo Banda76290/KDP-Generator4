@@ -37,7 +37,6 @@ export default function CreateProject() {
     defaultValues: {
       name: "",
       description: "",
-      status: "draft",
       attachExistingBook: false,
       createNewBook: false,
     },
@@ -57,7 +56,6 @@ export default function CreateProject() {
       const project = await apiRequest("POST", "/api/projects", {
         name: data.name,
         description: data.description,
-        status: data.status,
       });
       
       console.log('Project created:', project);
@@ -79,8 +77,8 @@ export default function CreateProject() {
     onSuccess: (project) => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       toast({
-        title: "Projet créé",
-        description: "Votre projet a été créé avec succès.",
+        title: "Project Created",
+        description: "Your project has been created successfully.",
       });
       
       // Only redirect to projects if we're not going to book creation
@@ -91,8 +89,8 @@ export default function CreateProject() {
     onError: (error) => {
       console.error('Project creation error:', error);
       toast({
-        title: "Erreur",
-        description: error.message || "Impossible de créer le projet",
+        title: "Error",
+        description: error.message || "Failed to create project",
         variant: "destructive",
       });
     },
@@ -120,14 +118,14 @@ export default function CreateProject() {
                 className="mb-4"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Retour aux projets
+                Back to Projects
               </Button>
               <div className="flex items-center space-x-3">
                 <Folder className="h-8 w-8 text-primary" />
                 <div>
-                  <h1 className="text-3xl font-bold">Créer un Nouveau Projet</h1>
+                  <h1 className="text-3xl font-bold">Create New Project</h1>
                   <p className="text-muted-foreground">
-                    Créez un projet pour organiser vos livres KDP
+                    Create a project to organize your KDP books
                   </p>
                 </div>
               </div>
@@ -135,19 +133,19 @@ export default function CreateProject() {
 
             <Card className="max-w-2xl">
               <CardHeader>
-                <CardTitle>Informations du Projet</CardTitle>
+                <CardTitle>Project Information</CardTitle>
                 <CardDescription>
-                  Un projet vous permet de regrouper plusieurs livres (ebook, paperback, audiobook) sous un même thème ou série.
+                  A project allows you to group multiple books (ebook, paperback, audiobook) under the same theme or series.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={form.handleSubmit((data) => createProject.mutate(data))} className="space-y-6">
                   {/* Project Name */}
                   <div>
-                    <Label htmlFor="name">Nom du Projet *</Label>
+                    <Label htmlFor="name">Project Name *</Label>
                     <Input
                       {...form.register("name")}
-                      placeholder="Ex: Guide Google Analytics, Série Fantasy Romance..."
+                      placeholder="Ex: Google Analytics Guide, Fantasy Romance Series..."
                       onChange={(e) => handleNameChange(e.target.value)}
                       className="mt-1"
                     />
@@ -158,10 +156,10 @@ export default function CreateProject() {
 
                   {/* Project Description */}
                   <div>
-                    <Label htmlFor="description">Description (Optionnel)</Label>
+                    <Label htmlFor="description">Description (Optional)</Label>
                     <Textarea
                       {...form.register("description")}
-                      placeholder="Décrivez brièvement votre projet..."
+                      placeholder="Briefly describe your project..."
                       rows={3}
                       className="resize-none mt-1"
                     />
@@ -173,10 +171,10 @@ export default function CreateProject() {
                       <CardHeader className="pb-4">
                         <CardTitle className="text-lg flex items-center gap-2">
                           <BookOpen className="h-5 w-5" />
-                          Livres du Projet
+                          Project Books
                         </CardTitle>
                         <CardDescription>
-                          Vous pouvez rattacher un livre existant ou créer un nouveau livre pour ce projet.
+                          You can attach an existing book or create a new book for this project.
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
@@ -194,7 +192,7 @@ export default function CreateProject() {
                                   }
                                 }}
                               />
-                              <Label htmlFor="attachExisting">Rattacher un livre existant</Label>
+                              <Label htmlFor="attachExisting">Attach an existing book</Label>
                             </div>
                             
                             {form.watch("attachExistingBook") && (
@@ -203,7 +201,7 @@ export default function CreateProject() {
                                 onValueChange={(value) => form.setValue("selectedBookId", value)}
                               >
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Sélectionnez un livre" />
+                                  <SelectValue placeholder="Select a book" />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {(existingBooks as any[]).map((book: any) => (
@@ -230,12 +228,12 @@ export default function CreateProject() {
                               }
                             }}
                           />
-                          <Label htmlFor="createNew">Créer un nouveau livre pour ce projet</Label>
+                          <Label htmlFor="createNew">Create a new book for this project</Label>
                         </div>
 
                         {!form.watch("attachExistingBook") && !form.watch("createNewBook") && (
                           <div className="text-sm text-muted-foreground p-3 bg-muted/50 rounded">
-                            💡 Vous pourrez ajouter des livres plus tard depuis la page du projet
+                            💡 You can add books later from the project page
                           </div>
                         )}
                       </CardContent>
@@ -248,7 +246,7 @@ export default function CreateProject() {
                       variant="outline" 
                       onClick={() => setLocation("/projects")}
                     >
-                      Annuler
+                      Cancel
                     </Button>
                     <Button 
                       type="submit" 
@@ -258,12 +256,12 @@ export default function CreateProject() {
                       {createProject.isPending ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Création...
+                          Creating...
                         </>
                       ) : (
                         <>
                           <Plus className="mr-2 h-4 w-4" />
-                          {form.watch("createNewBook") ? "Créer et Ajouter un Livre" : "Créer le Projet"}
+                          {form.watch("createNewBook") ? "Create and Add Book" : "Create Project"}
                         </>
                       )}
                     </Button>

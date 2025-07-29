@@ -34,7 +34,6 @@ export default function EditProject() {
     defaultValues: {
       name: "",
       description: "",
-      status: "draft",
     },
   });
 
@@ -48,9 +47,8 @@ export default function EditProject() {
   useEffect(() => {
     if (project) {
       form.reset({
-        name: project.name || "",
-        description: project.description || "",
-        status: project.status || "draft",
+        name: (project as any).name || "",
+        description: (project as any).description || "",
       });
     }
   }, [project, form]);
@@ -62,7 +60,6 @@ export default function EditProject() {
       const updatedProject = await apiRequest("PUT", `/api/projects/${projectId}`, {
         name: data.name,
         description: data.description,
-        status: data.status,
       });
       
       console.log('Project updated:', updatedProject);
@@ -186,23 +183,7 @@ export default function EditProject() {
                           )}
                         </div>
 
-                        <div>
-                          <Label htmlFor="status">Status</Label>
-                          <Select 
-                            value={form.watch("status") || "draft"} 
-                            onValueChange={(value) => form.setValue("status", value as any)}
-                          >
-                            <SelectTrigger className="mt-1">
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="draft">Draft</SelectItem>
-                              <SelectItem value="in_review">In Review</SelectItem>
-                              <SelectItem value="published">Published</SelectItem>
-                              <SelectItem value="archived">Archived</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+
                       </CardContent>
                     </Card>
                   </div>
