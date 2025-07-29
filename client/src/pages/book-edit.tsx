@@ -71,7 +71,7 @@ export default function EditBook() {
   // Fetch existing book data (only if editing)
   const { data: book, isLoading: bookLoading, error } = useQuery<Book>({
     queryKey: [`/api/books/${bookId}`],
-    enabled: !!bookId,
+    enabled: !isCreating, // Only fetch if we're not creating (i.e., if we have a bookId)
   });
 
   const form = useForm<BookFormData>({
