@@ -157,14 +157,65 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserProjects(userId: string): Promise<ProjectWithRelations[]> {
-    // Simple query without relations for now to avoid relation errors
     const userProjects = await db.select().from(projects).where(eq(projects.userId, userId));
-    // TODO: Add books relation when books table is properly set up
-    return userProjects.map(project => ({
-      ...project,
-      books: [], // Empty for now, will populate when books API is ready
-      user: { id: userId } as User, // Minimal user data
-    })) as ProjectWithRelations[];
+    
+    // Get books for each project with sales data
+    const projectsWithBooks = await Promise.all(userProjects.map(async (project) => {
+      // Get books for this project
+      const projectBooks = await db.select().from(books).where(eq(books.projectId, project.id));
+      
+      // Calculate revenue and sales for each book
+      const booksWithStats = await Promise.all(projectBooks.map(async (book) => {
+        // Get sales data for this book
+        const bookSales = await db.select().from(salesData).where(eq(salesData.bookId, book.id));
+        
+        const totalRevenue = bookSales.reduce((sum, sale) => sum + parseFloat(sale.royalty || '0'), 0);
+        const totalSales = bookSales.reduce((sum, sale) => sum + (sale.unitsSold || 0), 0);
+        
+        // Calculate monthly revenue (current month)
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        const monthlyRevenue = bookSales
+          .filter(sale => {
+            const saleDate = new Date(sale.reportDate);
+            return saleDate.getMonth() === currentMonth && saleDate.getFullYear() === currentYear;
+          })
+          .reduce((sum, sale) => sum + parseFloat(sale.royalty || '0'), 0);
+        
+        const monthlySales = bookSales
+          .filter(sale => {
+            const saleDate = new Date(sale.reportDate);
+            return saleDate.getMonth() === currentMonth && saleDate.getFullYear() === currentYear;
+          })
+          .reduce((sum, sale) => sum + (sale.unitsSold || 0), 0);
+        
+        return {
+          ...book,
+          totalRevenue: totalRevenue.toString(),
+          totalSales,
+          monthlyRevenue: monthlyRevenue.toString(),
+          monthlySales,
+        };
+      }));
+      
+      // Calculate project totals
+      const projectTotalRevenue = booksWithStats.reduce((sum, book) => sum + parseFloat(book.totalRevenue), 0);
+      const projectTotalSales = booksWithStats.reduce((sum, book) => sum + book.totalSales, 0);
+      const projectMonthlyRevenue = booksWithStats.reduce((sum, book) => sum + parseFloat(book.monthlyRevenue), 0);
+      const projectMonthlySales = booksWithStats.reduce((sum, book) => sum + book.monthlySales, 0);
+      
+      return {
+        ...project,
+        books: booksWithStats,
+        user: { id: userId } as User,
+        totalRevenue: projectTotalRevenue.toString(),
+        totalSales: projectTotalSales,
+        monthlyRevenue: projectMonthlyRevenue.toString(),
+        monthlySales: projectMonthlySales,
+      };
+    }));
+    
+    return projectsWithBooks as ProjectWithRelations[];
   }
 
   async getProject(projectId: string, userId: string): Promise<ProjectWithRelations | undefined> {

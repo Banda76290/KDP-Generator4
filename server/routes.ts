@@ -106,7 +106,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Only accept name and description for simple project creation  
       const createSchema = insertProjectSchema.pick({ name: true, description: true });
       const projectData = createSchema.parse(req.body);
-      const fullProjectData = { ...projectData, userId };
+      // Map name to title for database compatibility (legacy field)
+      const fullProjectData = { 
+        ...projectData, 
+        title: projectData.name, // Legacy field for database compatibility
+        userId 
+      };
       
       console.log('Parsed project data:', fullProjectData);
       const project = await storage.createProject(fullProjectData);

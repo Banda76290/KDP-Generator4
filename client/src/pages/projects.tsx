@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, BarChart3 } from "lucide-react";
+import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, BarChart3, BookOpen, Globe, DollarSign, TrendingUp } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { ProjectWithRelations } from "@shared/schema";
 
@@ -155,7 +155,7 @@ export default function Projects() {
 
           {/* Projects Grid */}
           {projectsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <Card key={i} className="animate-pulse">
                   <CardHeader>
@@ -238,10 +238,102 @@ export default function Projects() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
+                      {/* Project Status */}
                       <div className="flex items-center justify-between">
                         <Badge className={getStatusColor(project.status || 'draft')}>
                           {(project.status || 'draft').replace('_', ' ')}
                         </Badge>
+                      </div>
+
+                      {/* Books List */}
+                      {project.books && project.books.length > 0 ? (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                            <BookOpen className="w-4 h-4" />
+                            Books ({project.books.length})
+                          </div>
+                          {project.books.map((book: any) => (
+                            <div key={book.id} className="border rounded-lg p-3 bg-gray-50 space-y-2">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="text-sm font-medium text-gray-900 truncate">{book.title}</h4>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <Badge variant="outline" className="text-xs">
+                                      {book.format}
+                                    </Badge>
+                                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                                      <Globe className="w-3 h-3" />
+                                      {book.language || 'English'}
+                                    </div>
+                                  </div>
+                                </div>
+                                <Badge className={getStatusColor(book.status || 'draft')} size="sm">
+                                  {(book.status || 'draft').replace('_', ' ')}
+                                </Badge>
+                              </div>
+                              
+                              {/* Book Revenue Stats */}
+                              <div className="grid grid-cols-2 gap-3 text-xs">
+                                <div>
+                                  <div className="flex items-center gap-1 text-gray-500 mb-1">
+                                    <TrendingUp className="w-3 h-3" />
+                                    This Month
+                                  </div>
+                                  <div className="font-medium">${parseFloat(book.monthlyRevenue || '0').toFixed(2)}</div>
+                                  <div className="text-gray-500">{book.monthlySales || 0} sales</div>
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-1 text-gray-500 mb-1">
+                                    <DollarSign className="w-3 h-3" />
+                                    Total
+                                  </div>
+                                  <div className="font-medium">${parseFloat(book.totalRevenue || '0').toFixed(2)}</div>
+                                  <div className="text-gray-500">{book.totalSales || 0} sales</div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-4 text-gray-500">
+                          <BookOpen className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                          <p className="text-sm">No books in this project</p>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="mt-2"
+                            onClick={() => setLocation(`/books/create?projectId=${project.id}`)}
+                          >
+                            <Plus className="w-3 h-3 mr-1" />
+                            Add Book
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* Project Revenue Summary */}
+                      <div className="border-t pt-3">
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <div className="flex items-center gap-1 text-gray-500 mb-1">
+                              <TrendingUp className="w-4 h-4" />
+                              Monthly Revenue
+                            </div>
+                            <div className="font-semibold text-green-600">
+                              ${parseFloat(project.monthlyRevenue || '0').toFixed(2)}
+                            </div>
+                            <div className="text-xs text-gray-500">{project.monthlySales || 0} sales</div>
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-1 text-gray-500 mb-1">
+                              <DollarSign className="w-4 h-4" />
+                              Total Revenue  
+                            </div>
+                            <div className="font-semibold text-blue-600">
+                              ${parseFloat(project.totalRevenue || '0').toFixed(2)}
+                            </div>
+                            <div className="text-xs text-gray-500">{project.totalSales || 0} sales</div>
+                          </div>
+                        </div>
                       </div>
                       
                       {project.books && project.books.length > 0 && (
