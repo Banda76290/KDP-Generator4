@@ -67,7 +67,7 @@ export default function EditBook() {
   const isCreating = !bookId;
   
   // Get projectId from URL if present
-  const urlParams = new URLSearchParams((location || '').split('?')[1] || '');
+  const urlParams = new URLSearchParams(window.location.search);
   const preSelectedProjectId = urlParams.get('projectId');
   
   console.log('BookEdit Debug:', { 
@@ -75,7 +75,8 @@ export default function EditBook() {
     isCreating, 
     location, 
     preSelectedProjectId,
-    fullUrl: window.location.href 
+    fullUrl: window.location.href,
+    search: window.location.search
   });
 
   // Fetch existing book data (only if editing)
