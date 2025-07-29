@@ -65,28 +65,7 @@ export default function BooksPage() {
   }
   return (
     <Layout>
-      <div className="w-full">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold">Books</h1>
-            <p className="text-muted-foreground">
-              Manage all your books and their project assignments
-            </p>
-            {/* Books data loading will be restored later */}
-          </div>
-          <Link href="/books/create">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Book
-            </Button>
-          </Link>
-        </div>
-
-        {/* Rest of the content will be added later */}
-        <div className="text-center py-8">
-          <p>Books page converted to Layout - content loading...</p>
-        </div>
-      </div>
+      <BooksContent />
     </Layout>
   );
 }
@@ -516,7 +495,7 @@ function BooksContent() {
                         This Month
                       </div>
                       <div className="font-medium">${parseFloat(book.monthlyRevenue || '0').toFixed(2)}</div>
-                      <div className="text-muted-foreground">{book.monthlySales || 0} sales</div>
+                      <div className="text-muted-foreground">{book.totalSales || 0} sales</div>
                     </div>
                     <div>
                       <div className="flex items-center gap-1 text-muted-foreground mb-1">
