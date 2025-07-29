@@ -142,6 +142,8 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Navigation Update**: Updated all project-related navigation to use dedicated pages instead of modals
 - **Book Edit Interface**: Complete reconstruction of book editing page to match KDP interface exactly
 - **Header Spacing**: Fixed header overlap issue in book edit page with proper top padding
+- **Save Buttons Implementation**: Added fully functional "Save as Draft" and "Save and Continue" buttons with tab navigation
+- **Form Validation**: Resolved TypeScript validation issues that were preventing button functionality
 
 ### Current Features Available
 - **Complete Dashboard**: KPI cards, sales charts, format distribution, recent projects table

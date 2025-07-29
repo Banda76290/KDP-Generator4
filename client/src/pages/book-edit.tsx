@@ -244,9 +244,6 @@ export default function EditBook() {
   };
 
   const handleSaveAsDraft = (data: BookFormData) => {
-    console.log('Save as Draft clicked - Form data:', data);
-    console.log('Save as Draft clicked - Form errors:', form.formState.errors);
-    
     const draftData = {
       ...data,
       status: "draft" as const,
@@ -256,9 +253,6 @@ export default function EditBook() {
   };
 
   const handleSaveAndContinue = (data: BookFormData) => {
-    console.log('Save and Continue clicked - Form data:', data);
-    console.log('Save and Continue clicked - Form errors:', form.formState.errors);
-    
     let nextTab = "";
     if (activeTab === "details") {
       nextTab = "content";
@@ -267,14 +261,6 @@ export default function EditBook() {
     }
     
     updateBook.mutate({ bookData: data, nextTab });
-  };
-
-  // Debug function to test button clicks
-  const handleTestClick = () => {
-    console.log('Test button clicked!');
-    console.log('Current form state:', form.formState);
-    console.log('Current form errors:', form.formState.errors);
-    console.log('Current form values:', form.getValues());
   };
 
   const handleDelete = () => {
@@ -934,17 +920,8 @@ export default function EditBook() {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={handleTestClick}
-                  >
-                    Test Click
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
                     onClick={() => {
-                      console.log('Save as Draft button clicked');
                       const formData = form.getValues();
-                      console.log('Form data direct call:', formData);
                       handleSaveAsDraft(formData);
                     }}
                     disabled={updateBook.isPending}
@@ -962,9 +939,7 @@ export default function EditBook() {
                     <Button
                       type="button"
                       onClick={() => {
-                        console.log('Save and Continue button clicked');
                         const formData = form.getValues();
-                        console.log('Form data direct call:', formData);
                         handleSaveAndContinue(formData);
                       }}
                       disabled={updateBook.isPending}
