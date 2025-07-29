@@ -32,12 +32,21 @@ export default function Projects() {
   // Duplication mutation
   const duplicateProject = useMutation({
     mutationFn: async (project: ProjectWithRelations) => {
-      return await apiRequest(`/api/projects`, "POST", {
-        name: `${project.name} (copy)`,
-        description: project.description,
-      });
+      console.log("Starting duplication for project:", project.name);
+      try {
+        const result = await apiRequest(`/api/projects`, "POST", {
+          name: `${project.name} (copy)`,
+          description: project.description,
+        });
+        console.log("Duplication successful:", result);
+        return result;
+      } catch (error) {
+        console.error("Duplication failed:", error);
+        throw error;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("onSuccess called with:", data);
       toast({
         title: "Success",
         description: "Project duplicated successfully",
@@ -45,6 +54,7 @@ export default function Projects() {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
     },
     onError: (error) => {
+      console.error("onError called with:", error);
       toast({
         title: "Error",
         description: "Failed to duplicate project",
@@ -169,6 +179,7 @@ export default function Projects() {
   };
 
   const handleDuplicateProject = (project: ProjectWithRelations) => {
+    console.log("Duplicating project:", project);
     duplicateProject.mutate(project);
   };
 
