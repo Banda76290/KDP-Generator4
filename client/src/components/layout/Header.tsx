@@ -3,11 +3,15 @@ import type { User } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Bell, ChevronDown, Settings, LogOut, Crown } from "lucide-react";
+import { Bell, ChevronDown, Settings, LogOut, Crown, Menu } from "lucide-react";
 import logoImage from "@assets/image_1753719885932.png";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
-export default function Header() {
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
+export default function Header({ onMenuClick }: HeaderProps = {}) {
   const { user } = useAuth() as { user: User | undefined };
 
   const getUserInitials = (firstName?: string, lastName?: string) => {
@@ -19,6 +23,16 @@ export default function Header() {
     <header className="bg-white dark:bg-background border-b border-border fixed top-0 left-0 right-0 z-50 h-16">
       <div className="flex items-center justify-between px-6 h-full">
         <div className="flex items-center space-x-4">
+          {/* Mobile Menu Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="md:hidden p-2"
+            onClick={onMenuClick}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+          
           <div className="flex items-center space-x-2">
             <a href="/" className="cursor-pointer">
               <img 
