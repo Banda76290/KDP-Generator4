@@ -175,7 +175,7 @@ function BooksContent() {
     return project?.name || "Unknown Project";
   };
 
-  const getStatusBadgeVariant = (status: string) => {
+  const getStatusBadgeVariant = (status: string | null) => {
     switch (status) {
       case "published":
         return "default";

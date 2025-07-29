@@ -7,6 +7,7 @@ import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, in
 import { aiService } from "./services/aiService";
 import { parseKDPReport } from "./services/kdpParser";
 import { z } from "zod";
+import OpenAI from "openai";
 
 // Admin middleware to check if user has admin or superadmin role
 const isAdmin = async (req: any, res: any, next: any) => {
@@ -377,7 +378,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const record of salesRecords) {
         const salesData = await storage.addSalesData({
           userId,
-          bookId: record.projectId || record.bookId, // Handle both for compatibility
+          bookId: record.projectId || record.asin || record.title || '', // Use fallback values
           reportDate: record.reportDate,
           format: record.format,
           marketplace: record.marketplace,
@@ -1056,6 +1057,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { functionKey, bookId, projectId, customPrompt, customModel, customTemperature } = req.body;
       const userId = req.user?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
 
       // Get the AI function configuration
       const { aiFunctionsService } = await import('./services/aiFunctionsService');
@@ -1075,7 +1080,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let contextData: any = { user };
       
       if (aiFunction.requiresBookContext && bookId) {
-        const book = await storage.getBook(bookId);
+        const book = await storage.getBook(bookId, userId);
         if (!book || book.userId !== userId) {
           return res.status(404).json({ message: "Book not found" });
         }
@@ -1083,15 +1088,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (aiFunction.requiresProjectContext && projectId) {
-        const project = await storage.getProject(projectId);
+        const project = await storage.getProject(projectId, userId);
         if (!project || project.userId !== userId) {
           return res.status(404).json({ message: "Project not found" });
         }
         contextData.project = project;
         
         // Get project books for additional context
-        const books = await storage.getBooksByProject(projectId);
-        contextData.projectBooks = books;
+        const books = await storage.getUserBooks(userId);
+        const projectBooks = books.filter(book => book.projectId === projectId);
+        contextData.projectBooks = projectBooks;
       }
 
       // Replace variables in the prompt template  

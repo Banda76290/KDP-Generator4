@@ -321,7 +321,7 @@ export class DatabaseStorage implements IStorage {
       return newName;
     };
 
-    const newProjectName = generateUniqueName(originalProject.name);
+    const newProjectName = generateUniqueName(originalProject.name || originalProject.title);
 
     // Create the new project with unique name
     const duplicatedProjectData: InsertProject = {
@@ -338,8 +338,7 @@ export class DatabaseStorage implements IStorage {
       formats: originalProject.formats,
       publicationInfo: originalProject.publicationInfo as any,
       coverImageUrl: originalProject.coverImageUrl,
-      totalSales: 0,
-      totalRevenue: "0.00",
+
       language: originalProject.language,
       seriesTitle: originalProject.seriesTitle,
       seriesNumber: originalProject.seriesNumber,
@@ -427,8 +426,7 @@ export class DatabaseStorage implements IStorage {
         format: originalBook.format,
         publicationInfo: originalBook.publicationInfo as any,
         coverImageUrl: originalBook.coverImageUrl,
-        totalRevenue: "0.00",
-        monthlyRevenue: "0.00",
+
       };
 
       const newBook = await this.createBook(duplicatedBookData);
@@ -545,8 +543,7 @@ export class DatabaseStorage implements IStorage {
       format: originalBook.format,
       publicationInfo: originalBook.publicationInfo as any,
       coverImageUrl: originalBook.coverImageUrl,
-      totalRevenue: "0.00",
-      monthlyRevenue: "0.00",
+
     };
 
     const newBook = await this.createBook(duplicatedBookData);
