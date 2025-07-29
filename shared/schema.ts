@@ -66,16 +66,45 @@ export const formatEnum = pgEnum("format", [
   "hardcover"
 ]);
 
-// Projects table
+// Projects table - Simplified container for books
 export const projects = pgTable("projects", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  description: text("description"),
+  status: projectStatusEnum("status").default("draft"),
+  totalSales: integer("total_sales").default(0),
+  totalRevenue: decimal("total_revenue", { precision: 10, scale: 2 }).default("0.00"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Book status enum
+export const bookStatusEnum = pgEnum("book_status", [
+  "draft",
+  "writing",
+  "editing", 
+  "design",
+  "formatting",
+  "marketing",
+  "in_review",
+  "published",
+  "archived"
+]);
+
+// Books table - Contains all KDP details
+export const books = pgTable("books", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  projectId: varchar("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  
+  // Basic Information
   title: text("title").notNull(),
   subtitle: text("subtitle"),
   description: text("description"),
   categories: text("categories").array(),
   keywords: text("keywords").array(),
-  status: projectStatusEnum("status").default("draft"),
+  status: bookStatusEnum("status").default("draft"),
   
   // Language and Region
   language: varchar("language").default("English"),
@@ -121,30 +150,34 @@ export const projects = pgTable("projects", {
   aiPrompt: text("ai_prompt"),
   aiContentType: varchar("ai_content_type"),
   
-  // Original fields
-  formats: formatEnum("formats").array(),
+  // Format and Publication
+  format: formatEnum("format").notNull(), // Single format per book
   publicationInfo: jsonb("publication_info"),
   coverImageUrl: varchar("cover_image_url"),
+  
+  // Sales tracking
   totalSales: integer("total_sales").default(0),
   totalRevenue: decimal("total_revenue", { precision: 10, scale: 2 }).default("0.00"),
+  monthlyRevenue: decimal("monthly_revenue", { precision: 10, scale: 2 }).default("0.00"),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Contributors table
+// Contributors table - Now linked to books
 export const contributors = pgTable("contributors", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  projectId: varchar("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  bookId: varchar("book_id").notNull().references(() => books.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   role: varchar("role").notNull(), // author, co-author, editor, illustrator
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// KDP Sales Data table
+// KDP Sales Data table - Now linked to books
 export const salesData = pgTable("sales_data", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  projectId: varchar("project_id").references(() => projects.id, { onDelete: "cascade" }),
+  bookId: varchar("book_id").notNull().references(() => books.id, { onDelete: "cascade" }),
   reportDate: timestamp("report_date").notNull(),
   format: formatEnum("format").notNull(),
   marketplace: varchar("marketplace").notNull(),
@@ -155,11 +188,12 @@ export const salesData = pgTable("sales_data", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// AI Generations table
+// AI Generations table - Can be linked to both projects and books
 export const aiGenerations = pgTable("ai_generations", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   projectId: varchar("project_id").references(() => projects.id, { onDelete: "cascade" }),
+  bookId: varchar("book_id").references(() => books.id, { onDelete: "cascade" }),
   type: varchar("type").notNull(), // structure, description, marketing, chapters
   prompt: text("prompt").notNull(),
   response: text("response").notNull(),
@@ -239,6 +273,7 @@ export const blogComments = pgTable("blog_comments", {
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   projects: many(projects),
+  books: many(books),
   salesData: many(salesData),
   aiGenerations: many(aiGenerations),
   blogPosts: many(blogPosts),
@@ -250,15 +285,28 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
     fields: [projects.userId],
     references: [users.id],
   }),
+  books: many(books),
+  aiGenerations: many(aiGenerations),
+}));
+
+export const booksRelations = relations(books, ({ one, many }) => ({
+  user: one(users, {
+    fields: [books.userId],
+    references: [users.id],
+  }),
+  project: one(projects, {
+    fields: [books.projectId],
+    references: [projects.id],
+  }),
   contributors: many(contributors),
   salesData: many(salesData),
   aiGenerations: many(aiGenerations),
 }));
 
 export const contributorsRelations = relations(contributors, ({ one }) => ({
-  project: one(projects, {
-    fields: [contributors.projectId],
-    references: [projects.id],
+  book: one(books, {
+    fields: [contributors.bookId],
+    references: [books.id],
   }),
 }));
 
@@ -267,9 +315,9 @@ export const salesDataRelations = relations(salesData, ({ one }) => ({
     fields: [salesData.userId],
     references: [users.id],
   }),
-  project: one(projects, {
-    fields: [salesData.projectId],
-    references: [projects.id],
+  book: one(books, {
+    fields: [salesData.bookId],
+    references: [books.id],
   }),
 }));
 
@@ -281,6 +329,10 @@ export const aiGenerationsRelations = relations(aiGenerations, ({ one }) => ({
   project: one(projects, {
     fields: [aiGenerations.projectId],
     references: [projects.id],
+  }),
+  book: one(books, {
+    fields: [aiGenerations.bookId],
+    references: [books.id],
   }),
 }));
 
@@ -342,6 +394,17 @@ export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+  totalSales: true,
+  totalRevenue: true,
+});
+
+export const insertBookSchema = createInsertSchema(books).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  totalSales: true,
+  totalRevenue: true,
+  monthlyRevenue: true,
 }).extend({
   contributors: z.array(z.object({
     name: z.string().min(1, "Name is required"),
@@ -381,6 +444,8 @@ export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
+export type InsertBook = z.infer<typeof insertBookSchema>;
+export type Book = typeof books.$inferSelect;
 export type InsertContributor = z.infer<typeof insertContributorSchema>;
 export type Contributor = typeof contributors.$inferSelect;
 export type InsertSalesData = z.infer<typeof insertSalesDataSchema>;
@@ -394,8 +459,15 @@ export type AuditLog = typeof adminAuditLog.$inferSelect;
 
 // Project with relations type
 export type ProjectWithRelations = Project & {
+  books: Book[];
+  user: User;
+};
+
+// Book with relations type
+export type BookWithRelations = Book & {
   contributors: Contributor[];
   salesData: SalesData[];
+  project: Project;
   user: User;
 };
 

@@ -69,9 +69,9 @@ export default function Projects() {
   }
 
   // Filter projects based on search and status
-  const filteredProjects = Array.isArray(projects) ? projects.filter((project: ProjectWithRelations) => {
-    const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.subtitle?.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredProjects = Array.isArray(projects) ? projects.filter((project: any) => {
+    const matchesSearch = project.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         project.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || project.status === statusFilter;
     return matchesSearch && matchesStatus;
   }) : [];
@@ -112,13 +112,19 @@ export default function Projects() {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Projects</h1>
-                <p className="text-gray-600 mt-1">Manage your book projects and track their progress.</p>
+                <h1 className="text-2xl font-bold text-gray-900">Projets</h1>
+                <p className="text-gray-600 mt-1">Gérez vos projets de livres et suivez leur progression.</p>
               </div>
-              <Button onClick={() => setLocation("/projects/create")} className="bg-primary hover:bg-primary/90">
-                <Plus className="w-4 h-4 mr-2" />
-                New Project
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={() => setLocation("/projects/create")} variant="outline">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Créer un Projet
+                </Button>
+                <Button onClick={() => setLocation("/books/create")} className="bg-primary hover:bg-primary/90">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Créer un Livre
+                </Button>
+              </div>
             </div>
 
             {/* Filters */}
@@ -176,10 +182,16 @@ export default function Projects() {
                   : "Get started by creating your first book project."}
               </p>
               {(!searchTerm && statusFilter === "all") && (
-                <Button onClick={() => setLocation("/projects/create")} className="bg-primary hover:bg-primary/90">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Your First Project
-                </Button>
+                <div className="flex gap-2 justify-center">
+                  <Button onClick={() => setLocation("/projects/create")} variant="outline">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Créer votre Premier Projet
+                  </Button>
+                  <Button onClick={() => setLocation("/books/create")} className="bg-primary hover:bg-primary/90">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Créer votre Premier Livre
+                  </Button>
+                </div>
               )}
             </div>
           ) : (
@@ -190,14 +202,14 @@ export default function Projects() {
                     <div className="flex items-start justify-between">
                       <div className="flex items-center space-x-4 flex-1">
                         <div className="w-12 h-12 gradient-blue-purple rounded-lg flex items-center justify-center text-white font-semibold text-sm">
-                          {generateProjectInitials(project.title)}
+                          {generateProjectInitials(project.name || 'Project')}
                         </div>
                         <div className="flex-1 min-w-0">
                           <CardTitle className="text-base font-medium text-gray-900 truncate">
-                            {project.title}
+                            {project.name}
                           </CardTitle>
-                          {project.subtitle && (
-                            <p className="text-sm text-gray-600 truncate mt-1">{project.subtitle}</p>
+                          {project.description && (
+                            <p className="text-sm text-gray-600 truncate mt-1">{project.description}</p>
                           )}
                         </div>
                       </div>
@@ -230,22 +242,22 @@ export default function Projects() {
                         <Badge className={getStatusColor(project.status || 'draft')}>
                           {(project.status || 'draft').replace('_', ' ')}
                         </Badge>
-                        {project.useAI && (
-                          <Badge variant="secondary" className="text-xs">
-                            AI Enhanced
-                          </Badge>
-                        )}
                       </div>
                       
-                      {project.formats && project.formats.length > 0 && (
+                      {project.books && project.books.length > 0 && (
                         <div>
-                          <p className="text-sm text-gray-600 mb-1">Formats:</p>
+                          <p className="text-sm text-gray-600 mb-1">Livres ({project.books.length}):</p>
                           <div className="flex flex-wrap gap-1">
-                            {project.formats.map((format) => (
-                              <Badge key={format} variant="outline" className="text-xs">
-                                {format}
+                            {project.books.slice(0, 3).map((book: any) => (
+                              <Badge key={book.id} variant="outline" className="text-xs">
+                                {book.format}
                               </Badge>
                             ))}
+                            {project.books.length > 3 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{project.books.length - 3} more
+                              </Badge>
+                            )}
                           </div>
                         </div>
                       )}
@@ -261,23 +273,7 @@ export default function Projects() {
                         </div>
                       </div>
 
-                      {project.contributors && project.contributors.length > 0 && (
-                        <div>
-                          <p className="text-sm text-gray-600 mb-1">Contributors:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {project.contributors.slice(0, 2).map((contributor) => (
-                              <Badge key={contributor.id} variant="outline" className="text-xs">
-                                {contributor.name}
-                              </Badge>
-                            ))}
-                            {project.contributors.length > 2 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{project.contributors.length - 2} more
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      )}
+                      {/* Contributors section removed for now - will be at book level */}
                     </div>
                   </CardContent>
                 </Card>
