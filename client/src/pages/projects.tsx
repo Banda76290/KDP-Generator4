@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -11,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, BarChart3, BookOpen, Globe, DollarSign, TrendingUp, ArrowUpDown } from "lucide-react";
+import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, BarChart3, BookOpen, Globe, DollarSign, TrendingUp, ArrowUpDown, Copy } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { ProjectWithRelations } from "@shared/schema";
 
@@ -141,6 +142,37 @@ export default function Projects() {
 
   const handleEditProject = (project: ProjectWithRelations) => {
     setLocation(`/projects/edit/${project.id}`);
+  };
+
+  // Duplication mutation
+  const duplicateProject = useMutation({
+    mutationFn: async (project: ProjectWithRelations) => {
+      return await apiRequest(`/api/projects`, {
+        method: "POST",
+        body: JSON.stringify({
+          name: `${project.name} (copy)`,
+          description: project.description,
+        }),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Project duplicated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to duplicate project",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDuplicateProject = (project: ProjectWithRelations) => {
+    duplicateProject.mutate(project);
   };
 
   return (
@@ -280,6 +312,10 @@ export default function Projects() {
                           <DropdownMenuItem onClick={() => handleEditProject(project)}>
                             <Edit className="w-4 h-4 mr-2" />
                             Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDuplicateProject(project)}>
+                            <Copy className="w-4 h-4 mr-2" />
+                            Duplicate
                           </DropdownMenuItem>
                           <DropdownMenuItem>
                             <BarChart3 className="w-4 h-4 mr-2" />
