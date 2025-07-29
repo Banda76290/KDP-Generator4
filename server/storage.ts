@@ -255,10 +255,31 @@ export class DatabaseStorage implements IStorage {
       throw new Error("Project not found");
     }
 
-    // Create the new project with " (copy)" suffix
+    // Get all user projects to check for naming conflicts
+    const userProjects = await this.getUserProjects(userId);
+    
+    // Generate unique name with appropriate suffix
+    const generateUniqueName = (baseName: string): string => {
+      // Remove existing copy suffix if present
+      const cleanName = baseName.replace(/ \(copy.*?\)$/, '');
+      
+      let newName = `${cleanName} (copy)`;
+      let counter = 2;
+      
+      while (userProjects.some(p => p.name === newName || p.title === newName)) {
+        newName = `${cleanName} (copy ${counter})`;
+        counter++;
+      }
+      
+      return newName;
+    };
+
+    const newProjectName = generateUniqueName(originalProject.name);
+
+    // Create the new project with unique name
     const duplicatedProjectData: InsertProject = {
-      title: `${originalProject.title} (copy)`,
-      name: `${originalProject.name} (copy)`,
+      title: newProjectName,
+      name: newProjectName,
       description: originalProject.description,
       userId,
       categories: originalProject.categories,
@@ -297,12 +318,36 @@ export class DatabaseStorage implements IStorage {
 
     const newProject = await this.createProject(duplicatedProjectData);
 
+    // Get all existing books for name conflict checking
+    const existingBooks = await this.getUserBooks(userId);
+    
+    // Helper function to generate unique book names
+    const generateUniqueBookName = (baseName: string): string => {
+      const cleanName = baseName.replace(/ \(copy.*?\)$/, '');
+      let newName = `${cleanName} (copy)`;
+      let counter = 2;
+      
+      while (existingBooks.some(b => b.title === newName)) {
+        newName = `${cleanName} (copy ${counter})`;
+        counter++;
+      }
+      
+      // Add this new name to the list to avoid conflicts within this duplication
+      existingBooks.push({ title: newName } as any);
+      return newName;
+    };
+
     // Duplicate all books from the original project
+    console.log(`Duplicating ${originalProject.books.length} books for project ${newProjectName}`);
+    
     for (const originalBook of originalProject.books) {
+      const newBookTitle = generateUniqueBookName(originalBook.title);
+      console.log(`Duplicating book: ${originalBook.title} -> ${newBookTitle}`);
+
       const duplicatedBookData: InsertBook = {
         userId,
         projectId: newProject.id,
-        title: `${originalBook.title} (copy)`,
+        title: newBookTitle,
         subtitle: originalBook.subtitle,
         description: originalBook.description,
         categories: originalBook.categories,
@@ -341,17 +386,23 @@ export class DatabaseStorage implements IStorage {
       };
 
       const newBook = await this.createBook(duplicatedBookData);
+      console.log(`Created new book: ${newBook.id} - ${newBook.title}`);
 
       // Duplicate contributors for this book
       const originalContributors = await this.getBookContributors(originalBook.id);
+      console.log(`Found ${originalContributors.length} contributors for book ${originalBook.title}`);
+      
       for (const contributor of originalContributors) {
         await this.addContributor({
           bookId: newBook.id,
           name: contributor.name,
           role: contributor.role,
         });
+        console.log(`Added contributor: ${contributor.name} (${contributor.role})`);
       }
     }
+    
+    console.log(`Completed duplication. Created project ${newProject.id} with ${originalProject.books.length} books`);
 
     // Return the complete duplicated project with all relations
     const duplicatedProject = await this.getProject(newProject.id, userId);
