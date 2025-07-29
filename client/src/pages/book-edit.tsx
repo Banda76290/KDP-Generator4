@@ -314,7 +314,7 @@ export default function EditBook() {
       <Header />
       <div className="flex">
         <Sidebar />
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-8 pt-24">
           <div className="max-w-4xl mx-auto">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
