@@ -238,12 +238,7 @@ export default function Projects() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {/* Project Status */}
-                      <div className="flex items-center justify-between">
-                        <Badge className={getStatusColor(project.status || 'draft')}>
-                          {(project.status || 'draft').replace('_', ' ')}
-                        </Badge>
-                      </div>
+                      
 
                       {/* Books List */}
                       {project.books && project.books.length > 0 ? (
@@ -336,34 +331,7 @@ export default function Projects() {
                         </div>
                       </div>
                       
-                      {project.books && project.books.length > 0 && (
-                        <div>
-                          <p className="text-sm text-gray-600 mb-1">Books ({project.books.length}):</p>
-                          <div className="flex flex-wrap gap-1">
-                            {project.books.slice(0, 3).map((book: any) => (
-                              <Badge key={book.id} variant="outline" className="text-xs">
-                                {book.format}
-                              </Badge>
-                            ))}
-                            {project.books.length > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{project.books.length - 3} more
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <p className="text-gray-600">Sales</p>
-                          <p className="font-medium">{project.totalSales || 0}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-600">Revenue</p>
-                          <p className="font-medium">${project.totalRevenue || '0.00'}</p>
-                        </div>
-                      </div>
+                      
 
                       {/* Contributors section removed for now - will be at book level */}
                     </div>
