@@ -737,7 +737,7 @@ export default function EditBook() {
                       <div className="flex items-start space-x-2">
                         <Checkbox
                           id="hasExplicitContent"
-                          checked={form.watch("hasExplicitContent")}
+                          checked={form.watch("hasExplicitContent") || false}
                           onCheckedChange={(checked) => form.setValue("hasExplicitContent", checked as boolean)}
                           className="mt-1"
                         />
@@ -750,7 +750,7 @@ export default function EditBook() {
                       <div className="flex items-start space-x-2">
                         <Checkbox
                           id="useAI"
-                          checked={form.watch("useAI")}
+                          checked={form.watch("useAI") || false}
                           onCheckedChange={(checked) => form.setValue("useAI", checked as boolean)}
                           className="mt-1"
                         />
@@ -763,7 +763,7 @@ export default function EditBook() {
                       <div className="flex items-start space-x-2">
                         <Checkbox
                           id="previouslyPublished"
-                          checked={form.watch("previouslyPublished")}
+                          checked={form.watch("previouslyPublished") || false}
                           onCheckedChange={(checked) => form.setValue("previouslyPublished", checked as boolean)}
                           className="mt-1"
                         />
