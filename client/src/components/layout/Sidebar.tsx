@@ -22,6 +22,7 @@ const navigation = [
   { name: "Sales Analytics", href: "/analytics", icon: TrendingUp },
   { name: "KDP Reports", href: "/kdp-reports", icon: Upload },
   { name: "AI Assistant", href: "/ai-assistant", icon: Bot, badge: "PRO" },
+  { name: "AI Functions", href: "/ai-functions", icon: Settings, badge: "PRO" },
 ];
 
 const accountNavigation = [

@@ -136,13 +136,19 @@ export default function AIFunctions() {
   // Handle context change
   const handleContextChange = (field: string, value: string) => {
     if (field === 'book') {
-      setSelectedBook(value);
-      const context = { bookId: value, projectId: selectedProject };
-      previewMutation.mutate(context);
+      const bookId = value === 'none' ? '' : value;
+      setSelectedBook(bookId);
+      const context = { bookId: bookId || undefined, projectId: selectedProject || undefined };
+      if (bookId || selectedProject) {
+        previewMutation.mutate(context);
+      }
     } else if (field === 'project') {
-      setSelectedProject(value);
-      const context = { bookId: selectedBook, projectId: value };
-      previewMutation.mutate(context);
+      const projectId = value === 'none' ? '' : value;
+      setSelectedProject(projectId);
+      const context = { bookId: selectedBook || undefined, projectId: projectId || undefined };
+      if (selectedBook || projectId) {
+        previewMutation.mutate(context);
+      }
     }
   };
 
@@ -270,7 +276,7 @@ export default function AIFunctions() {
                             <SelectValue placeholder="Sélectionner un projet" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">Aucun projet</SelectItem>
+                            <SelectItem value="none">Aucun projet</SelectItem>
                             {(projects as any)?.map((project: any) => (
                               <SelectItem key={project.id} value={project.id}>
                                 {project.name}
@@ -287,7 +293,7 @@ export default function AIFunctions() {
                             <SelectValue placeholder="Sélectionner un livre" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">Aucun livre</SelectItem>
+                            <SelectItem value="none">Aucun livre</SelectItem>
                             {(books as any)?.map((book: any) => (
                               <SelectItem key={book.id} value={book.id}>
                                 {book.title}
