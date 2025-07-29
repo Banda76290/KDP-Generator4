@@ -157,7 +157,7 @@ export default function Projects() {
                   <Plus className="w-4 h-4 mr-2" />
                   Create Project
                 </Button>
-                <Button onClick={() => setLocation("/books/create-advanced")} className="bg-primary hover:bg-primary/90">
+                <Button onClick={() => setLocation("/books/create")} className="bg-primary hover:bg-primary/90">
                   <Plus className="w-4 h-4 mr-2" />
                   Create Book
                 </Button>
@@ -236,7 +236,7 @@ export default function Projects() {
                     <Plus className="w-4 h-4 mr-2" />
                     Create Your First Project
                   </Button>
-                  <Button onClick={() => setLocation("/books/create-advanced")} className="bg-primary hover:bg-primary/90">
+                  <Button onClick={() => setLocation("/books/create")} className="bg-primary hover:bg-primary/90">
                     <Plus className="w-4 h-4 mr-2" />
                     Create Your First Book
                   </Button>
@@ -357,7 +357,7 @@ export default function Projects() {
                             variant="outline" 
                             size="sm" 
                             className="mt-2"
-                            onClick={() => setLocation(`/books/create-advanced?projectId=${project.id}`)}
+                            onClick={() => setLocation(`/books/create?projectId=${project.id}`)}
                           >
                             <Plus className="w-3 h-3 mr-1" />
                             Add Book

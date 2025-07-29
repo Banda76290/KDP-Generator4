@@ -65,7 +65,7 @@ export default function EditBook() {
   const isCreating = !bookId;
   
   // Get projectId from URL if present
-  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const urlParams = new URLSearchParams((location || '').split('?')[1] || '');
   const preSelectedProjectId = urlParams.get('projectId');
 
   // Fetch existing book data (only if editing)
@@ -427,7 +427,7 @@ export default function EditBook() {
                       What language is your book written in? <a href="#" className="text-blue-600 underline cursor-pointer">Supported languages</a>
                     </p>
                     <Select 
-                      value={form.watch("language")} 
+                      value={form.watch("language") || ""} 
                       onValueChange={(value) => form.setValue("language", value)}
                     >
                       <SelectTrigger>
@@ -617,7 +617,7 @@ export default function EditBook() {
                       Choose the option that applies to your book. Choosing the wrong option may result in your content being blocked. <span className="text-blue-600 underline cursor-pointer">Learn more about content guidelines</span>
                     </p>
                     <RadioGroup 
-                      value={form.watch("publishingRights")} 
+                      value={form.watch("publishingRights") || ""} 
                       onValueChange={(value) => form.setValue("publishingRights", value as any)}
                     >
                       <div className="flex items-start space-x-2">
