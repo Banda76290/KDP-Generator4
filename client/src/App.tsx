@@ -20,6 +20,7 @@ import AdminConfig from "@/pages/admin-config";
 import AdminAudit from "@/pages/admin-audit";
 import AdminBlogPosts from "@/pages/admin-blog-posts";
 import AdminBlogCategories from "@/pages/admin-blog-categories";
+import AIConfig from "@/pages/admin/ai-config";
 import ProjectCreate from "@/pages/project-create-simple";
 import ProjectEdit from "@/pages/project-edit";
 import BookCreate from "@/pages/book-create";
@@ -42,6 +43,7 @@ function Router() {
       <Route path="/admin/users" component={AdminUsers} />
       <Route path="/admin/config" component={AdminConfig} />
       <Route path="/admin/audit" component={AdminAudit} />
+      <Route path="/admin/ai-config" component={AIConfig} />
       <Route path="/admin/blog-posts" component={AdminBlogPosts} />
       <Route path="/admin/blog-categories" component={AdminBlogCategories} />
       <Route path="/projects/create" component={ProjectCreate} />

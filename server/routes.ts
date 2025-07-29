@@ -443,6 +443,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin AI Configuration Routes
+  app.get('/api/admin/ai/stats', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const stats = {
+        totalTokensUsed: 0, // Will be calculated from database
+        totalCost: 0, // Will be calculated from database  
+        monthlyRequests: 0, // Will be calculated from database
+        activeTemplates: 0 // Will be calculated from database
+      };
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching AI stats:", error);
+      res.status(500).json({ message: "Failed to fetch AI stats" });
+    }
+  });
+
+  // Mock prompt templates for initial interface
+  app.get('/api/admin/ai/prompts', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const templates = [
+        {
+          id: "1",
+          name: "Book Structure Generator",
+          type: "structure",
+          systemPrompt: "You are an expert book structure consultant. Create detailed outlines for books.",
+          userPromptTemplate: "Create a structure for a {type} book about {topic}. Include chapters, sections, and key points.",
+          model: "gpt-4o",
+          maxTokens: 2000,
+          temperature: 0.7,
+          isActive: true,
+          isDefault: true
+        },
+        {
+          id: "2", 
+          name: "Book Description Writer",
+          type: "description",
+          systemPrompt: "You are a marketing copywriter specializing in book descriptions that convert browsers into buyers.",
+          userPromptTemplate: "Write a compelling book description for '{title}' - {description}. Make it engaging and sales-focused.",
+          model: "gpt-4o",
+          maxTokens: 1000,
+          temperature: 0.8,
+          isActive: true,
+          isDefault: false
+        }
+      ];
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching prompt templates:", error);
+      res.status(500).json({ message: "Failed to fetch prompt templates" });
+    }
+  });
+
+  // Mock AI models for initial interface
+  app.get('/api/admin/ai/models', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const models = [
+        {
+          id: "1",
+          name: "gpt-4o",
+          displayName: "GPT-4o",
+          provider: "openai",
+          inputPricePer1kTokens: 0.005,
+          outputPricePer1kTokens: 0.015,
+          maxTokens: 4096,
+          contextWindow: 128000,
+          isAvailable: true
+        },
+        {
+          id: "2",
+          name: "gpt-4o-mini",
+          displayName: "GPT-4o Mini",
+          provider: "openai", 
+          inputPricePer1kTokens: 0.00015,
+          outputPricePer1kTokens: 0.0006,
+          maxTokens: 4096,
+          contextWindow: 128000,
+          isAvailable: true
+        }
+      ];
+      res.json(models);
+    } catch (error) {
+      console.error("Error fetching AI models:", error);
+      res.status(500).json({ message: "Failed to fetch AI models" });
+    }
+  });
+
+  // Mock usage limits for initial interface
+  app.get('/api/admin/ai/limits', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const limits = [
+        {
+          id: "1",
+          subscriptionTier: "free",
+          monthlyTokenLimit: 5000,
+          dailyRequestLimit: 5,
+          maxTokensPerRequest: 1000,
+          allowedModels: ["gpt-4o-mini"]
+        },
+        {
+          id: "2", 
+          subscriptionTier: "premium",
+          monthlyTokenLimit: 50000,
+          dailyRequestLimit: 50,
+          maxTokensPerRequest: 4000,
+          allowedModels: ["gpt-4o", "gpt-4o-mini"]
+        },
+        {
+          id: "3",
+          subscriptionTier: "enterprise", 
+          monthlyTokenLimit: null, // unlimited
+          dailyRequestLimit: null, // unlimited
+          maxTokensPerRequest: 8000,
+          allowedModels: ["gpt-4o", "gpt-4o-mini"]
+        }
+      ];
+      res.json(limits);
+    } catch (error) {
+      console.error("Error fetching usage limits:", error);
+      res.status(500).json({ message: "Failed to fetch usage limits" });
+    }
+  });
+
   app.get('/api/admin/users', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { search, limit = 50, offset = 0 } = req.query;

@@ -90,6 +90,21 @@ export default function Sidebar() {
               </span>
             </Link>
             
+            {/* AI Configuration */}
+            <Link href="/admin/ai-config">
+              <span
+                className={cn(
+                  "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",
+                  location === "/admin/ai-config"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-foreground hover:bg-muted"
+                )}
+              >
+                <Bot className="w-5 h-5" />
+                <span>AI Configuration</span>
+              </span>
+            </Link>
+
             {/* Blog Admin Navigation */}
             <div className="ml-4 mt-2 space-y-1">
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-3">
@@ -118,7 +133,7 @@ export default function Sidebar() {
                   )}
                 >
                   <Folder className="w-4 h-4" />
-                  <span>Catégories</span>
+                  <span>Categories</span>
                 </span>
               </Link>
             </div>

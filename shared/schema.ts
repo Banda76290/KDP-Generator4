@@ -198,7 +198,52 @@ export const aiGenerations = pgTable("ai_generations", {
   prompt: text("prompt").notNull(),
   response: text("response").notNull(),
   tokensUsed: integer("tokens_used").default(0),
+  model: varchar("model").default("gpt-4o"),
+  cost: decimal("cost", { precision: 10, scale: 4 }).default("0.0000"),
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+// AI Configuration for different content types
+export const aiPromptTemplates = pgTable("ai_prompt_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull().unique(),
+  type: varchar("type").notNull(), // "structure", "description", "marketing", etc.
+  systemPrompt: text("system_prompt").notNull(),
+  userPromptTemplate: text("user_prompt_template").notNull(),
+  model: varchar("model").default("gpt-4o"),
+  maxTokens: integer("max_tokens").default(2000),
+  temperature: decimal("temperature", { precision: 3, scale: 2 }).default("0.7"),
+  isActive: boolean("is_active").default(true),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// AI Model Configuration and Pricing
+export const aiModels = pgTable("ai_models", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull().unique(), // "gpt-4o", "gpt-4o-mini", etc.
+  displayName: varchar("display_name").notNull(),
+  provider: varchar("provider").default("openai"),
+  inputPricePer1kTokens: decimal("input_price_per_1k_tokens", { precision: 10, scale: 6 }),
+  outputPricePer1kTokens: decimal("output_price_per_1k_tokens", { precision: 10, scale: 6 }),
+  maxTokens: integer("max_tokens").default(4096),
+  contextWindow: integer("context_window").default(128000),
+  isAvailable: boolean("is_available").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// AI Usage Limits per subscription tier
+export const aiUsageLimits = pgTable("ai_usage_limits", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  subscriptionTier: varchar("subscription_tier").notNull().unique(),
+  monthlyTokenLimit: integer("monthly_token_limit"),
+  dailyRequestLimit: integer("daily_request_limit"),
+  maxTokensPerRequest: integer("max_tokens_per_request").default(4000),
+  allowedModels: text("allowed_models").array(), // JSON array of allowed model names
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // System configuration table for admin settings
@@ -432,6 +477,24 @@ export const insertAiGenerationSchema = createInsertSchema(aiGenerations).omit({
   createdAt: true,
 });
 
+export const insertAiPromptTemplateSchema = createInsertSchema(aiPromptTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAiModelSchema = createInsertSchema(aiModels).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAiUsageLimitSchema = createInsertSchema(aiUsageLimits).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertSystemConfigSchema = createInsertSchema(systemConfig);
 
 export const insertAuditLogSchema = createInsertSchema(adminAuditLog).omit({
@@ -452,6 +515,12 @@ export type InsertSalesData = z.infer<typeof insertSalesDataSchema>;
 export type SalesData = typeof salesData.$inferSelect;
 export type InsertAiGeneration = z.infer<typeof insertAiGenerationSchema>;
 export type AiGeneration = typeof aiGenerations.$inferSelect;
+export type InsertAiPromptTemplate = z.infer<typeof insertAiPromptTemplateSchema>;
+export type AiPromptTemplate = typeof aiPromptTemplates.$inferSelect;
+export type InsertAiModel = z.infer<typeof insertAiModelSchema>;
+export type AiModel = typeof aiModels.$inferSelect;
+export type InsertAiUsageLimit = z.infer<typeof insertAiUsageLimitSchema>;
+export type AiUsageLimit = typeof aiUsageLimits.$inferSelect;
 export type InsertSystemConfig = z.infer<typeof insertSystemConfigSchema>;
 export type SystemConfig = typeof systemConfig.$inferSelect;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
