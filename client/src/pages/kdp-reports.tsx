@@ -147,7 +147,7 @@ export default function KDPReports() {
       <Header />
       <div className="flex pt-16">
         <Sidebar />
-        <main className="flex-1 ml-64 p-6">
+        <main className="flex-1 min-w-0 p-4 md:p-6 md:ml-64">
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-gray-900">KDP Reports</h1>
             <p className="text-gray-600 mt-1">Upload and analyze your Amazon KDP sales reports.</p>
