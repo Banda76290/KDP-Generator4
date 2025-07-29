@@ -6,16 +6,13 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
+import PromptTemplateModal from "@/components/admin/PromptTemplateModal";
+import ModelConfigModal from "@/components/admin/ModelConfigModal";
+import UsageLimitModal from "@/components/admin/UsageLimitModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
 import { 
   Bot, 
   Settings, 
@@ -24,11 +21,18 @@ import {
   Edit, 
   Trash2, 
   Plus,
-  Save,
   RefreshCw,
   AlertTriangle,
   CheckCircle
 } from "lucide-react";
+
+interface Variable {
+  name: string;
+  description: string;
+  type: 'text' | 'number' | 'select';
+  options?: string[];
+  required: boolean;
+}
 
 interface AIPromptTemplate {
   id: string;
@@ -41,6 +45,7 @@ interface AIPromptTemplate {
   temperature: number;
   isActive: boolean;
   isDefault: boolean;
+  variables?: Variable[];
 }
 
 interface AIModel {
@@ -58,8 +63,8 @@ interface AIModel {
 interface AIUsageLimit {
   id: string;
   subscriptionTier: string;
-  monthlyTokenLimit: number;
-  dailyRequestLimit: number;
+  monthlyTokenLimit: number | null;
+  dailyRequestLimit: number | null;
   maxTokensPerRequest: number;
   allowedModels: string[];
 }
@@ -74,7 +79,7 @@ export default function AIConfig() {
 
   // Check if user is admin
   useEffect(() => {
-    if (!isLoading && isAuthenticated && user?.role !== "admin" && user?.role !== "superadmin") {
+    if (!isLoading && isAuthenticated && (user as any)?.role !== "admin" && (user as any)?.role !== "superadmin") {
       toast({
         title: "Access Denied",
         description: "You need administrator privileges to access this page.",
@@ -88,22 +93,22 @@ export default function AIConfig() {
   // Fetch AI configuration data
   const { data: promptTemplates, isLoading: promptsLoading } = useQuery({
     queryKey: ["/api/admin/ai/prompts"],
-    enabled: isAuthenticated && (user?.role === "admin" || user?.role === "superadmin"),
+    enabled: isAuthenticated && ((user as any)?.role === "admin" || (user as any)?.role === "superadmin"),
   });
 
   const { data: aiModels, isLoading: modelsLoading } = useQuery({
     queryKey: ["/api/admin/ai/models"],
-    enabled: isAuthenticated && (user?.role === "admin" || user?.role === "superadmin"),
+    enabled: isAuthenticated && ((user as any)?.role === "admin" || (user as any)?.role === "superadmin"),
   });
 
   const { data: usageLimits, isLoading: limitsLoading } = useQuery({
     queryKey: ["/api/admin/ai/limits"],
-    enabled: isAuthenticated && (user?.role === "admin" || user?.role === "superadmin"),
+    enabled: isAuthenticated && ((user as any)?.role === "admin" || (user as any)?.role === "superadmin"),
   });
 
   const { data: aiStats } = useQuery({
     queryKey: ["/api/admin/ai/stats"],
-    enabled: isAuthenticated && (user?.role === "admin" || user?.role === "superadmin"),
+    enabled: isAuthenticated && ((user as any)?.role === "admin" || (user as any)?.role === "superadmin"),
   });
 
   // Mutations for CRUD operations
@@ -203,7 +208,7 @@ export default function AIConfig() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">AI Configuration</h1>
-                <p className="text-gray-600">Manage AI prompts, models, and usage limits</p>
+                <p className="text-gray-600">Gérer les prompts IA, modèles et limites d'usage</p>
               </div>
             </div>
 
@@ -268,9 +273,9 @@ export default function AIConfig() {
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="prompts">Prompt Templates</TabsTrigger>
-              <TabsTrigger value="models">AI Models</TabsTrigger>
-              <TabsTrigger value="limits">Usage Limits</TabsTrigger>
+              <TabsTrigger value="prompts">Fonctionnalités IA</TabsTrigger>
+              <TabsTrigger value="models">Modèles IA</TabsTrigger>
+              <TabsTrigger value="limits">Limites d'Usage</TabsTrigger>
             </TabsList>
 
             {/* Prompt Templates Tab */}
@@ -278,10 +283,10 @@ export default function AIConfig() {
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle>Prompt Templates</CardTitle>
+                    <CardTitle>Fonctionnalités IA Configurables</CardTitle>
                     <Button onClick={() => setEditingPrompt({} as AIPromptTemplate)}>
                       <Plus className="w-4 h-4 mr-2" />
-                      Add Template
+                      Nouvelle Fonctionnalité
                     </Button>
                   </div>
                 </CardHeader>
@@ -290,23 +295,26 @@ export default function AIConfig() {
                     {promptsLoading ? (
                       <div className="text-center py-8">Loading...</div>
                     ) : (
-                      promptTemplates?.map((template: any) => (
+                      (promptTemplates as any)?.map((template: any) => (
                         <div key={template.id} className="border rounded-lg p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-2">
                                 <h3 className="font-medium">{template.name}</h3>
                                 <Badge variant={template.isActive ? "default" : "secondary"}>
-                                  {template.isActive ? "Active" : "Inactive"}
+                                  {template.isActive ? "Actif" : "Inactif"}
                                 </Badge>
                                 {template.isDefault && (
-                                  <Badge variant="outline">Default</Badge>
+                                  <Badge variant="outline">Par défaut</Badge>
                                 )}
                               </div>
                               <p className="text-sm text-gray-600 mb-2">Type: {template.type}</p>
-                              <p className="text-sm text-gray-600 mb-2">Model: {template.model}</p>
+                              <p className="text-sm text-gray-600 mb-2">Modèle: {template.model}</p>
                               <div className="text-xs text-gray-500">
-                                Max Tokens: {template.maxTokens} | Temperature: {template.temperature}
+                                Max Tokens: {template.maxTokens} | Température: {template.temperature}
+                                {template.variables && template.variables.length > 0 && (
+                                  <span className="ml-2">| Variables: {template.variables.length}</span>
+                                )}
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -351,14 +359,14 @@ export default function AIConfig() {
                     {modelsLoading ? (
                       <div className="text-center py-8">Loading...</div>
                     ) : (
-                      aiModels?.map((model: any) => (
+                      (aiModels as any)?.map((model: any) => (
                         <div key={model.id} className="border rounded-lg p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-2">
                                 <h3 className="font-medium">{model.displayName}</h3>
                                 <Badge variant={model.isAvailable ? "default" : "secondary"}>
-                                  {model.isAvailable ? "Available" : "Disabled"}
+                                  {model.isAvailable ? "Disponible" : "Désactivé"}
                                 </Badge>
                               </div>
                               <p className="text-sm text-gray-600 mb-2">Provider: {model.provider}</p>
@@ -404,7 +412,7 @@ export default function AIConfig() {
                     {limitsLoading ? (
                       <div className="text-center py-8">Loading...</div>
                     ) : (
-                      usageLimits?.map((limit: any) => (
+                      (usageLimits as any)?.map((limit: any) => (
                         <div key={limit.id} className="border rounded-lg p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -455,8 +463,33 @@ export default function AIConfig() {
             </TabsContent>
           </Tabs>
 
-          {/* Edit Modals would go here - simplified for this implementation */}
-          {/* In a full implementation, you'd have forms for editing prompts, models, and limits */}
+          {/* Modals de Configuration */}
+          {editingPrompt && (
+            <PromptTemplateModal
+              template={editingPrompt}
+              onSave={savePromptMutation.mutate}
+              onClose={() => setEditingPrompt(null)}
+              isLoading={savePromptMutation.isPending}
+            />
+          )}
+
+          {editingModel && (
+            <ModelConfigModal
+              model={editingModel}
+              onSave={saveModelMutation.mutate}
+              onClose={() => setEditingModel(null)}
+              isLoading={saveModelMutation.isPending}
+            />
+          )}
+
+          {editingLimit && (
+            <UsageLimitModal
+              limit={editingLimit}
+              onSave={(data) => saveLimitMutation.mutate(data)}
+              onClose={() => setEditingLimit(null)}
+              isLoading={saveLimitMutation.isPending}
+            />
+          )}
         </main>
       </div>
     </div>

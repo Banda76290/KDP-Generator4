@@ -154,6 +154,18 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Routing**: Integrated AI config page into main application routing system
 - **Mock Data**: Implemented initial data structure for immediate testing and development
 
+### Advanced AI Functions System (29 Juillet 2025 - Final Update)
+- **Configurable AI Functions**: Complete system allowing configuration of each AI feature individually
+- **Dynamic Variable System**: Variables can be injected into prompts with {variable_name} syntax
+- **Model Selection**: Each function can use different AI models (GPT-4o, GPT-4o-mini, etc.)
+- **Custom Prompts**: System and user prompts are fully configurable per function
+- **Variable Types**: Support for text, number, and select dropdown variables
+- **AI Functions Page**: New user interface for accessing configured AI functions with dynamic forms
+- **Backend Service**: AIConfigService handles prompt templating and variable replacement
+- **Real Configuration**: Functions include description generator, structure creator, marketing content, etc.
+- **Parameter Control**: Max tokens, temperature, and model selection per function
+- **Cost Tracking**: Automatic calculation of generation costs based on token usage
+
 ### Current Features Available
 - **Complete Dashboard**: KPI cards, sales charts, format distribution, recent projects table
 - **Project Management**: Complete KDP project creation and editing system with dedicated pages
@@ -170,6 +182,12 @@ The application is designed to be deployed on Replit with integrated authenticat
   - Usage limits by subscription tier (tokens, requests, model access)
   - Real-time AI usage statistics and cost tracking
   - Enhanced AI generation API with configurable models and parameters
+- **AI Functions Interface**: User-facing interface for configured AI functions
+  - Dynamic form generation based on function variables
+  - Real-time variable injection into prompts
+  - Custom model and prompt override capabilities
+  - Multi-tab interface (Configuration, Advanced Settings, Results)
+  - Copy to clipboard and content management features
 - **Analytics**: Sales analytics page (basic structure in place)
 - **KDP Reports**: File upload and parsing functionality
 - **Authentication**: Replit OIDC integration with session management

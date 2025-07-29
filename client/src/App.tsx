@@ -21,6 +21,7 @@ import AdminAudit from "@/pages/admin-audit";
 import AdminBlogPosts from "@/pages/admin-blog-posts";
 import AdminBlogCategories from "@/pages/admin-blog-categories";
 import AIConfig from "@/pages/admin/ai-config";
+import AIFunctions from "@/pages/ai-functions";
 import ProjectCreate from "@/pages/project-create-simple";
 import ProjectEdit from "@/pages/project-edit";
 import BookCreate from "@/pages/book-create";
@@ -37,6 +38,7 @@ function Router() {
       <Route path="/analytics" component={Analytics} />
       <Route path="/kdp-reports" component={KDPReports} />
       <Route path="/ai-assistant" component={AIAssistant} />
+      <Route path="/ai-functions" component={AIFunctions} />
       <Route path="/subscription" component={Subscription} />
       <Route path="/settings" component={Settings} />
       <Route path="/admin" component={AdminDashboard} />
