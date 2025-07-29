@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { Copy, Play, Settings, BookOpen, User, Building, HelpCircle } from 'lucide-react';
+import { Copy, Play, Settings, BookOpen, User, Building, HelpCircle, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -66,6 +66,7 @@ export default function AIFunctions() {
   const [customTemperature, setCustomTemperature] = useState('');
   const [generatedContent, setGeneratedContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
   // Fetch AI functions
   const { data: aiFunctions, isLoading: functionsLoading } = useQuery({
@@ -102,8 +103,8 @@ export default function AIFunctions() {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: 'Copié !',
-      description: 'Le texte a été copié dans le presse-papiers',
+      title: 'Copied!',
+      description: 'Text has been copied to clipboard',
     });
   };
 
@@ -128,20 +129,20 @@ export default function AIFunctions() {
       });
 
       if (!response.ok) {
-        throw new Error('Erreur lors de la génération');
+        throw new Error('Error during generation');
       }
 
       const data = await response.json();
       setGeneratedContent(data.content);
       
       toast({
-        title: 'Contenu généré !',
-        description: 'Le contenu IA a été généré avec succès',
+        title: 'Content Generated!',
+        description: 'AI content has been generated successfully',
       });
     } catch (error) {
       toast({
-        title: 'Erreur',
-        description: 'Impossible de générer le contenu',
+        title: 'Error',
+        description: 'Unable to generate content',
         variant: 'destructive',
       });
     } finally {
@@ -211,38 +212,85 @@ export default function AIFunctions() {
   return (
     <Layout>
       <TooltipProvider>
-        <div className="container mx-auto px-6 py-8">
+        <div className="container mx-auto px-6 py-8 pt-24">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
               <h1 className="text-3xl font-bold text-foreground">AI Functions</h1>
-              <Tooltip>
+              <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <HelpCircle className="h-4 w-4" />
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 px-3" 
+                    onClick={() => setIsTooltipOpen(!isTooltipOpen)}
+                  >
+                    <HelpCircle className="h-4 w-4 mr-2" />
+                    Configuration Guide
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-md p-4">
-                  <div className="space-y-3">
-                    <h4 className="font-semibold">AI Functions Configuration Guide</h4>
+                <TooltipContent 
+                  side="bottom" 
+                  className="max-w-2xl p-6" 
+                  sideOffset={10}
+                  onPointerDownOutside={(e) => e.preventDefault()}
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold text-lg">AI Functions Configuration Guide</h4>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6 p-0"
+                        onClick={() => setIsTooltipOpen(false)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
                     
-                    <div className="space-y-2 text-sm">
-                      <p><strong>1. System Overview:</strong></p>
-                      <p>AI Functions use dynamic variables extracted from your database (books, projects, authors) to generate personalized content with configurable AI models and prompts.</p>
+                    <div className="space-y-3 text-sm">
+                      <div>
+                        <p className="font-semibold">1. System Overview:</p>
+                        <p className="ml-4">AI Functions use dynamic variables extracted from your database (books, projects, authors) to generate personalized content with configurable AI models and prompts.</p>
+                      </div>
                       
-                      <p><strong>2. Configuration Process:</strong></p>
-                      <p>• <strong>Variables:</strong> View available variables at /admin/ai-variables (37 Book, 5 Project, 10 Author, 4 System variables)</p>
-                      <p>• <strong>Prompts:</strong> Create templates at /admin/ai-config using {'{variable_name}'} format</p>
-                      <p>• <strong>Models:</strong> Configure gpt-4o, gpt-4o-mini with pricing and limits</p>
-                      <p>• <strong>Usage Limits:</strong> Set token quotas by subscription tier (Free: 1K, Basic: 10K, Premium: 100K tokens/month)</p>
+                      <div>
+                        <p className="font-semibold">2. Configuration Process:</p>
+                        <div className="ml-4 space-y-1">
+                          <p>• <strong>Variables:</strong> View available variables at /admin/ai-variables<br/>
+                             &nbsp;&nbsp;(37 Book, 5 Project, 10 Author, 4 System variables)</p>
+                          <p>• <strong>Prompts:</strong> Create templates at /admin/ai-config<br/>
+                             &nbsp;&nbsp;using {'{variable_name}'} format</p>
+                          <p>• <strong>Models:</strong> Configure gpt-4o, gpt-4o-mini<br/>
+                             &nbsp;&nbsp;with pricing and limits</p>
+                          <p>• <strong>Usage Limits:</strong> Set token quotas by subscription tier<br/>
+                             &nbsp;&nbsp;(Free: 1K, Basic: 10K, Premium: 100K tokens/month)</p>
+                        </div>
+                      </div>
                       
-                      <p><strong>3. Usage Workflow:</strong></p>
-                      <p>• Select an AI function • Choose a book/project for context • Variables auto-populate • Generate content with real data substitution</p>
+                      <div>
+                        <p className="font-semibold">3. Usage Workflow:</p>
+                        <p className="ml-4">• Select an AI function<br/>
+                           • Choose a book/project for context<br/>
+                           • Variables auto-populate<br/>
+                           • Generate content with real data substitution</p>
+                      </div>
                       
-                      <p><strong>4. Variable Examples:</strong></p>
-                      <p>• {'{title}'} - Book title • {'{genre}'} - Book genre • {'{author_name}'} - Author name • {'{pages}'} - Page count • {'{price}'} - Book price</p>
+                      <div>
+                        <p className="font-semibold">4. Variable Examples:</p>
+                        <p className="ml-4">• {'{title}'} - Book title<br/>
+                           • {'{genre}'} - Book genre<br/>
+                           • {'{author_name}'} - Author name<br/>
+                           • {'{pages}'} - Page count<br/>
+                           • {'{price}'} - Book price</p>
+                      </div>
                       
-                      <p><strong>5. Best Practices:</strong></p>
-                      <p>• Use gpt-4o-mini for simple tasks to save costs • Combine multiple variables for richer context • Test with real book data • Monitor usage limits</p>
+                      <div>
+                        <p className="font-semibold">5. Best Practices:</p>
+                        <p className="ml-4">• Use gpt-4o-mini for simple tasks to save costs<br/>
+                           • Combine multiple variables for richer context<br/>
+                           • Test with real book data<br/>
+                           • Monitor usage limits</p>
+                      </div>
                     </div>
                   </div>
                 </TooltipContent>
