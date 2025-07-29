@@ -102,7 +102,7 @@ export default function ProjectsTable() {
         {recentProjects.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-gray-500 mb-4">No projects yet</p>
-            <Link href="/projects">
+            <Link href="/project-create-simple">
               <Button size="sm" className="bg-primary hover:bg-primary/90">
                 Create your first project
               </Button>

@@ -10,13 +10,12 @@ import FormatChart from "@/components/dashboard/FormatChart";
 import ProjectsTable from "@/components/dashboard/ProjectsTable";
 import { Button } from "@/components/ui/button";
 import { Plus, Download } from "lucide-react";
-import { useState } from "react";
-import { KDPProjectModal } from "@/components/projects/KDPProjectModal";
+import { useLocation } from "wouter";
 
 export default function Dashboard() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
-  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [, setLocation] = useLocation();
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -63,7 +62,7 @@ export default function Dashboard() {
                   <Download className="w-4 h-4 mr-2" />
                   Export Report
                 </Button>
-                <Button onClick={() => setShowProjectModal(true)} className="bg-primary hover:bg-primary/90">
+                <Button onClick={() => setLocation("/project-create-simple")} className="bg-primary hover:bg-primary/90">
                   <Plus className="w-4 h-4 mr-2" />
                   New Project
                 </Button>
@@ -84,14 +83,6 @@ export default function Dashboard() {
           <ProjectsTable />
         </main>
       </div>
-
-      {/* Project Modal */}
-      {showProjectModal && (
-        <KDPProjectModal 
-          isOpen={showProjectModal} 
-          onClose={() => setShowProjectModal(false)} 
-        />
-      )}
     </div>
   );
 }
