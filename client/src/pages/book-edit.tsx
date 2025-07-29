@@ -431,9 +431,6 @@ export default function EditBook() {
               <Card>
                 <CardHeader>
                   <CardTitle>Paperback Details</CardTitle>
-                  <CardDescription>
-                    Basic information about your book
-                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* Project Selection */}
