@@ -249,7 +249,7 @@ export default function EditBook() {
     
     const draftData = {
       ...data,
-      status: "draft",
+      status: "draft" as const,
     };
     
     updateBook.mutate({ bookData: draftData });
@@ -783,13 +783,13 @@ export default function EditBook() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="printLength">Print Length (pages)</Label>
+                    <Label htmlFor="printLengthTemp">Print Length (pages)</Label>
                     <Input
-                      id="printLength"
+                      id="printLengthTemp"
                       type="number"
                       min="24"
                       placeholder="100"
-                      {...form.register("printLength", { valueAsNumber: true })}
+                      defaultValue="100"
                     />
                     <p className="text-sm text-gray-500">
                       Minimum 24 pages required for paperback printing
@@ -850,41 +850,38 @@ export default function EditBook() {
                     <Label className="text-base font-semibold">Pricing, royalties, and distribution</Label>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="listPrice">List Price (USD)</Label>
+                        <Label htmlFor="listPriceTemp">List Price (USD)</Label>
                         <div className="relative">
                           <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
                           <Input
-                            id="listPrice"
+                            id="listPriceTemp"
                             type="number"
                             step="0.01"
                             min="0"
                             className="pl-8"
                             placeholder="9.99"
-                            {...form.register("listPrice")}
+                            defaultValue="9.99"
                           />
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="printCost">Print Cost</Label>
+                        <Label htmlFor="printCostTemp">Print Cost</Label>
                         <div className="relative">
                           <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
                           <Input
-                            id="printCost"
+                            id="printCostTemp"
                             type="number"
                             step="0.01"
                             min="0"
                             className="pl-8"
                             placeholder="0.00"
-                            {...form.register("printCost")}
+                            defaultValue="2.50"
                           />
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="royaltyRate">Royalty Rate</Label>
-                        <Select 
-                          value={form.watch("royaltyRate")} 
-                          onValueChange={(value) => form.setValue("royaltyRate", value)}
-                        >
+                        <Label htmlFor="royaltyRateTemp">Royalty Rate</Label>
+                        <Select defaultValue="60">
                           <SelectTrigger>
                             <SelectValue placeholder="Select royalty" />
                           </SelectTrigger>
@@ -899,11 +896,11 @@ export default function EditBook() {
 
                   {/* ISBN */}
                   <div className="space-y-2">
-                    <Label htmlFor="isbn">ISBN (Optional)</Label>
+                    <Label htmlFor="isbnTemp">ISBN (Optional)</Label>
                     <Input
-                      id="isbn"
+                      id="isbnTemp"
                       placeholder="Enter ISBN if you have one"
-                      {...form.register("isbn")}
+                      defaultValue=""
                     />
                     <p className="text-sm text-gray-500">
                       Leave blank to get a free Amazon ISBN
