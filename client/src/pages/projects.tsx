@@ -34,7 +34,7 @@ export default function Projects() {
     mutationFn: async (project: ProjectWithRelations) => {
       console.log("Starting duplication for project:", project.name);
       try {
-        const result = await apiRequest(`/api/projects`, "POST", {
+        const result = await apiRequest("POST", `/api/projects`, {
           name: `${project.name} (copy)`,
           description: project.description,
         });
