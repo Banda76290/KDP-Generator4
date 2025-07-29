@@ -850,7 +850,8 @@ export default function EditBook() {
               {activeTab === "content" && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Paperback Content</CardTitle>
+                  <CardTitle>Upload your manuscript and configure content settings
+</CardTitle>
                   <CardDescription>
                     Upload your manuscript and configure content settings
                   </CardDescription>
