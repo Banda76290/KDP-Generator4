@@ -975,15 +975,150 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get available AI functions
+  // Get available AI functions (dynamic from site features)
   app.get("/api/ai/functions", isAuthenticated, async (req, res) => {
     try {
-      const { aiConfigService } = await import('./services/aiConfigService');
-      const functions = aiConfigService.getAvailableFunctions();
+      const { aiFunctionsService } = await import('./services/aiFunctionsService');
+      const functions = aiFunctionsService.getAvailableFunctions();
       res.json(functions);
     } catch (error) {
       console.error("Error fetching AI functions:", error);
       res.status(500).json({ message: "Failed to fetch AI functions" });
+    }
+  });
+
+  // Get AI functions by category (for admin configuration)
+  app.get("/api/admin/ai/functions", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { aiFunctionsService } = await import('./services/aiFunctionsService');
+      const functionsByCategory = aiFunctionsService.getFunctionsByCategory();
+      res.json(functionsByCategory);
+    } catch (error) {
+      console.error("Error fetching AI functions by category:", error);
+      res.status(500).json({ message: "Failed to fetch AI functions" });
+    }
+  });
+
+  // Generate AI content using configured functions
+  app.post("/api/ai/generate", isAuthenticated, async (req, res) => {
+    try {
+      const { functionKey, bookId, projectId, customPrompt, customModel, customTemperature } = req.body;
+      const userId = req.user?.claims?.sub;
+
+      // Get the AI function configuration
+      const { aiFunctionsService } = await import('./services/aiFunctionsService');
+      const aiFunction = aiFunctionsService.getFunctionByKey(functionKey);
+      
+      if (!aiFunction) {
+        return res.status(404).json({ message: "AI function not found" });
+      }
+
+      // Check if user's subscription tier can access this function
+      const user = await storage.getUser(userId);
+      if (!user || !aiFunction.availableForTiers.includes(user.subscriptionTier || 'free')) {
+        return res.status(403).json({ message: "Subscription tier not allowed for this function" });
+      }
+
+      // Get context data if required
+      let contextData: any = { user };
+      
+      if (aiFunction.requiresBookContext && bookId) {
+        const book = await storage.getBook(bookId);
+        if (!book || book.userId !== userId) {
+          return res.status(404).json({ message: "Book not found" });
+        }
+        contextData.book = book;
+      }
+
+      if (aiFunction.requiresProjectContext && projectId) {
+        const project = await storage.getProject(projectId);
+        if (!project || project.userId !== userId) {
+          return res.status(404).json({ message: "Project not found" });
+        }
+        contextData.project = project;
+        
+        // Get project books for additional context
+        const books = await storage.getBooksByProject(projectId);
+        contextData.projectBooks = books;
+      }
+
+      // Replace variables in the prompt template  
+      const { databaseFieldsService } = await import('./services/databaseFieldsService');
+      let finalPrompt = customPrompt || aiFunction.defaultUserPromptTemplate;
+      
+      // Prepare context values for variable replacement
+      const contextValues: Record<string, any> = {};
+      
+      if (contextData.book) {
+        Object.keys(contextData.book).forEach(key => {
+          contextValues[key] = contextData.book[key];
+        });
+        // Add computed book fields
+        contextValues.bookFullTitle = `${contextData.book.title}${contextData.book.subtitle ? ' - ' + contextData.book.subtitle : ''}`;
+      }
+      
+      if (contextData.project) {
+        Object.keys(contextData.project).forEach(key => {
+          contextValues[key] = contextData.project[key];
+        });
+      }
+      
+      if (contextData.user) {
+        Object.keys(contextData.user).forEach(key => {
+          contextValues[key] = contextData.user[key];
+        });
+        contextValues.fullAuthorName = `${contextData.user.firstName || ''} ${contextData.user.lastName || ''}`.trim();
+      }
+      
+      // Add system values
+      contextValues.currentDate = new Date().toLocaleDateString('fr-FR');
+      contextValues.currentYear = new Date().getFullYear();
+      
+      finalPrompt = databaseFieldsService.replaceVariables(finalPrompt, contextValues);
+
+      // Use OpenAI to generate content
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      
+      const completion = await openai.chat.completions.create({
+        model: customModel || aiFunction.defaultModel,
+        messages: [
+          {
+            role: "system",
+            content: aiFunction.defaultSystemPrompt
+          },
+          {
+            role: "user",
+            content: finalPrompt
+          }
+        ],
+        max_tokens: aiFunction.maxTokens,
+        temperature: customTemperature !== undefined ? customTemperature : aiFunction.temperature,
+      });
+
+      const generatedContent = completion.choices[0]?.message?.content || '';
+      
+      // Track AI generation for analytics (simplified - would need to implement trackAIGeneration in storage)
+      // await storage.trackAIGeneration({
+      //   userId,
+      //   functionKey,
+      //   bookId: bookId || null,
+      //   projectId: projectId || null,
+      //   prompt: finalPrompt,
+      //   response: generatedContent,
+      //   model: customModel || aiFunction.defaultModel,
+      //   tokensUsed: completion.usage?.total_tokens || 0,
+      //   cost: calculateCost(completion.usage?.total_tokens || 0, customModel || aiFunction.defaultModel)
+      // });
+
+      res.json({
+        content: generatedContent,
+        tokensUsed: completion.usage?.total_tokens || 0,
+        functionUsed: aiFunction.name
+      });
+
+    } catch (error) {
+      console.error("Error generating AI content:", error);
+      res.status(500).json({ message: "Failed to generate content" });
     }
   });
 

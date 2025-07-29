@@ -1,32 +1,34 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import { useAdmin } from "@/hooks/useAdmin";
-import Header from "@/components/layout/Header";
-import Sidebar from "@/components/layout/Sidebar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Bot, 
-  Wand2, 
-  Settings, 
-  Copy,
-  Download,
-  RefreshCw,
-  BookOpen,
-  MessageSquare,
-  Target,
-  Lightbulb
-} from "lucide-react";
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
+import { Copy, Play, Settings, BookOpen, User, Building } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+
+interface AIFunction {
+  key: string;
+  name: string;
+  description: string;
+  category: string;
+  isActive: boolean;
+  requiresBookContext: boolean;
+  requiresProjectContext: boolean;
+  defaultModel: string;
+  defaultSystemPrompt: string;
+  defaultUserPromptTemplate: string;
+  maxTokens: number;
+  temperature: number;
+  availableForTiers: string[];
+  sortOrder: number;
+}
 
 interface DatabaseField {
   table: string;
@@ -37,324 +39,419 @@ interface DatabaseField {
   options?: string[];
 }
 
-interface AIFunction {
-  type: string;
-  name: string;
-  description: string;
-}
+const categoryIcons = {
+  content: BookOpen,
+  marketing: Building,
+  seo: Settings,
+  profile: User,
+};
+
+const categoryColors = {
+  content: 'border-green-200 dark:border-green-800',
+  marketing: 'border-blue-200 dark:border-blue-800',
+  seo: 'border-purple-200 dark:border-purple-800',
+  profile: 'border-orange-200 dark:border-orange-800',
+};
 
 export default function AIFunctions() {
+  const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
-  const { isAuthenticated, isLoading, user } = useAuth();
-  const { isAdmin } = useAdmin();
-  const [selectedFunction, setSelectedFunction] = useState<string>("");
-  const [selectedBook, setSelectedBook] = useState<string>("");
-  const [selectedProject, setSelectedProject] = useState<string>("");
-  const [customPrompt, setCustomPrompt] = useState("");
-  const [customModel, setCustomModel] = useState("");
-  const [generatedContent, setGeneratedContent] = useState("");
-  const [activeTab, setActiveTab] = useState("functions");
-  const [previewValues, setPreviewValues] = useState<Record<string, any>>({});
+  const [selectedFunction, setSelectedFunction] = useState<AIFunction | null>(null);
+  const [selectedBook, setSelectedBook] = useState<string>('');
+  const [selectedProject, setSelectedProject] = useState<string>('');
+  const [customPrompt, setCustomPrompt] = useState('');
+  const [customModel, setCustomModel] = useState('');
+  const [customTemperature, setCustomTemperature] = useState('');
+  const [generatedContent, setGeneratedContent] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  // Check authentication and admin access
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-    
-    if (!isLoading && isAuthenticated && !isAdmin) {
-      toast({
-        title: "Accès refusé",
-        description: "Cette page est réservée aux administrateurs",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 1000);
-      return;
-    }
-  }, [isAuthenticated, isLoading, isAdmin, toast]);
-
-  // Fetch available AI functions
+  // Fetch AI functions
   const { data: aiFunctions, isLoading: functionsLoading } = useQuery({
-    queryKey: ["/api/ai/functions"],
+    queryKey: ['/api/ai/functions'],
     enabled: isAuthenticated,
   });
 
-  // Fetch database fields
-  const { data: databaseFields, isLoading: fieldsLoading } = useQuery({
-    queryKey: ["/api/ai/database-fields"],
+  // Fetch database fields for variable preview
+  const { data: databaseFields } = useQuery({
+    queryKey: ['/api/ai/database-fields'],
     enabled: isAuthenticated,
   });
 
-  // Fetch user projects and books
-  const { data: projects } = useQuery({
-    queryKey: ["/api/projects"],
-    enabled: isAuthenticated,
-  });
-
+  // Fetch user's books
   const { data: books } = useQuery({
-    queryKey: ["/api/books"],
+    queryKey: ['/api/books'],
     enabled: isAuthenticated,
   });
 
-  // Generation mutation
-  const generateMutation = useMutation({
-    mutationFn: async (data: {
-      functionType: string;
-      context: { bookId?: string; projectId?: string; userId?: string };
-      customPrompt?: string;
-      customModel?: string;
-    }) => {
-      return await apiRequest("POST", "/api/ai/generate-configured", data);
-    },
-    onSuccess: (result) => {
-      setGeneratedContent(result.content);
-      setActiveTab("results");
-      toast({ 
-        title: "Contenu généré avec succès", 
-        description: `Coût: $${result.cost.toFixed(4)} | Tokens: ${result.tokensUsed}` 
-      });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        window.location.href = "/api/login";
-        return;
-      }
-      toast({ 
-        title: "Erreur de génération", 
-        description: error.message,
-        variant: "destructive" 
-      });
-    },
+  // Fetch user's projects
+  const { data: projects } = useQuery({
+    queryKey: ['/api/projects'],
+    enabled: isAuthenticated,
   });
 
-  // Fetch field values for preview
-  const previewMutation = useMutation({
-    mutationFn: async (context: { bookId?: string; projectId?: string }) => {
-      return await apiRequest("POST", "/api/ai/field-values", { context });
-    },
-    onSuccess: (values) => {
-      setPreviewValues(values);
-    },
-  });
-
-  // Handle context change
-  const handleContextChange = (field: string, value: string) => {
-    if (field === 'book') {
-      const bookId = value === 'none' ? '' : value;
-      setSelectedBook(bookId);
-      const context = { bookId: bookId || undefined, projectId: selectedProject || undefined };
-      if (bookId || selectedProject) {
-        previewMutation.mutate(context);
-      }
-    } else if (field === 'project') {
-      const projectId = value === 'none' ? '' : value;
-      setSelectedProject(projectId);
-      const context = { bookId: selectedBook || undefined, projectId: projectId || undefined };
-      if (selectedBook || projectId) {
-        previewMutation.mutate(context);
-      }
+  useEffect(() => {
+    if (selectedFunction) {
+      setCustomPrompt(selectedFunction.defaultUserPromptTemplate);
+      setCustomModel(selectedFunction.defaultModel);
+      setCustomTemperature(selectedFunction.temperature.toString());
     }
-  };
+  }, [selectedFunction]);
 
-  // Handle generation
-  const handleGenerate = () => {
-    if (!selectedFunction) {
-      toast({
-        title: "Fonction requise",
-        description: "Veuillez sélectionner une fonction IA",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    generateMutation.mutate({
-      functionType: selectedFunction,
-      context: {
-        bookId: selectedBook || undefined,
-        projectId: selectedProject || undefined
-      },
-      customPrompt: customPrompt || undefined,
-      customModel: customModel || undefined
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: 'Copié !',
+      description: 'Le texte a été copié dans le presse-papiers',
     });
   };
 
-  // Copy content to clipboard
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(generatedContent);
-    toast({ title: "Copié dans le presse-papiers" });
+  const generateContent = async () => {
+    if (!selectedFunction) return;
+
+    setIsGenerating(true);
+    try {
+      const response = await fetch('/api/ai/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          functionKey: selectedFunction.key,
+          bookId: selectedFunction.requiresBookContext ? selectedBook : undefined,
+          projectId: selectedFunction.requiresProjectContext ? selectedProject : undefined,
+          customPrompt: customPrompt !== selectedFunction.defaultUserPromptTemplate ? customPrompt : undefined,
+          customModel: customModel !== selectedFunction.defaultModel ? customModel : undefined,
+          customTemperature: parseFloat(customTemperature) !== selectedFunction.temperature ? parseFloat(customTemperature) : undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la génération');
+      }
+
+      const data = await response.json();
+      setGeneratedContent(data.content);
+      
+      toast({
+        title: 'Contenu généré !',
+        description: 'Le contenu IA a été généré avec succès',
+      });
+    } catch (error) {
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de générer le contenu',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
-  // Function icons map
-  const functionIcons: Record<string, any> = {
-    description: BookOpen,
-    structure: Settings,
-    marketing: Target,
-    title: Lightbulb,
-    keywords: MessageSquare,
-    synopsis: BookOpen,
-    blurb: MessageSquare
+  const getAvailableVariables = () => {
+    if (!databaseFields || !selectedFunction) return [];
+    
+    const relevantFields: DatabaseField[] = [];
+    const fields = databaseFields as Record<string, DatabaseField[]>;
+    
+    if (selectedFunction.requiresBookContext) {
+      relevantFields.push(...(fields.Livre || []));
+    }
+    
+    if (selectedFunction.requiresProjectContext) {
+      relevantFields.push(...(fields.Projet || []));
+    }
+    
+    // Always include author and system variables
+    relevantFields.push(...(fields.Auteur || []));
+    relevantFields.push(...(fields.Système || []));
+    
+    return relevantFields;
   };
 
-  if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="w-96">
+          <CardHeader>
+            <CardTitle>Connexion requise</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4">
+              Vous devez être connecté pour accéder aux fonctionnalités IA.
+            </p>
+            <Button onClick={() => window.location.href = '/api/login'}>
+              Se connecter
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
+  if (functionsLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Chargement des fonctionnalités IA...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Group functions by category
+  const functionsByCategory = (aiFunctions as AIFunction[] || []).reduce((acc: Record<string, AIFunction[]>, func: AIFunction) => {
+    if (!acc[func.category]) acc[func.category] = [];
+    acc[func.category].push(func);
+    return acc;
+  }, {});
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 ml-64 mt-16 p-6">
-          <div className="max-w-6xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-600 rounded-lg">
-                <Settings className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Configuration des Variables IA</h1>
-                <p className="text-gray-600">Configurez les variables disponibles pour toutes les fonctions IA</p>
-              </div>
-            </div>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-6 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Fonctionnalités IA</h1>
+          <p className="text-muted-foreground">
+            Générez du contenu intelligent pour vos projets d'édition
+          </p>
+        </div>
 
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="functions">Variables Disponibles</TabsTrigger>
-                <TabsTrigger value="advanced">Documentation</TabsTrigger>
-              </TabsList>
-
-              {/* Variables Tab */}
-              <TabsContent value="functions" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Variables Disponibles par Catégorie</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {fieldsLoading ? (
-                      <div className="text-center py-8">Chargement des variables...</div>
-                    ) : (
-                      <div className="space-y-6">
-                        {Object.entries(databaseFields || {}).map(([category, fields]) => (
-                          <div key={category}>
-                            <h3 className="text-lg font-semibold mb-3 text-gray-900">{category}</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                              {fields.map((field: any) => (
-                                <div key={`${field.table}-${field.field}`} className="p-3 border rounded-lg bg-gray-50">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <code className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm font-mono">
-                                      {`{${field.field}}`}
-                                    </code>
-                                    <Badge variant="outline" className="text-xs">
-                                      {field.type}
-                                    </Badge>
-                                  </div>
-                                  <p className="text-sm text-gray-600">{field.description}</p>
-                                  {field.options && (
-                                    <div className="mt-2">
-                                      <p className="text-xs text-gray-500">Options:</p>
-                                      <p className="text-xs text-gray-600">{field.options.join(', ')}</p>
-                                    </div>
-                                  )}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Functions List */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle>Fonctionnalités disponibles</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="space-y-4 p-6">
+                  {Object.entries(functionsByCategory).map(([category, functions]) => {
+                    const IconComponent = categoryIcons[category as keyof typeof categoryIcons] || Settings;
+                    const colorClass = categoryColors[category as keyof typeof categoryColors] || '';
+                    
+                    return (
+                      <div key={category}>
+                        <div className="flex items-center gap-2 mb-3">
+                          <IconComponent className="w-4 h-4" />
+                          <h3 className="font-semibold capitalize">{category}</h3>
+                        </div>
+                        <div className="space-y-2 ml-6">
+                          {(functions as AIFunction[]).map((func) => (
+                            <Button
+                              key={func.key}
+                              variant={selectedFunction?.key === func.key ? 'default' : 'ghost'}
+                              className="w-full justify-start text-left h-auto p-3"
+                              onClick={() => setSelectedFunction(func)}
+                            >
+                              <div>
+                                <div className="font-medium">{func.name}</div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {func.description}
                                 </div>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* Documentation Tab */}
-              <TabsContent value="advanced" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Documentation des Variables</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div>
-                      <h3 className="text-lg font-semibold mb-3">Comment utiliser les variables :</h3>
-                      <div className="bg-blue-50 p-4 rounded-lg space-y-3">
-                        <p className="text-sm">
-                          • Les variables sont automatiquement remplacées par les valeurs réelles des utilisateurs
-                        </p>
-                        <p className="text-sm">
-                          • Utilisez la syntaxe <code className="px-1 bg-white rounded">{`{nom_variable}`}</code> dans vos prompts
-                        </p>
-                        <p className="text-sm">
-                          • Les variables sont organisées par contexte : Livre, Projet, Auteur, Système
-                        </p>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h3 className="text-lg font-semibold mb-3">Exemples d'utilisation :</h3>
-                      <div className="space-y-4">
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                          <h4 className="font-medium mb-2">Génération de description :</h4>
-                          <code className="text-sm text-gray-700 block">
-                            "Créez une description marketing pour le livre {`{title}`} de {`{fullAuthorName}`}. 
-                            Le livre est écrit en {`{language}`} et appartient à la catégorie {`{primaryCategory}`}. 
-                            Prix: {`{ebookPrice}`}€"
-                          </code>
-                        </div>
-
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                          <h4 className="font-medium mb-2">Génération de structure :</h4>
-                          <code className="text-sm text-gray-700 block">
-                            "Créez un plan détaillé pour le livre {`{title}`} qui fait {`{manuscriptPages}`} pages. 
-                            Public cible: {`{targetAudience}`}. Incluez {`{expectedLength}`} mots environ."
-                          </code>
-                        </div>
-
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                          <h4 className="font-medium mb-2">Contenu marketing :</h4>
-                          <code className="text-sm text-gray-700 block">
-                            "Créez du contenu promotionnel pour {`{bookFullTitle}`} de {`{fullAuthorName}`}. 
-                            Mots-clés: {`{keywords}`}. Date de sortie: {`{currentDate}`}"
-                          </code>
+                                <div className="flex gap-1 mt-2">
+                                  {func.availableForTiers.map((tier: string) => (
+                                    <Badge key={tier} variant="secondary" className="text-xs">
+                                      {tier}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            </Button>
+                          ))}
                         </div>
                       </div>
-                    </div>
-
-                    <div>
-                      <h3 className="text-lg font-semibold mb-3">Variables spéciales :</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="p-3 border rounded-lg">
-                          <code className="text-blue-600 font-mono text-sm">{`{fullAuthorName}`}</code>
-                          <p className="text-sm text-gray-600 mt-1">Prénom + Nom complet</p>
-                        </div>
-                        <div className="p-3 border rounded-lg">
-                          <code className="text-blue-600 font-mono text-sm">{`{bookFullTitle}`}</code>
-                          <p className="text-sm text-gray-600 mt-1">Titre + Sous-titre</p>
-                        </div>
-                        <div className="p-3 border rounded-lg">
-                          <code className="text-blue-600 font-mono text-sm">{`{currentDate}`}</code>
-                          <p className="text-sm text-gray-600 mt-1">Date du jour</p>
-                        </div>
-                        <div className="p-3 border rounded-lg">
-                          <code className="text-blue-600 font-mono text-sm">{`{currentYear}`}</code>
-                          <p className="text-sm text-gray-600 mt-1">Année actuelle</p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </main>
+
+          {/* Function Configuration */}
+          <div className="lg:col-span-2">
+            {selectedFunction ? (
+              <Tabs defaultValue="configuration" className="space-y-6">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="configuration">Configuration</TabsTrigger>
+                  <TabsTrigger value="advanced">Paramètres avancés</TabsTrigger>
+                  <TabsTrigger value="results">Résultats</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="configuration" className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>{selectedFunction.name}</CardTitle>
+                      <p className="text-muted-foreground">{selectedFunction.description}</p>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {/* Context Selection */}
+                      {selectedFunction.requiresBookContext && (
+                        <div>
+                          <Label htmlFor="book-select">Sélectionner un livre</Label>
+                          <Select value={selectedBook} onValueChange={setSelectedBook}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Choisissez un livre..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {(books as any[] || []).map((book: any) => (
+                                <SelectItem key={book.id} value={book.id}>
+                                  {book.title}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+
+                      {selectedFunction.requiresProjectContext && (
+                        <div>
+                          <Label htmlFor="project-select">Sélectionner un projet</Label>
+                          <Select value={selectedProject} onValueChange={setSelectedProject}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Choisissez un projet..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {(projects as any[] || []).map((project: any) => (
+                                <SelectItem key={project.id} value={project.id}>
+                                  {project.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+
+                      {/* Available Variables */}
+                      <div>
+                        <Label>Variables disponibles</Label>
+                        <div className="border rounded-lg p-4 bg-muted/50 mt-2">
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                            {getAvailableVariables().map((field) => (
+                              <Button
+                                key={`${field.table}-${field.field}`}
+                                variant="outline"
+                                size="sm"
+                                className="h-auto p-2 text-left justify-start"
+                                onClick={() => copyToClipboard(`{${field.field}}`)}
+                              >
+                                <div>
+                                  <code className="text-xs font-mono">{`{${field.field}}`}</code>
+                                  <div className="text-xs text-muted-foreground mt-1">
+                                    {field.displayName}
+                                  </div>
+                                </div>
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Generate Button */}
+                      <Button 
+                        onClick={generateContent} 
+                        disabled={isGenerating || (selectedFunction.requiresBookContext && !selectedBook) || (selectedFunction.requiresProjectContext && !selectedProject)}
+                        className="w-full"
+                      >
+                        <Play className="w-4 h-4 mr-2" />
+                        {isGenerating ? 'Génération en cours...' : 'Générer le contenu'}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="advanced" className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Paramètres avancés</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div>
+                        <Label htmlFor="custom-prompt">Prompt personnalisé</Label>
+                        <Textarea
+                          id="custom-prompt"
+                          value={customPrompt}
+                          onChange={(e) => setCustomPrompt(e.target.value)}
+                          rows={6}
+                          className="mt-2"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="custom-model">Modèle IA</Label>
+                          <Input
+                            id="custom-model"
+                            value={customModel}
+                            onChange={(e) => setCustomModel(e.target.value)}
+                            className="mt-2"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="custom-temperature">Température</Label>
+                          <Input
+                            id="custom-temperature"
+                            type="number"
+                            min="0"
+                            max="2"
+                            step="0.1"
+                            value={customTemperature}
+                            onChange={(e) => setCustomTemperature(e.target.value)}
+                            className="mt-2"
+                          />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="results" className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle>Contenu généré</CardTitle>
+                        {generatedContent && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => copyToClipboard(generatedContent)}
+                          >
+                            <Copy className="w-4 h-4 mr-2" />
+                            Copier
+                          </Button>
+                        )}
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {generatedContent ? (
+                        <div className="bg-muted/50 rounded-lg p-4">
+                          <pre className="whitespace-pre-wrap text-sm">
+                            {generatedContent}
+                          </pre>
+                        </div>
+                      ) : (
+                        <div className="text-center text-muted-foreground py-12">
+                          <Play className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                          <p>Aucun contenu généré pour le moment</p>
+                          <p className="text-sm">Utilisez l'onglet Configuration pour générer du contenu</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            ) : (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <Settings className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-lg font-semibold mb-2">Sélectionnez une fonctionnalité</h3>
+                  <p className="text-muted-foreground">
+                    Choisissez une fonctionnalité IA dans la liste de gauche pour commencer
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
