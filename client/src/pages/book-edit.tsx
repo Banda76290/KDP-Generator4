@@ -328,6 +328,7 @@ export default function EditBook() {
         keywords: book.keywords || [],
         seriesTitle: book.seriesTitle || "",
         seriesNumber: book.seriesNumber || null,
+        editionNumber: book.editionNumber || null,
       });
 
       // Set series checkbox state and store original series data
@@ -374,8 +375,8 @@ export default function EditBook() {
         categories,
         keywords,
         // Convert numeric fields to proper types as expected by schema
-        editionNumber: data.bookData.editionNumber ? String(data.bookData.editionNumber) : undefined,
-        seriesNumber: data.bookData.seriesNumber ? Number(data.bookData.seriesNumber) : undefined,
+        editionNumber: data.bookData.editionNumber ? String(data.bookData.editionNumber) : null,
+        seriesNumber: data.bookData.seriesNumber ? Number(data.bookData.seriesNumber) : null,
       };
       
       console.log(isCreating ? 'Creating book data:' : 'Updating book data:', formattedData);
