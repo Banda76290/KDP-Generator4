@@ -153,47 +153,109 @@ export default function EditBook() {
     },
   });
 
+  // Auto-save form data whenever anything changes (future-proof)
+  const watchedFormData = form.watch();
+  useEffect(() => {
+    if (!isCreating && !book) return; // Don't save until we have initial data
+    
+    const saveFormData = () => {
+      const currentFormData = {
+        ...watchedFormData,
+        keywords,
+        categories,
+        contributors,
+        isPartOfSeries
+      };
+      
+      const storageKey = `bookFormData_${bookId || 'new'}`;
+      sessionStorage.setItem(storageKey, JSON.stringify(currentFormData));
+    };
+    
+    // Debounce saving to avoid excessive storage writes
+    const timeoutId = setTimeout(saveFormData, 500);
+    return () => clearTimeout(timeoutId);
+  }, [watchedFormData, keywords, categories, contributors, isPartOfSeries, bookId, isCreating, book]);
+
+  // Clean up auto-saved data when leaving the page normally (not via series creation)
+  useEffect(() => {
+    const storageKey = `bookFormData_${bookId || 'new'}`;
+    
+    const handleBeforeUnload = () => {
+      // Only clear if we're not going to series creation
+      if (!sessionStorage.getItem('returnToBookEdit')) {
+        sessionStorage.removeItem(storageKey);
+      }
+    };
+    
+    const handlePopState = () => {
+      // Clear when navigating back/forward unless going to series creation
+      if (!sessionStorage.getItem('returnToBookEdit')) {
+        sessionStorage.removeItem(storageKey);
+      }
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('popstate', handlePopState);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [bookId]);
+
   // Update form with fetched book data or restored data
   useEffect(() => {
     // Check for saved form data from series creation first
-    const savedFormData = sessionStorage.getItem('bookFormData');
+    const storageKey = `bookFormData_${bookId || 'new'}`;
+    const savedFormData = sessionStorage.getItem(storageKey);
     const returnFromSeries = sessionStorage.getItem('returnToBookEdit');
     const newlyCreatedSeries = sessionStorage.getItem('newlyCreatedSeries');
     
     if (savedFormData && returnFromSeries === (bookId || 'new')) {
       console.log('Restoring form data from sessionStorage');
-      // Restore saved form data
-      const formData = JSON.parse(savedFormData);
-      
-      // If we have a newly created series, associate it
-      if (newlyCreatedSeries) {
-        const seriesData = JSON.parse(newlyCreatedSeries);
-        console.log('Associating newly created series:', seriesData);
-        formData.seriesTitle = seriesData.title;
-        formData.seriesNumber = 1;
+      try {
+        const formData = JSON.parse(savedFormData);
+        
+        // If we have a newly created series, associate it
+        if (newlyCreatedSeries) {
+          const seriesData = JSON.parse(newlyCreatedSeries);
+          console.log('Associating newly created series:', seriesData);
+          formData.seriesTitle = seriesData.title;
+          formData.seriesNumber = 1;
+        }
+        
+        console.log('Form data being restored:', formData);
+        
+        // Restore all form fields automatically (future-proof)
+        const { keywords: savedKeywords, categories: savedCategories, contributors: savedContributors, isPartOfSeries: savedIsPartOfSeries, ...formFields } = formData;
+        
+        form.reset(formFields);
+        
+        // Restore separate state arrays
+        if (savedKeywords && Array.isArray(savedKeywords)) {
+          setKeywords(savedKeywords);
+        }
+        if (savedCategories && Array.isArray(savedCategories)) {
+          setCategories(savedCategories);
+        }
+        if (savedContributors && Array.isArray(savedContributors)) {
+          setContributors(savedContributors);
+        }
+        if (typeof savedIsPartOfSeries === 'boolean') {
+          setIsPartOfSeries(savedIsPartOfSeries);
+        }
+        
+        // Clear saved data
+        sessionStorage.removeItem(storageKey);
+        sessionStorage.removeItem('returnToBookEdit');
+        sessionStorage.removeItem('newlyCreatedSeries');
+        
+        console.log('Form restoration complete');
+        return; // Exit early to prevent book data from overriding restored data
+      } catch (error) {
+        console.error('Error restoring form data:', error);
+        sessionStorage.removeItem(storageKey);
       }
-      
-      console.log('Form data being restored:', formData);
-      form.reset(formData);
-      
-      // Restore separate state arrays
-      if (formData.keywords) {
-        setKeywords(Array.isArray(formData.keywords) ? formData.keywords : []);
-      }
-      if (formData.categories) {
-        setCategories(Array.isArray(formData.categories) ? formData.categories : []);
-      }
-      
-      // Set series checkbox state
-      setIsPartOfSeries(!!formData.seriesTitle);
-      
-      // Clear saved data
-      sessionStorage.removeItem('bookFormData');
-      sessionStorage.removeItem('returnToBookEdit');
-      sessionStorage.removeItem('newlyCreatedSeries');
-      
-      console.log('Form restoration complete');
-      return; // Exit early to prevent book data from overriding restored data
     }
     
     // Only load book data if we didn't restore from sessionStorage
@@ -720,12 +782,7 @@ export default function EditBook() {
                                   }
                                 } else {
                                   // Aucune série sélectionnée - créer une nouvelle série
-                                  // Sauvegarder les données du formulaire dans sessionStorage
-                                  const formData = form.getValues();
-                                  // Include current keywords and categories state
-                                  formData.keywords = keywords;
-                                  formData.categories = categories;
-                                  sessionStorage.setItem('bookFormData', JSON.stringify(formData));
+                                  // Le système de sauvegarde automatique se charge déjà de sauvegarder les données
                                   sessionStorage.setItem('returnToBookEdit', bookId || 'new');
                                   
                                   // Rediriger vers la création de série
