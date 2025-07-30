@@ -796,24 +796,12 @@ export default function EditBook() {
                               variant="outline" 
                               size="sm"
                               onClick={() => {
-                                const seriesTitle = form.watch("seriesTitle");
-                                if (seriesTitle) {
-                                  // Si le livre a un seriesTitle, on redirige vers l'édition de cette série
-                                  const matchingSeries = userSeries.find((s: any) => s.title === seriesTitle);
-                                  if (matchingSeries) {
-                                    window.location.href = `/series-edit/${matchingSeries.id}`;
-                                  } else {
-                                    window.location.href = '/manage-series';
-                                  }
-                                } else {
-                                  // Aucune série sélectionnée - créer une nouvelle série
-                                  // Sauvegarder les données SEULEMENT dans sessionStorage (pas en base de données)
-                                  saveFormDataToSession();
-                                  sessionStorage.setItem('returnToBookEdit', bookId || 'new');
-                                  
-                                  // Rediriger vers la création de série
-                                  window.location.href = '/series-setup';
-                                }
+                                // Sauvegarder les données SEULEMENT dans sessionStorage (pas en base de données)
+                                saveFormDataToSession();
+                                sessionStorage.setItem('returnToBookEdit', bookId || 'new');
+                                
+                                // Rediriger vers la création de série
+                                window.location.href = '/series-create';
                               }}
                             >
                               {form.watch("seriesTitle") ? "Edit series" : "Create series"}
