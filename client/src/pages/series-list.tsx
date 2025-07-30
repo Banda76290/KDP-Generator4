@@ -26,7 +26,9 @@ function useSeriesData() {
   return useQuery({
     queryKey: ['/api/series'],
     queryFn: async () => {
-      const response = await fetch('/api/series');
+      const response = await fetch('/api/series', {
+        credentials: 'include' // Include cookies for authentication
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch series');
       }

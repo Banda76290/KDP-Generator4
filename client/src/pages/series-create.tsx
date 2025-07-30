@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -22,6 +23,7 @@ interface SeriesFormData {
 export default function SeriesCreatePage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [characterCount, setCharacterCount] = useState(0);
   const maxCharacters = 4000;
   const [showLinkDialog, setShowLinkDialog] = useState(false);
@@ -70,6 +72,9 @@ export default function SeriesCreatePage() {
         throw new Error(errorData.message || 'Failed to save series');
       }
 
+      // Invalidate and refetch series data
+      await queryClient.invalidateQueries({ queryKey: ['/api/series'] });
+      
       toast({
         title: "Series saved",
         description: "Your series has been successfully created.",
