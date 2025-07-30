@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { BookOpen, Search, Plus, MoreVertical, Edit3, Trash2, Book } from "lucide-react";
+import { BookOpen, Search, Plus, MoreVertical, Edit3, Trash2, Book, X } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface BookData {
@@ -54,8 +56,36 @@ export default function SeriesListPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: series = [], isLoading, error } = useSeriesData();
+
+  // Mutation to remove book from series
+  const removeBookFromSeries = useMutation({
+    mutationFn: async (bookId: string) => {
+      return await apiRequest("PATCH", `/api/books/${bookId}`, {
+        seriesTitle: "",
+        seriesNumber: null
+      });
+    },
+    onSuccess: () => {
+      // Invalidate queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ['/api/series'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/books'] });
+      toast({
+        title: "Book Removed",
+        description: "The book has been successfully removed from the series.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove book from series",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Filter and sort series
   const filteredSeries = series
@@ -285,6 +315,37 @@ export default function SeriesListPage() {
                                   >
                                     {book.status}
                                   </Badge>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        className="h-6 w-6 p-0 hover:bg-red-100 hover:text-red-600"
+                                        title="Remove book from series"
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Remove Book from Series</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          Are you sure you want to remove "{book.title}" from this series? 
+                                          The book will remain in your library but will no longer be part of "{seriesItem.title}".
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction 
+                                          className="bg-red-600 hover:bg-red-700"
+                                          onClick={() => removeBookFromSeries.mutate(book.id)}
+                                          disabled={removeBookFromSeries.isPending}
+                                        >
+                                          {removeBookFromSeries.isPending ? "Removing..." : "Remove from Series"}
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
                                 </div>
                               </div>
                             ))}
