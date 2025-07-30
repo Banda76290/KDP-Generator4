@@ -36,8 +36,44 @@ const bookFormSchema = insertBookSchema.extend({
 type BookFormData = z.infer<typeof bookFormSchema>;
 
 const languages = [
-  "English", "Spanish", "French", "German", "Italian", "Portuguese", "Japanese", "Chinese (Simplified)", 
-  "Chinese (Traditional)", "Korean", "Arabic", "Hindi", "Russian", "Dutch", "Swedish", "Norwegian"
+  "English", 
+  "German", 
+  "French", 
+  "Spanish", 
+  "Italian", 
+  "Portuguese", 
+  "Dutch", 
+  "Japanese", 
+  "Afrikaans", 
+  "Arabic (Beta)", 
+  "Basque", 
+  "Breton", 
+  "Catalan", 
+  "Chinese (Traditional) (Beta)", 
+  "Cornish", 
+  "Corsican", 
+  "Danish", 
+  "Eastern Frisian", 
+  "Finnish", 
+  "Frisian", 
+  "Galician", 
+  "Gujarati", 
+  "Hindi", 
+  "Icelandic", 
+  "Irish", 
+  "Luxembourgish", 
+  "Malayalam", 
+  "Manx", 
+  "Marathi", 
+  "Northern Frisian", 
+  "Norwegian", 
+  "Nynorsk Norwegian", 
+  "Romanian", 
+  "Scots", 
+  "Scottish Gaelic", 
+  "Swedish", 
+  "Tamil", 
+  "Welsh"
 ];
 
 const marketplaces = [
