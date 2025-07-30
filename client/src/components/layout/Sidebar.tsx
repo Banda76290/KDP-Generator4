@@ -25,9 +25,10 @@ export default function Sidebar() {
                 className={cn(
                   "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",
                   isActive
-                    ? "bg-primary text-primary-foreground"
+                    ? "text-white"
                     : "text-foreground hover:bg-muted"
                 )}
+                style={isActive ? { backgroundColor: '#38b6ff' } : {}}
               >
                 <item.icon className="w-5 h-5" />
                 <span>{item.name}</span>
@@ -62,9 +63,10 @@ export default function Sidebar() {
                     className={cn(
                       "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",
                       isActive
-                        ? "bg-primary text-primary-foreground"
+                        ? "text-white"
                         : "text-foreground hover:bg-muted"
                     )}
+                    style={isActive ? { backgroundColor: '#38b6ff' } : {}}
                   >
                     <item.icon className="w-5 h-5" />
                     <span>{item.name}</span>
@@ -120,9 +122,10 @@ export default function Sidebar() {
                   className={cn(
                     "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",
                     isActive
-                      ? "bg-primary text-primary-foreground"
+                      ? "text-white"
                       : "text-foreground hover:bg-muted"
                   )}
+                  style={isActive ? { backgroundColor: '#38b6ff' } : {}}
                 >
                   <item.icon className="w-5 h-5" />
                   <span>{item.name}</span>
