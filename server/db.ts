@@ -5,11 +5,11 @@ import * as schema from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
 
-// Use DATABASE_URL from environment, or fallback to REPLIT_DB_URL, or use a default local connection
-const databaseUrl = process.env.DATABASE_URL || process.env.REPLIT_DB_URL || 'postgresql://localhost:5432/defaultdb';
+// Check for valid Neon database URL
+const databaseUrl = process.env.DATABASE_URL || process.env.REPLIT_DB_URL;
 
-if (!process.env.DATABASE_URL && !process.env.REPLIT_DB_URL) {
-  console.warn('Warning: No DATABASE_URL or REPLIT_DB_URL found. Using default local connection.');
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL must be set. Did you forget to provision a database?');
 }
 
 export const pool = new Pool({ connectionString: databaseUrl });
