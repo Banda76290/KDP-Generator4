@@ -73,6 +73,45 @@
   background: linear-gradient(135deg, hsl(142, 76%, 36%) 0%, hsl(195, 100%, 50%) 100%);
 }
 
+/* KDP Generator Brand Colors */
+:root {
+  --kdp-primary-blue: #38b6ff;    /* Primary blue for main actions */
+  --kdp-secondary-orange: #ff9900; /* Secondary orange for highlights */
+  --kdp-accent-blue: #146eb4;      /* Darker blue for secondary actions */
+}
+
+.kdp-btn-primary {
+  background-color: var(--kdp-primary-blue);
+  color: white;
+}
+
+.kdp-btn-primary:hover {
+  background-color: #2da5ee;
+  opacity: 0.9;
+}
+
+.kdp-btn-secondary {
+  background-color: var(--kdp-accent-blue);
+  color: white;
+}
+
+.kdp-btn-secondary:hover {
+  background-color: #125a96;
+  opacity: 0.9;
+}
+
+.kdp-text-primary {
+  color: var(--kdp-primary-blue);
+}
+
+.kdp-text-accent {
+  color: var(--kdp-accent-blue);
+}
+
+.kdp-text-orange {
+  color: var(--kdp-secondary-orange);
+}
+
 .gradient-warning {
   background: linear-gradient(135deg, hsl(35, 100%, 50%) 0%, hsl(45, 95%, 53%) 100%);
 }

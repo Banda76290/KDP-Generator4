@@ -8,6 +8,26 @@ KDP Generator is a comprehensive web application designed to help authors manage
 
 Preferred communication style: Simple, everyday language.
 
+## Brand Colors
+
+The application uses specific brand colors that must be consistently applied across all UI elements:
+
+- **Primary Blue**: `#38b6ff` - Used for main action buttons, primary links, and key interface elements
+- **Secondary Orange**: `#ff9900` - Used for highlights, notifications, and accent elements  
+- **Accent Blue**: `#146eb4` - Used for secondary actions, darker blue elements, and alternative buttons
+
+These colors are defined in `client/src/index.css` as CSS custom properties:
+- `--kdp-primary-blue: #38b6ff`
+- `--kdp-secondary-orange: #ff9900` 
+- `--kdp-accent-blue: #146eb4`
+
+Corresponding CSS utility classes are available:
+- `.kdp-btn-primary` - Primary blue buttons
+- `.kdp-btn-secondary` - Accent blue buttons
+- `.kdp-text-primary` - Primary blue text
+- `.kdp-text-accent` - Accent blue text
+- `.kdp-text-orange` - Orange text
+
 ## System Architecture
 
 ### Full-Stack Architecture
@@ -211,6 +231,14 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Unified Sort Logic**: Both pages now support identical sorting by title, date, status, modification time, and revenue
 - **Consistent Terminology**: Standardized option labels across both pages for better user experience
 - **Full Feature Parity**: Projects and Books pages now have complete consistency in both data display and sorting capabilities
+
+### Brand Color Integration and UI Consistency (30 Juillet 2025)
+- **Exact Brand Colors Defined**: Integrated precise brand colors (#38b6ff, #ff9900, #146eb4) into CSS system
+- **CSS Custom Properties**: Added brand color variables and utility classes in index.css for consistent usage
+- **Manage Series Page Updated**: Applied exact brand colors to all buttons, links, and interface elements
+- **Popup Style Standardization**: Replaced custom popup styling with native shadcn/ui AlertDialog components
+- **Color Documentation**: Documented brand color usage and CSS classes in replit.md for future reference
+- **Consistent UI Experience**: All interface elements now follow the exact brand color scheme from logo and navigation
 
 ### Universal Layout System Implementation (30 Juillet 2025) ✅ VALIDATED
 - **CSS Grid Layout Architecture**: Implemented universal layout system using CSS Grid for consistent header positioning
