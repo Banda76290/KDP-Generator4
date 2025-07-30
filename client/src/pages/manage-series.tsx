@@ -150,10 +150,7 @@ function ManageSeriesContent() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Breadcrumb */}
-      <div className="flex items-center text-sm text-gray-600 mb-6">
-          <span className="mx-2">›</span>
-        </div>
+      
 
       {/* Series Header */}
       <div className="flex items-start justify-between mb-8">
