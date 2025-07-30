@@ -907,7 +907,7 @@ export default function EditBook() {
                 <CardContent className="space-y-6">
                   {/* Project Selection */}
                   <div className="space-y-2">
-                    <Label htmlFor="projectId" className="text-sm font-medium">Project *</Label>
+                    <Label htmlFor="projectId" className="font-medium text-[16px]">Project *</Label>
                     <p className="text-sm text-gray-600">
                       Select the project this book belongs to.
                     </p>
@@ -931,7 +931,7 @@ export default function EditBook() {
 
                   {/* Language */}
                   <div className="space-y-2">
-                    <Label htmlFor="language" className="text-sm font-medium">Language *</Label>
+                    <Label htmlFor="language" className="font-medium text-[16px]">Language *</Label>
                     <p className="text-sm text-gray-600">
                       What language is your book written in?
                     </p>
@@ -952,7 +952,7 @@ export default function EditBook() {
 
                   {/* Book Title */}
                   <div className="space-y-2">
-                    <Label htmlFor="title" className="text-sm font-medium">Book Title *</Label>
+                    <Label htmlFor="title" className="font-medium text-[16px]">Book Title *</Label>
                     <p className="text-sm text-gray-600">
                       Enter your title as it should appear on the book cover and in the catalog. Some
                       customers use long titles to help with keyword searches.
@@ -969,7 +969,7 @@ export default function EditBook() {
 
                   {/* Subtitle */}
                   <div className="space-y-2">
-                    <Label htmlFor="subtitle" className="text-sm font-medium">Subtitle</Label>
+                    <Label htmlFor="subtitle" className="font-medium text-[16px]">Subtitle</Label>
                     <p className="text-sm text-gray-600">Optional subtitle for your book</p>
                     <Input
                       id="subtitle"
@@ -1028,7 +1028,7 @@ export default function EditBook() {
                     {form.watch("seriesTitle") && (
                       <div className="bg-gray-50 p-4 rounded-md border space-y-4">
                         <div className="space-y-2">
-                          <Label className="text-sm font-medium text-gray-700">Series Title</Label>
+                          <Label className="font-medium text-[16px] text-gray-700">Series Title</Label>
                           <p className="text-sm font-medium">{form.watch("seriesTitle")}</p>
                         </div>
                         <div className="flex gap-2">
@@ -1108,7 +1108,7 @@ export default function EditBook() {
                       <div className="space-y-4">
                         <div className="flex gap-2">
                           <div className="flex-1">
-                            <Label className="text-sm font-medium">Select existing series</Label>
+                            <Label className="font-medium text-[16px]">Select existing series</Label>
                             <Select 
                               value={form.watch("seriesTitle") || ""} 
                               onValueChange={(value) => {
@@ -1171,7 +1171,7 @@ export default function EditBook() {
                         
                         {form.watch("seriesTitle") && (
                           <div className="space-y-2">
-                            <Label htmlFor="seriesNumber" className="text-sm">Volume Number</Label>
+                            <Label htmlFor="seriesNumber" className="font-medium text-[16px]">Volume Number</Label>
                             <Input
                               id="seriesNumber"
                               type="number"
@@ -1188,7 +1188,7 @@ export default function EditBook() {
 
                   {/* Edition Number */}
                   <div className="space-y-2">
-                    <Label htmlFor="editionNumber">Edition Number</Label>
+                    <Label htmlFor="editionNumber" className="font-medium text-[16px]">Edition Number</Label>
                     <p className="text-sm text-gray-600">
                       The edition number tells readers whether the book is an original or updated version. Note: This cannot be changed after the book is published.
                     </p>
@@ -1211,7 +1211,7 @@ export default function EditBook() {
                     </div>
                     
                     <div>
-                      <Label className="text-sm font-medium">Primary Author or Contributor</Label>
+                      <Label className="font-medium text-[16px]">Primary Author or Contributor</Label>
                       <div className="grid grid-cols-5 gap-3 mt-2">
                         <Input
                           placeholder="Prefix"
@@ -1250,7 +1250,7 @@ export default function EditBook() {
                     </div>
                     
                     <div>
-                      <Label className="text-sm font-medium">Contributors <span className="text-sm font-normal text-gray-500">(Optional)</span></Label>
+                      <Label className="font-medium text-[16px]">Contributors <span className="text-sm font-normal text-gray-500">(Optional)</span></Label>
                       
                       {contributors.map((contributor, index) => (
                         <div key={contributor.id} className="grid grid-cols-7 gap-3 mt-2 items-center">
@@ -1583,7 +1583,7 @@ export default function EditBook() {
                           className="mt-1"
                         />
                         <div className="flex-1">
-                          <Label htmlFor="previouslyPublished" className="text-sm font-medium">Previously published content</Label>
+                          <Label htmlFor="previouslyPublished" className="font-medium text-[16px]">Previously published content</Label>
                           <p className="text-sm text-gray-600 mt-1">Check this box if your content is at least 10% different from a version that has been previously published or sold on Amazon or elsewhere, or if the content is new to Amazon</p>
                         </div>
                       </div>
@@ -1595,14 +1595,14 @@ export default function EditBook() {
                           onCheckedChange={(checked) => form.setValue("isLowContentBook", checked as boolean)}
                           className="mt-1"
                         />
-                        <Label htmlFor="useAI">AI was used in creating this book</Label>
+                        <Label htmlFor="useAI" className="font-medium text-[16px]">AI was used in creating this book</Label>
                       </div>
                     </div>
                   </div>
 
                   {/* Primary Marketplace */}
                   <div className="space-y-2">
-                    <Label htmlFor="primaryMarketplace">Primary Marketplace</Label>
+                    <Label htmlFor="primaryMarketplace" className="font-medium text-[16px]">Primary Marketplace</Label>
                     <Select 
                       value={form.watch("primaryMarketplace") || ""} 
                       onValueChange={(value) => form.setValue("primaryMarketplace", value)}
@@ -1645,17 +1645,17 @@ export default function EditBook() {
                     <div className="space-y-3">
                       <div className="flex items-center space-x-2">
                         <Checkbox id="bleedSettings" />
-                        <Label htmlFor="bleedSettings">This book has bleed settings</Label>
+                        <Label htmlFor="bleedSettings" className="font-medium text-[16px]">This book has bleed settings</Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Checkbox id="largeBook" />
-                        <Label htmlFor="largeBook">This is a large book (over 828 pages)</Label>
+                        <Label htmlFor="largeBook" className="font-medium text-[16px]">This is a large book (over 828 pages)</Label>
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="printLengthTemp">Print Length (pages)</Label>
+                    <Label htmlFor="printLengthTemp" className="font-medium text-[16px]">Print Length (pages)</Label>
                     <Input
                       id="printLengthTemp"
                       type="number"
@@ -1688,18 +1688,18 @@ export default function EditBook() {
                     <RadioGroup defaultValue="worldwide">
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="worldwide" id="worldwide" />
-                        <Label htmlFor="worldwide">All territories (worldwide rights)</Label>
+                        <Label htmlFor="worldwide" className="font-medium text-[16px]">All territories (worldwide rights)</Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="individual" id="individual" />
-                        <Label htmlFor="individual">Individual territories</Label>
+                        <Label htmlFor="individual" className="font-medium text-[16px]">Individual territories</Label>
                       </div>
                     </RadioGroup>
                   </div>
 
                   {/* Primary Marketplace */}
                   <div className="space-y-2">
-                    <Label htmlFor="primaryMarketplace">Primary Marketplace</Label>
+                    <Label htmlFor="primaryMarketplace" className="font-medium text-[16px]">Primary Marketplace</Label>
                     <Select 
                       value={form.watch("primaryMarketplace") || ""} 
                       onValueChange={(value) => form.setValue("primaryMarketplace", value)}
@@ -1720,7 +1720,7 @@ export default function EditBook() {
                     <Label className="font-medium text-[16px]">Pricing, royalties, and distribution</Label>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="listPriceTemp">List Price (USD)</Label>
+                        <Label htmlFor="listPriceTemp" className="font-medium text-[16px]">List Price (USD)</Label>
                         <div className="relative">
                           <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
                           <Input
@@ -1735,7 +1735,7 @@ export default function EditBook() {
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="printCostTemp">Print Cost</Label>
+                        <Label htmlFor="printCostTemp" className="font-medium text-[16px]">Print Cost</Label>
                         <div className="relative">
                           <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
                           <Input
@@ -1750,7 +1750,7 @@ export default function EditBook() {
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="royaltyRateTemp">Royalty Rate</Label>
+                        <Label htmlFor="royaltyRateTemp" className="font-medium text-[16px]">Royalty Rate</Label>
                         <Select defaultValue="60">
                           <SelectTrigger>
                             <SelectValue placeholder="Select royalty" />
@@ -1766,7 +1766,7 @@ export default function EditBook() {
 
                   {/* ISBN */}
                   <div className="space-y-2">
-                    <Label htmlFor="isbnTemp">ISBN (Optional)</Label>
+                    <Label htmlFor="isbnTemp" className="font-medium text-[16px]">ISBN (Optional)</Label>
                     <Input
                       id="isbnTemp"
                       placeholder="Enter ISBN if you have one"
@@ -1782,7 +1782,7 @@ export default function EditBook() {
                     <Label className="font-medium text-[16px]">Terms & Conditions</Label>
                     <div className="flex items-center space-x-2">
                       <Checkbox id="acceptTerms" />
-                      <Label htmlFor="acceptTerms" className="text-sm">
+                      <Label htmlFor="acceptTerms" className="font-medium text-[16px]">
                         I confirm that I agree to and am in compliance with the KDP Terms and Conditions
                       </Label>
                     </div>
