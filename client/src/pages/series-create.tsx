@@ -34,6 +34,15 @@ export default function SeriesCreatePage() {
   });
 
   const onSubmit = (data: SeriesFormData) => {
+    if (characterCount > maxCharacters) {
+      toast({
+        title: "Error",
+        description: `Description exceeds ${maxCharacters} character limit.`,
+        variant: "destructive"
+      });
+      return;
+    }
+    
     console.log('Series data:', data);
     toast({
       title: "Series saved",
@@ -43,6 +52,15 @@ export default function SeriesCreatePage() {
   };
 
   const saveDraft = () => {
+    if (characterCount > maxCharacters) {
+      toast({
+        title: "Error",
+        description: `Description exceeds ${maxCharacters} character limit.`,
+        variant: "destructive"
+      });
+      return;
+    }
+    
     const data = form.getValues();
     console.log('Saving draft:', data);
     toast({
@@ -54,6 +72,66 @@ export default function SeriesCreatePage() {
   const handleDescriptionChange = (value: string) => {
     setCharacterCount(value.length);
     form.setValue('description', value);
+  };
+
+  const insertFormatting = (startTag: string, endTag: string) => {
+    const textarea = document.getElementById('description') as HTMLTextAreaElement;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const currentValue = form.watch('description');
+    const selectedText = currentValue.substring(start, end);
+    
+    const newValue = currentValue.substring(0, start) + startTag + selectedText + endTag + currentValue.substring(end);
+    handleDescriptionChange(newValue);
+    
+    // Set cursor position after formatting
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + startTag.length, end + startTag.length);
+    }, 0);
+  };
+
+  const handleFormatChange = (format: string) => {
+    const textarea = document.getElementById('description') as HTMLTextAreaElement;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const currentValue = form.watch('description');
+    const selectedText = currentValue.substring(start, end);
+    
+    let formattedText = selectedText;
+    switch (format) {
+      case 'heading1':
+        formattedText = `# ${selectedText}`;
+        break;
+      case 'heading2':
+        formattedText = `## ${selectedText}`;
+        break;
+      case 'heading3':
+        formattedText = `### ${selectedText}`;
+        break;
+      default:
+        formattedText = selectedText;
+    }
+    
+    const newValue = currentValue.substring(0, start) + formattedText + currentValue.substring(end);
+    handleDescriptionChange(newValue);
+  };
+
+  const insertSpecialCharacter = () => {
+    const specialChars = ['©', '®', '™', '§', '¶', '†', '‡', '•', '…', '–', '—'];
+    const char = specialChars[Math.floor(Math.random() * specialChars.length)];
+    
+    const textarea = document.getElementById('description') as HTMLTextAreaElement;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const currentValue = form.watch('description');
+    const newValue = currentValue.substring(0, start) + char + currentValue.substring(start);
+    handleDescriptionChange(newValue);
   };
 
   return (
@@ -227,39 +305,89 @@ export default function SeriesCreatePage() {
                 </p>
                 
                 {/* Formatting Toolbar */}
-                <div className="flex items-center space-x-2 p-2 bg-gray-50 border rounded">
-                  <Button type="button" variant="ghost" size="sm" className="h-8 px-2">
+                <div className="flex items-center space-x-1 p-2 bg-gray-50 border rounded">
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 px-2 hover:bg-gray-200"
+                    onClick={() => insertFormatting('**', '**')}
+                    title="Bold"
+                  >
                     <strong>B</strong>
                   </Button>
-                  <Button type="button" variant="ghost" size="sm" className="h-8 px-2">
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 px-2 hover:bg-gray-200"
+                    onClick={() => insertFormatting('*', '*')}
+                    title="Italic"
+                  >
                     <em>I</em>
                   </Button>
-                  <Button type="button" variant="ghost" size="sm" className="h-8 px-2">
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 px-2 hover:bg-gray-200"
+                    onClick={() => insertFormatting('<u>', '</u>')}
+                    title="Underline"
+                  >
                     <u>U</u>
                   </Button>
                   <div className="w-px h-6 bg-gray-300"></div>
-                  <Button type="button" variant="ghost" size="sm" className="h-8 px-2">
-                    ≡
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 px-2 hover:bg-gray-200"
+                    onClick={() => insertFormatting('\n• ', '')}
+                    title="Bullet List"
+                  >
+                    •
                   </Button>
-                  <Button type="button" variant="ghost" size="sm" className="h-8 px-2">
-                    ≡≡
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 px-2 hover:bg-gray-200"
+                    onClick={() => insertFormatting('\n1. ', '')}
+                    title="Numbered List"
+                  >
+                    1.
                   </Button>
                   <div className="w-px h-6 bg-gray-300"></div>
-                  <Select defaultValue="format">
-                    <SelectTrigger className="w-20 h-8">
+                  <Select defaultValue="normal" onValueChange={(value) => handleFormatChange(value)}>
+                    <SelectTrigger className="w-24 h-8">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="format">Format</SelectItem>
                       <SelectItem value="normal">Normal</SelectItem>
-                      <SelectItem value="heading">Heading</SelectItem>
+                      <SelectItem value="heading1">Heading 1</SelectItem>
+                      <SelectItem value="heading2">Heading 2</SelectItem>
+                      <SelectItem value="heading3">Heading 3</SelectItem>
                     </SelectContent>
                   </Select>
                   <div className="w-px h-6 bg-gray-300"></div>
-                  <Button type="button" variant="ghost" size="sm" className="h-8 px-2">
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 px-2 hover:bg-gray-200"
+                    onClick={() => insertFormatting('<a href="">', '</a>')}
+                    title="Insert Link"
+                  >
                     🔗
                   </Button>
-                  <Button type="button" variant="ghost" size="sm" className="h-8 px-2">
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 px-2 hover:bg-gray-200"
+                    onClick={insertSpecialCharacter}
+                    title="Special Characters"
+                  >
                     Ω
                   </Button>
                 </div>
@@ -269,10 +397,9 @@ export default function SeriesCreatePage() {
                   <Textarea
                     id="description"
                     placeholder=""
-                    className="min-h-[200px] resize-none"
+                    className="min-h-[200px] resize-y"
                     value={form.watch('description')}
                     onChange={(e) => handleDescriptionChange(e.target.value)}
-                    maxLength={maxCharacters}
                   />
                   <div className="flex justify-end">
                     <span className={`text-sm ${characterCount > maxCharacters ? 'text-red-600' : 'text-green-600'}`}>
