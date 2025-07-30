@@ -154,7 +154,7 @@ function ManageSeriesContent() {
       <div className="flex items-center text-sm text-gray-600 mb-6">
           <span>Bookshelf</span>
           <span className="mx-2">›</span>
-          <span className="text-blue-600">Manage Series</span>
+          <span className="text-cyan-600">Manage Series</span>
         </div>
 
       {/* Series Header */}
@@ -165,7 +165,7 @@ function ManageSeriesContent() {
               <div className="flex items-center justify-center w-20 h-20 bg-gray-100 border rounded">
                 <div className="grid grid-cols-3 gap-1 w-12 h-12">
                   <div className="bg-gray-300 rounded text-xs flex items-center justify-center font-bold">2</div>
-                  <div className="bg-blue-500 text-white rounded text-xs flex items-center justify-center font-bold">1</div>
+                  <div className="bg-cyan-500 text-white rounded text-xs flex items-center justify-center font-bold">1</div>
                   <div className="bg-gray-300 rounded text-xs flex items-center justify-center font-bold">3</div>
                 </div>
               </div>
@@ -178,7 +178,7 @@ function ManageSeriesContent() {
                     <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
                       {editData.status}
                     </Badge>
-                    <button className="text-blue-600 text-sm underline">View on Amazon</button>
+                    <button className="text-cyan-600 text-sm underline">View on Amazon</button>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -202,13 +202,13 @@ function ManageSeriesContent() {
               )}
             </div>
 
-            <button className="text-blue-600 text-sm underline mb-6">See more</button>
+            <button className="text-cyan-600 text-sm underline mb-6">See more</button>
           </div>
 
           <div className="flex flex-col gap-2 ml-6">
             {isEditing ? (
               <>
-                <Button onClick={handleSaveDetails} className="bg-yellow-500 hover:bg-yellow-600 text-black">
+                <Button onClick={handleSaveDetails} className="bg-cyan-500 hover:bg-cyan-600 text-white">
                   Save series details
                 </Button>
                 <Button variant="outline" onClick={() => setIsEditing(false)}>
@@ -216,7 +216,7 @@ function ManageSeriesContent() {
                 </Button>
               </>
             ) : (
-              <Button onClick={() => setIsEditing(true)} className="bg-yellow-500 hover:bg-yellow-600 text-black">
+              <Button onClick={() => setIsEditing(true)} className="bg-cyan-500 hover:bg-cyan-600 text-white">
                 Edit series details
               </Button>
             )}
@@ -244,7 +244,7 @@ function ManageSeriesContent() {
                 <Button variant="outline" onClick={handleAddExistingTitle}>
                   + Add existing title
                 </Button>
-                <Button onClick={handleCreateNewTitle} className="bg-blue-600 hover:bg-blue-700">
+                <Button onClick={handleCreateNewTitle} className="bg-cyan-500 hover:bg-cyan-600 text-white">
                   + Create new title
                 </Button>
               </div>

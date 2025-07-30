@@ -563,31 +563,14 @@ export default function EditBook() {
                             <AlertDialogContent>
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Remove title from series</AlertDialogTitle>
-                                <AlertDialogDescription asChild>
-                                  <div className="space-y-3">
-                                    <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 flex items-start gap-2">
-                                      <div className="flex-shrink-0 mt-0.5">
-                                        <div className="w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center">
-                                          <span className="text-black text-xs font-bold">!</span>
-                                        </div>
-                                      </div>
-                                      <div className="text-sm">
-                                        <p className="font-medium text-gray-900 mb-1">
-                                          You're about to remove <span className="font-semibold">{form.watch("title") || 'this book'}</span> from the series.
-                                        </p>
-                                        <p className="text-gray-700">
-                                          If you remove the title, all linked formats and editions will also be removed from the series. 
-                                          The title will remain in your catalog and on Amazon, and the series data will be removed from the title.
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </div>
+                                <AlertDialogDescription>
+                                  Are you sure you want to remove this book from the series? This action cannot be undone.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <AlertDialogAction 
-                                  className="bg-yellow-500 hover:bg-yellow-600 text-black"
+                                  className="bg-destructive hover:bg-destructive/90"
                                   onClick={() => {
                                     form.setValue("seriesTitle", "");
                                     form.setValue("seriesNumber", null);
