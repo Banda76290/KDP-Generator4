@@ -325,6 +325,15 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Debounced Performance**: Auto-save is debounced to prevent excessive storage operations
 - **Session-Specific Storage**: Each book/creation session has its own storage key to prevent conflicts
 
+### Edit Series Details Workflow (30 Juillet 2025) ✅ COMPLETED
+- **Complete Series Edit Integration**: Extended sessionStorage workflow to "Edit series details" button functionality
+- **Smart Series ID Resolution**: Automatic lookup of series ID based on currently selected series title
+- **Unified Edit Interface**: Created complete series-edit.tsx page matching series-setup.tsx architecture
+- **Seamless Data Flow**: Form data persisted → redirect to series edit → modify series → return to book edit with restored data
+- **API Integration**: Connected to existing PUT /api/series/:id endpoint for series updates
+- **Error Handling**: Robust fallback to manage-series page if series ID not found
+- **Complete Workflow Parity**: Both "Create series" and "Edit series details" now use identical sessionStorage patterns
+
 ### Current Features Available
 - **Complete Dashboard**: KPI cards, sales charts, format distribution, recent projects table
 - **Project Management**: Complete KDP project creation and editing system with dedicated pages
