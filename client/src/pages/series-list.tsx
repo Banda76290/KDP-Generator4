@@ -8,8 +8,16 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { BookOpen, Search, Plus, MoreVertical, Edit3, Trash2 } from "lucide-react";
+import { BookOpen, Search, Plus, MoreVertical, Edit3, Trash2, Book } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+
+interface BookData {
+  id: string;
+  title: string;
+  seriesNumber: number | null;
+  status: string;
+  format: string;
+}
 
 interface SeriesData {
   id: string;
@@ -19,6 +27,7 @@ interface SeriesData {
   readingOrder: string;
   createdAt: string;
   updatedAt: string;
+  books: BookData[];
 }
 
 // Fetch series data from API
@@ -242,6 +251,51 @@ export default function SeriesListPage() {
                         __html: seriesItem.description || "No description provided" 
                       }}
                     />
+
+                    {/* Books in Series */}
+                    {seriesItem.books && seriesItem.books.length > 0 && (
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium text-gray-800 flex items-center">
+                          <Book className="w-4 h-4 mr-1" />
+                          Books in this series ({seriesItem.books.length})
+                        </h4>
+                        <div className="space-y-1 max-h-24 overflow-y-auto">
+                          {seriesItem.books
+                            .sort((a, b) => (a.seriesNumber || 0) - (b.seriesNumber || 0))
+                            .map((book) => (
+                              <div key={book.id} className="flex items-center justify-between text-xs p-2 bg-gray-50 rounded">
+                                <div className="flex items-center space-x-2">
+                                  {book.seriesNumber && (
+                                    <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs font-medium">
+                                      #{book.seriesNumber}
+                                    </span>
+                                  )}
+                                  <span className="font-medium truncate max-w-[120px]">{book.title}</span>
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                  <Badge variant="secondary" className="text-xs">
+                                    {book.format}
+                                  </Badge>
+                                  <Badge 
+                                    variant={book.status === 'published' ? 'default' : 'secondary'} 
+                                    className="text-xs"
+                                  >
+                                    {book.status}
+                                  </Badge>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* No Books Message */}
+                    {(!seriesItem.books || seriesItem.books.length === 0) && (
+                      <div className="text-xs text-gray-500 italic flex items-center">
+                        <Book className="w-3 h-3 mr-1" />
+                        No books in this series yet
+                      </div>
+                    )}
 
                     {/* Creation Date */}
                     <div className="text-xs text-gray-500">

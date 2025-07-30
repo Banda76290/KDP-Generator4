@@ -128,7 +128,7 @@ export interface IStorage {
   getAuditLogs(limit?: number, offset?: number): Promise<{logs: AuditLog[], total: number}>;
 
   // Series operations
-  getUserSeries(userId: string): Promise<Series[]>;
+  getUserSeries(userId: string): Promise<(Series & { books: Book[] })[]>;
   getSeries(seriesId: string, userId: string): Promise<Series | undefined>;
   createSeries(series: InsertSeries): Promise<Series>;
   updateSeries(seriesId: string, userId: string, updates: Partial<InsertSeries>): Promise<Series>;
@@ -1015,13 +1015,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Series operations
-  async getUserSeries(userId: string): Promise<Series[]> {
+  async getUserSeries(userId: string): Promise<(Series & { books: Book[] })[]> {
     const userSeries = await db
       .select()
       .from(series)
       .where(eq(series.userId, userId))
       .orderBy(desc(series.createdAt));
-    return userSeries;
+
+    // Get books for each series
+    const seriesWithBooks = await Promise.all(
+      userSeries.map(async (seriesItem) => {
+        const seriesBooks = await db
+          .select()
+          .from(books)
+          .where(and(
+            eq(books.userId, userId),
+            eq(books.seriesTitle, seriesItem.title)
+          ))
+          .orderBy(books.seriesNumber);
+        
+        return {
+          ...seriesItem,
+          books: seriesBooks
+        };
+      })
+    );
+
+    return seriesWithBooks;
   }
 
   async getSeries(seriesId: string, userId: string): Promise<Series | undefined> {
