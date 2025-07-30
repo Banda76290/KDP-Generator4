@@ -121,8 +121,34 @@ export default function EditBook() {
   
   // WYSIWYG Editor functions for Description
   const applyDescriptionFormatting = (command: string, value?: string) => {
-    document.execCommand(command, false, value);
-    updateDescriptionFromHTML();
+    try {
+      const editor = document.getElementById('description-editor') as HTMLDivElement;
+      if (!editor) {
+        console.error('Description editor not found');
+        return;
+      }
+
+      // Focus the editor before applying command
+      editor.focus();
+      
+      // Check if execCommand is supported
+      if (typeof document.execCommand !== 'function') {
+        console.error('execCommand is not supported in this browser');
+        toast.error('Cette fonctionnalité n\'est pas supportée dans votre navigateur');
+        return;
+      }
+
+      // Apply the formatting command
+      const success = document.execCommand(command, false, value);
+      if (!success) {
+        console.warn(`execCommand failed for command: ${command}`);
+      }
+      
+      updateDescriptionFromHTML();
+    } catch (error) {
+      console.error('Error applying description formatting:', error);
+      toast.error('Erreur lors de l\'application du formatage');
+    }
   };
 
   // Function to clean HTML and remove unnecessary styles
@@ -180,19 +206,27 @@ export default function EditBook() {
   };
 
   const handleDescriptionFormatChange = (format: string) => {
-    switch (format) {
-      case 'heading4':
-        applyDescriptionFormatting('formatBlock', 'h4');
-        break;
-      case 'heading5':
-        applyDescriptionFormatting('formatBlock', 'h5');
-        break;
-      case 'heading6':
-        applyDescriptionFormatting('formatBlock', 'h6');
-        break;
-      case 'normal':
-        applyDescriptionFormatting('formatBlock', 'div');
-        break;
+    try {
+      console.log('Applying description format:', format);
+      switch (format) {
+        case 'heading4':
+          applyDescriptionFormatting('formatBlock', 'h4');
+          break;
+        case 'heading5':
+          applyDescriptionFormatting('formatBlock', 'h5');
+          break;
+        case 'heading6':
+          applyDescriptionFormatting('formatBlock', 'h6');
+          break;
+        case 'normal':
+          applyDescriptionFormatting('formatBlock', 'div');
+          break;
+        default:
+          console.warn('Unknown format type:', format);
+      }
+    } catch (error) {
+      console.error('Error in handleDescriptionFormatChange:', error);
+      toast.error('Erreur lors du changement de format');
     }
   };
 
@@ -1211,7 +1245,7 @@ export default function EditBook() {
                     </div>
                     
                     <div>
-                      <Label className="font-medium text-[16px]">Primary Author or Contributor</Label>
+                      <Label className="font-medium text-[14px]">Primary Author or Contributor</Label>
                       <div className="grid grid-cols-5 gap-3 mt-2">
                         <Input
                           placeholder="Prefix"
