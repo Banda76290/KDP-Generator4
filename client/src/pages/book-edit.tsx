@@ -445,8 +445,10 @@ export default function EditBook() {
           
           // Add new contributors
           if (contributors.length > 0) {
+            console.log('Adding contributors:', contributors);
+            console.log('Project ID for contributors:', formattedData.projectId);
             for (const contributor of contributors) {
-              await apiRequest("POST", "/api/contributors", {
+              const contributorData = {
                 bookId: bookId,
                 projectId: formattedData.projectId, // Add projectId for database compatibility
                 name: `${contributor.firstName} ${contributor.lastName}`.trim(), // Add name field for database compatibility
@@ -456,7 +458,9 @@ export default function EditBook() {
                 middleName: contributor.middleName || null,
                 lastName: contributor.lastName,
                 suffix: contributor.suffix || null,
-              });
+              };
+              console.log('Sending contributor data:', contributorData);
+              await apiRequest("POST", "/api/contributors", contributorData);
             }
           }
         }

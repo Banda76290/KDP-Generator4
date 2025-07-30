@@ -425,27 +425,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Contributors routes
   app.post('/api/contributors', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const contributorData = insertContributorSchema.parse(req.body);
-      const contributor = await storage.addContributor(contributorData);
-      res.json(contributor);
-    } catch (error) {
-      console.error("Error adding contributor:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid contributor data", errors: error.errors });
-      }
-      res.status(500).json({ message: "Failed to add contributor" });
-    }
-  });
-
-  // Contributors routes
-  app.post('/api/contributors', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
+      console.log('Received contributor data:', req.body);
       const validatedData = insertContributorSchema.parse(req.body);
+      console.log('Validated contributor data:', validatedData);
       const contributor = await storage.addContributor(validatedData);
       res.json(contributor);
     } catch (error) {
-      console.error("Error creating contributor:", error);
-      res.status(500).json({ message: "Failed to create contributor" });
+      console.error("Error adding contributor:", error);
+      res.status(500).json({ message: "Failed to add contributor" });
     }
   });
 

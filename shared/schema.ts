@@ -198,7 +198,9 @@ export const books = pgTable("books", {
 // Contributors table - Now linked to books
 export const contributors = pgTable("contributors", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  bookId: varchar("book_id").notNull().references(() => books.id, { onDelete: "cascade" }),
+  projectId: varchar("project_id"), // For database compatibility - can be null
+  bookId: varchar("book_id").references(() => books.id, { onDelete: "cascade" }), // Changed to nullable for DB compatibility
+  name: text("name").notNull(), // For database compatibility
   role: varchar("role").notNull(), // Author, Editor, Foreword, Illustrator, Introduction, Narrator, Photographer, Preface, Translator, Contributions by
   prefix: varchar("prefix"),
   firstName: varchar("first_name").notNull(),
