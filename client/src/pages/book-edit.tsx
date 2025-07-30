@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertBookSchema, type Book } from "@shared/schema";
@@ -489,32 +489,108 @@ export default function EditBook() {
                     />
                   </div>
 
-                  {/* Series Information */}
+                  {/* Series (optional) */}
                   <div className="space-y-4">
-                    <Label className="text-sm font-medium">Series Information</Label>
-                    <p className="text-sm text-gray-600">
-                      Does this book belong to a series? You can add it to a series here or leave optional.
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="seriesTitle" className="text-sm">Series Title</Label>
-                        <Input
-                          id="seriesTitle"
-                          placeholder="Enter series name (if applicable)"
-                          {...form.register("seriesTitle")}
-                        />
+                    <Label className="text-base font-medium">Series (optional)</Label>
+                    
+                    {form.watch("seriesTitle") ? (
+                      /* Book is part of a series */
+                      <div className="bg-gray-50 p-4 rounded-md border">
+                        <p className="text-sm text-gray-700 mb-3">
+                          This title is part of a series. You can edit details or remove the title from the series. (Optional) 
+                          <button className="text-blue-600 underline ml-1">Learn more</button>
+                        </p>
+                        <div className="mb-3">
+                          <Label className="text-sm font-medium text-gray-700">Series Title</Label>
+                          <p className="text-sm font-medium">{form.watch("seriesTitle")}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => window.location.href = '/manage-series'}
+                          >
+                            Edit series details
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button type="button" variant="outline" size="sm">
+                                Remove from series
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Remove title from series</AlertDialogTitle>
+                                <AlertDialogDescription asChild>
+                                  <div className="space-y-3">
+                                    <div className="bg-orange-50 border border-orange-200 rounded-md p-3 flex items-start gap-2">
+                                      <div className="flex-shrink-0 mt-0.5">
+                                        <div className="w-5 h-5 bg-orange-400 rounded-full flex items-center justify-center">
+                                          <span className="text-white text-xs font-bold">!</span>
+                                        </div>
+                                      </div>
+                                      <div className="text-sm">
+                                        <p className="font-medium text-gray-900 mb-1">
+                                          You're about to remove <span className="font-semibold">{form.watch("title") || 'this book'}</span> from the series.
+                                        </p>
+                                        <p className="text-gray-700">
+                                          If you remove the title, all linked formats and editions will also be removed from the series. 
+                                          The title will remain in your catalog and on Amazon, and the series data will be removed from the title.
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  className="bg-yellow-500 hover:bg-yellow-600 text-black"
+                                  onClick={() => {
+                                    form.setValue("seriesTitle", "");
+                                    form.setValue("seriesNumber", null);
+                                    toast.success({
+                                      title: "Livre retiré de la série",
+                                      description: "Le livre a été retiré de la série avec succès.",
+                                    });
+                                  }}
+                                >
+                                  Remove from series
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="seriesNumber" className="text-sm">Volume Number</Label>
-                        <Input
-                          id="seriesNumber"
-                          type="number"
-                          min="1"
-                          placeholder="1"
-                          {...form.register("seriesNumber", { valueAsNumber: true })}
-                        />
+                    ) : (
+                      /* Book is not part of a series */
+                      <div className="space-y-3">
+                        <p className="text-sm text-gray-600">
+                          Does this book belong to a series? You can add it to a series here or leave optional.
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="seriesTitle" className="text-sm">Series Title</Label>
+                            <Input
+                              id="seriesTitle"
+                              placeholder="Enter series name (if applicable)"
+                              {...form.register("seriesTitle")}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="seriesNumber" className="text-sm">Volume Number</Label>
+                            <Input
+                              id="seriesNumber"
+                              type="number"
+                              min="1"
+                              placeholder="1"
+                              {...form.register("seriesNumber", { valueAsNumber: true })}
+                            />
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
 
                   {/* Edition Number */}

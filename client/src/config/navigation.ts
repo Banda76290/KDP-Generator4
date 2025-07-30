@@ -25,6 +25,7 @@ export const navigation: NavigationItem[] = [
   { name: "Dashboard", href: "/", icon: BarChart3 },
   { name: "Projects", href: "/projects", icon: FolderOpen },
   { name: "Books", href: "/books", icon: FileText },
+  { name: "Manage Series", href: "/manage-series", icon: Tags },
   { name: "Sales Analytics", href: "/analytics", icon: TrendingUp },
   { name: "KDP Reports", href: "/kdp-reports", icon: Upload },
   { name: "AI Assistant", href: "/ai-assistant", icon: Bot, badge: "PRO" },

@@ -28,6 +28,7 @@ import ProjectCreate from "@/pages/project-create-simple";
 import ProjectEdit from "@/pages/project-edit";
 import BookCreate from "@/pages/book-create";
 import BookEdit from "@/pages/book-edit";
+import ManageSeries from "@/pages/manage-series";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -38,6 +39,7 @@ function Router() {
       <Route path="/" component={isLoading || !isAuthenticated ? Landing : Dashboard} />
       <Route path="/projects" component={Projects} />
       <Route path="/books" component={Books} />
+      <Route path="/manage-series" component={ManageSeries} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/kdp-reports" component={KDPReports} />
       <Route path="/ai-assistant" component={AIAssistant} />
