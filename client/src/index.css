@@ -109,3 +109,29 @@
 .gradient-orange-yellow {
   background: linear-gradient(135deg, hsl(35, 100%, 50%) 0%, hsl(50, 100%, 60%) 100%);
 }
+
+/* Layout System - Universal solution for header positioning */
+.layout-container {
+  @apply min-h-screen bg-gray-50 dark:bg-background;
+  display: grid;
+  grid-template-rows: 64px 1fr; /* Header is exactly 64px (h-16), content takes remaining space */
+  grid-template-areas: 
+    "header"
+    "content";
+}
+
+.layout-container > header {
+  grid-area: header;
+  @apply fixed top-0 left-0 right-0 z-50;
+}
+
+.layout-content {
+  grid-area: content;
+  @apply flex;
+  min-height: 0; /* Important for nested flex/grid layouts */
+}
+
+.layout-main {
+  @apply flex-1 min-w-0 p-4 md:p-6 md:ml-64;
+  /* No padding-top needed - content starts exactly where header ends */
+}

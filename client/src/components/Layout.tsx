@@ -15,15 +15,15 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-background">
+    <div className="layout-container">
       <Header onMenuClick={handleMenuClick} />
-      <div className="flex">
+      <div className="layout-content">
         <Sidebar />
         <MobileSidebar 
           open={mobileMenuOpen} 
           onOpenChange={setMobileMenuOpen}
         />
-        <main className="flex-1 min-w-0 p-4 md:p-6 pt-20 md:ml-64">
+        <main className="layout-main">
           {children}
         </main>
       </div>
