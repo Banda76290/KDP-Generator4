@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { BookOpen, Search, Plus, MoreVertical, Edit3, Trash2, Book, X } from "lucide-react";
+import { BookOpen, Search, Plus, MoreVertical, Edit3, Trash2, Book, X, DollarSign, TrendingUp } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface BookData {
@@ -19,6 +19,8 @@ interface BookData {
   seriesNumber: number | null;
   status: string;
   format: string;
+  totalRevenue: string;
+  monthlyRevenue: string;
 }
 
 interface SeriesData {
@@ -86,6 +88,16 @@ export default function SeriesListPage() {
       });
     },
   });
+
+  // Calculate series revenue
+  const calculateSeriesRevenue = (books: BookData[]) => {
+    const totalRevenue = books.reduce((sum, book) => sum + parseFloat(book.totalRevenue || '0'), 0);
+    const monthlyRevenue = books.reduce((sum, book) => sum + parseFloat(book.monthlyRevenue || '0'), 0);
+    return {
+      totalRevenue: totalRevenue.toFixed(2),
+      monthlyRevenue: monthlyRevenue.toFixed(2)
+    };
+  };
 
   // Filter and sort series
   const filteredSeries = series
@@ -366,8 +378,36 @@ export default function SeriesListPage() {
                       </div>
                     )}
 
+                    {/* Revenue Statistics */}
+                    {seriesItem.books && seriesItem.books.length > 0 && (
+                      <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-200">
+                        <div className="flex items-center space-x-2">
+                          <div className="p-1.5 bg-green-100 rounded">
+                            <TrendingUp className="w-3 h-3 text-green-600" />
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">This Month</p>
+                            <p className="text-sm font-semibold text-gray-900">
+                              ${calculateSeriesRevenue(seriesItem.books).monthlyRevenue}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="p-1.5 bg-blue-100 rounded">
+                            <DollarSign className="w-3 h-3 text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Total Revenue</p>
+                            <p className="text-sm font-semibold text-gray-900">
+                              ${calculateSeriesRevenue(seriesItem.books).totalRevenue}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Creation Date */}
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-500 pt-2">
                       Created: {new Date(seriesItem.createdAt).toLocaleDateString()}
                     </div>
 
