@@ -1070,6 +1070,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteSeries(seriesId: string, userId: string): Promise<void> {
+    // First, get the series to find its title
+    const existingSeries = await this.getSeries(seriesId, userId);
+    if (!existingSeries) {
+      return; // Series doesn't exist, nothing to delete
+    }
+    
+    // Remove all books from this series by clearing their seriesTitle and seriesNumber
+    await db
+      .update(books)
+      .set({ 
+        seriesTitle: "", 
+        seriesNumber: null,
+        updatedAt: new Date()
+      })
+      .where(and(
+        eq(books.userId, userId),
+        eq(books.seriesTitle, existingSeries.title)
+      ));
+    
+    // Now delete the series
     await db
       .delete(series)
       .where(and(eq(series.id, seriesId), eq(series.userId, userId)));
