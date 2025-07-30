@@ -84,6 +84,7 @@ export default function EditBook() {
   const { data: book, isLoading: bookLoading, error } = useQuery<Book>({
     queryKey: [`/api/books/${bookId}`],
     enabled: !isCreating, // Only fetch if we're not creating (i.e., if we have a bookId)
+    refetchOnMount: true, // Force refresh on mount
   });
   
   console.log('Query State:', { book, bookLoading, error, isCreating });
