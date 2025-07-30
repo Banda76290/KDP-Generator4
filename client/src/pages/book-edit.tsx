@@ -153,14 +153,27 @@ export default function EditBook() {
     },
   });
 
-  // Check for saved form data from series creation
+  // Update form with fetched book data or restored data
   useEffect(() => {
+    // Check for saved form data from series creation first
     const savedFormData = sessionStorage.getItem('bookFormData');
     const returnFromSeries = sessionStorage.getItem('returnToBookEdit');
+    const newlyCreatedSeries = sessionStorage.getItem('newlyCreatedSeries');
     
     if (savedFormData && returnFromSeries === (bookId || 'new')) {
+      console.log('Restoring form data from sessionStorage');
       // Restore saved form data
       const formData = JSON.parse(savedFormData);
+      
+      // If we have a newly created series, associate it
+      if (newlyCreatedSeries) {
+        const seriesData = JSON.parse(newlyCreatedSeries);
+        console.log('Associating newly created series:', seriesData);
+        formData.seriesTitle = seriesData.title;
+        formData.seriesNumber = 1;
+      }
+      
+      console.log('Form data being restored:', formData);
       form.reset(formData);
       
       // Restore separate state arrays
@@ -171,31 +184,20 @@ export default function EditBook() {
         setCategories(Array.isArray(formData.categories) ? formData.categories : []);
       }
       
-      // Check if we need to associate with newly created series
-      const newlyCreatedSeries = sessionStorage.getItem('newlyCreatedSeries');
-      if (newlyCreatedSeries) {
-        const seriesData = JSON.parse(newlyCreatedSeries);
-        form.setValue('seriesTitle', seriesData.title);
-        form.setValue('seriesNumber', 1);
-        setIsPartOfSeries(true);
-        
-        // Clear the series creation flag
-        sessionStorage.removeItem('newlyCreatedSeries');
-      }
+      // Set series checkbox state
+      setIsPartOfSeries(!!formData.seriesTitle);
       
       // Clear saved data
       sessionStorage.removeItem('bookFormData');
       sessionStorage.removeItem('returnToBookEdit');
-    }
-  }, [bookId, form]);
-
-  // Update form with fetched book data
-  useEffect(() => {
-    if (book) {
-      // Only update if we didn't restore from sessionStorage
-      const returnFromSeries = sessionStorage.getItem('returnToBookEdit');
-      if (returnFromSeries === (bookId || 'new')) return;
+      sessionStorage.removeItem('newlyCreatedSeries');
       
+      console.log('Form restoration complete');
+      return; // Exit early to prevent book data from overriding restored data
+    }
+    
+    // Only load book data if we didn't restore from sessionStorage
+    if (book) {
       form.reset({
         title: book.title || "",
         subtitle: book.subtitle || "",
@@ -720,6 +722,9 @@ export default function EditBook() {
                                   // Aucune série sélectionnée - créer une nouvelle série
                                   // Sauvegarder les données du formulaire dans sessionStorage
                                   const formData = form.getValues();
+                                  // Include current keywords and categories state
+                                  formData.keywords = keywords;
+                                  formData.categories = categories;
                                   sessionStorage.setItem('bookFormData', JSON.stringify(formData));
                                   sessionStorage.setItem('returnToBookEdit', bookId || 'new');
                                   
