@@ -167,14 +167,7 @@ function ManageSeriesContent() {
               
               <div className="flex-1">
                 <h1 className="text-2xl font-bold mb-2">{editData.title}</h1>
-                <div className="flex items-center gap-4 mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">Series Status:</span>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                      {editData.status}
-                    </Badge>
-                  </div>
-                </div>
+                
                 <div className="flex items-center gap-4 text-sm text-gray-600">
                   <span>Display reading order: <strong>No</strong></span>
                 </div>
