@@ -152,7 +152,6 @@ function ManageSeriesContent() {
     <div className="space-y-6 p-6">
       {/* Breadcrumb */}
       <div className="flex items-center text-sm text-gray-600 mb-6">
-          <span>Bookshelf</span>
           <span className="mx-2">›</span>
           <span className="kdp-text-primary">Manage Series</span>
         </div>
