@@ -72,13 +72,6 @@ export default function SeriesCreatePage() {
         throw new Error(errorData.message || 'Failed to save series');
       }
 
-      // Store the newly created series for book association
-      const newSeries = await response.json();
-      sessionStorage.setItem('newlyCreatedSeries', JSON.stringify({
-        id: newSeries.id,
-        title: newSeries.title
-      }));
-      
       // Invalidate and refetch series data
       await queryClient.invalidateQueries({ queryKey: ['/api/series'] });
       
@@ -86,22 +79,7 @@ export default function SeriesCreatePage() {
         title: "Series saved",
         description: "Your series has been successfully created.",
       });
-      
-      // Vérifier s'il faut retourner vers book-edit
-      const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
-      if (returnToBookEdit) {
-        // Nettoyer le storage de retour (mais garder newlyCreatedSeries pour l'association)
-        sessionStorage.removeItem('returnToBookEdit');
-        
-        // Rediriger vers la page d'édition de livre
-        if (returnToBookEdit === 'new') {
-          window.location.href = '/book-create';
-        } else {
-          window.location.href = `/books/edit/${returnToBookEdit}`;
-        }
-      } else {
-        setLocation('/manage-series');
-      }
+      setLocation('/manage-series');
     } catch (error) {
       console.error('Error saving series:', error);
       toast({

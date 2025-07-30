@@ -41,27 +41,6 @@ import {
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, sum, count, like, or } from "drizzle-orm";
 
-// Helper function to check if database is available
-const isDatabaseAvailable = () => {
-  const databaseUrl = process.env.DATABASE_URL || process.env.REPLIT_DB_URL;
-  return databaseUrl && databaseUrl !== 'undefined' && databaseUrl !== '';
-};
-
-// Helper function to handle database operations safely
-const safeDbOperation = async <T>(operation: () => Promise<T>, fallback: T): Promise<T> => {
-  if (!isDatabaseAvailable()) {
-    console.warn('Database not available, returning fallback data');
-    return fallback;
-  }
-  
-  try {
-    return await operation();
-  } catch (error) {
-    console.error('Database operation failed:', error);
-    return fallback;
-  }
-};
-
 export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
@@ -156,10 +135,8 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
-    return await safeDbOperation(async () => {
-      const [user] = await db.select().from(users).where(eq(users.id, id));
-      return user;
-    }, undefined);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async upsertUser(userData: UpsertUser & { id: string }): Promise<User> {

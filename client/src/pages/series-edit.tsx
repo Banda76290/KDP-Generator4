@@ -133,20 +133,6 @@ function ManageSeriesContent() {
       description: "Les détails de la série ont été sauvegardés avec succès.",
     });
     setIsEditing(false);
-    
-    // Vérifier s'il faut retourner vers book-edit
-    const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
-    if (returnToBookEdit) {
-      // Nettoyer le storage
-      sessionStorage.removeItem('returnToBookEdit');
-      
-      // Rediriger vers la page d'édition de livre
-      if (returnToBookEdit === 'new') {
-        window.location.href = '/book-create';
-      } else {
-        window.location.href = `/books/edit/${returnToBookEdit}`;
-      }
-    }
   };
 
   const handleAddExistingTitle = () => {

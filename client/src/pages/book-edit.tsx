@@ -689,38 +689,7 @@ export default function EditBook() {
                             type="button" 
                             variant="outline" 
                             size="sm"
-                            onClick={async () => {
-                              // Sauvegarder les données du formulaire avant de partir (même logique que "Create series")
-                              saveFormDataToSession();
-                              sessionStorage.setItem('returnToBookEdit', bookId || 'new');
-                              
-                              // Trouver l'ID de la série actuelle pour rediriger vers la page de création en mode édition
-                              const currentSeriesTitle = form.watch("seriesTitle");
-                              if (currentSeriesTitle) {
-                                try {
-                                  // Récupérer les séries pour trouver l'ID correspondant au titre
-                                  const response = await fetch('/api/series');
-                                  const seriesData = await response.json();
-                                  const currentSeries = seriesData.find((s: any) => s.title === currentSeriesTitle);
-                                  
-                                  if (currentSeries) {
-                                    // Stocker l'ID de la série à éditer
-                                    sessionStorage.setItem('editingSeriesId', currentSeries.id);
-                                    // Rediriger vers la page de création de série en mode édition (même page que "Create series")
-                                    window.location.href = '/series-create';
-                                  } else {
-                                    // Si la série n'est pas trouvée, rediriger vers la création
-                                    window.location.href = '/series-create';
-                                  }
-                                } catch (error) {
-                                  console.error('Error fetching series:', error);
-                                  // En cas d'erreur, rediriger vers la création
-                                  window.location.href = '/series-create';
-                                }
-                              } else {
-                                window.location.href = '/series-create';
-                              }
-                            }}
+                            onClick={() => window.location.href = '/manage-series'}
                           >
                             Edit series details
                           </Button>
@@ -796,12 +765,24 @@ export default function EditBook() {
                               variant="outline" 
                               size="sm"
                               onClick={() => {
-                                // Sauvegarder les données SEULEMENT dans sessionStorage (pas en base de données)
-                                saveFormDataToSession();
-                                sessionStorage.setItem('returnToBookEdit', bookId || 'new');
-                                
-                                // Rediriger vers la création de série
-                                window.location.href = '/series-create';
+                                const seriesTitle = form.watch("seriesTitle");
+                                if (seriesTitle) {
+                                  // Si le livre a un seriesTitle, on redirige vers l'édition de cette série
+                                  const matchingSeries = userSeries.find((s: any) => s.title === seriesTitle);
+                                  if (matchingSeries) {
+                                    window.location.href = `/series-edit/${matchingSeries.id}`;
+                                  } else {
+                                    window.location.href = '/manage-series';
+                                  }
+                                } else {
+                                  // Aucune série sélectionnée - créer une nouvelle série
+                                  // Sauvegarder les données SEULEMENT dans sessionStorage (pas en base de données)
+                                  saveFormDataToSession();
+                                  sessionStorage.setItem('returnToBookEdit', bookId || 'new');
+                                  
+                                  // Rediriger vers la création de série
+                                  window.location.href = '/series-setup';
+                                }
                               }}
                             >
                               {form.watch("seriesTitle") ? "Edit series" : "Create series"}
