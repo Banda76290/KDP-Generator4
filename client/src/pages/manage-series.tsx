@@ -153,7 +153,6 @@ function ManageSeriesContent() {
       {/* Breadcrumb */}
       <div className="flex items-center text-sm text-gray-600 mb-6">
           <span className="mx-2">›</span>
-          <span className="kdp-text-primary">Manage Series</span>
         </div>
 
       {/* Series Header */}
