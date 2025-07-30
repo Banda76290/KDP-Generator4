@@ -87,26 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Temporary route to grant admin privileges - REMOVE AFTER USE
-  app.post('/api/auth/grant-admin', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
 
-      // Update user role to superadmin
-      const updatedUser = await storage.updateUserRole(userId, "superadmin");
-      
-      res.json({ 
-        message: "Admin privileges granted successfully",
-        user: updatedUser 
-      });
-    } catch (error) {
-      console.error("Error granting admin privileges:", error);
-      res.status(500).json({ message: "Failed to grant admin privileges" });
-    }
-  });
 
   // Dashboard routes
   app.get('/api/dashboard/stats', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
