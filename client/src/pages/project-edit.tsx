@@ -67,7 +67,7 @@ export default function EditProject() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId] });
-      toast({
+      toast.success({
         title: "Project Updated",
         description: "Your project has been updated successfully.",
       });

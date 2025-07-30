@@ -181,9 +181,15 @@ function useToast() {
     }
   }, [state])
 
+  const enhancedToast = Object.assign(toast, {
+    success: (props: Omit<Toast, 'variant'>) => toast({ ...props, variant: "success" }),
+    error: (props: Omit<Toast, 'variant'>) => toast({ ...props, variant: "destructive" }),
+    info: (props: Omit<Toast, 'variant'>) => toast({ ...props, variant: "default" }),
+  })
+
   return {
     ...state,
-    toast,
+    toast: enhancedToast,
     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
   }
 }

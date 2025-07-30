@@ -47,7 +47,7 @@ export default function Projects() {
     },
     onSuccess: (data) => {
       console.log("onSuccess called with:", data);
-      toast({
+      toast.success({
         title: "Success",
         description: "Project and all books duplicated successfully",
       });
@@ -55,10 +55,9 @@ export default function Projects() {
     },
     onError: (error) => {
       console.error("onError called with:", error);
-      toast({
+      toast.error({
         title: "Error",
         description: "Failed to duplicate project",
-        variant: "destructive",
       });
     },
   });
@@ -70,7 +69,7 @@ export default function Projects() {
       return await apiRequest("DELETE", `/api/projects/${projectId}?deleteBooks=${deleteBooks}`, {});
     },
     onSuccess: (_, { deleteBooks }) => {
-      toast({
+      toast.success({
         title: "Success",
         description: deleteBooks 
           ? "Project and associated books deleted successfully" 
@@ -81,10 +80,9 @@ export default function Projects() {
     },
     onError: (error) => {
       console.error("Delete failed:", error);
-      toast({
+      toast.error({
         title: "Error",
         description: "Failed to delete project",
-        variant: "destructive",
       });
     },
   });
@@ -498,9 +496,9 @@ export default function Projects() {
                               Monthly Revenue
                             </div>
                             <div className="font-semibold text-green-600">
-                              ${parseFloat(project.monthlyRevenue || '0').toFixed(2)}
+                              ${project.books?.reduce((sum, book) => sum + parseFloat(book.monthlyRevenue || '0'), 0).toFixed(2) || '0.00'}
                             </div>
-                            <div className="text-xs text-gray-500">{project.monthlySales || 0} sales</div>
+                            <div className="text-xs text-gray-500">{project.books?.reduce((sum, book) => sum + (book.totalSales || 0), 0) || 0} sales this month</div>
                           </div>
                           <div>
                             <div className="flex items-center gap-1 text-gray-500 mb-1">

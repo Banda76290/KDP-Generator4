@@ -139,10 +139,14 @@ export default function EditBook() {
       });
 
       // Set separate state arrays
-      if (book.keywords && typeof book.keywords === 'string') {
-        setKeywords(book.keywords.split(',').map((k: string) => k.trim()).filter((k: string) => k));
-      } else if (Array.isArray(book.keywords)) {
-        setKeywords(book.keywords);
+      if (book.keywords) {
+        if (typeof book.keywords === 'string') {
+          setKeywords((book.keywords as string).split(',').map((k: string) => k.trim()).filter((k: string) => k));
+        } else if (Array.isArray(book.keywords)) {
+          setKeywords(book.keywords as string[]);
+        } else {
+          setKeywords([]);
+        }
       } else {
         setKeywords([]);
       }
@@ -186,7 +190,7 @@ export default function EditBook() {
       if (!isCreating) {
         queryClient.invalidateQueries({ queryKey: [`/api/books/${bookId}`] });
       }
-      toast({
+      toast.success({
         title: isCreating ? "Book Created" : "Book Updated",
         description: `Your book has been ${isCreating ? 'created' : 'updated'} successfully.`,
       });
