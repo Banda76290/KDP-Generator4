@@ -61,6 +61,7 @@ export default function EditBook() {
   const [categories, setCategories] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState("details");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isPartOfSeries, setIsPartOfSeries] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -137,7 +138,12 @@ export default function EditBook() {
         projectId: book.projectId || "",
         categories: book.categories || [],
         keywords: book.keywords || [],
+        seriesTitle: book.seriesTitle || "",
+        seriesNumber: book.seriesNumber || null,
       });
+
+      // Set series checkbox state
+      setIsPartOfSeries(!!book.seriesTitle);
 
       // Set separate state arrays
       if (book.keywords) {
@@ -493,15 +499,39 @@ export default function EditBook() {
                   {/* Series (optional) */}
                   <div className="space-y-4">
                     <Label className="text-base font-medium">Series (optional)</Label>
+                    <p className="text-sm text-gray-600">
+                      This title is part of a series. You can edit details or remove the title from the series. (Optional) 
+                      <button className="text-blue-600 underline ml-1">Learn more</button>
+                    </p>
                     
-                    {form.watch("seriesTitle") ? (
-                      /* Book is part of a series */
-                      <div className="bg-gray-50 p-4 rounded-md border">
-                        <p className="text-sm text-gray-700 mb-3">
-                          This title is part of a series. You can edit details or remove the title from the series. (Optional) 
-                          <button className="text-blue-600 underline ml-1">Learn more</button>
+                    {/* Checkbox to enable series */}
+                    <div className="flex items-start space-x-3">
+                      <Checkbox 
+                        id="isPartOfSeries"
+                        checked={!!form.watch("seriesTitle") || isPartOfSeries}
+                        onCheckedChange={(checked) => {
+                          setIsPartOfSeries(!!checked);
+                          if (!checked) {
+                            form.setValue("seriesTitle", "");
+                            form.setValue("seriesNumber", null);
+                          }
+                        }}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <Label htmlFor="isPartOfSeries" className="text-sm font-medium">
+                          This book is part of a series
+                        </Label>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Check this if your book belongs to a series
                         </p>
-                        <div className="mb-3">
+                      </div>
+                    </div>
+
+                    {/* Series details - shown when checkbox is checked */}
+                    {form.watch("seriesTitle") && (
+                      <div className="bg-gray-50 p-4 rounded-md border space-y-4">
+                        <div className="space-y-2">
                           <Label className="text-sm font-medium text-gray-700">Series Title</Label>
                           <p className="text-sm font-medium">{form.watch("seriesTitle")}</p>
                         </div>
@@ -564,21 +594,44 @@ export default function EditBook() {
                           </AlertDialog>
                         </div>
                       </div>
-                    ) : (
-                      /* Book is not part of a series */
-                      <div className="space-y-3">
-                        <p className="text-sm text-gray-600">
-                          Does this book belong to a series? You can add it to a series here or leave optional.
-                        </p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="seriesTitle" className="text-sm">Series Title</Label>
-                            <Input
-                              id="seriesTitle"
-                              placeholder="Enter series name (if applicable)"
-                              {...form.register("seriesTitle")}
-                            />
+                    )}
+
+                    {/* Series selection - shown when checkbox is checked but no series selected yet */}
+                    {!form.watch("seriesTitle") && isPartOfSeries && (
+                      <div className="space-y-4">
+                        <div className="flex gap-2">
+                          <div className="flex-1">
+                            <Label className="text-sm font-medium">Select existing series</Label>
+                            <Select 
+                              value={form.watch("seriesTitle") || ""} 
+                              onValueChange={(value) => {
+                                form.setValue("seriesTitle", value);
+                                form.setValue("seriesNumber", 1);
+                              }}
+                            >
+                              <SelectTrigger className="mt-1">
+                                <SelectValue placeholder="Choose a series..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="From Zero to Hero">From Zero to Hero</SelectItem>
+                                <SelectItem value="Marketing Mastery">Marketing Mastery</SelectItem>
+                                <SelectItem value="Business Basics">Business Basics</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
+                          <div className="pt-6">
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => window.location.href = '/manage-series'}
+                            >
+                              Edit series
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        {form.watch("seriesTitle") && (
                           <div className="space-y-2">
                             <Label htmlFor="seriesNumber" className="text-sm">Volume Number</Label>
                             <Input
@@ -587,9 +640,10 @@ export default function EditBook() {
                               min="1"
                               placeholder="1"
                               {...form.register("seriesNumber", { valueAsNumber: true })}
+                              className="w-32"
                             />
                           </div>
-                        </div>
+                        )}
                       </div>
                     )}
                   </div>
