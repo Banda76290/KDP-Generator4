@@ -3,8 +3,9 @@ import { useForm } from "react-hook-form";
 import { useLocation } from "wouter";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -23,6 +24,8 @@ export default function SeriesCreatePage() {
   const { toast } = useToast();
   const [characterCount, setCharacterCount] = useState(0);
   const maxCharacters = 4000;
+  const [showLinkDialog, setShowLinkDialog] = useState(false);
+  const [linkUrl, setLinkUrl] = useState('');
 
   const form = useForm<SeriesFormData>({
     defaultValues: {
@@ -78,9 +81,9 @@ export default function SeriesCreatePage() {
         color: #9ca3af;
         pointer-events: none;
       }
-      #description-editor h1 { font-size: 1.875rem; font-weight: bold; margin: 0.5rem 0; }
-      #description-editor h2 { font-size: 1.5rem; font-weight: bold; margin: 0.5rem 0; }
-      #description-editor h3 { font-size: 1.25rem; font-weight: bold; margin: 0.5rem 0; }
+      #description-editor h4 { font-size: 1.25rem; font-weight: bold; margin: 0.5rem 0; }
+      #description-editor h5 { font-size: 1.125rem; font-weight: bold; margin: 0.5rem 0; }
+      #description-editor h6 { font-size: 1rem; font-weight: bold; margin: 0.5rem 0; }
       #description-editor ul { list-style-type: disc; margin-left: 1.5rem; }
       #description-editor ol { list-style-type: decimal; margin-left: 1.5rem; }
       #description-editor li { margin: 0.25rem 0; }
@@ -111,18 +114,26 @@ export default function SeriesCreatePage() {
 
   const handleFormatChange = (format: string) => {
     switch (format) {
-      case 'heading1':
-        applyFormatting('formatBlock', 'h1');
+      case 'heading4':
+        applyFormatting('formatBlock', 'h4');
         break;
-      case 'heading2':
-        applyFormatting('formatBlock', 'h2');
+      case 'heading5':
+        applyFormatting('formatBlock', 'h5');
         break;
-      case 'heading3':
-        applyFormatting('formatBlock', 'h3');
+      case 'heading6':
+        applyFormatting('formatBlock', 'h6');
         break;
       case 'normal':
         applyFormatting('formatBlock', 'div');
         break;
+    }
+  };
+
+  const handleLinkInsert = () => {
+    if (linkUrl) {
+      applyFormatting('createLink', linkUrl);
+      setLinkUrl('');
+      setShowLinkDialog(false);
     }
   };
 
@@ -216,7 +227,7 @@ export default function SeriesCreatePage() {
                 <Label htmlFor="title" className="text-sm font-medium">Series title</Label>
                 <Input
                   id="title"
-                  placeholder="From Zero to Hero"
+                  placeholder="Enter your series name"
                   {...form.register('title', { required: 'Series title is required' })}
                   className="w-full"
                 />
@@ -362,25 +373,71 @@ export default function SeriesCreatePage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="normal">Normal</SelectItem>
-                      <SelectItem value="heading1">Heading 1</SelectItem>
-                      <SelectItem value="heading2">Heading 2</SelectItem>
-                      <SelectItem value="heading3">Heading 3</SelectItem>
+                      <SelectItem value="heading4">Heading 4</SelectItem>
+                      <SelectItem value="heading5">Heading 5</SelectItem>
+                      <SelectItem value="heading6">Heading 6</SelectItem>
                     </SelectContent>
                   </Select>
                   <div className="w-px h-6 bg-gray-300"></div>
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-8 px-2 hover:bg-gray-200"
-                    onClick={() => {
-                      const url = prompt('Enter URL:');
-                      if (url) applyFormatting('createLink', url);
-                    }}
-                    title="Insert Link"
-                  >
-                    🔗
-                  </Button>
+                  <Dialog open={showLinkDialog} onOpenChange={setShowLinkDialog}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 px-2 hover:bg-gray-200"
+                        title="Insert Link"
+                      >
+                        🔗
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Insert Link</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor="link-url" className="text-sm font-medium">
+                            URL
+                          </label>
+                          <Input
+                            id="link-url"
+                            type="url"
+                            placeholder="https://example.com"
+                            value={linkUrl}
+                            onChange={(e) => setLinkUrl(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleLinkInsert();
+                              }
+                            }}
+                          />
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              setLinkUrl('');
+                              setShowLinkDialog(false);
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="button"
+                            style={{ backgroundColor: 'var(--kdp-primary-blue)' }}
+                            className="text-white hover:opacity-90"
+                            onClick={handleLinkInsert}
+                            disabled={!linkUrl}
+                          >
+                            Insert Link
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                   <Button 
                     type="button" 
                     variant="ghost" 
