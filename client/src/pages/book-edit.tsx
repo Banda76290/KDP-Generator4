@@ -98,6 +98,7 @@ export default function EditBook() {
   const [activeTab, setActiveTab] = useState("details");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isPartOfSeries, setIsPartOfSeries] = useState(false);
+  const [hasRestoredFromStorage, setHasRestoredFromStorage] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -251,6 +252,7 @@ export default function EditBook() {
         sessionStorage.removeItem('newlyCreatedSeries');
         
         console.log('Form restoration complete');
+        setHasRestoredFromStorage(true);
         return; // Exit early to prevent book data from overriding restored data
       } catch (error) {
         console.error('Error restoring form data:', error);
@@ -259,7 +261,7 @@ export default function EditBook() {
     }
     
     // Only load book data if we didn't restore from sessionStorage
-    if (book) {
+    if (book && !hasRestoredFromStorage) {
       form.reset({
         title: book.title || "",
         subtitle: book.subtitle || "",
