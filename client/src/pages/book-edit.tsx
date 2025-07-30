@@ -3,7 +3,7 @@ import { useLocation, useParams } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { X, Plus, Trash2, CheckCircle, ArrowLeft, BookOpen, Loader2 } from "lucide-react";
+import { X, Plus, Trash2, CheckCircle, ArrowLeft, BookOpen, Loader2, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertBookSchema, type Book } from "@shared/schema";
@@ -104,11 +105,61 @@ export default function EditBook() {
     seriesTitle: string;
     seriesNumber: number | null;
   } | null>(null);
+  
+  // WYSIWYG Editor states for Description
+  const [descriptionCharacterCount, setDescriptionCharacterCount] = useState(0);
+  const maxDescriptionCharacters = 4000;
+  const [showLinkDialog, setShowLinkDialog] = useState(false);
+  const [linkUrl, setLinkUrl] = useState('');
+  const [descriptionEditorContent, setDescriptionEditorContent] = useState('');
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Check if this is creation mode
   const isCreating = !bookId;
+  
+  // WYSIWYG Editor functions for Description
+  const applyDescriptionFormatting = (command: string, value?: string) => {
+    document.execCommand(command, false, value);
+    updateDescriptionFromHTML();
+  };
+
+  const updateDescriptionFromHTML = () => {
+    const editor = document.getElementById('description-editor') as HTMLDivElement;
+    if (!editor) return;
+    
+    const htmlContent = editor.innerHTML;
+    const textContent = editor.innerText || editor.textContent || '';
+    setDescriptionCharacterCount(textContent.length);
+    setDescriptionEditorContent(htmlContent);
+    form.setValue('description', htmlContent);
+  };
+
+  const handleDescriptionFormatChange = (format: string) => {
+    switch (format) {
+      case 'heading4':
+        applyDescriptionFormatting('formatBlock', 'h4');
+        break;
+      case 'heading5':
+        applyDescriptionFormatting('formatBlock', 'h5');
+        break;
+      case 'heading6':
+        applyDescriptionFormatting('formatBlock', 'h6');
+        break;
+      case 'normal':
+        applyDescriptionFormatting('formatBlock', 'div');
+        break;
+    }
+  };
+
+  const insertDescriptionLink = () => {
+    if (linkUrl) {
+      applyDescriptionFormatting('createLink', linkUrl);
+      setLinkUrl('');
+      setShowLinkDialog(false);
+    }
+  };
   
   // Get projectId from URL if present
   const urlParams = new URLSearchParams(window.location.search);
@@ -162,6 +213,31 @@ export default function EditBook() {
     },
   });
 
+  // Add CSS for the description editor
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      #description-editor:empty:before {
+        content: attr(data-placeholder);
+        color: #9ca3af;
+        pointer-events: none;
+      }
+      #description-editor h4 { font-size: 1.25rem; font-weight: bold; margin: 0.5rem 0; }
+      #description-editor h5 { font-size: 1.125rem; font-weight: bold; margin: 0.5rem 0; }
+      #description-editor h6 { font-size: 1rem; font-weight: bold; margin: 0.5rem 0; }
+      #description-editor ul { list-style-type: disc; margin-left: 1.5rem; }
+      #description-editor ol { list-style-type: decimal; margin-left: 1.5rem; }
+      #description-editor li { margin: 0.25rem 0; }
+      #description-editor a { color: #3b82f6; text-decoration: underline; }
+      #description-editor p { margin: 0.5rem 0; }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   // Save current form state to session storage (for navigation to series creation only)
   const saveFormDataToSession = () => {
     const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
@@ -170,6 +246,7 @@ export default function EditBook() {
     const watchedFormData = form.watch();
     const currentFormData = {
       ...watchedFormData,
+      description: descriptionEditorContent, // Save the rich HTML content
       keywords,
       categories,
       contributors,
@@ -290,6 +367,23 @@ export default function EditBook() {
           setIsPartOfSeries(savedIsPartOfSeries);
         }
         
+        // Restore description in WYSIWYG editor
+        if (formFields.description) {
+          setDescriptionEditorContent(formFields.description);
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = formFields.description;
+          const textContent = tempDiv.innerText || tempDiv.textContent || '';
+          setDescriptionCharacterCount(textContent.length);
+          
+          // Set the editor content after a short delay to ensure the editor is rendered
+          setTimeout(() => {
+            const editor = document.getElementById('description-editor') as HTMLDivElement;
+            if (editor) {
+              editor.innerHTML = formFields.description;
+            }
+          }, 200);
+        }
+        
         console.log('UI restoration complete');
         
         // Clear saved data
@@ -309,6 +403,22 @@ export default function EditBook() {
     // Only load book data if we didn't restore from sessionStorage
     console.log('Book loading check:', { book: !!book, hasRestoredFromStorage, shouldLoadBook: book && !hasRestoredFromStorage });
     if (book && !hasRestoredFromStorage) {
+      // Load description into WYSIWYG editor
+      if (book.description) {
+        setDescriptionEditorContent(book.description);
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = book.description;
+        const textContent = tempDiv.innerText || tempDiv.textContent || '';
+        setDescriptionCharacterCount(textContent.length);
+        
+        // Set the editor content after a short delay to ensure the editor is rendered
+        setTimeout(() => {
+          const editor = document.getElementById('description-editor') as HTMLDivElement;
+          if (editor) {
+            editor.innerHTML = book.description;
+          }
+        }, 100);
+      }
       form.reset({
         title: book.title || "",
         subtitle: book.subtitle || "",
@@ -1128,19 +1238,102 @@ export default function EditBook() {
                   </div>
 
                   {/* Description */}
-                  <div className="space-y-2">
-                    <Label htmlFor="description" className="text-sm font-medium">Description</Label>
-                    <p className="text-sm text-gray-600">
-                      Provide a description that will entice readers to buy your book. What is your book about? What makes it interesting? What should readers expect? This can be copied from the back cover of your book.
-                    </p>
-                    <Textarea
-                      id="description"
-                      placeholder="Enter a compelling book description that will attract readers..."
-                      className="min-h-[120px]"
-                      {...form.register("description")}
-                    />
-                    <div className="text-sm text-gray-500">
-                      <p>4000 characters remaining</p>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="description-editor" className="text-sm font-medium">Description</Label>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Provide a description that will entice readers to buy your book. What is your book about? What makes it interesting? What should readers expect? This can be copied from the back cover of your book. Maximum {maxDescriptionCharacters.toLocaleString()} characters.
+                      </p>
+                    </div>
+                    
+                    {/* Formatting Toolbar */}
+                    <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border">
+                      <Select onValueChange={handleDescriptionFormatChange}>
+                        <SelectTrigger className="w-32">
+                          <SelectValue placeholder="Format" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="normal">Normal</SelectItem>
+                          <SelectItem value="heading4">Heading 4</SelectItem>
+                          <SelectItem value="heading5">Heading 5</SelectItem>
+                          <SelectItem value="heading6">Heading 6</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      
+                      <Button type="button" variant="outline" size="sm" onClick={() => applyDescriptionFormatting('bold')}>
+                        <strong>B</strong>
+                      </Button>
+                      <Button type="button" variant="outline" size="sm" onClick={() => applyDescriptionFormatting('italic')}>
+                        <em>I</em>
+                      </Button>
+                      <Button type="button" variant="outline" size="sm" onClick={() => applyDescriptionFormatting('underline')}>
+                        <u>U</u>
+                      </Button>
+                      <Button type="button" variant="outline" size="sm" onClick={() => applyDescriptionFormatting('insertUnorderedList')}>
+                        • List
+                      </Button>
+                      <Button type="button" variant="outline" size="sm" onClick={() => applyDescriptionFormatting('insertOrderedList')}>
+                        1. List
+                      </Button>
+                      
+                      <Dialog open={showLinkDialog} onOpenChange={setShowLinkDialog}>
+                        <DialogTrigger asChild>
+                          <Button type="button" variant="outline" size="sm">
+                            <Link2 className="w-4 h-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Insert Link</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <Input
+                              placeholder="Enter URL"
+                              value={linkUrl}
+                              onChange={(e) => setLinkUrl(e.target.value)}
+                            />
+                            <div className="flex justify-end space-x-2">
+                              <Button variant="outline" onClick={() => setShowLinkDialog(false)}>
+                                Cancel
+                              </Button>
+                              <Button 
+                                style={{ backgroundColor: 'var(--kdp-primary-blue)', color: 'white' }}
+                                onClick={insertDescriptionLink}
+                              >
+                                Insert
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+
+                    {/* Rich Text Editor */}
+                    <div className="space-y-2">
+                      <div
+                        id="description-editor"
+                        contentEditable
+                        className="min-h-[200px] p-3 border border-gray-300 rounded-md resize-y overflow-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        style={{ 
+                          minHeight: '200px',
+                          maxHeight: '500px',
+                          fontSize: '14px',
+                          lineHeight: '1.5'
+                        }}
+                        onInput={updateDescriptionFromHTML}
+                        onBlur={updateDescriptionFromHTML}
+                        data-placeholder="Enter a compelling book description that will attract readers..."
+                        suppressContentEditableWarning={true}
+                      />
+                      <input
+                        type="hidden"
+                        {...form.register('description')}
+                      />
+                      <div className="flex justify-end">
+                        <span className={`text-sm ${descriptionCharacterCount > maxDescriptionCharacters ? 'text-red-600' : 'text-green-600'}`}>
+                          <strong>{descriptionCharacterCount}</strong> / {maxDescriptionCharacters}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
