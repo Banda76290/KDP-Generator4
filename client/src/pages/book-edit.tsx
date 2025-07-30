@@ -99,6 +99,11 @@ export default function EditBook() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isPartOfSeries, setIsPartOfSeries] = useState(false);
   const [hasRestoredFromStorage, setHasRestoredFromStorage] = useState(false);
+  // Store original series data to restore when checkbox is checked again
+  const [originalSeriesData, setOriginalSeriesData] = useState<{
+    seriesTitle: string;
+    seriesNumber: number | null;
+  } | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -257,6 +262,14 @@ export default function EditBook() {
         // Restore all form fields automatically (future-proof)
         const { keywords: savedKeywords, categories: savedCategories, contributors: savedContributors, isPartOfSeries: savedIsPartOfSeries, ...formFields } = formData;
         
+        // Store series data as original if it exists
+        if (formFields.seriesTitle) {
+          setOriginalSeriesData({
+            seriesTitle: formFields.seriesTitle,
+            seriesNumber: formFields.seriesNumber || null
+          });
+        }
+        
         // Immediate form reset - same as buttons "Create series" and "Edit series details"
         form.reset(formFields);
         
@@ -317,8 +330,14 @@ export default function EditBook() {
         seriesNumber: book.seriesNumber || null,
       });
 
-      // Set series checkbox state
+      // Set series checkbox state and store original series data
       setIsPartOfSeries(!!book.seriesTitle);
+      if (book.seriesTitle) {
+        setOriginalSeriesData({
+          seriesTitle: book.seriesTitle,
+          seriesNumber: book.seriesNumber || null
+        });
+      }
 
       // Set separate state arrays
       if (book.keywords) {
@@ -699,8 +718,23 @@ export default function EditBook() {
                         onCheckedChange={(checked) => {
                           setIsPartOfSeries(!!checked);
                           if (!checked) {
+                            // Store current series data before clearing
+                            const currentSeriesTitle = form.watch("seriesTitle");
+                            const currentSeriesNumber = form.watch("seriesNumber");
+                            if (currentSeriesTitle) {
+                              setOriginalSeriesData({
+                                seriesTitle: currentSeriesTitle,
+                                seriesNumber: currentSeriesNumber
+                              });
+                            }
                             form.setValue("seriesTitle", "");
                             form.setValue("seriesNumber", null);
+                          } else {
+                            // Restore original series data if available
+                            if (originalSeriesData) {
+                              form.setValue("seriesTitle", originalSeriesData.seriesTitle);
+                              form.setValue("seriesNumber", originalSeriesData.seriesNumber);
+                            }
                           }
                         }}
                         className="mt-1"
