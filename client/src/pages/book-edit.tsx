@@ -412,6 +412,8 @@ export default function EditBook() {
           for (const contributor of contributors) {
             await apiRequest("POST", "/api/contributors", {
               bookId: createdBook.id,
+              projectId: formattedData.projectId, // Add projectId for database compatibility
+              name: `${contributor.firstName} ${contributor.lastName}`.trim(), // Add name field for database compatibility
               role: contributor.role,
               prefix: contributor.prefix || null,
               firstName: contributor.firstName,
@@ -446,6 +448,8 @@ export default function EditBook() {
             for (const contributor of contributors) {
               await apiRequest("POST", "/api/contributors", {
                 bookId: bookId,
+                projectId: formattedData.projectId, // Add projectId for database compatibility
+                name: `${contributor.firstName} ${contributor.lastName}`.trim(), // Add name field for database compatibility
                 role: contributor.role,
                 prefix: contributor.prefix || null,
                 firstName: contributor.firstName,
