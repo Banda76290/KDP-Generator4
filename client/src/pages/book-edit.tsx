@@ -86,6 +86,8 @@ export default function EditBook() {
     queryKey: [`/api/books/${bookId}`],
     enabled: !isCreating, // Only fetch if we're not creating (i.e., if we have a bookId)
     refetchOnMount: true, // Force refresh on mount
+    refetchOnWindowFocus: true, // Force refresh when window gets focus
+    staleTime: 0, // Always consider data stale for immediate updates
   });
   
   console.log('Query State:', { book, bookLoading, error, isCreating });
@@ -180,6 +182,7 @@ export default function EditBook() {
       };
       
       console.log(isCreating ? 'Creating book data:' : 'Updating book data:', formattedData);
+      console.log('ProjectId being sent:', formattedData.projectId);
       
       if (isCreating) {
         const createdBook = await apiRequest("POST", `/api/books`, formattedData);
@@ -192,11 +195,18 @@ export default function EditBook() {
       }
     },
     onSuccess: (result) => {
+      // Update the current book query cache with the latest data
+      if (result.book && !isCreating) {
+        queryClient.setQueryData([`/api/books/${bookId}`], result.book);
+      }
+      
+      // Invalidate all related queries to ensure fresh data
       queryClient.invalidateQueries({ queryKey: ["/api/books"] });
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       if (!isCreating) {
         queryClient.invalidateQueries({ queryKey: [`/api/books/${bookId}`] });
       }
+      
       toast.success({
         title: isCreating ? "Book Created" : "Book Updated",
         description: `Your book has been ${isCreating ? 'created' : 'updated'} successfully.`,
