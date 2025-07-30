@@ -825,7 +825,28 @@ export default function EditBook() {
                 <nav className="-mb-px flex space-x-8">
                   <button
                     type="button"
-                    onClick={() => setActiveTab("details")}
+                    onClick={() => {
+                      // Sauvegarder le contenu de l'éditeur avant de changer d'onglet
+                      if (activeTab === "details") {
+                        const editor = document.getElementById('description-editor') as HTMLDivElement;
+                        if (editor) {
+                          const rawHtmlContent = editor.innerHTML;
+                          const cleanedHtmlContent = cleanHTML(rawHtmlContent);
+                          form.setValue('description', cleanedHtmlContent);
+                          setDescriptionEditorContent(cleanedHtmlContent);
+                        }
+                      }
+                      setActiveTab("details");
+                      // Restaurer le contenu de l'éditeur si on revient sur l'onglet details
+                      if ("details" !== activeTab) {
+                        setTimeout(() => {
+                          const editor = document.getElementById('description-editor') as HTMLDivElement;
+                          if (editor && descriptionEditorContent) {
+                            editor.innerHTML = descriptionEditorContent;
+                          }
+                        }, 50);
+                      }
+                    }}
                     className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
                       activeTab === "details"
                         ? "border-orange-500 text-orange-600"
@@ -834,7 +855,19 @@ export default function EditBook() {
                   >Book Details</button>
                   <button
                     type="button"
-                    onClick={() => setActiveTab("content")}
+                    onClick={() => {
+                      // Sauvegarder le contenu de l'éditeur avant de changer d'onglet
+                      if (activeTab === "details") {
+                        const editor = document.getElementById('description-editor') as HTMLDivElement;
+                        if (editor) {
+                          const rawHtmlContent = editor.innerHTML;
+                          const cleanedHtmlContent = cleanHTML(rawHtmlContent);
+                          form.setValue('description', cleanedHtmlContent);
+                          setDescriptionEditorContent(cleanedHtmlContent);
+                        }
+                      }
+                      setActiveTab("content");
+                    }}
                     className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
                       activeTab === "content"
                         ? "border-orange-500 text-orange-600"
@@ -843,7 +876,19 @@ export default function EditBook() {
                   >Book Content</button>
                   <button
                     type="button"
-                    onClick={() => setActiveTab("pricing")}
+                    onClick={() => {
+                      // Sauvegarder le contenu de l'éditeur avant de changer d'onglet
+                      if (activeTab === "details") {
+                        const editor = document.getElementById('description-editor') as HTMLDivElement;
+                        if (editor) {
+                          const rawHtmlContent = editor.innerHTML;
+                          const cleanedHtmlContent = cleanHTML(rawHtmlContent);
+                          form.setValue('description', cleanedHtmlContent);
+                          setDescriptionEditorContent(cleanedHtmlContent);
+                        }
+                      }
+                      setActiveTab("pricing");
+                    }}
                     className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
                       activeTab === "pricing"
                         ? "border-orange-500 text-orange-600"
@@ -1763,7 +1808,7 @@ export default function EditBook() {
                       const formData = form.getValues();
                       handleSaveAsDraft(formData);
                     }}
-                    disabled={saveBook.isPending}
+                    disabled={saveBook.isPending || descriptionCharacterCount > maxDescriptionCharacters}
                   >
                     {saveBook.isPending ? (
                       <>
@@ -1781,7 +1826,7 @@ export default function EditBook() {
                         const formData = form.getValues();
                         handleSaveAndContinue(formData);
                       }}
-                      disabled={saveBook.isPending}
+                      disabled={saveBook.isPending || descriptionCharacterCount > maxDescriptionCharacters}
                       className="bg-orange-600 hover:bg-orange-700"
                     >
                       {saveBook.isPending ? (
@@ -1797,7 +1842,7 @@ export default function EditBook() {
                   {activeTab === "pricing" && (
                     <Button
                       type="submit"
-                      disabled={saveBook.isPending}
+                      disabled={saveBook.isPending || descriptionCharacterCount > maxDescriptionCharacters}
                       className="bg-orange-600 hover:bg-orange-700"
                     >
                       {saveBook.isPending ? (
