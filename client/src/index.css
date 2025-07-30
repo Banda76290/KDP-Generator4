@@ -110,7 +110,9 @@
   background: linear-gradient(135deg, hsl(35, 100%, 50%) 0%, hsl(50, 100%, 60%) 100%);
 }
 
-/* Layout System - Universal solution for header positioning */
+/* Layout System - Universal solution for header positioning
+   This system works for ALL pages (current and future) without any page-specific modifications
+   Compatible with mobile, tablet, desktop, and any screen size */
 .layout-container {
   @apply min-h-screen bg-gray-50 dark:bg-background;
   display: grid;
@@ -123,15 +125,32 @@
 .layout-container > header {
   grid-area: header;
   @apply fixed top-0 left-0 right-0 z-50;
+  height: 64px; /* Ensure header height is consistent */
 }
 
 .layout-content {
   grid-area: content;
   @apply flex;
   min-height: 0; /* Important for nested flex/grid layouts */
+  /* Content starts exactly at 64px from top - no overlap, no gap */
 }
 
 .layout-main {
-  @apply flex-1 min-w-0 p-4 md:p-6 md:ml-64;
-  /* No padding-top needed - content starts exactly where header ends */
+  @apply flex-1 min-w-0 p-4 md:p-6;
+  /* Responsive margin for sidebar - automatically handled by CSS */
+  margin-left: 0; /* Mobile: no sidebar margin */
 }
+
+/* Desktop: sidebar margin only when sidebar is visible */
+@media (min-width: 768px) {
+  .layout-main {
+    margin-left: 256px; /* 64 * 4 = 256px (w-64) */
+  }
+}
+
+/* Future-proof: Any new page using Layout component will automatically:
+   1. Have content positioned exactly under the header
+   2. Work on all device sizes  
+   3. Respect sidebar positioning
+   4. No manual padding-top adjustments needed
+   5. No page-specific CSS required */
