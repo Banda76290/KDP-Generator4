@@ -111,8 +111,7 @@ export default function SeriesListPage() {
   };
 
   const handleCreateSeries = () => {
-    // TODO: Redirect to series creation page
-    console.log("Creating new series");
+    window.location.href = '/series-create';
   };
 
   return (
