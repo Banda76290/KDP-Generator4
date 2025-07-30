@@ -229,9 +229,12 @@ export default function SeriesListPage() {
                 <CardContent>
                   <div className="space-y-3">
                     {/* Description */}
-                    <p className="text-sm text-gray-600 line-clamp-3">
-                      {seriesItem.description || "No description provided"}
-                    </p>
+                    <div 
+                      className="text-sm text-gray-600 line-clamp-3 series-description"
+                      dangerouslySetInnerHTML={{ 
+                        __html: seriesItem.description || "No description provided" 
+                      }}
+                    />
 
                     {/* Creation Date */}
                     <div className="text-xs text-gray-500">
