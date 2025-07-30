@@ -311,6 +311,11 @@ The application is designed to be deployed on Replit with integrated authenticat
   - Save and Continue with automatic tab progression
   - Complete form pre-population from database
   - Edit buttons integrated in project cards
+- **Series Management**: Complete series setup and management system
+  - Advanced WYSIWYG editor with 4000 character limit and color coding
+  - Full formatting toolbar (Bold, Italic, Underline, Lists, Headings, Links, Special Characters)
+  - 39 language support with regional variants
+  - Professional contentEditable interface matching KDP standards
 - **AI Assistant**: Content generation with various types (structure, descriptions, marketing)
 - **AI Configuration System**: Complete admin interface for managing AI prompts, models, and usage limits
   - Prompt template management with system prompts and user prompt templates
@@ -324,9 +329,12 @@ The application is designed to be deployed on Replit with integrated authenticat
   - Custom model and prompt override capabilities
   - Multi-tab interface (Configuration, Advanced Settings, Results)
   - Copy to clipboard and content management features
+- **Navigation System**: Fixed sidebar navigation with proper scrolling support
+  - All menu items accessible with working vertical scroll
+  - Consistent layout across desktop and mobile devices
 - **Analytics**: Sales analytics page (basic structure in place)
 - **KDP Reports**: File upload and parsing functionality
-- **Authentication**: Replit OIDC integration with session management
+- **Authentication**: Replit OIDC integration with session management including custom domain support
 - **Database**: PostgreSQL with Drizzle ORM for all project and user data
 - **SEO Implementation**: Complete SEO setup for public pages with meta tags, Open Graph, and Twitter Cards
 
