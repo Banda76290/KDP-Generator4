@@ -1284,7 +1284,7 @@ export default function EditBook() {
                     </div>
                     
                     <div>
-                      <Label className="font-medium text-[16px]">Contributors <span className="text-sm font-normal text-gray-500">(Optional)</span></Label>
+                      <Label className="font-medium text-[14px]">Contributors <span className="text-sm font-normal text-gray-500">(Optional)</span></Label>
                       
                       {contributors.map((contributor, index) => (
                         <div key={contributor.id} className="grid grid-cols-7 gap-3 mt-2 items-center">
