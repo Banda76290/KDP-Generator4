@@ -118,17 +118,16 @@ function BooksContent() {
       return apiRequest("POST", `/api/books/${bookId}/duplicate`);
     },
     onSuccess: () => {
-      toast({
+      toast.success({
         title: "Success",
         description: "Book duplicated successfully",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/books"] });
     },
     onError: (error: Error) => {
-      toast({
+      toast.error({
         title: "Error",
         description: error.message,
-        variant: "destructive",
       });
     },
   });
@@ -139,7 +138,7 @@ function BooksContent() {
       return apiRequest("DELETE", `/api/books/${bookId}`);
     },
     onSuccess: () => {
-      toast({
+      toast.success({
         title: "Success",
         description: "Book deleted successfully",
       });
@@ -147,10 +146,9 @@ function BooksContent() {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
     },
     onError: (error: Error) => {
-      toast({
+      toast.error({
         title: "Error",
         description: error.message,
-        variant: "destructive",
       });
     },
   });
