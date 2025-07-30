@@ -61,10 +61,13 @@ export default function SeriesCreatePage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
+        credentials: 'include' // Include cookies for authentication
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save series');
+        const errorData = await response.json();
+        console.error('API Error:', errorData);
+        throw new Error(errorData.message || 'Failed to save series');
       }
 
       toast({

@@ -508,7 +508,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/series', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        console.error('No userId found in request. User object:', JSON.stringify(req.user));
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
       const seriesData = insertSeriesSchema.parse({
         ...req.body,
         userId
