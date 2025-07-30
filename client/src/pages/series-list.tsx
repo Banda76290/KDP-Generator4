@@ -89,6 +89,30 @@ export default function SeriesListPage() {
     },
   });
 
+  // Mutation to delete series
+  const deleteSeries = useMutation({
+    mutationFn: async (seriesId: string) => {
+      return await apiRequest("DELETE", `/api/series/${seriesId}`);
+    },
+    onSuccess: () => {
+      // Invalidate queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ['/api/series'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/books'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      toast({
+        title: "Series Deleted",
+        description: "The series has been successfully deleted.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete series",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Calculate series revenue
   const calculateSeriesRevenue = (books: BookData[]) => {
     const totalRevenue = books.reduce((sum, book) => sum + parseFloat(book.totalRevenue || '0'), 0);
@@ -122,8 +146,8 @@ export default function SeriesListPage() {
     });
 
   const handleDeleteSeries = (seriesId: string) => {
-    // TODO: Implement series deletion
     console.log("Deleting series:", seriesId);
+    deleteSeries.mutate(seriesId);
   };
 
   const handleCreateSeries = () => {

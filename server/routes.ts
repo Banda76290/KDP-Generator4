@@ -682,6 +682,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete('/api/series/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const seriesId = req.params.id;
+      
+      // Check if series exists first
+      const existingSeries = await storage.getSeries(seriesId, userId);
+      if (!existingSeries) {
+        return res.status(404).json({ message: "Series not found" });
+      }
+      
+      await storage.deleteSeries(seriesId, userId);
+      
+      res.json({ message: "Series deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting series:", error);
+      res.status(500).json({ message: "Failed to delete series" });
+    }
+  });
+
   // Admin routes
   app.get('/api/admin/stats', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
