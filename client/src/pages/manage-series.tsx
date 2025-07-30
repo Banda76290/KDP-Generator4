@@ -149,17 +149,16 @@ function ManageSeriesContent() {
   };
 
   return (
-    <div className="layout-content">
-      <div className="layout-main">
-        {/* Breadcrumb */}
-        <div className="flex items-center text-sm text-gray-600 mb-6">
+    <div className="space-y-6 p-6">
+      {/* Breadcrumb */}
+      <div className="flex items-center text-sm text-gray-600 mb-6">
           <span>Bookshelf</span>
           <span className="mx-2">›</span>
           <span className="text-blue-600">Manage Series</span>
         </div>
 
-        {/* Series Header */}
-        <div className="flex items-start justify-between mb-8">
+      {/* Series Header */}
+      <div className="flex items-start justify-between mb-8">
           <div className="flex-1">
             <div className="flex items-center gap-4 mb-4">
               {/* Series Icon */}
@@ -236,8 +235,8 @@ function ManageSeriesContent() {
           </div>
         </div>
 
-        {/* Main Content Section */}
-        <Card>
+      {/* Main Content Section */}
+      <Card>
           <CardHeader className="border-b">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">Main content</CardTitle>
@@ -304,7 +303,6 @@ function ManageSeriesContent() {
             ))}
           </CardContent>
         </Card>
-      </div>
     </div>
   );
 }

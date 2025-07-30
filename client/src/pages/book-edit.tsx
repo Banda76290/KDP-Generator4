@@ -565,10 +565,10 @@ export default function EditBook() {
                                 <AlertDialogTitle>Remove title from series</AlertDialogTitle>
                                 <AlertDialogDescription asChild>
                                   <div className="space-y-3">
-                                    <div className="bg-orange-50 border border-orange-200 rounded-md p-3 flex items-start gap-2">
+                                    <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 flex items-start gap-2">
                                       <div className="flex-shrink-0 mt-0.5">
-                                        <div className="w-5 h-5 bg-orange-400 rounded-full flex items-center justify-center">
-                                          <span className="text-white text-xs font-bold">!</span>
+                                        <div className="w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center">
+                                          <span className="text-black text-xs font-bold">!</span>
                                         </div>
                                       </div>
                                       <div className="text-sm">
