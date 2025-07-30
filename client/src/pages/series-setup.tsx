@@ -183,15 +183,58 @@ export default function SeriesSetupPage() {
     updateDescriptionFromHTML();
   };
 
+  // Function to clean HTML and remove unnecessary styles
+  const cleanHTML = (html: string): string => {
+    // Create a temporary div to parse the HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    
+    // Remove all style attributes that contain Tailwind CSS variables
+    const allElements = tempDiv.querySelectorAll('*');
+    allElements.forEach(element => {
+      const styleAttr = element.getAttribute('style');
+      if (styleAttr) {
+        // Remove styles that contain CSS custom properties (--tw-* variables)
+        if (styleAttr.includes('--tw-') || styleAttr.includes('--gradient') || styleAttr.includes('--ring') || styleAttr.includes('--shadow')) {
+          element.removeAttribute('style');
+        } else {
+          // Keep only essential inline styles (color, font-weight, etc.)
+          const cleanStyles = styleAttr
+            .split(';')
+            .filter(style => {
+              const prop = style.trim().split(':')[0]?.trim();
+              return ['color', 'font-weight', 'font-style', 'text-decoration'].includes(prop);
+            })
+            .join('; ');
+          
+          if (cleanStyles) {
+            element.setAttribute('style', cleanStyles);
+          } else {
+            element.removeAttribute('style');
+          }
+        }
+      }
+      
+      // Remove empty elements except for br tags
+      if (element.tagName !== 'BR' && !element.textContent?.trim() && element.children.length === 0) {
+        element.remove();
+      }
+    });
+    
+    return tempDiv.innerHTML;
+  };
+
   const updateDescriptionFromHTML = () => {
     const editor = document.getElementById('description-editor') as HTMLDivElement;
     if (!editor) return;
     
-    const htmlContent = editor.innerHTML;
+    const rawHtmlContent = editor.innerHTML;
+    const cleanedHtmlContent = cleanHTML(rawHtmlContent);
     const textContent = editor.innerText || editor.textContent || '';
+    
     setCharacterCount(textContent.length);
-    setEditorContent(htmlContent);
-    form.setValue('description', htmlContent);
+    setEditorContent(cleanedHtmlContent);
+    form.setValue('description', cleanedHtmlContent);
   };
 
   const handleFormatChange = (format: string) => {
@@ -683,6 +726,7 @@ export default function SeriesSetupPage() {
             <div className="flex space-x-3">
               <Button
                 type="submit"
+                disabled={characterCount > maxCharacters}
                 style={{ backgroundColor: '#38b6ff', borderColor: '#38b6ff' }}
               >
                 <Save className="w-4 h-4 mr-2" />

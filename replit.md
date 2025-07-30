@@ -405,6 +405,17 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Admin Access Resolved**: Created temporary route to grant superadmin privileges to production Google account
 - **Security Maintained**: Temporary admin route removed immediately after use for security
 
+### HTML Content Processing Solution (30 Juillet 2025) ✅ COMPLETED
+- **Universal HTML Cleaning**: Applied complete HTML cleaning solution to all WYSIWYG editors in the application
+- **Error 413 Prevention**: Hybrid solution implemented with Express 10MB payload limit + automatic HTML cleaning
+- **Book Description Editor**: Complete solution applied to book creation/editing with disabled save buttons on limit exceeded
+- **Series Description Editors**: Extended solution to all three series pages (series-setup.tsx, series-edit.tsx, series-create.tsx)
+- **Essential Styling Preservation**: HTML cleaning keeps only essential formatting (bold, italic, underline, headings, lists, color)
+- **CSS Variables Removal**: Automatic removal of Tailwind CSS variables (--tw-*, --gradient, --ring, --shadow) that cause payload bloat
+- **Smart Button Control**: Save buttons automatically disabled when character limits exceeded on all editors
+- **Tab Content Preservation**: Description content properly saved and restored when switching between form tabs
+- **Unified Implementation**: Same cleaning function and validation logic applied consistently across all WYSIWYG editors
+
 ### Current Features Available
 - **Complete Dashboard**: KPI cards, sales charts, format distribution, recent projects table
 - **Project Management**: Complete KDP project creation and editing system with dedicated pages
