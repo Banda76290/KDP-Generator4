@@ -22,7 +22,7 @@ export default function SeriesCreatePage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [characterCount, setCharacterCount] = useState(0);
-  const maxCharacters = 1948;
+  const maxCharacters = 4000;
 
   const form = useForm<SeriesFormData>({
     defaultValues: {
@@ -275,8 +275,8 @@ export default function SeriesCreatePage() {
                     maxLength={maxCharacters}
                   />
                   <div className="flex justify-end">
-                    <span className="text-sm text-gray-500">
-                      <strong>{characterCount}</strong> remaining characters
+                    <span className={`text-sm ${characterCount > maxCharacters ? 'text-red-600' : 'text-green-600'}`}>
+                      <strong>{characterCount}</strong> / {maxCharacters}
                     </span>
                   </div>
                 </div>
