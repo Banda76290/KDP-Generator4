@@ -292,35 +292,27 @@ export default function SeriesListPage() {
                           <Book className="w-4 h-4 mr-1" />
                           Books in this series ({seriesItem.books.length})
                         </h4>
-                        <div className="space-y-1 max-h-24 overflow-y-auto">
+                        <div className="space-y-2 max-h-32 overflow-y-auto">
                           {seriesItem.books
                             .sort((a, b) => (a.seriesNumber || 0) - (b.seriesNumber || 0))
                             .map((book) => (
-                              <div key={book.id} className="flex items-center justify-between text-xs p-2 bg-gray-50 rounded">
-                                <div className="flex items-center space-x-2">
-                                  {book.seriesNumber && (
-                                    <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs font-medium">
-                                      #{book.seriesNumber}
-                                    </span>
-                                  )}
-                                  <span className="font-medium truncate max-w-[120px]">{book.title}</span>
-                                </div>
-                                <div className="flex items-center space-x-1">
-                                  <Badge variant="secondary" className="text-xs">
-                                    {book.format}
-                                  </Badge>
-                                  <Badge 
-                                    variant={book.status === 'published' ? 'default' : 'secondary'} 
-                                    className="text-xs"
-                                  >
-                                    {book.status}
-                                  </Badge>
+                              <div key={book.id} className="text-xs p-3 bg-gray-50 rounded space-y-2">
+                                {/* First row: Series number and title with remove button */}
+                                <div className="flex items-start justify-between">
+                                  <div className="flex items-center space-x-2 flex-1 min-w-0">
+                                    {book.seriesNumber && (
+                                      <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs font-medium flex-shrink-0">
+                                        #{book.seriesNumber}
+                                      </span>
+                                    )}
+                                    <span className="font-medium truncate">{book.title}</span>
+                                  </div>
                                   <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                       <Button 
                                         variant="ghost" 
                                         size="sm" 
-                                        className="h-6 w-6 p-0 hover:bg-red-100 hover:text-red-600"
+                                        className="h-6 w-6 p-0 hover:bg-red-100 hover:text-red-600 flex-shrink-0 ml-2"
                                         title="Remove book from series"
                                       >
                                         <X className="h-3 w-3" />
@@ -346,6 +338,19 @@ export default function SeriesListPage() {
                                       </AlertDialogFooter>
                                     </AlertDialogContent>
                                   </AlertDialog>
+                                </div>
+                                
+                                {/* Second row: Format and status badges */}
+                                <div className="flex items-center space-x-2">
+                                  <Badge variant="secondary" className="text-xs">
+                                    {book.format}
+                                  </Badge>
+                                  <Badge 
+                                    variant={book.status === 'published' ? 'default' : 'secondary'} 
+                                    className="text-xs"
+                                  >
+                                    {book.status}
+                                  </Badge>
                                 </div>
                               </div>
                             ))}
