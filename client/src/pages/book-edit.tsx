@@ -169,6 +169,34 @@ export default function EditBook() {
     sessionStorage.setItem(storageKey, JSON.stringify(currentFormData));
   };
 
+  // Real-time auto-save: Save form data automatically when any field changes
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    const autoSave = () => {
+      // Only auto-save if we are about to navigate to series creation
+      const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
+      if (returnToBookEdit === (bookId || 'new')) {
+        saveFormDataToSession();
+        console.log('Auto-saved form data to sessionStorage');
+      }
+    };
+
+    // Debounced auto-save every 500ms when form data changes
+    const subscription = form.watch(() => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(autoSave, 500);
+    });
+
+    // Also save when state arrays change
+    timeoutId = setTimeout(autoSave, 500);
+
+    return () => {
+      clearTimeout(timeoutId);
+      subscription.unsubscribe();
+    };
+  }, [form, keywords, categories, contributors, isPartOfSeries, bookId]);
+
   // Clean up auto-saved data when leaving the page normally (not via series creation)
   useEffect(() => {
     const storageKey = `bookFormData_${bookId || 'new'}`;
@@ -222,21 +250,26 @@ export default function EditBook() {
         // Restore all form fields automatically (future-proof)
         const { keywords: savedKeywords, categories: savedCategories, contributors: savedContributors, isPartOfSeries: savedIsPartOfSeries, ...formFields } = formData;
         
-        form.reset(formFields);
-        
-        // Restore separate state arrays
-        if (savedKeywords && Array.isArray(savedKeywords)) {
-          setKeywords(savedKeywords);
-        }
-        if (savedCategories && Array.isArray(savedCategories)) {
-          setCategories(savedCategories);
-        }
-        if (savedContributors && Array.isArray(savedContributors)) {
-          setContributors(savedContributors);
-        }
-        if (typeof savedIsPartOfSeries === 'boolean') {
-          setIsPartOfSeries(savedIsPartOfSeries);
-        }
+        // Use setTimeout to ensure UI elements are properly updated
+        setTimeout(() => {
+          form.reset(formFields);
+          
+          // Restore separate state arrays with force update
+          if (savedKeywords && Array.isArray(savedKeywords)) {
+            setKeywords([...savedKeywords]);
+          }
+          if (savedCategories && Array.isArray(savedCategories)) {
+            setCategories([...savedCategories]);
+          }
+          if (savedContributors && Array.isArray(savedContributors)) {
+            setContributors([...savedContributors]);
+          }
+          if (typeof savedIsPartOfSeries === 'boolean') {
+            setIsPartOfSeries(savedIsPartOfSeries);
+          }
+          
+          console.log('UI restoration complete with forced re-render');
+        }, 100);
         
         // Clear saved data
         sessionStorage.removeItem(storageKey);
