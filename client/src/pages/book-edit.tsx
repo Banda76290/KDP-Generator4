@@ -250,26 +250,24 @@ export default function EditBook() {
         // Restore all form fields automatically (future-proof)
         const { keywords: savedKeywords, categories: savedCategories, contributors: savedContributors, isPartOfSeries: savedIsPartOfSeries, ...formFields } = formData;
         
-        // Use setTimeout to ensure UI elements are properly updated
-        setTimeout(() => {
-          form.reset(formFields);
-          
-          // Restore separate state arrays with force update
-          if (savedKeywords && Array.isArray(savedKeywords)) {
-            setKeywords([...savedKeywords]);
-          }
-          if (savedCategories && Array.isArray(savedCategories)) {
-            setCategories([...savedCategories]);
-          }
-          if (savedContributors && Array.isArray(savedContributors)) {
-            setContributors([...savedContributors]);
-          }
-          if (typeof savedIsPartOfSeries === 'boolean') {
-            setIsPartOfSeries(savedIsPartOfSeries);
-          }
-          
-          console.log('UI restoration complete with forced re-render');
-        }, 100);
+        // Immediate form reset - same as buttons "Create series" and "Edit series details"
+        form.reset(formFields);
+        
+        // Restore separate state arrays immediately
+        if (savedKeywords && Array.isArray(savedKeywords)) {
+          setKeywords(savedKeywords);
+        }
+        if (savedCategories && Array.isArray(savedCategories)) {
+          setCategories(savedCategories);
+        }
+        if (savedContributors && Array.isArray(savedContributors)) {
+          setContributors(savedContributors);
+        }
+        if (typeof savedIsPartOfSeries === 'boolean') {
+          setIsPartOfSeries(savedIsPartOfSeries);
+        }
+        
+        console.log('UI restoration complete');
         
         // Clear saved data
         sessionStorage.removeItem(storageKey);
@@ -286,6 +284,7 @@ export default function EditBook() {
     }
     
     // Only load book data if we didn't restore from sessionStorage
+    console.log('Book loading check:', { book: !!book, hasRestoredFromStorage, shouldLoadBook: book && !hasRestoredFromStorage });
     if (book && !hasRestoredFromStorage) {
       form.reset({
         title: book.title || "",
@@ -330,7 +329,7 @@ export default function EditBook() {
       setCategories(Array.isArray(book.categories) ? book.categories : []);
       setContributors([]);
     }
-  }, [book, form, bookId]);
+  }, [book, bookId, hasRestoredFromStorage]); // Removed form from dependencies to prevent loops
 
   // Fetch projects for selection
   const { data: projects = [] } = useQuery({
