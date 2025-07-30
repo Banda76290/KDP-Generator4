@@ -362,6 +362,14 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Extensive Logging**: Added detailed console logs to trace save/restore operations for future debugging
 - **Universal Coverage**: System works for both series creation and series editing workflows seamlessly
 
+### SSL Certificate Configuration Issue Resolved (30 Juillet 2025)
+- **Problem Identified**: Custom domain `kdpgenerator.com` was causing `NET::ERR_CERT_COMMON_NAME_INVALID` SSL errors
+- **Temporary Solution**: Temporarily disabled custom domain configuration to prevent SSL errors
+- **Final Solution**: Re-enabled custom domain configuration - waiting for SSL certificate installation by domain provider
+- **Authentication Ready**: Replit OIDC authentication configured for both Replit domains and custom domain
+- **Admin Access Resolved**: Created temporary route to grant superadmin privileges to production Google account
+- **Security Maintained**: Temporary admin route removed immediately after use for security
+
 ### Current Features Available
 - **Complete Dashboard**: KPI cards, sales charts, format distribution, recent projects table
 - **Project Management**: Complete KDP project creation and editing system with dedicated pages
