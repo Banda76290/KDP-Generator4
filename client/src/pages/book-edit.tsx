@@ -153,9 +153,49 @@ export default function EditBook() {
     },
   });
 
+  // Check for saved form data from series creation
+  useEffect(() => {
+    const savedFormData = sessionStorage.getItem('bookFormData');
+    const returnFromSeries = sessionStorage.getItem('returnToBookEdit');
+    
+    if (savedFormData && returnFromSeries === (bookId || 'new')) {
+      // Restore saved form data
+      const formData = JSON.parse(savedFormData);
+      form.reset(formData);
+      
+      // Restore separate state arrays
+      if (formData.keywords) {
+        setKeywords(Array.isArray(formData.keywords) ? formData.keywords : []);
+      }
+      if (formData.categories) {
+        setCategories(Array.isArray(formData.categories) ? formData.categories : []);
+      }
+      
+      // Check if we need to associate with newly created series
+      const newlyCreatedSeries = sessionStorage.getItem('newlyCreatedSeries');
+      if (newlyCreatedSeries) {
+        const seriesData = JSON.parse(newlyCreatedSeries);
+        form.setValue('seriesTitle', seriesData.title);
+        form.setValue('seriesNumber', 1);
+        setIsPartOfSeries(true);
+        
+        // Clear the series creation flag
+        sessionStorage.removeItem('newlyCreatedSeries');
+      }
+      
+      // Clear saved data
+      sessionStorage.removeItem('bookFormData');
+      sessionStorage.removeItem('returnToBookEdit');
+    }
+  }, [bookId, form]);
+
   // Update form with fetched book data
   useEffect(() => {
     if (book) {
+      // Only update if we didn't restore from sessionStorage
+      const returnFromSeries = sessionStorage.getItem('returnToBookEdit');
+      if (returnFromSeries === (bookId || 'new')) return;
+      
       form.reset({
         title: book.title || "",
         subtitle: book.subtitle || "",
@@ -199,7 +239,7 @@ export default function EditBook() {
       setCategories(Array.isArray(book.categories) ? book.categories : []);
       setContributors([]);
     }
-  }, [book, form]);
+  }, [book, form, bookId]);
 
   // Fetch projects for selection
   const { data: projects = [] } = useQuery({
@@ -667,10 +707,9 @@ export default function EditBook() {
                               variant="outline" 
                               size="sm"
                               onClick={() => {
-                                // Si le livre a un seriesTitle, on redirige vers l'édition de cette série
                                 const seriesTitle = form.watch("seriesTitle");
                                 if (seriesTitle) {
-                                  // Trouve l'ID réel de la série correspondant au titre
+                                  // Si le livre a un seriesTitle, on redirige vers l'édition de cette série
                                   const matchingSeries = userSeries.find((s: any) => s.title === seriesTitle);
                                   if (matchingSeries) {
                                     window.location.href = `/series-edit/${matchingSeries.id}`;
@@ -678,11 +717,18 @@ export default function EditBook() {
                                     window.location.href = '/manage-series';
                                   }
                                 } else {
-                                  window.location.href = '/manage-series';
+                                  // Aucune série sélectionnée - créer une nouvelle série
+                                  // Sauvegarder les données du formulaire dans sessionStorage
+                                  const formData = form.getValues();
+                                  sessionStorage.setItem('bookFormData', JSON.stringify(formData));
+                                  sessionStorage.setItem('returnToBookEdit', bookId || 'new');
+                                  
+                                  // Rediriger vers la création de série
+                                  window.location.href = '/series-setup';
                                 }
                               }}
                             >
-                              Edit series
+                              {form.watch("seriesTitle") ? "Edit series" : "Create series"}
                             </Button>
                           </div>
                         </div>

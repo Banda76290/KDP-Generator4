@@ -121,11 +121,28 @@ export default function SeriesSetupPage() {
       // Invalidate and refetch series data
       await queryClient.invalidateQueries({ queryKey: ['/api/series'] });
       
+      const responseData = await response.json();
+      
       toast({
         title: `Series ${isEditing ? 'updated' : 'saved'}`,
         description: `Your series has been successfully ${isEditing ? 'updated' : 'created'}.`,
       });
-      setLocation('/manage-series');
+
+      // Check if we need to return to book edit page
+      const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
+      if (returnToBookEdit && !isEditing) {
+        // Store newly created series data for book association
+        sessionStorage.setItem('newlyCreatedSeries', JSON.stringify(responseData));
+        
+        // Return to book edit page
+        if (returnToBookEdit === 'new') {
+          setLocation('/books/create');
+        } else {
+          setLocation(`/books/edit/${returnToBookEdit}`);
+        }
+      } else {
+        setLocation('/manage-series');
+      }
     } catch (error) {
       console.error('Error saving series:', error);
       toast({
@@ -628,7 +645,23 @@ export default function SeriesSetupPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setLocation('/manage-series')}
+              onClick={() => {
+                // Check if we need to return to book edit page
+                const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
+                if (returnToBookEdit) {
+                  // Clear sessionStorage and return to book edit
+                  sessionStorage.removeItem('bookFormData');
+                  sessionStorage.removeItem('returnToBookEdit');
+                  
+                  if (returnToBookEdit === 'new') {
+                    setLocation('/books/create');
+                  } else {
+                    setLocation(`/books/edit/${returnToBookEdit}`);
+                  }
+                } else {
+                  setLocation('/manage-series');
+                }
+              }}
             >
               Cancel
             </Button>
