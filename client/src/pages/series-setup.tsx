@@ -329,11 +329,26 @@ export default function SeriesSetupPage() {
           <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
-              onClick={() => setLocation('/manage-series')}
+              onClick={() => {
+                // Check if we need to return to book edit page
+                const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
+                if (returnToBookEdit) {
+                  // Only clear returnToBookEdit marker, keep bookFormData for restoration
+                  sessionStorage.removeItem('returnToBookEdit');
+                  
+                  if (returnToBookEdit === 'new') {
+                    setLocation('/books/create');
+                  } else {
+                    setLocation(`/books/edit/${returnToBookEdit}`);
+                  }
+                } else {
+                  setLocation('/manage-series');
+                }
+              }}
               className="flex items-center space-x-2"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Back to Manage Series</span>
+              <span>Back</span>
             </Button>
           </div>
         </div>
@@ -649,8 +664,7 @@ export default function SeriesSetupPage() {
                 // Check if we need to return to book edit page
                 const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
                 if (returnToBookEdit) {
-                  // Clear sessionStorage and return to book edit
-                  sessionStorage.removeItem('bookFormData');
+                  // Only clear returnToBookEdit marker, keep bookFormData for restoration
                   sessionStorage.removeItem('returnToBookEdit');
                   
                   if (returnToBookEdit === 'new') {

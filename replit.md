@@ -334,6 +334,14 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Error Handling**: Robust fallback to manage-series page if series ID not found
 - **Complete Workflow Parity**: Both "Create series" and "Edit series details" now use identical sessionStorage patterns
 
+### Cancel Button Logic Consistency (30 Juillet 2025) ✅ COMPLETED
+- **Unified Cancel Behavior**: Fixed all "Cancel" and "Back" buttons in Series Setup and Series Edit pages
+- **Data Preservation**: Cancel buttons now preserve bookFormData in sessionStorage for proper form restoration
+- **Smart Return Logic**: Cancel buttons intelligently return to book edit page when accessed from book creation/editing
+- **SessionStorage Cleanup**: Only removes returnToBookEdit marker while preserving form data for restoration
+- **Consistent Experience**: Both series-setup.tsx and series-edit.tsx now handle cancellation identically
+- **All Navigation Points**: Fixed Cancel button, Back button, and header Back button in both pages
+
 ### Current Features Available
 - **Complete Dashboard**: KPI cards, sales charts, format distribution, recent projects table
 - **Project Management**: Complete KDP project creation and editing system with dedicated pages

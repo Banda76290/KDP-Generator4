@@ -235,8 +235,7 @@ export default function SeriesEditPage() {
                   // Check if we need to return to book edit page
                   const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
                   if (returnToBookEdit) {
-                    // Clear sessionStorage and return to book edit
-                    sessionStorage.removeItem('bookFormData');
+                    // Only clear returnToBookEdit marker, keep bookFormData for restoration
                     sessionStorage.removeItem('returnToBookEdit');
                     
                     if (returnToBookEdit === 'new') {
@@ -495,8 +494,7 @@ export default function SeriesEditPage() {
                   // Check if we need to return to book edit page
                   const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
                   if (returnToBookEdit) {
-                    // Clear sessionStorage and return to book edit
-                    sessionStorage.removeItem('bookFormData');
+                    // Only clear returnToBookEdit marker, keep bookFormData for restoration
                     sessionStorage.removeItem('returnToBookEdit');
                     
                     if (returnToBookEdit === 'new') {
