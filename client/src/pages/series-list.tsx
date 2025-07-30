@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { BookOpen, Search, Plus, MoreVertical, Edit3, Trash2, Book, X, DollarSign, TrendingUp } from "lucide-react";
+import { BookOpen, Search, Plus, MoreVertical, Edit3, Trash2, Book, X, DollarSign, TrendingUp, SortAsc, SortDesc, Globe } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface BookData {
@@ -57,7 +57,7 @@ export default function SeriesListPage() {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("newest");
+  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "title-az" | "title-za" | "lastModified" | "language-az" | "language-za" | "mostBooks" | "highestRevenue">("newest");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -140,6 +140,18 @@ export default function SeriesListPage() {
           return a.title.localeCompare(b.title);
         case "title-za":
           return b.title.localeCompare(a.title);
+        case "lastModified":
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        case "language-az":
+          return a.language.localeCompare(b.language);
+        case "language-za":
+          return b.language.localeCompare(a.language);
+        case "mostBooks":
+          return (b.books?.length || 0) - (a.books?.length || 0);
+        case "highestRevenue":
+          const revenueA = calculateSeriesRevenue(a.books || []);
+          const revenueB = calculateSeriesRevenue(b.books || []);
+          return parseFloat(revenueB.totalRevenue) - parseFloat(revenueA.totalRevenue);
         default:
           return 0;
       }
@@ -191,10 +203,25 @@ export default function SeriesListPage() {
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="newest">Newest first</SelectItem>
-                <SelectItem value="oldest">Oldest first</SelectItem>
-                <SelectItem value="title-az">Title A-Z</SelectItem>
-                <SelectItem value="title-za">Title Z-A</SelectItem>
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="oldest">Oldest First</SelectItem>
+                <SelectItem value="title-az">
+                  <div className="flex items-center gap-2">
+                    <SortAsc className="h-4 w-4" />
+                    Title A-Z
+                  </div>
+                </SelectItem>
+                <SelectItem value="title-za">
+                  <div className="flex items-center gap-2">
+                    <SortDesc className="h-4 w-4" />
+                    Title Z-A
+                  </div>
+                </SelectItem>
+                <SelectItem value="lastModified">Last Modified</SelectItem>
+                <SelectItem value="language-az">Language A-Z</SelectItem>
+                <SelectItem value="language-za">Language Z-A</SelectItem>
+                <SelectItem value="mostBooks">Most Books</SelectItem>
+                <SelectItem value="highestRevenue">Highest Total Revenue</SelectItem>
               </SelectContent>
             </Select>
           </div>
