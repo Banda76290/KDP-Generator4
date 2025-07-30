@@ -1015,7 +1015,7 @@ export default function EditBook() {
                         className="mt-1"
                       />
                       <div className="flex-1">
-                        <Label htmlFor="isPartOfSeries" className="text-sm font-medium">
+                        <Label htmlFor="isPartOfSeries" className="peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-medium text-[16px]">
                           This book is part of a series
                         </Label>
                         <p className="text-xs text-gray-500 mt-1">
