@@ -48,6 +48,18 @@ export default function CreateProject() {
     enabled: showBookOptions,
   });
 
+  // Separate available and attached books
+  const sortedBooks = (existingBooks as any[]).sort((a, b) => {
+    // Put available books first, then attached books
+    const aAttached = a.projectId ? 1 : 0;
+    const bAttached = b.projectId ? 1 : 0;
+    if (aAttached !== bAttached) {
+      return aAttached - bAttached;
+    }
+    // Then sort alphabetically within each group
+    return a.title.localeCompare(b.title);
+  });
+
   const createProject = useMutation({
     mutationFn: async (data: ProjectFormData) => {
       console.log('Creating project:', data);
@@ -62,8 +74,14 @@ export default function CreateProject() {
       
       // Handle book attachment/creation
       if (data.attachExistingBook && data.selectedBookId) {
+        // Check if book is already attached to a project
+        const selectedBook = existingBooks.find((book: any) => book.id === data.selectedBookId);
+        if (selectedBook?.projectId) {
+          throw new Error("This book is already attached to another project. Please select a different book.");
+        }
+        
         // Attach existing book to project
-        await apiRequest("PUT", `/api/books/${data.selectedBookId}`, {
+        await apiRequest("PATCH", `/api/books/${data.selectedBookId}`, {
           projectId: project.id,
         });
       } else if (data.createNewBook) {
@@ -204,11 +222,23 @@ export default function CreateProject() {
                                   <SelectValue placeholder="Select a book" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {(existingBooks as any[]).map((book: any) => (
-                                    <SelectItem key={book.id} value={book.id}>
-                                      {book.title} ({book.format})
-                                    </SelectItem>
-                                  ))}
+                                  {sortedBooks.map((book: any) => {
+                                    const isAttached = !!book.projectId;
+                                    const displayText = isAttached 
+                                      ? `${book.title} (Already attached to a project)` 
+                                      : `${book.title} (${book.format})`;
+                                    
+                                    return (
+                                      <SelectItem 
+                                        key={book.id} 
+                                        value={book.id}
+                                        disabled={isAttached}
+                                        className={isAttached ? "opacity-50 cursor-not-allowed" : ""}
+                                      >
+                                        {displayText}
+                                      </SelectItem>
+                                    );
+                                  })}
                                 </SelectContent>
                               </Select>
                             )}
