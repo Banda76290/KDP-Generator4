@@ -15,8 +15,8 @@ export default function Sidebar() {
   const { isAdmin } = useAdmin();
 
   return (
-    <aside className="bg-white dark:bg-background w-64 h-full border-r border-border fixed left-0 top-16 bottom-0 overflow-y-auto hidden md:block">
-      <nav className="p-4 space-y-2">
+    <aside className="bg-white dark:bg-background w-64 border-r border-border fixed left-0 top-16 bottom-0 overflow-y-auto hidden md:block">
+      <nav className="p-4 space-y-2 pb-8">
         {navigation.map((item) => {
           const isActive = location === item.href;
           return (
@@ -110,7 +110,7 @@ export default function Sidebar() {
           </div>
         )}
 
-        <div className="pt-4 border-t border-border mt-4">
+        <div className="pt-4 border-t border-border mt-4 pb-6">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
             Account
           </p>
