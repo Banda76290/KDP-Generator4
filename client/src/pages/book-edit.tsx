@@ -819,7 +819,7 @@ export default function EditBook() {
                                     </SelectItem>
                                   ))
                                 ) : (
-                                  <SelectItem value="" disabled>
+                                  <SelectItem value="no-series" disabled>
                                     No series available - Create one first
                                   </SelectItem>
                                 )}
