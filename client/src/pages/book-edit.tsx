@@ -724,7 +724,7 @@ export default function EditBook() {
                             if (currentSeriesTitle) {
                               setOriginalSeriesData({
                                 seriesTitle: currentSeriesTitle,
-                                seriesNumber: currentSeriesNumber
+                                seriesNumber: currentSeriesNumber || null
                               });
                             }
                             form.setValue("seriesTitle", "");

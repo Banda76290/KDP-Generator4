@@ -225,6 +225,14 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Visual Consistency**: Matched the exact styling and layout from Projects page book cards
 - **Data Parity**: Books page now displays all the same information as Projects page book cards
 
+### Series Checkbox State Management Fix (30 Juillet 2025) ✅ COMPLETED
+- **Issue Resolution**: Fixed critical bug where unchecking/rechecking series checkbox lost original series data
+- **State Preservation**: Added `originalSeriesData` state to store series title and number when book loads
+- **Smart Restoration**: Checkbox now preserves series data when unchecked and restores it when checked again
+- **Database Integration**: Original series data captured from both database loading and session restoration
+- **TypeScript Safety**: Added proper null handling for series number field to prevent type errors
+- **User Experience**: Series information no longer disappears when toggling checkbox state
+
 ### Complete Sort Options Synchronization (29 Juillet 2025)
 - **Books Page Enhanced**: Added missing sort options (Last Modified, Most Profitable This Month, Highest Total Revenue)
 - **Projects Page Enhanced**: Added missing sort options (Oldest First, Status A-Z, Status Z-A)
