@@ -49,7 +49,7 @@ export interface IStorage {
   getProject(projectId: string, userId: string): Promise<ProjectWithRelations | undefined>;
   createProject(project: InsertProject): Promise<Project>;
   updateProject(projectId: string, userId: string, updates: Partial<InsertProject>): Promise<Project>;
-  deleteProject(projectId: string, userId: string): Promise<void>;
+  deleteProject(projectId: string, userId: string, deleteBooks?: boolean): Promise<void>;
   duplicateProject(projectId: string, userId: string): Promise<ProjectWithRelations>;
 
   // Book operations
@@ -291,7 +291,23 @@ export class DatabaseStorage implements IStorage {
     return updatedProject;
   }
 
-  async deleteProject(projectId: string, userId: string): Promise<void> {
+  async deleteProject(projectId: string, userId: string, deleteBooks = false): Promise<void> {
+    if (deleteBooks) {
+      // First delete contributors associated with books in this project
+      await db.delete(contributors).where(
+        sql`book_id IN (SELECT id FROM books WHERE project_id = ${projectId} AND user_id = ${userId})`
+      );
+      
+      // Then delete the books themselves
+      await db.delete(books).where(and(eq(books.projectId, projectId), eq(books.userId, userId)));
+    } else {
+      // Just unlink books from the project
+      await db.update(books)
+        .set({ projectId: null })
+        .where(and(eq(books.projectId, projectId), eq(books.userId, userId)));
+    }
+    
+    // Finally delete the project
     await db.delete(projects).where(and(eq(projects.id, projectId), eq(projects.userId, userId)));
   }
 

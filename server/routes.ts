@@ -219,8 +219,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/projects/:id', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      await storage.deleteProject(req.params.id, userId);
-      res.json({ message: "Project deleted successfully" });
+      const deleteBooks = req.query.deleteBooks === 'true';
+      
+      console.log(`Deleting project ${req.params.id} for user ${userId}, deleteBooks: ${deleteBooks}`);
+      
+      await storage.deleteProject(req.params.id, userId, deleteBooks);
+      
+      const message = deleteBooks 
+        ? "Project and associated books deleted successfully"
+        : "Project deleted successfully, books have been unlinked";
+      
+      res.json({ message });
     } catch (error) {
       console.error("Error deleting project:", error);
       res.status(500).json({ message: "Failed to delete project" });

@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, BarChart3, BookOpen, Globe, DollarSign, TrendingUp, ArrowUpDown, Copy } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { ProjectWithRelations } from "@shared/schema";
 
 export default function Projects() {
@@ -24,6 +25,7 @@ export default function Projects() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("createdAt"); // Default sort by creation date
   const [projectToDelete, setProjectToDelete] = useState<ProjectWithRelations | null>(null);
+  const [deleteAssociatedBooks, setDeleteAssociatedBooks] = useState(false);
 
   const { data: projects, isLoading: projectsLoading, error } = useQuery({
     queryKey: ["/api/projects"],
@@ -63,16 +65,19 @@ export default function Projects() {
 
   // Delete mutation
   const deleteProject = useMutation({
-    mutationFn: async (projectId: string) => {
-      console.log("Deleting project:", projectId);
-      return await apiRequest("DELETE", `/api/projects/${projectId}`, {});
+    mutationFn: async ({ projectId, deleteBooks }: { projectId: string; deleteBooks: boolean }) => {
+      console.log("Deleting project:", projectId, "with deleteBooks:", deleteBooks);
+      return await apiRequest("DELETE", `/api/projects/${projectId}?deleteBooks=${deleteBooks}`, {});
     },
-    onSuccess: () => {
+    onSuccess: (_, { deleteBooks }) => {
       toast({
         title: "Success",
-        description: "Project deleted successfully",
+        description: deleteBooks 
+          ? "Project and associated books deleted successfully" 
+          : "Project deleted successfully, books have been unlinked",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
     },
     onError: (error) => {
       console.error("Delete failed:", error);
@@ -235,6 +240,7 @@ export default function Projects() {
 
   const handleDeleteProject = (project: ProjectWithRelations) => {
     setProjectToDelete(project);
+    setDeleteAssociatedBooks(false); // Reset checkbox state
   };
 
   const handleDuplicateBook = (bookId: string) => {
@@ -516,26 +522,64 @@ export default function Projects() {
           )}
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!projectToDelete} onOpenChange={() => setProjectToDelete(null)}>
+      <AlertDialog open={!!projectToDelete} onOpenChange={() => {
+        setProjectToDelete(null);
+        setDeleteAssociatedBooks(false);
+      }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Project</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete this project? This action cannot be undone.
+              {projectToDelete?.books && projectToDelete.books.length > 0 && (
+                <span className="block mt-2 text-sm">
+                  This project has {projectToDelete.books.length} associated book(s).
+                </span>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
+          
+          {/* Checkbox for deleting associated books */}
+          {projectToDelete?.books && projectToDelete.books.length > 0 && (
+            <div className="px-6 pb-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="delete-books"
+                  checked={deleteAssociatedBooks}
+                  onCheckedChange={(checked) => setDeleteAssociatedBooks(checked as boolean)}
+                />
+                <label
+                  htmlFor="delete-books"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Also delete all books associated with this project?
+                </label>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 ml-6">
+                {deleteAssociatedBooks 
+                  ? "Books will be permanently deleted."
+                  : "Books will be unlinked from the project but kept in your library."
+                }
+              </p>
+            </div>
+          )}
+          
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 if (projectToDelete) {
-                  deleteProject.mutate(projectToDelete.id);
+                  deleteProject.mutate({ 
+                    projectId: projectToDelete.id, 
+                    deleteBooks: deleteAssociatedBooks 
+                  });
                   setProjectToDelete(null);
+                  setDeleteAssociatedBooks(false);
                 }
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              Delete Project
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
