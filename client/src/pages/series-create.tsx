@@ -427,11 +427,11 @@ export default function SeriesCreatePage() {
                         🔗
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-md">
+                    <DialogContent className="sm:max-w-md" aria-describedby="insert-link-description">
                       <DialogHeader>
                         <DialogTitle>Insert Link</DialogTitle>
                       </DialogHeader>
-                      <div className="space-y-6 pt-2">
+                      <div className="space-y-6 pt-2" id="insert-link-description">
                         <div className="space-y-2">
                           <Label htmlFor="link-url" className="text-sm font-medium">
                             URL
@@ -475,16 +475,7 @@ export default function SeriesCreatePage() {
                       </div>
                     </DialogContent>
                   </Dialog>
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-8 px-2 hover:bg-gray-200"
-                    onClick={insertSpecialCharacter}
-                    title="Special Characters"
-                  >
-                    Ω
-                  </Button>
+                  
                 </div>
 
                 <div className="space-y-2">

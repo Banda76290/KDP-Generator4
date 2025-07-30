@@ -509,12 +509,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/series', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const seriesData = insertSeriesSchema.parse(req.body);
-      
-      const newSeries = await storage.createSeries({
-        ...seriesData,
+      const seriesData = insertSeriesSchema.parse({
+        ...req.body,
         userId
       });
+      
+      const newSeries = await storage.createSeries(seriesData);
       
       res.status(201).json(newSeries);
     } catch (error) {
