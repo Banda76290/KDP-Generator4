@@ -225,9 +225,6 @@ export default function SeriesCreatePage() {
                 <p className="text-sm text-gray-600">
                   Enter a description for your series. If left blank, Amazon will display the description from the first book in the series.
                 </p>
-                <p className="text-sm text-gray-600">
-                  <a href="#" className="text-blue-600 hover:underline">How to format your description</a>
-                </p>
                 
                 {/* Formatting Toolbar */}
                 <div className="flex items-center space-x-2 p-2 bg-gray-50 border rounded">
