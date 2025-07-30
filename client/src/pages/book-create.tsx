@@ -124,7 +124,7 @@ export default function CreateBook() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/books"] });
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
-      toast({
+      toast.success({
         title: "Book Created",
         description: "Your book has been created successfully.",
       });
@@ -132,10 +132,9 @@ export default function CreateBook() {
     },
     onError: (error) => {
       console.error('Book creation error:', error);
-      toast({
+      toast.error({
         title: "Error",
         description: error.message || "Failed to create book",
-        variant: "destructive",
       });
     },
   });

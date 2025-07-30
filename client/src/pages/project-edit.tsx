@@ -75,10 +75,9 @@ export default function EditProject() {
     },
     onError: (error) => {
       console.error('Project update error:', error);
-      toast({
+      toast.error({
         title: "Error",
         description: error.message || "Failed to update project",
-        variant: "destructive",
       });
     },
   });

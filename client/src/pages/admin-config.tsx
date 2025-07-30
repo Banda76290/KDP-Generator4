@@ -55,27 +55,25 @@ export default function AdminConfig() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/config"] });
-      toast({
+      toast.success({
         title: "Succès",
         description: "Configuration mise à jour avec succès.",
       });
       setNewConfig({ key: "", value: "", description: "" });
     },
     onError: (error: Error) => {
-      toast({
+      toast.error({
         title: "Erreur",
         description: error.message || "Impossible de mettre à jour la configuration.",
-        variant: "destructive",
       });
     },
   });
 
   const handleAddConfig = () => {
     if (!newConfig.key || !newConfig.value) {
-      toast({
+      toast.error({
         title: "Erreur",
         description: "La clé et la valeur sont obligatoires.",
-        variant: "destructive",
       });
       return;
     }

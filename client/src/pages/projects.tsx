@@ -94,7 +94,7 @@ export default function Projects() {
       return await apiRequest("POST", `/api/books/${bookId}/duplicate`, {});
     },
     onSuccess: () => {
-      toast({
+      toast.success({
         title: "Success",
         description: "Book duplicated successfully",
       });
@@ -102,10 +102,9 @@ export default function Projects() {
     },
     onError: (error) => {
       console.error("Book duplication failed:", error);
-      toast({
+      toast.error({
         title: "Error",
         description: "Failed to duplicate book",
-        variant: "destructive",
       });
     },
   });
@@ -113,10 +112,9 @@ export default function Projects() {
   // Redirect to home if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      toast({
+      toast.error({
         title: "Unauthorized",
         description: "You are logged out. Logging in again...",
-        variant: "destructive",
       });
       setTimeout(() => {
         window.location.href = "/api/login";
@@ -127,10 +125,9 @@ export default function Projects() {
 
   useEffect(() => {
     if (error && isUnauthorizedError(error as Error)) {
-      toast({
+      toast.error({
         title: "Unauthorized",
         description: "You are logged out. Logging in again...",
-        variant: "destructive",
       });
       setTimeout(() => {
         window.location.href = "/api/login";
