@@ -42,7 +42,10 @@ function useSeriesData() {
         throw new Error('Failed to fetch series');
       }
       return response.json();
-    }
+    },
+    staleTime: 0, // Always fetch fresh data to see updated series with books
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 }
 

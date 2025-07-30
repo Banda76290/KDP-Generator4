@@ -171,7 +171,7 @@ export default function EditBook() {
   });
 
   // Fetch series for selection
-  const { data: userSeries = [] } = useQuery({
+  const { data: userSeries = [] } = useQuery<any[]>({
     queryKey: ["/api/series"],
   });
 
