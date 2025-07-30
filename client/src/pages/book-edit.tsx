@@ -689,7 +689,35 @@ export default function EditBook() {
                             type="button" 
                             variant="outline" 
                             size="sm"
-                            onClick={() => window.location.href = '/manage-series'}
+                            onClick={async () => {
+                              // Sauvegarder les données du formulaire dans sessionStorage
+                              saveFormDataToSession();
+                              sessionStorage.setItem('returnToBookEdit', bookId || 'new');
+                              
+                              // Trouver l'ID de la série actuelle basé sur le titre
+                              const currentSeriesTitle = form.watch("seriesTitle");
+                              if (currentSeriesTitle) {
+                                try {
+                                  // Récupérer toutes les séries pour trouver l'ID correspondant
+                                  const seriesResponse = await apiRequest("GET", "/api/series");
+                                  const currentSeries = seriesResponse.find((s: any) => s.title === currentSeriesTitle);
+                                  
+                                  if (currentSeries) {
+                                    // Rediriger vers la page d'édition de la série spécifique
+                                    window.location.href = `/series-edit/${currentSeries.id}`;
+                                  } else {
+                                    // Fallback vers la liste des séries
+                                    window.location.href = '/manage-series';
+                                  }
+                                } catch (error) {
+                                  console.error('Error finding series:', error);
+                                  // Fallback vers la liste des séries
+                                  window.location.href = '/manage-series';
+                                }
+                              } else {
+                                window.location.href = '/manage-series';
+                              }
+                            }}
                           >
                             Edit series details
                           </Button>
