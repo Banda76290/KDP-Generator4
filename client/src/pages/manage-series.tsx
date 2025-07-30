@@ -173,7 +173,6 @@ function ManageSeriesContent() {
                     <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
                       {editData.status}
                     </Badge>
-            <button style={{ color: '#38b6ff' }} className="text-sm underline">View on Amazon</button>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-gray-600">
