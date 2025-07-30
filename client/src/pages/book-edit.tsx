@@ -23,11 +23,11 @@ import Layout from "@/components/Layout";
 interface Contributor {
   id: string;
   role: string;
-  prefix: string;
+  prefix?: string;
   firstName: string;
-  middleName: string;
+  middleName?: string;
   lastName: string;
-  suffix: string;
+  suffix?: string;
 }
 
 const bookFormSchema = insertBookSchema.extend({
@@ -86,7 +86,7 @@ const readingAges = [
 ];
 
 const contributorRoles = [
-  "Author", "Co-author", "Editor", "Illustrator", "Translator", "Photographer", "Designer"
+  "Author", "Editor", "Foreword", "Illustrator", "Introduction", "Narrator", "Photographer", "Preface", "Translator", "Contributions by"
 ];
 
 export default function EditBook() {
@@ -927,54 +927,59 @@ export default function EditBook() {
                     />
                   </div>
 
-                  {/* Author Information */}
+                  {/* Author Section */}
                   <div className="space-y-4">
-                    <Label className="text-sm font-medium">Authors</Label>
-                    <p className="text-sm text-gray-600">
-                      List the primary author's author display name as you would like to see it in the catalog. Use "and" between multiple names, not "&".
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="authorFirstName" className="text-sm">First Name *</Label>
+                    <div>
+                      <Label className="text-base font-medium">Author</Label>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Enter the primary author or contributor. Pen names are allowed. Note: before continuing, check your spelling since this field cannot be updated after publication. <span className="text-blue-600">Author guidelines</span>
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <Label className="text-sm font-medium">Primary Author or Contributor</Label>
+                      <div className="grid grid-cols-5 gap-3 mt-2">
                         <Input
-                          id="authorFirstName"
-                          placeholder="Author's first name"
+                          placeholder="Prefix"
+                          {...form.register("authorPrefix")}
+                        />
+                        <Input
+                          placeholder="First name"
                           {...form.register("authorFirstName", { required: "First name is required" })}
                         />
-                        {form.formState.errors.authorFirstName && (
-                          <p className="text-sm text-red-600">{form.formState.errors.authorFirstName.message}</p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="authorLastName" className="text-sm">Last Name *</Label>
                         <Input
-                          id="authorLastName"
-                          placeholder="Author's last name"
+                          placeholder="Middle name"
+                          {...form.register("authorMiddleName")}
+                        />
+                        <Input
+                          placeholder="Last name"
                           {...form.register("authorLastName", { required: "Last name is required" })}
                         />
-                        {form.formState.errors.authorLastName && (
-                          <p className="text-sm text-red-600">{form.formState.errors.authorLastName.message}</p>
-                        )}
+                        <Input
+                          placeholder="Suffix"
+                          {...form.register("authorSuffix")}
+                        />
                       </div>
+                      {(form.formState.errors.authorFirstName || form.formState.errors.authorLastName) && (
+                        <p className="text-sm text-red-600 mt-1">First name and last name are required</p>
+                      )}
                     </div>
                   </div>
 
-                  {/* Contributors */}
+                  {/* Contributors Section */}
                   <div className="space-y-4">
-                    <Label className="text-sm font-medium">Contributors</Label>
-                    <p className="text-sm text-gray-600">
-                      Who else contributed to this book? Include editors, translators, narrators and anyone whose names you'd like to appear on the detail page.
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">Add contributors</span>
-                      <Button type="button" variant="outline" size="sm" onClick={addContributor}>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Contributor
-                      </Button>
+                    <div>
+                      <Label className="text-base font-medium">Contributors</Label>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Add up to 9 contributors. They'll display on Amazon using the order you enter below.
+                      </p>
                     </div>
-                    {contributors.map((contributor) => (
-                      <Card key={contributor.id} className="p-4">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    
+                    <div>
+                      <Label className="text-sm font-medium">Contributors <span className="text-sm font-normal text-gray-500">(Optional)</span></Label>
+                      
+                      {contributors.map((contributor, index) => (
+                        <div key={contributor.id} className="grid grid-cols-7 gap-3 mt-2 items-center">
                           <Select 
                             value={contributor.role} 
                             onValueChange={(value) => updateContributor(contributor.id, 'role', value)}
@@ -983,32 +988,67 @@ export default function EditBook() {
                               <SelectValue placeholder="Role" />
                             </SelectTrigger>
                             <SelectContent>
-                              {contributorRoles.map((role) => (
-                                <SelectItem key={role} value={role}>{role}</SelectItem>
-                              ))}
+                              <SelectItem value="Author">Author</SelectItem>
+                              <SelectItem value="Editor">Editor</SelectItem>
+                              <SelectItem value="Foreword">Foreword</SelectItem>
+                              <SelectItem value="Illustrator">Illustrator</SelectItem>
+                              <SelectItem value="Introduction">Introduction</SelectItem>
+                              <SelectItem value="Narrator">Narrator</SelectItem>
+                              <SelectItem value="Photographer">Photographer</SelectItem>
+                              <SelectItem value="Preface">Preface</SelectItem>
+                              <SelectItem value="Translator">Translator</SelectItem>
+                              <SelectItem value="Contributions by">Contributions by</SelectItem>
                             </SelectContent>
                           </Select>
                           <Input
-                            placeholder="First Name"
+                            placeholder="Prefix"
+                            value={contributor.prefix || ""}
+                            onChange={(e) => updateContributor(contributor.id, 'prefix', e.target.value)}
+                          />
+                          <Input
+                            placeholder="First name"
                             value={contributor.firstName}
                             onChange={(e) => updateContributor(contributor.id, 'firstName', e.target.value)}
                           />
                           <Input
-                            placeholder="Last Name"
+                            placeholder="Middle name"
+                            value={contributor.middleName || ""}
+                            onChange={(e) => updateContributor(contributor.id, 'middleName', e.target.value)}
+                          />
+                          <Input
+                            placeholder="Last name"
                             value={contributor.lastName}
                             onChange={(e) => updateContributor(contributor.id, 'lastName', e.target.value)}
+                          />
+                          <Input
+                            placeholder="Suffix"
+                            value={contributor.suffix || ""}
+                            onChange={(e) => updateContributor(contributor.id, 'suffix', e.target.value)}
                           />
                           <Button 
                             type="button" 
                             variant="outline" 
                             size="sm" 
                             onClick={() => removeContributor(contributor.id)}
+                            className="text-gray-600 hover:text-red-600"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            Remove
                           </Button>
                         </div>
-                      </Card>
-                    ))}
+                      ))}
+                      
+                      {contributors.length < 9 && (
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={addContributor}
+                          className="mt-3"
+                        >
+                          Add Another
+                        </Button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Description */}

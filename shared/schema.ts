@@ -199,8 +199,12 @@ export const books = pgTable("books", {
 export const contributors = pgTable("contributors", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   bookId: varchar("book_id").notNull().references(() => books.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  role: varchar("role").notNull(), // author, co-author, editor, illustrator
+  role: varchar("role").notNull(), // Author, Editor, Foreword, Illustrator, Introduction, Narrator, Photographer, Preface, Translator, Contributions by
+  prefix: varchar("prefix"),
+  firstName: varchar("first_name").notNull(),
+  middleName: varchar("middle_name"),
+  lastName: varchar("last_name").notNull(),
+  suffix: varchar("suffix"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
