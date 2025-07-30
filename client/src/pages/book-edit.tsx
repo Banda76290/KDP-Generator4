@@ -166,6 +166,7 @@ export default function EditBook() {
     };
     
     const storageKey = `bookFormData_${bookId || 'new'}`;
+    console.log('Saving form data to sessionStorage:', { storageKey, data: currentFormData });
     sessionStorage.setItem(storageKey, JSON.stringify(currentFormData));
   };
 
@@ -176,6 +177,7 @@ export default function EditBook() {
     const autoSave = () => {
       // Only auto-save if we are about to navigate to series creation
       const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
+      console.log('Auto-save check:', { returnToBookEdit, currentBookId: bookId || 'new', shouldSave: returnToBookEdit === (bookId || 'new') });
       if (returnToBookEdit === (bookId || 'new')) {
         saveFormDataToSession();
         console.log('Auto-saved form data to sessionStorage');
