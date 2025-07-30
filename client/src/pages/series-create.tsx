@@ -268,7 +268,7 @@ export default function SeriesCreatePage() {
                   <Label htmlFor="description" className="text-sm font-medium">(Optional)</Label>
                   <Textarea
                     id="description"
-                    placeholder="Enter the exciting world of online commerce with the 'From Zero to Hero' book series. Whether you're a novice looking to launch your first online business or an experienced entrepreneur seeking to hone your skills, this comprehensive training series will guide you step by step to succeed in the field of e-commerce..."
+                    placeholder=""
                     className="min-h-[200px] resize-none"
                     value={form.watch('description')}
                     onChange={(e) => handleDescriptionChange(e.target.value)}
