@@ -277,6 +277,18 @@ export const aiUsageLimits = pgTable("ai_usage_limits", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Series table for book series management
+export const series = pgTable("series", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  language: varchar("language").notNull().default("english"),
+  readingOrder: varchar("reading_order").notNull().default("unordered"), // "ordered" or "unordered"
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 
 
 // System configuration table for admin settings
@@ -356,6 +368,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   aiGenerations: many(aiGenerations),
   blogPosts: many(blogPosts),
   blogComments: many(blogComments),
+  series: many(series),
 }));
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
@@ -580,6 +593,21 @@ export type BlogPost = typeof blogPosts.$inferSelect;
 export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
 export type BlogComment = typeof blogComments.$inferSelect;
 export type InsertBlogComment = z.infer<typeof insertBlogCommentSchema>;
+
+export const seriesRelations = relations(series, ({ one }) => ({
+  user: one(users, {
+    fields: [series.userId],
+    references: [users.id],
+  }),
+}));
+
+export const insertSeriesSchema = createInsertSchema(series).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type Series = typeof series.$inferSelect;
+export type InsertSeries = z.infer<typeof insertSeriesSchema>;
 
 // Blog Zod schemas
 export const insertBlogCategorySchema = createInsertSchema(blogCategories).omit({

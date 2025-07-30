@@ -26,6 +26,7 @@ export default function SeriesCreatePage() {
   const maxCharacters = 4000;
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
+  const [editorContent, setEditorContent] = useState('');
 
   const form = useForm<SeriesFormData>({
     defaultValues: {
@@ -36,7 +37,7 @@ export default function SeriesCreatePage() {
     }
   });
 
-  const onSubmit = (data: SeriesFormData) => {
+  const onSubmit = async (data: SeriesFormData) => {
     if (characterCount > maxCharacters) {
       toast({
         title: "Error",
@@ -46,31 +47,42 @@ export default function SeriesCreatePage() {
       return;
     }
     
-    console.log('Series data:', data);
-    toast({
-      title: "Series saved",
-      description: "Your series has been saved successfully.",
-    });
-    setLocation('/manage-series');
+    try {
+      const formData = {
+        title: data.title,
+        language: data.language,
+        readingOrder: data.readingOrder,
+        description: editorContent
+      };
+
+      const response = await fetch('/api/series', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save series');
+      }
+
+      toast({
+        title: "Series saved",
+        description: "Your series has been successfully created.",
+      });
+      setLocation('/manage-series');
+    } catch (error) {
+      console.error('Error saving series:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save series. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const saveDraft = () => {
-    if (characterCount > maxCharacters) {
-      toast({
-        title: "Error",
-        description: `Description exceeds ${maxCharacters} character limit.`,
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    const data = form.getValues();
-    console.log('Saving draft:', data);
-    toast({
-      title: "Draft saved",
-      description: "Your series has been saved as draft.",
-    });
-  };
+
 
   useEffect(() => {
     // Add CSS for the editor placeholder
@@ -109,6 +121,7 @@ export default function SeriesCreatePage() {
     const htmlContent = editor.innerHTML;
     const textContent = editor.innerText || editor.textContent || '';
     setCharacterCount(textContent.length);
+    setEditorContent(htmlContent);
     form.setValue('description', htmlContent);
   };
 
@@ -131,7 +144,30 @@ export default function SeriesCreatePage() {
 
   const handleLinkInsert = () => {
     if (linkUrl) {
-      applyFormatting('createLink', linkUrl);
+      const editor = document.getElementById('description-editor') as HTMLDivElement;
+      if (editor) {
+        editor.focus();
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          const selectedText = range.toString();
+          
+          // Create link element
+          const link = document.createElement('a');
+          link.href = linkUrl;
+          link.textContent = selectedText || linkUrl;
+          link.style.color = '#3b82f6';
+          link.style.textDecoration = 'underline';
+          
+          // Replace selection with link
+          range.deleteContents();
+          range.insertNode(link);
+          
+          // Clear selection and update
+          selection.removeAllRanges();
+          updateDescriptionFromHTML();
+        }
+      }
       setLinkUrl('');
       setShowLinkDialog(false);
     }
@@ -395,11 +431,11 @@ export default function SeriesCreatePage() {
                       <DialogHeader>
                         <DialogTitle>Insert Link</DialogTitle>
                       </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <label htmlFor="link-url" className="text-sm font-medium">
+                      <div className="space-y-6 pt-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="link-url" className="text-sm font-medium">
                             URL
-                          </label>
+                          </Label>
                           <Input
                             id="link-url"
                             type="url"
@@ -412,9 +448,10 @@ export default function SeriesCreatePage() {
                                 handleLinkInsert();
                               }
                             }}
+                            className="w-full"
                           />
                         </div>
-                        <div className="flex justify-end space-x-2">
+                        <div className="flex justify-end space-x-3 pt-2">
                           <Button
                             type="button"
                             variant="outline"
@@ -482,21 +519,13 @@ export default function SeriesCreatePage() {
           </Card>
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-end space-x-4 pt-6">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={saveDraft}
-              className="px-8"
-            >
-              Save as draft
-            </Button>
+          <div className="flex items-center justify-end pt-6">
             <Button 
               type="submit"
-              style={{ backgroundColor: '#ff9900' }}
+              style={{ backgroundColor: 'var(--kdp-primary-blue)' }}
               className="hover:opacity-90 text-white px-8"
             >
-              Submit updates
+              Save
             </Button>
           </div>
         </form>

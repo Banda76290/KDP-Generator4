@@ -10,6 +10,7 @@ import {
   blogCategories,
   blogPosts,
   blogComments,
+  series,
   type User,
   type UpsertUser,
   type Project,
@@ -34,6 +35,8 @@ import {
   type BlogPostWithRelations,
   type BlogComment,
   type InsertBlogComment,
+  type Series,
+  type InsertSeries,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, sum, count, like, or } from "drizzle-orm";
@@ -123,6 +126,12 @@ export interface IStorage {
   // Audit log
   addAuditLog(log: InsertAuditLog): Promise<AuditLog>;
   getAuditLogs(limit?: number, offset?: number): Promise<{logs: AuditLog[], total: number}>;
+
+  // Series operations
+  getUserSeries(userId: string): Promise<Series[]>;
+  createSeries(series: InsertSeries): Promise<Series>;
+  updateSeries(seriesId: string, userId: string, updates: Partial<InsertSeries>): Promise<Series>;
+  deleteSeries(seriesId: string, userId: string): Promise<void>;
 
   // Blog operations
   getBlogCategories(): Promise<BlogCategory[]>;
@@ -1002,6 +1011,39 @@ export class DatabaseStorage implements IStorage {
       .where(eq(blogPosts.id, id))
       .returning();
     return updatedPost;
+  }
+
+  // Series operations
+  async getUserSeries(userId: string): Promise<Series[]> {
+    const userSeries = await db
+      .select()
+      .from(series)
+      .where(eq(series.userId, userId))
+      .orderBy(desc(series.createdAt));
+    return userSeries;
+  }
+
+  async createSeries(seriesData: InsertSeries): Promise<Series> {
+    const [newSeries] = await db
+      .insert(series)
+      .values(seriesData)
+      .returning();
+    return newSeries;
+  }
+
+  async updateSeries(seriesId: string, userId: string, updates: Partial<InsertSeries>): Promise<Series> {
+    const [updatedSeries] = await db
+      .update(series)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(eq(series.id, seriesId), eq(series.userId, userId)))
+      .returning();
+    return updatedSeries;
+  }
+
+  async deleteSeries(seriesId: string, userId: string): Promise<void> {
+    await db
+      .delete(series)
+      .where(and(eq(series.id, seriesId), eq(series.userId, userId)));
   }
 }
 

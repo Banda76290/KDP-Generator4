@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema } from "@shared/schema";
+import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema } from "@shared/schema";
 import { aiService } from "./services/aiService";
 import { parseKDPReport } from "./services/kdpParser";
 import { z } from "zod";
@@ -491,6 +491,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating subscription:", error);
       res.status(500).json({ message: "Failed to create subscription" });
+    }
+  });
+
+  // Series routes
+  app.get('/api/series', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const series = await storage.getUserSeries(userId);
+      res.json(series);
+    } catch (error) {
+      console.error("Error fetching series:", error);
+      res.status(500).json({ message: "Failed to fetch series" });
+    }
+  });
+
+  app.post('/api/series', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seriesData = insertSeriesSchema.parse(req.body);
+      
+      const newSeries = await storage.createSeries({
+        ...seriesData,
+        userId
+      });
+      
+      res.status(201).json(newSeries);
+    } catch (error) {
+      console.error("Error creating series:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid series data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create series" });
+      }
     }
   });
 
