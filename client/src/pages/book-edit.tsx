@@ -688,8 +688,7 @@ export default function EditBook() {
                   <div className="space-y-4">
                     <Label className="text-base font-medium">Series (optional)</Label>
                     <p className="text-sm text-gray-600">
-                      This title is part of a series. You can edit details or remove the title from the series. (Optional) 
-                      <button className="text-blue-600 underline ml-1">Learn more</button>
+                      This title is part of a series. You can edit details or remove the title from the series. (Optional)
                     </p>
                     
                     {/* Checkbox to enable series */}
