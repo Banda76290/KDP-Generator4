@@ -21,7 +21,7 @@ interface SeriesFormData {
 }
 
 export default function SeriesSetupPage() {
-  const { seriesId } = useParams<{ seriesId?: string }>();
+  const { seriesId: urlSeriesId } = useParams<{ seriesId?: string }>();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -30,7 +30,10 @@ export default function SeriesSetupPage() {
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
   const [editorContent, setEditorContent] = useState('');
-  const [isEditing] = useState(!!seriesId);
+  
+  // Check for editing series ID from both URL params and sessionStorage
+  const editingSeriesId = urlSeriesId || sessionStorage.getItem('editingSeriesId');
+  const [isEditing] = useState(!!editingSeriesId);
 
   const form = useForm<SeriesFormData>({
     defaultValues: {
@@ -43,10 +46,10 @@ export default function SeriesSetupPage() {
 
   // Fetch existing series data if editing
   const { data: existingSeries, isLoading: isLoadingSeries } = useQuery({
-    queryKey: ['/api/series', seriesId],
+    queryKey: ['/api/series', editingSeriesId],
     queryFn: async () => {
-      if (!seriesId) return null;
-      const response = await fetch(`/api/series/${seriesId}`, {
+      if (!editingSeriesId) return null;
+      const response = await fetch(`/api/series/${editingSeriesId}`, {
         credentials: 'include'
       });
       if (!response.ok) {
@@ -54,7 +57,7 @@ export default function SeriesSetupPage() {
       }
       return response.json();
     },
-    enabled: !!seriesId
+    enabled: !!editingSeriesId
   });
 
   // Populate form with existing data when editing
@@ -100,7 +103,7 @@ export default function SeriesSetupPage() {
         description: editorContent
       };
 
-      const url = isEditing ? `/api/series/${seriesId}` : '/api/series';
+      const url = isEditing ? `/api/series/${editingSeriesId}` : '/api/series';
       const method = isEditing ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -130,17 +133,25 @@ export default function SeriesSetupPage() {
 
       // Check if we need to return to book edit page
       const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
-      if (returnToBookEdit && !isEditing) {
-        // Store newly created series data for book association
-        sessionStorage.setItem('newlyCreatedSeries', JSON.stringify(responseData));
+      if (returnToBookEdit) {
+        if (!isEditing) {
+          // Store newly created series data for book association
+          sessionStorage.setItem('newlyCreatedSeries', JSON.stringify(responseData));
+        }
+        
+        // Clean up editing series ID if we came from book-edit
+        sessionStorage.removeItem('editingSeriesId');
+        sessionStorage.removeItem('returnToBookEdit');
         
         // Return to book edit page
         if (returnToBookEdit === 'new') {
-          setLocation('/books/create');
+          window.location.href = '/book-create';
         } else {
-          setLocation(`/books/edit/${returnToBookEdit}`);
+          window.location.href = `/books/edit/${returnToBookEdit}`;
         }
       } else {
+        // Clean up editing series ID
+        sessionStorage.removeItem('editingSeriesId');
         setLocation('/manage-series');
       }
     } catch (error) {
