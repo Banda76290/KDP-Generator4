@@ -73,7 +73,7 @@ export default function SeriesCreatePage() {
             <CardContent>
               <div className="space-y-2">
                 <p className="text-sm text-gray-600">
-                  Choose the primary language for this series. <a href="#" className="text-blue-600 hover:underline">View supported languages</a>
+                  Choose the primary language for this series.
                 </p>
                 <Select 
                   value={form.watch('language')} 
@@ -159,7 +159,7 @@ export default function SeriesCreatePage() {
             <CardContent>
               <div className="space-y-4">
                 <p className="text-sm text-gray-600">
-                  Choose how you want to display titles in your series. <a href="#" className="text-blue-600 hover:underline">More details</a>
+                  Choose how you want to display titles in your series.
                 </p>
                 <RadioGroup 
                   value={form.watch('readingOrder')} 
