@@ -617,7 +617,18 @@ export default function EditBook() {
                               type="button" 
                               variant="outline" 
                               size="sm"
-                              onClick={() => window.location.href = '/manage-series'}
+                              onClick={() => {
+                                // Si le livre a un seriesTitle, on redirige vers l'édition de cette série
+                                // Pour l'instant, on utilise un ID factice basé sur le titre de la série
+                                const seriesTitle = form.watch("seriesTitle");
+                                if (seriesTitle) {
+                                  // Conversion simple du titre en ID pour la démo
+                                  const seriesId = seriesTitle.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                                  window.location.href = `/series-edit/${seriesId}`;
+                                } else {
+                                  window.location.href = '/manage-series';
+                                }
+                              }}
                             >
                               Edit series
                             </Button>
