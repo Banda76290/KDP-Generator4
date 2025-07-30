@@ -23,7 +23,7 @@ export default function Layout({ children }: LayoutProps) {
           open={mobileMenuOpen} 
           onOpenChange={setMobileMenuOpen}
         />
-        <main className="flex-1 min-w-0 p-4 md:p-6 pt-16 md:ml-64">
+        <main className="flex-1 min-w-0 p-4 md:p-6 pt-20 md:ml-64">
           {children}
         </main>
       </div>
