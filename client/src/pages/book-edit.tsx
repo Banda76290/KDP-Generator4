@@ -1206,7 +1206,7 @@ export default function EditBook() {
                     <div>
                       <Label className="font-medium text-[16px]">Author</Label>
                       <p className="text-sm text-gray-600 mt-1">
-                        Enter the primary author or contributor. Pen names are allowed. Note: before continuing, check your spelling since this field cannot be updated after publication. <span className="text-blue-600">Author guidelines</span>
+                        Enter the primary author or contributor. Pen names are allowed. Note: before continuing, check your spelling since this field cannot be updated after publication.
                       </p>
                     </div>
                     
