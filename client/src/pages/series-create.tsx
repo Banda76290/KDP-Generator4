@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation } from "wouter";
 import Layout from "@/components/Layout";
@@ -69,69 +69,67 @@ export default function SeriesCreatePage() {
     });
   };
 
-  const handleDescriptionChange = (value: string) => {
-    setCharacterCount(value.length);
-    form.setValue('description', value);
+  useEffect(() => {
+    // Add CSS for the editor placeholder
+    const style = document.createElement('style');
+    style.textContent = `
+      #description-editor:empty:before {
+        content: attr(data-placeholder);
+        color: #9ca3af;
+        pointer-events: none;
+      }
+      #description-editor h1 { font-size: 1.875rem; font-weight: bold; margin: 0.5rem 0; }
+      #description-editor h2 { font-size: 1.5rem; font-weight: bold; margin: 0.5rem 0; }
+      #description-editor h3 { font-size: 1.25rem; font-weight: bold; margin: 0.5rem 0; }
+      #description-editor ul { list-style-type: disc; margin-left: 1.5rem; }
+      #description-editor ol { list-style-type: decimal; margin-left: 1.5rem; }
+      #description-editor li { margin: 0.25rem 0; }
+      #description-editor a { color: #3b82f6; text-decoration: underline; }
+      #description-editor p { margin: 0.5rem 0; }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
+  const applyFormatting = (command: string, value?: string) => {
+    document.execCommand(command, false, value);
+    updateDescriptionFromHTML();
   };
 
-  const insertFormatting = (startTag: string, endTag: string) => {
-    const textarea = document.getElementById('description') as HTMLTextAreaElement;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const currentValue = form.watch('description');
-    const selectedText = currentValue.substring(start, end);
+  const updateDescriptionFromHTML = () => {
+    const editor = document.getElementById('description-editor') as HTMLDivElement;
+    if (!editor) return;
     
-    const newValue = currentValue.substring(0, start) + startTag + selectedText + endTag + currentValue.substring(end);
-    handleDescriptionChange(newValue);
-    
-    // Set cursor position after formatting
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + startTag.length, end + startTag.length);
-    }, 0);
+    const htmlContent = editor.innerHTML;
+    const textContent = editor.innerText || editor.textContent || '';
+    setCharacterCount(textContent.length);
+    form.setValue('description', htmlContent);
   };
 
   const handleFormatChange = (format: string) => {
-    const textarea = document.getElementById('description') as HTMLTextAreaElement;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const currentValue = form.watch('description');
-    const selectedText = currentValue.substring(start, end);
-    
-    let formattedText = selectedText;
     switch (format) {
       case 'heading1':
-        formattedText = `# ${selectedText}`;
+        applyFormatting('formatBlock', 'h1');
         break;
       case 'heading2':
-        formattedText = `## ${selectedText}`;
+        applyFormatting('formatBlock', 'h2');
         break;
       case 'heading3':
-        formattedText = `### ${selectedText}`;
+        applyFormatting('formatBlock', 'h3');
         break;
-      default:
-        formattedText = selectedText;
+      case 'normal':
+        applyFormatting('formatBlock', 'div');
+        break;
     }
-    
-    const newValue = currentValue.substring(0, start) + formattedText + currentValue.substring(end);
-    handleDescriptionChange(newValue);
   };
 
   const insertSpecialCharacter = () => {
     const specialChars = ['©', '®', '™', '§', '¶', '†', '‡', '•', '…', '–', '—'];
     const char = specialChars[Math.floor(Math.random() * specialChars.length)];
-    
-    const textarea = document.getElementById('description') as HTMLTextAreaElement;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const currentValue = form.watch('description');
-    const newValue = currentValue.substring(0, start) + char + currentValue.substring(start);
-    handleDescriptionChange(newValue);
+    applyFormatting('insertText', char);
   };
 
   return (
@@ -311,7 +309,7 @@ export default function SeriesCreatePage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={() => insertFormatting('**', '**')}
+                    onClick={() => applyFormatting('bold')}
                     title="Bold"
                   >
                     <strong>B</strong>
@@ -321,7 +319,7 @@ export default function SeriesCreatePage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={() => insertFormatting('*', '*')}
+                    onClick={() => applyFormatting('italic')}
                     title="Italic"
                   >
                     <em>I</em>
@@ -331,7 +329,7 @@ export default function SeriesCreatePage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={() => insertFormatting('<u>', '</u>')}
+                    onClick={() => applyFormatting('underline')}
                     title="Underline"
                   >
                     <u>U</u>
@@ -342,7 +340,7 @@ export default function SeriesCreatePage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={() => insertFormatting('\n• ', '')}
+                    onClick={() => applyFormatting('insertUnorderedList')}
                     title="Bullet List"
                   >
                     •
@@ -352,7 +350,7 @@ export default function SeriesCreatePage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={() => insertFormatting('\n1. ', '')}
+                    onClick={() => applyFormatting('insertOrderedList')}
                     title="Numbered List"
                   >
                     1.
@@ -375,7 +373,10 @@ export default function SeriesCreatePage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={() => insertFormatting('<a href="">', '</a>')}
+                    onClick={() => {
+                      const url = prompt('Enter URL:');
+                      if (url) applyFormatting('createLink', url);
+                    }}
                     title="Insert Link"
                   >
                     🔗
@@ -393,13 +394,25 @@ export default function SeriesCreatePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description" className="text-sm font-medium">(Optional)</Label>
-                  <Textarea
-                    id="description"
-                    placeholder=""
-                    className="min-h-[200px] resize-y"
-                    value={form.watch('description')}
-                    onChange={(e) => handleDescriptionChange(e.target.value)}
+                  <Label htmlFor="description-editor" className="text-sm font-medium">(Optional)</Label>
+                  <div
+                    id="description-editor"
+                    contentEditable
+                    className="min-h-[200px] p-3 border border-gray-300 rounded-md resize-y overflow-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    style={{ 
+                      minHeight: '200px',
+                      maxHeight: '500px',
+                      fontSize: '14px',
+                      lineHeight: '1.5'
+                    }}
+                    onInput={updateDescriptionFromHTML}
+                    onBlur={updateDescriptionFromHTML}
+                    data-placeholder="Enter your series description..."
+                    suppressContentEditableWarning={true}
+                  />
+                  <input
+                    type="hidden"
+                    {...form.register('description')}
                   />
                   <div className="flex justify-end">
                     <span className={`text-sm ${characterCount > maxCharacters ? 'text-red-600' : 'text-green-600'}`}>
