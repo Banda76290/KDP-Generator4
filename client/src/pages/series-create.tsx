@@ -84,10 +84,43 @@ export default function SeriesCreatePage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="english">English</SelectItem>
+                    <SelectItem value="german">German</SelectItem>
                     <SelectItem value="french">French</SelectItem>
                     <SelectItem value="spanish">Spanish</SelectItem>
-                    <SelectItem value="german">German</SelectItem>
                     <SelectItem value="italian">Italian</SelectItem>
+                    <SelectItem value="portuguese">Portuguese</SelectItem>
+                    <SelectItem value="dutch">Dutch</SelectItem>
+                    <SelectItem value="japanese">Japanese</SelectItem>
+                    <SelectItem value="afrikaans">Afrikaans</SelectItem>
+                    <SelectItem value="arabic">Arabic (Beta)</SelectItem>
+                    <SelectItem value="basque">Basque</SelectItem>
+                    <SelectItem value="breton">Breton</SelectItem>
+                    <SelectItem value="catalan">Catalan</SelectItem>
+                    <SelectItem value="chinese_traditional">Chinese (Traditional) (Beta)</SelectItem>
+                    <SelectItem value="cornish">Cornish</SelectItem>
+                    <SelectItem value="corsican">Corsican</SelectItem>
+                    <SelectItem value="danish">Danish</SelectItem>
+                    <SelectItem value="eastern_frisian">Eastern Frisian</SelectItem>
+                    <SelectItem value="finnish">Finnish</SelectItem>
+                    <SelectItem value="frisian">Frisian</SelectItem>
+                    <SelectItem value="galician">Galician</SelectItem>
+                    <SelectItem value="gujarati">Gujarati</SelectItem>
+                    <SelectItem value="hindi">Hindi</SelectItem>
+                    <SelectItem value="icelandic">Icelandic</SelectItem>
+                    <SelectItem value="irish">Irish</SelectItem>
+                    <SelectItem value="luxembourgish">Luxembourgish</SelectItem>
+                    <SelectItem value="malayalam">Malayalam</SelectItem>
+                    <SelectItem value="manx">Manx</SelectItem>
+                    <SelectItem value="marathi">Marathi</SelectItem>
+                    <SelectItem value="northern_frisian">Northern Frisian</SelectItem>
+                    <SelectItem value="norwegian">Norwegian</SelectItem>
+                    <SelectItem value="nynorsk_norwegian">Nynorsk Norwegian</SelectItem>
+                    <SelectItem value="romanian">Romanian</SelectItem>
+                    <SelectItem value="scots">Scots</SelectItem>
+                    <SelectItem value="scottish_gaelic">Scottish Gaelic</SelectItem>
+                    <SelectItem value="swedish">Swedish</SelectItem>
+                    <SelectItem value="tamil">Tamil</SelectItem>
+                    <SelectItem value="welsh">Welsh</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
