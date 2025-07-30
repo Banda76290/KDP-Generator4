@@ -506,6 +506,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/series/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const seriesId = req.params.id;
+      
+      const series = await storage.getSeries(seriesId, userId);
+      
+      if (!series) {
+        return res.status(404).json({ message: "Series not found" });
+      }
+      
+      res.json(series);
+    } catch (error) {
+      console.error("Error fetching series:", error);
+      res.status(500).json({ message: "Failed to fetch series" });
+    }
+  });
+
   app.post('/api/series', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub;
@@ -528,6 +546,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(400).json({ message: "Invalid series data", errors: error.errors });
       } else {
         res.status(500).json({ message: "Failed to create series" });
+      }
+    }
+  });
+
+  app.put('/api/series/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const seriesId = req.params.id;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const updateData = req.body;
+      
+      const updatedSeries = await storage.updateSeries(seriesId, userId, updateData);
+      
+      if (!updatedSeries) {
+        return res.status(404).json({ message: "Series not found" });
+      }
+      
+      res.json(updatedSeries);
+    } catch (error) {
+      console.error("Error updating series:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid series data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to update series" });
       }
     }
   });

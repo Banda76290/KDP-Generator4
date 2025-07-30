@@ -129,6 +129,7 @@ export interface IStorage {
 
   // Series operations
   getUserSeries(userId: string): Promise<Series[]>;
+  getSeries(seriesId: string, userId: string): Promise<Series | undefined>;
   createSeries(series: InsertSeries): Promise<Series>;
   updateSeries(seriesId: string, userId: string, updates: Partial<InsertSeries>): Promise<Series>;
   deleteSeries(seriesId: string, userId: string): Promise<void>;
@@ -1021,6 +1022,14 @@ export class DatabaseStorage implements IStorage {
       .where(eq(series.userId, userId))
       .orderBy(desc(series.createdAt));
     return userSeries;
+  }
+
+  async getSeries(seriesId: string, userId: string): Promise<Series | undefined> {
+    const [seriesResult] = await db
+      .select()
+      .from(series)
+      .where(and(eq(series.id, seriesId), eq(series.userId, userId)));
+    return seriesResult;
   }
 
   async createSeries(seriesData: InsertSeries): Promise<Series> {

@@ -73,7 +73,7 @@ export default function SeriesListPage() {
   };
 
   const handleCreateSeries = () => {
-    setLocation('/series-create');
+    setLocation('/series-setup');
   };
 
   return (
@@ -151,7 +151,7 @@ export default function SeriesListPage() {
               {searchTerm ? "Try adjusting your search terms" : "Create your first series to get started"}
             </p>
             <Button 
-              onClick={() => setLocation('/series-create')}
+              onClick={() => setLocation('/series-setup')}
               style={{ backgroundColor: '#38b6ff' }} 
               className="hover:opacity-90 text-white"
             >
@@ -187,9 +187,16 @@ export default function SeriesListPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
                         <DropdownMenuItem asChild>
-                          <Link href={`/series-edit/${seriesItem.id}`} className="flex items-center">
+                          <Link href={`/series-setup/${seriesItem.id}`} className="flex items-center">
                             <Edit3 className="w-4 h-4 mr-2" />
-                            Edit Series
+                            Edit Series Setup
+                          </Link>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem asChild>
+                          <Link href={`/series-edit/${seriesItem.id}`} className="flex items-center">
+                            <BookOpen className="w-4 h-4 mr-2" />
+                            Manage Series
                           </Link>
                         </DropdownMenuItem>
                         <AlertDialog>
@@ -241,16 +248,7 @@ export default function SeriesListPage() {
                       Created: {new Date(seriesItem.createdAt).toLocaleDateString()}
                     </div>
 
-                    {/* Action Button */}
-                    <Link href={`/series-edit/${seriesItem.id}`}>
-                      <Button 
-                        variant="outline" 
-                        className="w-full"
-                        style={{ borderColor: '#38b6ff', color: '#38b6ff' }}
-                      >
-                        Manage Series
-                      </Button>
-                    </Link>
+
                   </div>
                 </CardContent>
               </Card>
