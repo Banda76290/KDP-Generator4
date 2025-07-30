@@ -508,7 +508,9 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Get all books in the same project to avoid title conflicts
-    const projectBooks = await db.select().from(books).where(eq(books.projectId, originalBook.projectId));
+    const projectBooks = originalBook.projectId 
+      ? await db.select().from(books).where(eq(books.projectId, originalBook.projectId))
+      : [];
     
     // Generate unique book name
     const generateUniqueBookName = (baseName: string): string => {
