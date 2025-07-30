@@ -980,7 +980,7 @@ export default function EditBook() {
 
                   {/* Series (optional) */}
                   <div className="space-y-4">
-                    <Label className="text-base font-medium">Series (optional)</Label>
+                    <Label className="font-medium text-[16px]">Series (optional)</Label>
                     <p className="text-sm text-gray-600">
                       This title is part of a series. You can edit details or remove the title from the series. (Optional)
                     </p>
@@ -1204,7 +1204,7 @@ export default function EditBook() {
                   {/* Author Section */}
                   <div className="space-y-4">
                     <div>
-                      <Label className="text-base font-medium">Author</Label>
+                      <Label className="font-medium text-[16px]">Author</Label>
                       <p className="text-sm text-gray-600 mt-1">
                         Enter the primary author or contributor. Pen names are allowed. Note: before continuing, check your spelling since this field cannot be updated after publication. <span className="text-blue-600">Author guidelines</span>
                       </p>
@@ -1243,7 +1243,7 @@ export default function EditBook() {
                   {/* Contributors Section */}
                   <div className="space-y-4">
                     <div>
-                      <Label className="text-base font-medium">Contributors</Label>
+                      <Label className="font-medium text-[16px]">Contributors</Label>
                       <p className="text-sm text-gray-600 mt-1">
                         Add up to 9 contributors. They'll display on Amazon using the order you enter below.
                       </p>
@@ -1328,7 +1328,7 @@ export default function EditBook() {
                   {/* Description */}
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="description-editor" className="text-sm font-medium">Description</Label>
+                      <Label htmlFor="description-editor" className="font-medium text-[16px]">Description</Label>
                       <p className="text-sm text-gray-600 mt-1">
                         Provide a description that will entice readers to buy your book. What is your book about? What makes it interesting? What should readers expect? This can be copied from the back cover of your book. Maximum {maxDescriptionCharacters.toLocaleString()} characters.
                       </p>
@@ -1427,7 +1427,7 @@ export default function EditBook() {
 
                   {/* Publishing Rights */}
                   <div className="space-y-4">
-                    <Label className="text-sm font-medium">Publishing Rights</Label>
+                    <Label className="font-medium text-[16px]">Publishing Rights</Label>
                     <p className="text-sm text-gray-600">
                       Choose the option that applies to your book. Choosing the wrong option may result in your content being blocked. <span className="text-blue-600 underline cursor-pointer">Learn more about content guidelines</span>
                     </p>
@@ -1454,7 +1454,7 @@ export default function EditBook() {
 
                   {/* Categories */}
                   <div className="space-y-4">
-                    <Label className="text-sm font-medium">Categories</Label>
+                    <Label className="font-medium text-[16px]">Categories</Label>
                     <p className="text-sm text-gray-600">
                       Choose up to 2 categories that best describe your book. This will help customers find your book. You can search by keyword, see all categories, or browse by subject.
                     </p>
@@ -1499,7 +1499,7 @@ export default function EditBook() {
 
                   {/* Keywords */}
                   <div className="space-y-4">
-                    <Label className="text-sm font-medium">Keywords</Label>
+                    <Label className="font-medium text-[16px]">Keywords</Label>
                     <p className="text-sm text-gray-600">
                       Enter up to 7 keywords or short phrases that describe the content, topic, theme or type of your book. Separate keywords with commas.
                     </p>
@@ -1546,7 +1546,7 @@ export default function EditBook() {
 
                   {/* Additional Options */}
                   <div className="space-y-4">
-                    <Label className="text-sm font-medium">Additional Options</Label>
+                    <Label className="font-medium text-[16px]">Additional Options</Label>
                     
                     <div className="space-y-4">
                       <div className="flex items-start space-x-2">
@@ -1641,7 +1641,7 @@ export default function EditBook() {
                   </div>
                   
                   <div className="space-y-4">
-                    <Label className="text-base font-semibold">Print Options</Label>
+                    <Label className="font-medium text-[16px]">Print Options</Label>
                     <div className="space-y-3">
                       <div className="flex items-center space-x-2">
                         <Checkbox id="bleedSettings" />
@@ -1681,7 +1681,7 @@ export default function EditBook() {
                 <CardContent className="space-y-6">
                   {/* Distribution Rights */}
                   <div className="space-y-4">
-                    <Label className="text-base font-semibold">Territories</Label>
+                    <Label className="font-medium text-[16px]">Territories</Label>
                     <p className="text-sm text-gray-600">
                       Select the territories where you have rights to sell this book.
                     </p>
@@ -1717,7 +1717,7 @@ export default function EditBook() {
 
                   {/* Pricing */}
                   <div className="space-y-4">
-                    <Label className="text-base font-semibold">Pricing, royalties, and distribution</Label>
+                    <Label className="font-medium text-[16px]">Pricing, royalties, and distribution</Label>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="listPriceTemp">List Price (USD)</Label>
@@ -1779,7 +1779,7 @@ export default function EditBook() {
 
                   {/* Terms & Conditions */}
                   <div className="space-y-4">
-                    <Label className="text-base font-semibold">Terms & Conditions</Label>
+                    <Label className="font-medium text-[16px]">Terms & Conditions</Label>
                     <div className="flex items-center space-x-2">
                       <Checkbox id="acceptTerms" />
                       <Label htmlFor="acceptTerms" className="text-sm">
