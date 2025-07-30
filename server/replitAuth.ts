@@ -122,8 +122,8 @@ export async function setupAuth(app: Express) {
   // Add custom domains from CUSTOM_DOMAINS environment variable
   const customDomainsEnv = process.env.CUSTOM_DOMAINS?.split(",") || [];
   
-  // Default custom domains for this application
-  const defaultCustomDomains = ["kdpgenerator.com"];
+  // Default custom domains for this application (commented out due to SSL certificate issues)
+  const defaultCustomDomains: string[] = []; // ["kdpgenerator.com"];
   
   // Combine all domains and remove duplicates
   const allDomains = [...domains, ...customDomainsEnv, ...defaultCustomDomains];
