@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation } from "wouter";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -29,6 +29,10 @@ export default function SeriesCreatePage() {
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
   const [editorContent, setEditorContent] = useState('');
+  
+  // Check for editing series ID from sessionStorage
+  const editingSeriesId = sessionStorage.getItem('editingSeriesId');
+  const [isEditing] = useState(!!editingSeriesId);
 
   const form = useForm<SeriesFormData>({
     defaultValues: {
@@ -38,6 +42,47 @@ export default function SeriesCreatePage() {
       description: ''
     }
   });
+
+  // Fetch existing series data if editing
+  const { data: existingSeries, isLoading: isLoadingSeries } = useQuery({
+    queryKey: ['/api/series', editingSeriesId],
+    queryFn: async () => {
+      if (!editingSeriesId) return null;
+      const response = await fetch(`/api/series/${editingSeriesId}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch series');
+      }
+      return response.json();
+    },
+    enabled: !!editingSeriesId
+  });
+
+  // Populate form with existing data when editing
+  useEffect(() => {
+    if (existingSeries && isEditing) {
+      form.setValue('title', existingSeries.title || '');
+      form.setValue('language', existingSeries.language || 'english');
+      form.setValue('readingOrder', existingSeries.readingOrder || 'unordered');
+      
+      if (existingSeries.description) {
+        setEditorContent(existingSeries.description);
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = existingSeries.description;
+        const textContent = tempDiv.innerText || tempDiv.textContent || '';
+        setCharacterCount(textContent.length);
+        
+        // Set the editor content after a short delay to ensure the editor is rendered
+        setTimeout(() => {
+          const editor = document.getElementById('description-editor') as HTMLDivElement;
+          if (editor) {
+            editor.innerHTML = existingSeries.description;
+          }
+        }, 100);
+      }
+    }
+  }, [existingSeries, isEditing, form]);
 
   const onSubmit = async (data: SeriesFormData) => {
     if (characterCount > maxCharacters) {
@@ -57,8 +102,11 @@ export default function SeriesCreatePage() {
         description: editorContent
       };
 
-      const response = await fetch('/api/series', {
-        method: 'POST',
+      const url = isEditing ? `/api/series/${editingSeriesId}` : '/api/series';
+      const method = isEditing ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -69,29 +117,32 @@ export default function SeriesCreatePage() {
       if (!response.ok) {
         const errorData = await response.json();
         console.error('API Error:', errorData);
-        throw new Error(errorData.message || 'Failed to save series');
+        throw new Error(errorData.message || `Failed to ${isEditing ? 'update' : 'save'} series`);
       }
 
-      // Store the newly created series for book association
-      const newSeries = await response.json();
-      sessionStorage.setItem('newlyCreatedSeries', JSON.stringify({
-        id: newSeries.id,
-        title: newSeries.title
-      }));
+      // Store the series data for book association
+      const seriesData = await response.json();
+      if (!isEditing) {
+        sessionStorage.setItem('newlyCreatedSeries', JSON.stringify({
+          id: seriesData.id,
+          title: seriesData.title
+        }));
+      }
       
       // Invalidate and refetch series data
       await queryClient.invalidateQueries({ queryKey: ['/api/series'] });
       
       toast({
-        title: "Series saved",
-        description: "Your series has been successfully created.",
+        title: `Series ${isEditing ? 'updated' : 'saved'}`,
+        description: `Your series has been successfully ${isEditing ? 'updated' : 'created'}.`,
       });
       
       // Vérifier s'il faut retourner vers book-edit
       const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
       if (returnToBookEdit) {
-        // Nettoyer le storage de retour (mais garder newlyCreatedSeries pour l'association)
+        // Nettoyer le storage de retour et editing ID
         sessionStorage.removeItem('returnToBookEdit');
+        sessionStorage.removeItem('editingSeriesId');
         
         // Rediriger vers la page d'édition de livre
         if (returnToBookEdit === 'new') {
@@ -100,6 +151,8 @@ export default function SeriesCreatePage() {
           window.location.href = `/books/edit/${returnToBookEdit}`;
         }
       } else {
+        // Nettoyer l'editing ID
+        sessionStorage.removeItem('editingSeriesId');
         setLocation('/manage-series');
       }
     } catch (error) {

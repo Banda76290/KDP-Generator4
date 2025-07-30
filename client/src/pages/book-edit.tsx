@@ -690,11 +690,11 @@ export default function EditBook() {
                             variant="outline" 
                             size="sm"
                             onClick={async () => {
-                              // Sauvegarder les données du formulaire avant de partir
+                              // Sauvegarder les données du formulaire avant de partir (même logique que "Create series")
                               saveFormDataToSession();
                               sessionStorage.setItem('returnToBookEdit', bookId || 'new');
                               
-                              // Trouver l'ID de la série actuelle pour rediriger vers la page de setup en mode édition
+                              // Trouver l'ID de la série actuelle pour rediriger vers la page de création en mode édition
                               const currentSeriesTitle = form.watch("seriesTitle");
                               if (currentSeriesTitle) {
                                 try {
@@ -706,19 +706,19 @@ export default function EditBook() {
                                   if (currentSeries) {
                                     // Stocker l'ID de la série à éditer
                                     sessionStorage.setItem('editingSeriesId', currentSeries.id);
-                                    // Rediriger vers la page de setup de série en mode édition
-                                    window.location.href = '/series-setup';
+                                    // Rediriger vers la page de création de série en mode édition (même page que "Create series")
+                                    window.location.href = '/series-create';
                                   } else {
                                     // Si la série n'est pas trouvée, rediriger vers la création
-                                    window.location.href = '/series-setup';
+                                    window.location.href = '/series-create';
                                   }
                                 } catch (error) {
                                   console.error('Error fetching series:', error);
                                   // En cas d'erreur, rediriger vers la création
-                                  window.location.href = '/series-setup';
+                                  window.location.href = '/series-create';
                                 }
                               } else {
-                                window.location.href = '/series-setup';
+                                window.location.href = '/series-create';
                               }
                             }}
                           >
