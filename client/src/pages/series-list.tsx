@@ -78,7 +78,7 @@ export default function SeriesListPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
 
-  // Filtrage et tri des séries
+  // Filter and sort series
   const filteredSeries = mockSeries
     .filter(series => {
       const matchesSearch = series.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -106,12 +106,12 @@ export default function SeriesListPage() {
     });
 
   const handleDeleteSeries = (seriesId: string) => {
-    // TODO: Implémenter la suppression de série
+    // TODO: Implement series deletion
     console.log("Deleting series:", seriesId);
   };
 
   const handleCreateSeries = () => {
-    // TODO: Rediriger vers la page de création de série
+    // TODO: Redirect to series creation page
     console.log("Creating new series");
   };
 
@@ -122,7 +122,7 @@ export default function SeriesListPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Manage Series</h1>
-            <p className="text-gray-600 mt-2">Gérez vos séries de livres et organisez votre contenu</p>
+            <p className="text-gray-600 mt-2">Manage your book series and organize your content</p>
           </div>
           <Button 
             onClick={handleCreateSeries}
@@ -130,7 +130,7 @@ export default function SeriesListPage() {
             className="hover:opacity-90 text-white"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Créer une série
+            Create Series
           </Button>
         </div>
 
@@ -140,7 +140,7 @@ export default function SeriesListPage() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
-                placeholder="Rechercher des séries..."
+                placeholder="Search series..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 w-full sm:w-80"
@@ -149,27 +149,27 @@ export default function SeriesListPage() {
             
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filtrer par statut" />
+                <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tous les statuts</SelectItem>
-                <SelectItem value="active">Actif</SelectItem>
-                <SelectItem value="draft">Brouillon</SelectItem>
-                <SelectItem value="archived">Archivé</SelectItem>
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="archived">Archived</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Trier par" />
+                <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="newest">Plus récent</SelectItem>
-                <SelectItem value="oldest">Plus ancien</SelectItem>
-                <SelectItem value="title-az">Titre A-Z</SelectItem>
-                <SelectItem value="title-za">Titre Z-A</SelectItem>
-                <SelectItem value="most-books">Plus de livres</SelectItem>
-                <SelectItem value="highest-revenue">Meilleur revenu</SelectItem>
+                <SelectItem value="newest">Newest first</SelectItem>
+                <SelectItem value="oldest">Oldest first</SelectItem>
+                <SelectItem value="title-az">Title A-Z</SelectItem>
+                <SelectItem value="title-za">Title Z-A</SelectItem>
+                <SelectItem value="most-books">Most books</SelectItem>
+                <SelectItem value="highest-revenue">Highest revenue</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -177,7 +177,7 @@ export default function SeriesListPage() {
 
         {/* Results Count */}
         <div className="text-sm text-gray-600">
-          {filteredSeries.length} série{filteredSeries.length !== 1 ? 's' : ''} trouvée{filteredSeries.length !== 1 ? 's' : ''}
+          {filteredSeries.length} series found
         </div>
 
         {/* Series Grid */}
@@ -209,7 +209,7 @@ export default function SeriesListPage() {
                       <DropdownMenuItem asChild>
                         <Link href={`/series-edit/${series.id}`} className="flex items-center">
                           <Edit3 className="w-4 h-4 mr-2" />
-                          Modifier la série
+                          Edit Series
                         </Link>
                       </DropdownMenuItem>
                       <AlertDialog>
@@ -219,24 +219,24 @@ export default function SeriesListPage() {
                             onSelect={(e) => e.preventDefault()}
                           >
                             <Trash2 className="w-4 h-4 mr-2" />
-                            Supprimer la série
+                            Delete Series
                           </DropdownMenuItem>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                            <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Êtes-vous sûr de vouloir supprimer la série "{series.title}" ? 
-                              Cette action ne peut pas être annulée et supprimera tous les liens des livres à cette série.
+                              Are you sure you want to delete the series "{series.title}"? 
+                              This action cannot be undone and will remove all book links to this series.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Annuler</AlertDialogCancel>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
                             <AlertDialogAction 
                               onClick={() => handleDeleteSeries(series.id)}
                               className="bg-red-600 hover:bg-red-700"
                             >
-                              Supprimer
+                              Delete
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -256,7 +256,7 @@ export default function SeriesListPage() {
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-1 text-gray-600">
                     <BookOpen className="w-4 h-4" />
-                    <span>{series.booksCount} livre{series.booksCount !== 1 ? 's' : ''}</span>
+                    <span>{series.booksCount} book{series.booksCount !== 1 ? 's' : ''}</span>
                   </div>
                   <div className="text-green-600 font-medium">
                     €{series.totalRevenue}
@@ -265,7 +265,7 @@ export default function SeriesListPage() {
 
                 {/* Books Preview */}
                 <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-gray-700">Livres dans cette série :</h4>
+                  <h4 className="text-sm font-medium text-gray-700">Books in this series:</h4>
                   <div className="space-y-1">
                     {series.books.slice(0, 2).map((book) => (
                       <div key={book.id} className="flex items-center justify-between text-xs">
@@ -278,13 +278,13 @@ export default function SeriesListPage() {
                               : "border-gray-200 text-gray-600"
                           }`}
                         >
-                          {book.status === "published" ? "Publié" : "Brouillon"}
+                          {book.status === "published" ? "Published" : "Draft"}
                         </Badge>
                       </div>
                     ))}
                     {series.books.length > 2 && (
                       <div className="text-xs text-gray-400">
-                        ... et {series.books.length - 2} autre{series.books.length - 2 !== 1 ? 's' : ''}
+                        ... and {series.books.length - 2} more
                       </div>
                     )}
                   </div>
@@ -297,7 +297,7 @@ export default function SeriesListPage() {
                     className="w-full mt-3"
                     style={{ borderColor: '#38b6ff', color: '#38b6ff' }}
                   >
-                    Gérer la série
+                    Manage Series
                   </Button>
                 </Link>
               </CardContent>
@@ -310,12 +310,12 @@ export default function SeriesListPage() {
           <div className="text-center py-12">
             <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {searchTerm || statusFilter !== "all" ? "Aucune série trouvée" : "Aucune série créée"}
+              {searchTerm || statusFilter !== "all" ? "No series found" : "No series created"}
             </h3>
             <p className="text-gray-600 mb-6">
               {searchTerm || statusFilter !== "all" 
-                ? "Essayez de modifier vos critères de recherche"
-                : "Créez votre première série pour organiser vos livres"
+                ? "Try adjusting your search criteria"
+                : "Create your first series to organize your books"
               }
             </p>
             {!searchTerm && statusFilter === "all" && (
@@ -325,7 +325,7 @@ export default function SeriesListPage() {
                 className="hover:opacity-90 text-white"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Créer ma première série
+                Create My First Series
               </Button>
             )}
           </div>
