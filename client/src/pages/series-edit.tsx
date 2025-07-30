@@ -235,8 +235,8 @@ export default function SeriesEditPage() {
                   // Check if we need to return to book edit page
                   const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
                   if (returnToBookEdit) {
-                    // Only clear returnToBookEdit marker, keep bookFormData for restoration
-                    sessionStorage.removeItem('returnToBookEdit');
+                    // IMPORTANT: Ne PAS supprimer returnToBookEdit ici ! 
+                    // Il sera supprimé automatiquement APRÈS la restauration dans book-edit.tsx
                     
                     if (returnToBookEdit === 'new') {
                       setLocation('/books/create');
@@ -494,8 +494,8 @@ export default function SeriesEditPage() {
                   // Check if we need to return to book edit page
                   const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
                   if (returnToBookEdit) {
-                    // Only clear returnToBookEdit marker, keep bookFormData for restoration
-                    sessionStorage.removeItem('returnToBookEdit');
+                    // IMPORTANT: Ne PAS supprimer returnToBookEdit ici ! 
+                    // Il sera supprimé automatiquement APRÈS la restauration dans book-edit.tsx
                     
                     if (returnToBookEdit === 'new') {
                       setLocation('/books/create');
