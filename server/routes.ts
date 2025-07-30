@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
 import { storage } from "./storage";
@@ -9,10 +9,33 @@ import { parseKDPReport } from "./services/kdpParser";
 import { z } from "zod";
 import OpenAI from "openai";
 
+// Extend Express Request type to include authenticated user
+interface AuthenticatedRequest extends Request {
+  user?: {
+    claims: {
+      sub: string;
+      email: string;
+      first_name: string;
+      last_name: string;
+      profile_image_url?: string;
+    };
+    expires_at: number;
+    access_token?: string;
+    refresh_token?: string;
+  };
+  admin?: any;
+}
+
 // Admin middleware to check if user has admin or superadmin role
-const isAdmin = async (req: any, res: any, next: any) => {
+const isAdmin = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const userId = req.user.claims.sub;
+    const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+    if (!userId) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
     const user = await storage.getUser(userId);
     
     if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
@@ -50,9 +73,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/user', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {
@@ -62,9 +91,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard routes
-  app.get('/api/dashboard/stats', isAuthenticated, async (req: any, res) => {
+  app.get('/api/dashboard/stats', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const stats = await storage.getUserDashboardStats(userId);
       res.json(stats);
     } catch (error) {
@@ -74,9 +109,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Project routes
-  app.get('/api/projects', isAuthenticated, async (req: any, res) => {
+  app.get('/api/projects', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const projects = await storage.getUserProjects(userId);
       res.json(projects);
     } catch (error) {
@@ -85,9 +126,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/projects/:id', isAuthenticated, async (req: any, res) => {
+  app.get('/api/projects/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const project = await storage.getProject(req.params.id, userId);
       if (!project) {
         return res.status(404).json({ message: "Project not found" });
@@ -99,9 +146,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/projects', isAuthenticated, async (req: any, res) => {
+  app.post('/api/projects', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user?.claims?.sub || req.user?.id || "test-user-id";
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
 
       // Validate and prepare project data
       if (!req.body.name) {
@@ -170,7 +223,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // New route for duplicating projects with all books
-  app.post('/api/projects/:id/duplicate', isAuthenticated, async (req: any, res) => {
+  app.post('/api/projects/:id/duplicate', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.user?.claims?.sub || req.user?.id || "test-user-id";
       const projectId = req.params.id;
@@ -187,9 +240,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/projects/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/projects/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       console.log('Updating project:', req.params.id, req.body);
       
       // Map frontend fields to database fields
@@ -216,9 +272,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/projects/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/projects/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const deleteBooks = req.query.deleteBooks === 'true';
       
       console.log(`Deleting project ${req.params.id} for user ${userId}, deleteBooks: ${deleteBooks}`);
@@ -237,9 +296,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Books routes
-  app.post('/api/books', isAuthenticated, async (req: any, res) => {
+  app.post('/api/books', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       console.log('Creating book for user:', userId);
       console.log('Book data:', req.body);
       
@@ -260,9 +322,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/books', isAuthenticated, async (req: any, res) => {
+  app.get('/api/books', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const books = await storage.getUserBooks(userId);
       res.json(books);
     } catch (error) {
@@ -271,9 +336,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/books/:id', isAuthenticated, async (req: any, res) => {
+  app.get('/api/books/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const book = await storage.getBook(req.params.id, userId);
       if (!book) {
         return res.status(404).json({ message: "Book not found" });
@@ -285,9 +353,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/books/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/books/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const updates = insertBookSchema.partial().parse(req.body);
       
       const book = await storage.updateBook(req.params.id, userId, updates);
@@ -301,9 +372,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/books/:id', isAuthenticated, async (req: any, res) => {
+  app.patch('/api/books/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const updates = insertBookSchema.partial().parse(req.body);
       
       const book = await storage.updateBook(req.params.id, userId, updates);
@@ -317,9 +391,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/books/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/books/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       await storage.deleteBook(req.params.id, userId);
       res.json({ message: "Book deleted successfully" });
     } catch (error) {
@@ -329,7 +406,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // New route for duplicating books
-  app.post('/api/books/:id/duplicate', isAuthenticated, async (req: any, res) => {
+  app.post('/api/books/:id/duplicate', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.user?.claims?.sub || req.user?.id || "test-user-id";
       const bookId = req.params.id;
@@ -347,7 +424,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Contributors routes
-  app.post('/api/contributors', isAuthenticated, async (req: any, res) => {
+  app.post('/api/contributors', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const contributorData = insertContributorSchema.parse(req.body);
       const contributor = await storage.addContributor(contributorData);
@@ -361,7 +438,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/contributors/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/contributors/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { projectId } = req.body;
       await storage.removeContributor(req.params.id, projectId);
@@ -373,13 +450,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // KDP Reports routes
-  app.post('/api/kdp-reports/upload', isAuthenticated, upload.single('kdpReport'), async (req: any, res) => {
+  app.post('/api/kdp-reports/upload', isAuthenticated, upload.single('kdpReport'), async (req: AuthenticatedRequest, res: Response) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const salesRecords = await parseKDPReport(req.file.buffer, req.file.mimetype);
 
       // Save each sales record to database
@@ -410,9 +490,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/sales-data', isAuthenticated, async (req: any, res) => {
+  app.get('/api/sales-data', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const { startDate, endDate } = req.query;
       
       const start = startDate ? new Date(startDate as string) : undefined;
@@ -427,9 +510,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Assistant routes
-  app.post('/api/ai/generate', isAuthenticated, async (req: any, res) => {
+  app.post('/api/ai/generate', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const user = await storage.getUser(userId);
       
       // Temporarily allow AI access for all users for testing
@@ -461,9 +547,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/ai/generations', isAuthenticated, async (req: any, res) => {
+  app.get('/api/ai/generations', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const generations = await storage.getUserAiGenerations(userId);
       res.json(generations);
     } catch (error) {
@@ -473,9 +562,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Subscription routes
-  app.post('/api/create-subscription', isAuthenticated, async (req: any, res) => {
+  app.post('/api/create-subscription', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const user = await storage.getUser(userId);
       
       if (!user?.email) {
@@ -495,9 +587,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Series routes
-  app.get('/api/series', isAuthenticated, async (req: any, res) => {
+  app.get('/api/series', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const series = await storage.getUserSeries(userId);
       res.json(series);
     } catch (error) {
@@ -506,9 +601,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/series/:id', isAuthenticated, async (req: any, res) => {
+  app.get('/api/series/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const seriesId = req.params.id;
       
       const series = await storage.getSeries(seriesId, userId);
@@ -524,9 +622,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/series', isAuthenticated, async (req: any, res) => {
+  app.post('/api/series', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       if (!userId) {
         console.error('No userId found in request. User object:', JSON.stringify(req.user));
         return res.status(401).json({ message: "User not authenticated" });
@@ -550,9 +651,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/series/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/series/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const seriesId = req.params.id;
       
       if (!userId) {
@@ -579,7 +683,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes
-  app.get('/api/admin/stats', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.get('/api/admin/stats', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const stats = await storage.getSystemStats();
       res.json(stats);
@@ -590,7 +694,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin AI Configuration Routes
-  app.get('/api/admin/ai/stats', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.get('/api/admin/ai/stats', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const stats = {
         totalTokensUsed: 0, // Will be calculated from database
@@ -606,7 +710,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Mock prompt templates for initial interface
-  app.get('/api/admin/ai/prompts', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.get('/api/admin/ai/prompts', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const templates = [
         {
@@ -642,7 +746,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Mock AI models for initial interface
-  app.get('/api/admin/ai/models', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.get('/api/admin/ai/models', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const models = [
         {
@@ -676,7 +780,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Mock usage limits for initial interface
-  app.get('/api/admin/ai/limits', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.get('/api/admin/ai/limits', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const limits = [
         {
@@ -711,7 +815,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/admin/users', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.get('/api/admin/users', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { search, limit = 50, offset = 0 } = req.query;
       const result = await storage.getAllUsers(
@@ -726,7 +830,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/admin/users/:userId/role', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.put('/api/admin/users/:userId/role', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { role } = req.body;
       const { userId } = req.params;
@@ -761,7 +865,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/admin/users/:userId/deactivate', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.put('/api/admin/users/:userId/deactivate', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { userId } = req.params;
       const adminUser = req.admin;
@@ -786,7 +890,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/admin/users/:userId/reactivate', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.put('/api/admin/users/:userId/reactivate', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { userId } = req.params;
       const adminUser = req.admin;
@@ -811,7 +915,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/admin/projects', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.get('/api/admin/projects', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { limit = 50, offset = 0 } = req.query;
       const result = await storage.getAllProjects(
@@ -825,7 +929,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/admin/config', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.get('/api/admin/config', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const config = await storage.getSystemConfig();
       res.json(config);
@@ -835,7 +939,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/admin/config', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.put('/api/admin/config', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { key, value, description } = req.body;
       const adminUser = req.admin;
@@ -864,7 +968,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/admin/audit-logs', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.get('/api/admin/audit-logs', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { limit = 100, offset = 0 } = req.query;
       const result = await storage.getAuditLogs(
@@ -879,7 +983,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Blog admin routes
-  app.get('/api/admin/blog/categories', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.get('/api/admin/blog/categories', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const categories = await storage.getBlogCategories();
       res.json(categories);
@@ -889,7 +993,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/blog/categories', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.post('/api/admin/blog/categories', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const adminUser = req.admin;
       const category = await storage.createBlogCategory(req.body);
@@ -912,7 +1016,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/admin/blog/categories/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.put('/api/admin/blog/categories/:id', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id } = req.params;
       const adminUser = req.admin;
@@ -936,7 +1040,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/admin/blog/categories/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.delete('/api/admin/blog/categories/:id', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id } = req.params;
       const adminUser = req.admin;
@@ -961,7 +1065,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/admin/blog/posts', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.get('/api/admin/blog/posts', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { search, status, limit = 20, offset = 0 } = req.query;
       const result = await storage.getBlogPosts({
@@ -977,7 +1081,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/admin/blog/posts/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.get('/api/admin/blog/posts/:id', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id } = req.params;
       const post = await storage.getBlogPost(id);
@@ -991,7 +1095,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/blog/posts', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.post('/api/admin/blog/posts', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const adminUser = req.admin;
       const postData = {
@@ -1018,7 +1122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/admin/blog/posts/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.put('/api/admin/blog/posts/:id', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id } = req.params;
       const adminUser = req.admin;
@@ -1042,7 +1146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/admin/blog/posts/:id/status', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.put('/api/admin/blog/posts/:id/status', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id } = req.params;
       const { status } = req.body;
@@ -1068,7 +1172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/admin/blog/posts/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.delete('/api/admin/blog/posts/:id', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id } = req.params;
       const adminUser = req.admin;
@@ -1094,7 +1198,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // New AI Configuration routes for database fields
-  app.post("/api/ai/generate-configured", isAuthenticated, async (req: any, res) => {
+  app.post("/api/ai/generate-configured", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { functionType, context, customPrompt, customModel } = req.body;
       
@@ -1150,6 +1254,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { functionKey, bookId, projectId, customPrompt, customModel, customTemperature } = req.body;
       const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
@@ -1286,7 +1393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get field values for a specific context
-  app.post("/api/ai/field-values", isAuthenticated, async (req: any, res) => {
+  app.post("/api/ai/field-values", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { context } = req.body;
       const { databaseFieldsService } = await import('./services/databaseFieldsService');
