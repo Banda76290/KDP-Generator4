@@ -116,8 +116,22 @@ export async function setupAuth(app: Express) {
     verified(null, user);
   };
 
-  for (const domain of process.env
-    .REPLIT_DOMAINS!.split(",")) {
+  // Get domains from REPLIT_DOMAINS environment variable
+  const domains = process.env.REPLIT_DOMAINS?.split(",") || [];
+  
+  // Add custom domains from CUSTOM_DOMAINS environment variable
+  const customDomainsEnv = process.env.CUSTOM_DOMAINS?.split(",") || [];
+  
+  // Default custom domains for this application
+  const defaultCustomDomains = ["kdpgenerator.com"];
+  
+  // Combine all domains and remove duplicates
+  const allDomains = [...domains, ...customDomainsEnv, ...defaultCustomDomains];
+  const uniqueDomains = Array.from(new Set(allDomains.filter(domain => domain && domain.trim())));
+  
+  console.log(`Setting up authentication for domains:`, uniqueDomains);
+  
+  for (const domain of uniqueDomains) {
     const strategy = new Strategy(
       {
         name: `replitauth:${domain}`,
@@ -128,20 +142,43 @@ export async function setupAuth(app: Express) {
       verify,
     );
     passport.use(strategy);
+    console.log(`Registered authentication strategy for domain: ${domain}`);
   }
 
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    const strategyName = `replitauth:${req.hostname}`;
+    
+    // Check if strategy exists for this hostname
+    const strategy = (passport as any)._strategy(strategyName);
+    if (!strategy) {
+      console.error(`No authentication strategy found for hostname: ${req.hostname}`);
+      console.log(`Available strategies:`, Object.keys((passport as any)._strategies || {}));
+      return res.status(500).json({ 
+        error: "Authentication not configured for this domain",
+        hostname: req.hostname,
+        available: Object.keys((passport as any)._strategies || {})
+      });
+    }
+    
+    passport.authenticate(strategyName, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
 
   app.get("/api/callback", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    const strategyName = `replitauth:${req.hostname}`;
+    
+    const strategy = (passport as any)._strategy(strategyName);
+    if (!strategy) {
+      console.error(`No authentication strategy found for hostname: ${req.hostname}`);
+      return res.redirect("/api/login");
+    }
+    
+    passport.authenticate(strategyName, {
       successReturnToOrRedirect: "/",
       failureRedirect: "/api/login",
     })(req, res, next);
