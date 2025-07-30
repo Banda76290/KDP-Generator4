@@ -27,7 +27,8 @@ import {
   Trash2,
   Globe,
   TrendingUp,
-  DollarSign
+  DollarSign,
+  Library
 } from "lucide-react";
 import type { Book, Project } from "@shared/schema";
 
@@ -449,6 +450,21 @@ function BooksContent() {
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <Globe className="h-4 w-4" />
                       <span>{book.language}</span>
+                    </div>
+                  )}
+
+                  {/* Series Information */}
+                  {book.seriesTitle && (
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <Library className="h-4 w-4" />
+                      <span>
+                        Series: <span className="font-medium text-foreground">{book.seriesTitle}</span>
+                        {book.seriesNumber && (
+                          <span className="ml-1 bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs font-medium">
+                            #{book.seriesNumber}
+                          </span>
+                        )}
+                      </span>
                     </div>
                   )}
 
