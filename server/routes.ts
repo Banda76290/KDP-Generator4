@@ -437,10 +437,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/contributors/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+  // Contributors routes
+  app.post('/api/contributors', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { projectId } = req.body;
-      await storage.removeContributor(req.params.id, projectId);
+      const validatedData = insertContributorSchema.parse(req.body);
+      const contributor = await storage.addContributor(validatedData);
+      res.json(contributor);
+    } catch (error) {
+      console.error("Error creating contributor:", error);
+      res.status(500).json({ message: "Failed to create contributor" });
+    }
+  });
+
+  app.get('/api/contributors/book/:bookId', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { bookId } = req.params;
+      const contributors = await storage.getBookContributors(bookId);
+      res.json(contributors);
+    } catch (error) {
+      console.error("Error fetching contributors:", error);
+      res.status(500).json({ message: "Failed to fetch contributors" });
+    }
+  });
+
+  app.delete('/api/contributors/:id/:bookId', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { id, bookId } = req.params;
+      await storage.removeContributor(id, bookId);
       res.json({ message: "Contributor removed successfully" });
     } catch (error) {
       console.error("Error removing contributor:", error);

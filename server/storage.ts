@@ -488,9 +488,17 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(books).where(eq(books.userId, userId)).orderBy(desc(books.updatedAt));
   }
 
-  async getBook(bookId: string, userId: string): Promise<Book | undefined> {
+  async getBook(bookId: string, userId: string): Promise<(Book & { contributors?: Contributor[] }) | undefined> {
     const [book] = await db.select().from(books).where(and(eq(books.id, bookId), eq(books.userId, userId)));
-    return book;
+    if (!book) return undefined;
+    
+    // Get contributors for this book
+    const bookContributors = await db.select().from(contributors).where(eq(contributors.bookId, bookId));
+    
+    return {
+      ...book,
+      contributors: bookContributors
+    };
   }
 
   async createBook(book: InsertBook): Promise<Book> {

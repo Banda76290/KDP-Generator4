@@ -360,7 +360,22 @@ export default function EditBook() {
       }
       
       setCategories(Array.isArray(book.categories) ? book.categories : []);
-      setContributors([]);
+      
+      // Load contributors from database
+      if (book.contributors && Array.isArray(book.contributors)) {
+        const loadedContributors = book.contributors.map(contrib => ({
+          id: contrib.id,
+          role: contrib.role,
+          prefix: contrib.prefix || "",
+          firstName: contrib.firstName,
+          middleName: contrib.middleName || "",
+          lastName: contrib.lastName,
+          suffix: contrib.suffix || "",
+        }));
+        setContributors(loadedContributors);
+      } else {
+        setContributors([]);
+      }
     }
   }, [book, bookId, hasRestoredFromStorage]); // Removed form from dependencies to prevent loops
 
@@ -391,10 +406,57 @@ export default function EditBook() {
       if (isCreating) {
         const createdBook = await apiRequest("POST", `/api/books`, formattedData);
         console.log('Received created book response:', createdBook);
+        
+        // Save contributors after book creation
+        if (contributors.length > 0) {
+          for (const contributor of contributors) {
+            await apiRequest("POST", "/api/contributors", {
+              bookId: createdBook.id,
+              role: contributor.role,
+              prefix: contributor.prefix || null,
+              firstName: contributor.firstName,
+              middleName: contributor.middleName || null,
+              lastName: contributor.lastName,
+              suffix: contributor.suffix || null,
+            });
+          }
+        }
+        
         return { book: createdBook, shouldNavigate: data.shouldNavigate, nextTab: data.nextTab };
       } else {
         const updatedBook = await apiRequest("PATCH", `/api/books/${bookId}`, formattedData);
         console.log('Received updated book response:', updatedBook);
+        
+        // Update contributors - first delete existing ones, then add new ones
+        if (bookId) {
+          // Get existing contributors to delete them
+          try {
+            const existingContributors = await apiRequest("GET", `/api/contributors/book/${bookId}`);
+            if (existingContributors && existingContributors.length > 0) {
+              for (const contrib of existingContributors) {
+                await apiRequest("DELETE", `/api/contributors/${contrib.id}/${bookId}`);
+              }
+            }
+          } catch (error) {
+            console.log('No existing contributors or error deleting:', error);
+          }
+          
+          // Add new contributors
+          if (contributors.length > 0) {
+            for (const contributor of contributors) {
+              await apiRequest("POST", "/api/contributors", {
+                bookId: bookId,
+                role: contributor.role,
+                prefix: contributor.prefix || null,
+                firstName: contributor.firstName,
+                middleName: contributor.middleName || null,
+                lastName: contributor.lastName,
+                suffix: contributor.suffix || null,
+              });
+            }
+          }
+        }
+        
         return { book: updatedBook, shouldNavigate: data.shouldNavigate, nextTab: data.nextTab };
       }
     },
