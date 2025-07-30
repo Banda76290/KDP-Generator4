@@ -154,28 +154,20 @@ export default function EditBook() {
     },
   });
 
-  // Auto-save form data whenever anything changes (future-proof)
-  const watchedFormData = form.watch();
-  useEffect(() => {
-    if (!isCreating && !book) return; // Don't save until we have initial data
-    
-    const saveFormData = () => {
-      const currentFormData = {
-        ...watchedFormData,
-        keywords,
-        categories,
-        contributors,
-        isPartOfSeries
-      };
-      
-      const storageKey = `bookFormData_${bookId || 'new'}`;
-      sessionStorage.setItem(storageKey, JSON.stringify(currentFormData));
+  // Save current form state to session storage (for navigation to series creation only)
+  const saveFormDataToSession = () => {
+    const watchedFormData = form.watch();
+    const currentFormData = {
+      ...watchedFormData,
+      keywords,
+      categories,
+      contributors,
+      isPartOfSeries
     };
     
-    // Debounce saving to avoid excessive storage writes
-    const timeoutId = setTimeout(saveFormData, 500);
-    return () => clearTimeout(timeoutId);
-  }, [watchedFormData, keywords, categories, contributors, isPartOfSeries, bookId, isCreating, book]);
+    const storageKey = `bookFormData_${bookId || 'new'}`;
+    sessionStorage.setItem(storageKey, JSON.stringify(currentFormData));
+  };
 
   // Clean up auto-saved data when leaving the page normally (not via series creation)
   useEffect(() => {
@@ -784,7 +776,8 @@ export default function EditBook() {
                                   }
                                 } else {
                                   // Aucune série sélectionnée - créer une nouvelle série
-                                  // Le système de sauvegarde automatique se charge déjà de sauvegarder les données
+                                  // Sauvegarder les données SEULEMENT dans sessionStorage (pas en base de données)
+                                  saveFormDataToSession();
                                   sessionStorage.setItem('returnToBookEdit', bookId || 'new');
                                   
                                   // Rediriger vers la création de série
