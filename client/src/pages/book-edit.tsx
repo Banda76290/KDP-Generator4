@@ -170,6 +170,11 @@ export default function EditBook() {
     queryKey: ["/api/projects"],
   });
 
+  // Fetch series for selection
+  const { data: userSeries = [] } = useQuery({
+    queryKey: ["/api/series"],
+  });
+
   const saveBook = useMutation({
     mutationFn: async (data: { bookData: BookFormData; shouldNavigate?: boolean; nextTab?: string }) => {
       const formattedData = {
@@ -606,9 +611,17 @@ export default function EditBook() {
                                 <SelectValue placeholder="Choose a series..." />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="From Zero to Hero">From Zero to Hero</SelectItem>
-                                <SelectItem value="Marketing Mastery">Marketing Mastery</SelectItem>
-                                <SelectItem value="Business Basics">Business Basics</SelectItem>
+                                {userSeries.length > 0 ? (
+                                  userSeries.map((series: any) => (
+                                    <SelectItem key={series.id} value={series.title}>
+                                      {series.title}
+                                    </SelectItem>
+                                  ))
+                                ) : (
+                                  <SelectItem value="" disabled>
+                                    No series available - Create one first
+                                  </SelectItem>
+                                )}
                               </SelectContent>
                             </Select>
                           </div>
@@ -619,12 +632,15 @@ export default function EditBook() {
                               size="sm"
                               onClick={() => {
                                 // Si le livre a un seriesTitle, on redirige vers l'édition de cette série
-                                // Pour l'instant, on utilise un ID factice basé sur le titre de la série
                                 const seriesTitle = form.watch("seriesTitle");
                                 if (seriesTitle) {
-                                  // Conversion simple du titre en ID pour la démo
-                                  const seriesId = seriesTitle.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-                                  window.location.href = `/series-edit/${seriesId}`;
+                                  // Trouve l'ID réel de la série correspondant au titre
+                                  const matchingSeries = userSeries.find((s: any) => s.title === seriesTitle);
+                                  if (matchingSeries) {
+                                    window.location.href = `/series-edit/${matchingSeries.id}`;
+                                  } else {
+                                    window.location.href = '/manage-series';
+                                  }
                                 } else {
                                   window.location.href = '/manage-series';
                                 }
