@@ -2423,13 +2423,7 @@ export default function EditBook() {
           </div>
           
           {/* Modal Footer */}
-          <div className="flex justify-between items-center border-t pt-4">
-            <Button 
-              variant="outline" 
-              onClick={cancelCategoriesChanges}
-            >
-              Cancel
-            </Button>
+          <div className="flex justify-end items-center border-t pt-4">
             <Button 
               onClick={saveCategoriesChanges}
               className="bg-yellow-500 hover:bg-yellow-600 text-black"
