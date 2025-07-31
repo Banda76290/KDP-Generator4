@@ -2121,7 +2121,6 @@ export default function EditBook() {
                 <div className="space-y-6">
                   {/* Publishing Rights */}
                   <div className="space-y-4">
-                    <Label className="font-medium text-[16px]">Publishing Rights</Label>
                     <p className="text-sm text-gray-600">
                       Choose the option that applies to your book. Choosing the wrong option may result in your content being blocked.
                     </p>
