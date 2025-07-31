@@ -295,6 +295,21 @@ export const series = pgTable("series", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Marketplace Categories table for dynamic category loading
+export const marketplaceCategories = pgTable("marketplace_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  marketplace: varchar("marketplace").notNull(), // "Amazon.com", "Amazon.co.uk", etc.
+  categoryPath: text("category_path").notNull(), // Full path: "Books > Fiction > Romance"
+  parentPath: text("parent_path"), // Parent category path if any
+  level: integer("level").notNull().default(1), // Hierarchy level (1=root, 2=subcategory, etc.)
+  displayName: varchar("display_name").notNull(), // Category name to display
+  isSelectable: boolean("is_selectable").default(true), // Can be selected as final category
+  sortOrder: integer("sort_order").default(0), // For custom ordering
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 
 
 // System configuration table for admin settings
@@ -614,6 +629,14 @@ export const insertSeriesSchema = createInsertSchema(series).omit({
 });
 export type Series = typeof series.$inferSelect;
 export type InsertSeries = z.infer<typeof insertSeriesSchema>;
+
+export const insertMarketplaceCategorySchema = createInsertSchema(marketplaceCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type MarketplaceCategory = typeof marketplaceCategories.$inferSelect;
+export type InsertMarketplaceCategory = z.infer<typeof insertMarketplaceCategorySchema>;
 
 // Blog Zod schemas
 export const insertBlogCategorySchema = createInsertSchema(blogCategories).omit({

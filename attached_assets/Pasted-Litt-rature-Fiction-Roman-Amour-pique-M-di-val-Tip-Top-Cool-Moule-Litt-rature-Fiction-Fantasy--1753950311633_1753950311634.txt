@@ -1,0 +1,51 @@
+Littérature & Fiction	Roman	Amour	Épique	Médiéval	Tip	Top	Cool	Moule
+Littérature & Fiction	Fantasy	High Fantasy	Épique	Médiéval				
+Guide & Conseils	Bien-être	Méditation	Pleine conscience	Yoga	Yoga sur chaise			
+Enfants & Adolescents	Livres pour enfants	Albums illustrés	Animaux					
+Entreprise & Bourse	Entrepreneuriat	Start-up	Levée de fonds					
+Sciences, Techniques & Médecine	Informatique	Programmation	Python	Data Science				
+Littérature & Fiction	Fantasy	High Fantasy2	Épique	Médiéval				
+Guide & Conseils	Bien-être	Méditation	Pleine conscience	Yoga				
+Enfants & Adolescents	Livres pour enfants	Albums illustrés	Animaux					
+Entreprise & Bourse	Entrepreneuriat	Start-up	Levée de fonds					
+Sciences, Techniques & Médecine	Informatique	Programmation	Python	Data Science				
+Literature & Fiction	Fantasy	High Fantasy	Epic	Medieval				
+Guides & Advice	Wellness	Meditation	Mindfulness	Yoga				
+Children & Teens	Children's Books	Picture Books	Animals					
+Business & Finance	Entrepreneurship	Startups	Fundraising					
+Science, Tech & Medical	Computers & Technology	Programming	Python	Data Science				
+Literature & Fiction	Fantasy	High Fantasy	Epic	Medieval				
+Guides & Advice	Wellness	Meditation	Mindfulness	Yoga				
+Children & Teens	Children's Books	Picture Books	Animals					
+Business & Finance	Entrepreneurship	Startups	Fundraising					
+Science, Tech & Medical	Computers & Technology	Programming	Python	Data Science				
+Libros y Literatura	Fantasía	Alta fantasía	Épica	Medieval				
+Guías y Consejos	Bienestar	Meditación	Atención plena	Yoga				
+Infantil y Juvenil	Libros infantiles	Libros ilustrados	Animales					
+Negocios y Finanzas	Emprendimiento	Startups	Recaudación de fondos					
+Ciencia, Tecnología y Medicina	Informática	Programación	Python	Ciencia de datos				
+Libros y Literatura	Fantasía	Alta fantasía	Épica	Medieval				
+Guías y Consejos	Bienestar	Meditación	Atención plena	Yoga				
+Infantil y Juvenil	Libros infantiles	Libros ilustrados	Animales					
+Negocios y Finanzas	Emprendimiento	Startups	Recaudación de fondos					
+Ciencia, Tecnología y Medicina	Informática	Programación	Python	Ciencia de datos				
+Bücher & Literatur	Fantasy	High Fantasy	Episch	Mittelalterlich				
+Ratgeber & Tipps	Wellness	Meditation	Achtsamkeit	Yoga				
+Kinder & Jugendbücher	Kinderbücher	Bilderbücher	Tiere					
+Wirtschaft & Finanzen	Unternehmertum	Startups	Finanzierung					
+Wissenschaft, Technik & Medizin	Computer & Technologie	Programmierung	Python	Datenwissenschaft				
+Bücher & Literatur	Fantasy	High Fantasy	Episch	Mittelalterlich				
+Ratgeber & Tipps	Wellness	Meditation	Achtsamkeit	Yoga				
+Kinder & Jugendbücher	Kinderbücher	Bilderbücher	Tiere					
+Wirtschaft & Finanzen	Unternehmertum	Startups	Finanzierung					
+Wissenschaft, Technik & Medizin	Computer & Technologie	Programmierung	Python	Datenwissenschaft				
+Libri e Letteratura	Fantasy	High Fantasy	Epico	Medievale				
+Guide e Consigli	Benessere	Meditazione	Consapevolezza	Yoga				
+Bambini e Ragazzi	Libri per bambini	Libri illustrati	Animali					
+Affari e Finanza	Imprenditoria	Startup	Raccolta fondi					
+Scienza, Tecnologia e Medicina	Informatica	Programmazione	Python	Data Science				
+Libri e Letteratura	Fantasy	High Fantasy	Epico	Medievale				
+Guide e Consigli	Benessere	Meditazione	Consapevolezza	Yoga				
+Bambini e Ragazzi	Libri per bambini	Libri illustrati	Animali					
+Affari e Finanza	Imprenditoria	Startup	Raccolta fondi					
+Scienza, Tecnologia e Medicina	Informatica	Programmazione	Python	Data Science				

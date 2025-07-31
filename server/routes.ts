@@ -714,6 +714,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get marketplace categories
+  app.get('/api/marketplace-categories/:marketplace', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { marketplace } = req.params;
+      
+      if (!marketplace) {
+        return res.status(400).json({ message: "Marketplace parameter is required" });
+      }
+
+      const categories = await storage.getMarketplaceCategories(marketplace);
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching marketplace categories:", error);
+      res.status(500).json({ message: "Failed to fetch marketplace categories" });
+    }
+  });
+
   // Admin routes
   app.get('/api/admin/stats', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {

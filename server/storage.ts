@@ -11,6 +11,7 @@ import {
   blogPosts,
   blogComments,
   series,
+  marketplaceCategories,
   type User,
   type UpsertUser,
   type Project,
@@ -37,6 +38,7 @@ import {
   type InsertBlogComment,
   type Series,
   type InsertSeries,
+  type MarketplaceCategory,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, sum, count, like, or } from "drizzle-orm";
@@ -112,6 +114,9 @@ export interface IStorage {
   createSeries(series: InsertSeries): Promise<Series>;
   updateSeries(seriesId: string, userId: string, updates: Partial<InsertSeries>): Promise<Series>;
   deleteSeries(seriesId: string, userId: string): Promise<void>;
+
+  // Marketplace Categories operations
+  getMarketplaceCategories(marketplace: string): Promise<MarketplaceCategory[]>;
 
   // Blog operations
   getBlogCategories(): Promise<BlogCategory[]>;
@@ -1092,6 +1097,18 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(series)
       .where(and(eq(series.id, seriesId), eq(series.userId, userId)));
+  }
+
+  // Marketplace Categories operations
+  async getMarketplaceCategories(marketplace: string): Promise<MarketplaceCategory[]> {
+    return await db
+      .select()
+      .from(marketplaceCategories)
+      .where(and(
+        eq(marketplaceCategories.marketplace, marketplace),
+        eq(marketplaceCategories.isActive, true)
+      ))
+      .orderBy(marketplaceCategories.level, marketplaceCategories.sortOrder, marketplaceCategories.displayName);
   }
 }
 

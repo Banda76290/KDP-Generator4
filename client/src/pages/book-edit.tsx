@@ -17,7 +17,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { insertBookSchema, type Book } from "@shared/schema";
+import { insertBookSchema, type Book, type MarketplaceCategory } from "@shared/schema";
 import { z } from "zod";
 import Layout from "@/components/Layout";
 
@@ -100,8 +100,21 @@ const contributorRoles = [
   "Author", "Editor", "Foreword", "Illustrator", "Introduction", "Narrator", "Photographer", "Preface", "Translator", "Contributions by"
 ];
 
-// Categories structure matching Amazon KDP
-const availableCategories = [
+// Categories interface for API data
+interface MarketplaceCategory {
+  id: string;
+  marketplace: string;
+  categoryPath: string;
+  parentPath: string | null;
+  level: number;
+  displayName: string;
+  isSelectable: boolean;
+  sortOrder: number;
+  isActive: boolean;
+}
+
+// Categories structure matching Amazon KDP - fallback data
+const fallbackCategories = [
   {
     path: "Books › Computers & Technology › Business Technology",
     subcategories: [
@@ -145,6 +158,8 @@ export default function EditBook() {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [isPartOfSeries, setIsPartOfSeries] = useState(false);
   const [hasRestoredFromStorage, setHasRestoredFromStorage] = useState(false);
+  const [marketplaceCategories, setMarketplaceCategories] = useState<MarketplaceCategory[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
   // Store original series data to restore when checkbox is checked again
   const [originalSeriesData, setOriginalSeriesData] = useState<{
     seriesTitle: string;
@@ -834,9 +849,73 @@ export default function EditBook() {
     setCategories(categories.filter(c => c !== category));
   };
 
+  // Function to load categories for a specific marketplace
+  const loadMarketplaceCategories = async (marketplace: string) => {
+    if (!marketplace) return;
+    
+    setLoadingCategories(true);
+    try {
+      const response = await apiRequest("GET", `/api/marketplace-categories/${encodeURIComponent(marketplace)}`);
+      setMarketplaceCategories(response || []);
+    } catch (error) {
+      console.error("Error loading marketplace categories:", error);
+      // Fallback to empty array if error
+      setMarketplaceCategories([]);
+      toast({
+        title: "Error",
+        description: "Failed to load categories for selected marketplace",
+        variant: "destructive"
+      });
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
+
+  // Function to build category tree structure from flat database records
+  const buildCategoryTree = (categories: MarketplaceCategory[]) => {
+    const tree: any[] = [];
+    const categoryMap = new Map();
+
+    // Sort by level and sort order
+    const sortedCategories = [...categories].sort((a, b) => {
+      if (a.level !== b.level) return a.level - b.level;
+      return a.sortOrder - b.sortOrder;
+    });
+
+    // Build the tree structure
+    sortedCategories.forEach(category => {
+      const item = {
+        path: category.categoryPath,
+        displayName: category.displayName,
+        level: category.level,
+        isSelectable: category.isSelectable,
+        parentPath: category.parentPath,
+        subcategories: []
+      };
+
+      if (category.level === 1) {
+        tree.push(item);
+        categoryMap.set(category.categoryPath, item);
+      } else if (category.parentPath) {
+        const parent = categoryMap.get(category.parentPath);
+        if (parent) {
+          parent.subcategories.push(item);
+          categoryMap.set(category.categoryPath, item);
+        }
+      }
+    });
+
+    return tree;
+  };
+
   // Categories modal handlers
-  const openCategoriesModal = () => {
+  const openCategoriesModal = async () => {
     setSelectedCategories([...categories]);
+    
+    // Load categories for current marketplace
+    const currentMarketplace = form.watch("primaryMarketplace") || "Amazon.com";
+    await loadMarketplaceCategories(currentMarketplace);
+    
     setShowCategoriesModal(true);
   };
 
@@ -2258,9 +2337,18 @@ export default function EditBook() {
                 </p>
               </div>
 
+              {/* Loading State */}
+              {loadingCategories && (
+                <div className="flex justify-center items-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <span className="ml-2">Loading categories...</span>
+                </div>
+              )}
+
               {/* Category Tree Structure */}
-              <div className="space-y-2">
-                {availableCategories.map((category, index) => (
+              {!loadingCategories && (
+                <div className="space-y-2">
+                  {buildCategoryTree(marketplaceCategories).map((category, index) => (
                   <div key={index} className="border border-gray-200 rounded">
                     {/* Collapsed Category Header */}
                     <div 
@@ -2378,7 +2466,8 @@ export default function EditBook() {
                 >
                   Add another category
                 </Button>
-              </div>
+                </div>
+              )}
 
               {/* Selected Categories Summary */}
               <div className="space-y-4 bg-gray-50 rounded p-4">
