@@ -3435,7 +3435,7 @@ export default function EditBook() {
             <div>
               <h3 className="font-semibold text-base mb-2">Non Standard Trim Sizes:</h3>
               <p className="text-sm text-gray-600 mb-3">
-                These sizes have limited distribution options. <a href="#" className="text-blue-600 underline">How is my book affected?</a>
+                These sizes have limited distribution options.
               </p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {trimSizes.nonStandard.map((size) => (
