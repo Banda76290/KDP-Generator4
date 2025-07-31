@@ -2436,6 +2436,98 @@ export default function EditBook() {
                 </div>
               </div>
 
+              {/* Publication Date Section */}
+              <div className="bg-emerald-50 rounded-lg border border-emerald-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Publication Date</h3>
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600">
+                    The publication date tells readers when the book was originally published. If your book has not been published before, select the first option.
+                  </p>
+                  
+                  <div className="space-y-4">
+                    {/* Radio Button 1: Same date */}
+                    <div className="flex items-start space-x-3">
+                      <div className="flex items-center mt-1">
+                        <input
+                          type="radio"
+                          id="sameDateOption"
+                          name="publicationDateOption"
+                          checked={!form.watch("previouslyPublished")}
+                          onChange={() => {
+                            form.setValue("previouslyPublished", false);
+                            form.setValue("previousPublicationDate", null);
+                          }}
+                          className="w-4 h-4 text-[#38b6ff] border-gray-300 focus:ring-[#38b6ff]"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <Label htmlFor="sameDateOption" className="text-sm font-medium text-gray-900">
+                          Publication date and release date are the same
+                        </Label>
+                      </div>
+                    </div>
+
+                    {/* Radio Button 2: Previously published */}
+                    <div className="space-y-3">
+                      <div className="flex items-start space-x-3">
+                        <div className="flex items-center mt-1">
+                          <input
+                            type="radio"
+                            id="previouslyPublishedOption"
+                            name="publicationDateOption"
+                            checked={form.watch("previouslyPublished") || false}
+                            onChange={() => form.setValue("previouslyPublished", true)}
+                            className="w-4 h-4 text-[#38b6ff] border-gray-300 focus:ring-[#38b6ff]"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <Label htmlFor="previouslyPublishedOption" className="text-sm font-medium text-gray-900">
+                            My book was previously published
+                          </Label>
+                        </div>
+                      </div>
+
+                      {/* Conditional content for previously published */}
+                      {form.watch("previouslyPublished") && (
+                        <div className="ml-7 space-y-3 bg-gray-50 p-4 rounded-md">
+                          <p className="text-sm text-gray-700">
+                            Enter the date your book was previously published. One example of why a book might have a previous publish date is if you 
+                            purchased the rights for your book from another publisher.{' '}
+                            <a href="#" className="text-[#38b6ff] hover:text-[#146eb4] underline">
+                              Learn more about previously published dates for books
+                            </a>
+                            . This will not affect your Amazon release date.
+                          </p>
+                          
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              type="date"
+                              value={form.watch("previousPublicationDate") || ""}
+                              onChange={(e) => form.setValue("previousPublicationDate", e.target.value || null)}
+                              className="max-w-xs"
+                              placeholder="MM/DD/YYYY"
+                            />
+                            <div className="w-6 h-6 bg-gray-200 rounded border flex items-center justify-center">
+                              <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                          </div>
+                          
+                          <button
+                            type="button"
+                            onClick={() => form.setValue("previousPublicationDate", null)}
+                            className="text-[#38b6ff] hover:text-[#146eb4] text-sm"
+                          >
+                            Clear Date
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Additional Options Section */}
               <div className="bg-pink-50 rounded-lg border border-pink-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Options</h3>
@@ -2469,18 +2561,7 @@ export default function EditBook() {
                       </div>
                     </div>
 
-                    <div className="flex items-start space-x-2">
-                      <Checkbox
-                        id="previouslyPublished"
-                        checked={form.watch("previouslyPublished") || false}
-                        onCheckedChange={(checked) => form.setValue("previouslyPublished", checked as boolean)}
-                        className="mt-1"
-                      />
-                      <div className="flex-1">
-                        <Label htmlFor="previouslyPublished" className="font-medium text-[16px]">Previously published content</Label>
-                        <p className="text-sm text-gray-600 mt-1">Check this box if your content is at least 10% different from a version that has been previously published or sold on Amazon or elsewhere, or if the content is new to Amazon</p>
-                      </div>
-                    </div>
+
 
                     <div className="flex items-start space-x-2">
                       <Checkbox
@@ -2489,7 +2570,7 @@ export default function EditBook() {
                         onCheckedChange={(checked) => form.setValue("isLowContentBook", checked as boolean)}
                         className="mt-1"
                       />
-                      <Label htmlFor="useAI" className="font-medium text-[16px]">AI was used in creating this book</Label>
+                      <Label htmlFor="isLowContentBook" className="font-medium text-[16px]">Low-content book (e.g. journals, notebooks, and planners)</Label>
                     </div>
                   </div>
                 </div>
