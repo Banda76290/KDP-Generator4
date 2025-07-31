@@ -431,6 +431,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check ISBN uniqueness across all users
+  app.get('/api/books/check-isbn/:isbn', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { isbn } = req.params;
+      const { excludeBookId } = req.query;
+      
+      if (!isbn || isbn.trim() === '') {
+        return res.status(400).json({ message: "ISBN is required" });
+      }
+      
+      const existingBook = await storage.checkIsbnExists(isbn.trim(), excludeBookId as string);
+      
+      res.json({ 
+        exists: !!existingBook,
+        bookId: existingBook?.id || null
+      });
+    } catch (error) {
+      console.error("Error checking ISBN:", error);
+      res.status(500).json({ message: "Failed to check ISBN uniqueness" });
+    }
+  });
+
   // New route for duplicating books
   app.post('/api/books/:id/duplicate', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {

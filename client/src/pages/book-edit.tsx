@@ -531,6 +531,8 @@ export default function EditBook() {
   
   // ISBN Apply functionality states
   const [officialIsbnContentValue, setOfficialIsbnContentValue] = useState("");
+  const [isbnValidationError, setIsbnValidationError] = useState("");
+  const [isCheckingIsbn, setIsCheckingIsbn] = useState(false);
   const [showIsbnContentApplyDialog, setShowIsbnContentApplyDialog] = useState(false);
   
   // WYSIWYG Editor states for Description
@@ -1201,9 +1203,63 @@ export default function EditBook() {
     setContributors(contributors.filter(c => c.id !== id));
   };
 
+  // ISBN validation function
+  const checkIsbnUniqueness = async (isbn: string) => {
+    if (!isbn.trim()) {
+      setIsbnValidationError("");
+      return;
+    }
+
+    setIsCheckingIsbn(true);
+    try {
+      const response = await fetch(`/api/books/check-isbn/${encodeURIComponent(isbn.trim())}?excludeBookId=${bookId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.exists) {
+          setIsbnValidationError("This ISBN is already in use by another book. Please enter a unique ISBN.");
+        } else {
+          setIsbnValidationError("");
+        }
+      } else {
+        setIsbnValidationError("Unable to validate ISBN. Please try again.");
+      }
+    } catch (error) {
+      console.error('Error checking ISBN:', error);
+      setIsbnValidationError("Unable to validate ISBN. Please try again.");
+    } finally {
+      setIsCheckingIsbn(false);
+    }
+  };
+
+  // Debounced ISBN validation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (officialIsbnContentValue.trim()) {
+        checkIsbnUniqueness(officialIsbnContentValue);
+      }
+    }, 1000); // 1 second delay
+
+    return () => clearTimeout(timer);
+  }, [officialIsbnContentValue, bookId]);
+
   // ISBN Apply functionality
   const handleApplyIsbn = async () => {
     if (!officialIsbnContentValue.trim()) {
+      return;
+    }
+
+    // Check for validation errors before applying
+    if (isbnValidationError) {
+      toast.error({
+        title: "Cannot apply ISBN",
+        description: "Please resolve the validation error first."
+      });
       return;
     }
 
@@ -1220,6 +1276,7 @@ export default function EditBook() {
         // Reset the input value and close dialog
         setOfficialIsbnContentValue("");
         setShowIsbnContentApplyDialog(false);
+        setIsbnValidationError("");
         // Invalidate and refetch book data
         queryClient.invalidateQueries({ queryKey: [`/api/books/${bookId}`] });
       }
@@ -2722,17 +2779,35 @@ export default function EditBook() {
                     <div className="space-y-2">
                       <Label htmlFor="officialIsbnContent" className="text-sm font-medium">Official ISBN</Label>
                       <div className="flex gap-2">
-                        <Input
-                          id="officialIsbnContent"
-                          placeholder="Enter your own ISBN if you have one"
-                          value={officialIsbnContentValue}
-                          onChange={(e) => setOfficialIsbnContentValue(e.target.value)}
-                        />
+                        <div className="flex-1">
+                          <Input
+                            id="officialIsbnContent"
+                            placeholder="Enter your own ISBN if you have one"
+                            value={officialIsbnContentValue}
+                            onChange={(e) => {
+                              setOfficialIsbnContentValue(e.target.value);
+                              // Clear any existing error when user starts typing
+                              if (isbnValidationError) {
+                                setIsbnValidationError("");
+                              }
+                            }}
+                            className={`${isbnValidationError ? 'border-red-500 focus:border-red-500' : ''}`}
+                          />
+                          {isCheckingIsbn && (
+                            <p className="text-sm text-blue-600 mt-1 flex items-center gap-1">
+                              <span className="animate-spin inline-block w-3 h-3 border border-current border-t-transparent rounded-full"></span>
+                              Checking ISBN availability...
+                            </p>
+                          )}
+                          {isbnValidationError && (
+                            <p className="text-sm text-red-600 mt-1">{isbnValidationError}</p>
+                          )}
+                        </div>
                         <Button
                           type="button"
                           onClick={() => setShowIsbnContentApplyDialog(true)}
                           className="bg-[#ef4444] hover:bg-red-600 text-white flex-shrink-0"
-                          disabled={!officialIsbnContentValue?.trim()}
+                          disabled={!officialIsbnContentValue?.trim() || !!isbnValidationError || isCheckingIsbn}
                         >
                           Apply
                         </Button>

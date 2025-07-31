@@ -63,6 +63,7 @@ export interface IStorage {
   createBook(book: InsertBook): Promise<Book>;
   updateBook(bookId: string, userId: string, updates: Partial<InsertBook>): Promise<Book>;
   deleteBook(bookId: string, userId: string): Promise<void>;
+  checkIsbnExists(isbn: string, excludeBookId?: string): Promise<Book | undefined>;
 
   // Contributor operations
   getBookContributors(bookId: string): Promise<Contributor[]>;
@@ -630,6 +631,17 @@ export class DatabaseStorage implements IStorage {
 
   async deleteBook(bookId: string, userId: string): Promise<void> {
     await db.delete(books).where(and(eq(books.id, bookId), eq(books.userId, userId)));
+  }
+
+  async checkIsbnExists(isbn: string, excludeBookId?: string): Promise<Book | undefined> {
+    if (excludeBookId) {
+      const result = await db.select().from(books)
+        .where(and(eq(books.isbn, isbn), sql`${books.id} != ${excludeBookId}`));
+      return result[0];
+    }
+    
+    const result = await db.select().from(books).where(eq(books.isbn, isbn));
+    return result[0];
   }
 
   async getBookContributors(bookId: string): Promise<Contributor[]> {
