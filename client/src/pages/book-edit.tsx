@@ -100,6 +100,31 @@ const contributorRoles = [
   "Author", "Editor", "Foreword", "Illustrator", "Introduction", "Narrator", "Photographer", "Preface", "Translator", "Contributions by"
 ];
 
+const trimSizes = {
+  mostPopular: [
+    { id: "5x8", label: "5 x 8 in", metric: "12.7 x 20.32 cm" },
+    { id: "5.25x8", label: "5.25 x 8 in", metric: "13.34 x 20.32 cm" },
+    { id: "5.5x8.5", label: "5.5 x 8.5 in", metric: "13.97 x 21.59 cm" },
+    { id: "6x9", label: "6 x 9 in", metric: "15.24 x 22.86 cm" }
+  ],
+  moreStandard: [
+    { id: "5.06x7.81", label: "5.06 x 7.81 in", metric: "12.85 x 19.84 cm" },
+    { id: "6.14x9.21", label: "6.14 x 9.21 in", metric: "15.6 x 23.39 cm" },
+    { id: "6.69x9.61", label: "6.69 x 9.61 in", metric: "16.99 x 24.4 cm" },
+    { id: "7x10", label: "7 x 10 in", metric: "17.78 x 25.4 cm" },
+    { id: "7.44x9.69", label: "7.44 x 9.69 in", metric: "18.9 x 24.61 cm" },
+    { id: "7.5x9.25", label: "7.5 x 9.25 in", metric: "19.05 x 23.5 cm" },
+    { id: "8x10", label: "8 x 10 in", metric: "20.32 x 25.4 cm" },
+    { id: "8.5x11", label: "8.5 x 11 in", metric: "21.59 x 27.94 cm" }
+  ],
+  nonStandard: [
+    { id: "8.27x11.69", label: "8.27 x 11.69 in", metric: "21 x 29.7 cm" },
+    { id: "8.25x6", label: "8.25 x 6 in", metric: "20.96 x 15.24 cm" },
+    { id: "8.25x8.25", label: "8.25 x 8.25 in", metric: "20.96 x 20.96 cm" },
+    { id: "8.5x8.5", label: "8.5 x 8.5 in", metric: "21.59 x 21.59 cm" }
+  ]
+};
+
 
 
 // Categories interface for API data
@@ -496,6 +521,8 @@ export default function EditBook() {
   const [showMarketplaceConflictDialog, setShowMarketplaceConflictDialog] = useState(false);
   const [pendingMarketplace, setPendingMarketplace] = useState<string>("");
   const [incompatibleCategories, setIncompatibleCategories] = useState<string[]>([]);
+  const [trimSizeModalOpen, setTrimSizeModalOpen] = useState(false);
+  const [selectedTrimSize, setSelectedTrimSize] = useState("6x9");
   // Store original series data to restore when checkbox is checked again
   const [originalSeriesData, setOriginalSeriesData] = useState<{
     seriesTitle: string;
@@ -2712,7 +2739,10 @@ export default function EditBook() {
                             6 x 9 in<br />
                             <span className="text-gray-700">15.24 x 22.86 cm</span>
                           </button>
-                          <button className="p-3 text-left border border-gray-300 rounded-md hover:bg-gray-50 text-sm">
+                          <button 
+                            className="p-3 text-left border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
+                            onClick={() => setTrimSizeModalOpen(true)}
+                          >
                             Select a different size
                           </button>
                         </div>
@@ -3348,6 +3378,150 @@ export default function EditBook() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Trim Size Modal */}
+      <Dialog open={trimSizeModalOpen} onOpenChange={setTrimSizeModalOpen}>
+        <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <DialogTitle>Trim Size</DialogTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={() => setTrimSizeModalOpen(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Most Popular Standard Trim Sizes */}
+            <div>
+              <h3 className="font-semibold text-base mb-3">Most Popular Standard Trim Sizes:</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {trimSizes.mostPopular.map((size) => (
+                  <button
+                    key={size.id}
+                    onClick={() => setSelectedTrimSize(size.id)}
+                    className={`p-3 text-center border rounded-md text-sm transition-colors ${
+                      selectedTrimSize === size.id
+                        ? 'border-2 border-teal-500 bg-teal-50 font-medium'
+                        : 'border border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="font-medium">{size.label}</div>
+                    <div className="text-xs text-gray-500 mt-1">{size.metric}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* More Standard Trim Sizes */}
+            <div>
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="font-semibold text-base">More Standard Trim Sizes:</h3>
+                <a href="#" className="text-blue-600 underline text-sm">Compare all standard sizes</a>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {trimSizes.moreStandard.map((size) => (
+                  <button
+                    key={size.id}
+                    onClick={() => setSelectedTrimSize(size.id)}
+                    className={`p-3 text-center border rounded-md text-sm transition-colors ${
+                      selectedTrimSize === size.id
+                        ? 'border-2 border-teal-500 bg-teal-50 font-medium'
+                        : 'border border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="font-medium">{size.label}</div>
+                    <div className="text-xs text-gray-500 mt-1">{size.metric}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Non Standard Trim Sizes */}
+            <div>
+              <h3 className="font-semibold text-base mb-2">Non Standard Trim Sizes:</h3>
+              <p className="text-sm text-gray-600 mb-3">
+                These sizes have limited distribution options. <a href="#" className="text-blue-600 underline">How is my book affected?</a>
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {trimSizes.nonStandard.map((size) => (
+                  <button
+                    key={size.id}
+                    onClick={() => setSelectedTrimSize(size.id)}
+                    className={`p-3 text-center border rounded-md text-sm transition-colors ${
+                      selectedTrimSize === size.id
+                        ? 'border-2 border-teal-500 bg-teal-50 font-medium'
+                        : 'border border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="font-medium">{size.label}</div>
+                    <div className="text-xs text-gray-500 mt-1">{size.metric}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Self Define Trim Size */}
+            <div>
+              <h3 className="font-semibold text-base mb-2">Self Define Trim Size:</h3>
+              <p className="text-sm text-gray-600 mb-3">Set up your book with your own trim size.</p>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <Label htmlFor="customWidth" className="text-sm">Width:</Label>
+                  <Input
+                    id="customWidth"
+                    type="text"
+                    placeholder="Width"
+                    className="w-20 h-8 text-sm"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Label htmlFor="customHeight" className="text-sm">Height:</Label>
+                  <Input
+                    id="customHeight"
+                    type="text"
+                    placeholder="Height"
+                    className="w-20 h-8 text-sm"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Select defaultValue="in">
+                    <SelectTrigger className="w-16 h-8 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="in">in</SelectItem>
+                      <SelectItem value="cm">cm</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button variant="outline" size="sm" className="h-8">
+                  Select
+                </Button>
+              </div>
+            </div>
+          </div>
+          
+          {/* Modal Footer */}
+          <div className="flex justify-end space-x-2 pt-4 border-t">
+            <Button variant="outline" onClick={() => setTrimSizeModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                // Here you would update the trim size in the form
+                setTrimSizeModalOpen(false);
+              }}
+              className="bg-[#38b6ff] hover:bg-[#146eb4] text-white"
+            >
+              Select Size
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }
