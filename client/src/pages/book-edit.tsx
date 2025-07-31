@@ -2481,12 +2481,12 @@ export default function EditBook() {
 
       {/* Categories Edit Modal */}
       <Dialog open={showCategoriesModal} onOpenChange={setShowCategoriesModal}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
-          <DialogHeader className="border-b pb-4">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader className="border-b pb-4 flex-shrink-0">
             <DialogTitle className="text-xl font-semibold">Categories</DialogTitle>
           </DialogHeader>
           
-          <div className="overflow-y-auto max-h-[60vh] pr-2">
+          <div className="overflow-y-auto flex-1 pr-2 min-h-0">
             <div className="space-y-6">
               {/* Header Text */}
               <div className="space-y-2">
@@ -2506,29 +2506,67 @@ export default function EditBook() {
               {/* Category Selection Interface */}
               {!loadingCategories && marketplaceCategories.length > 0 && (
                 <div className="space-y-4">
-                  {/* Dynamic Category Selectors */}
-                  {selectedCategories.length < 3 && (
-                    <div className="border border-gray-200 rounded p-4">
-                      <h4 className="font-medium text-sm mb-3">Add Category {selectedCategories.length + 1}</h4>
-                      <CategorySelector 
-                        marketplaceCategories={marketplaceCategories}
-                        selectedCategories={selectedCategories}
-                        onCategorySelect={(categoryPath) => {
-                          if (!selectedCategories.includes(categoryPath)) {
-                            setSelectedCategories([...selectedCategories, categoryPath]);
-                          }
-                        }}
-                      />
+                  {/* Multiple Category Selectors */}
+                  {Array.from({ length: Math.max(1, selectedCategories.length + (selectedCategories.length < 3 ? 1 : 0)) }, (_, index) => (
+                    <div key={index} className="border border-gray-200 rounded">
+                      <div 
+                        className="flex items-center justify-between p-3 bg-gray-50 cursor-pointer hover:bg-gray-100"
+                        onClick={() => setExpandedCategory(expandedCategory === `selector-${index}` ? null : `selector-${index}`)}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 flex items-center justify-center">
+                            {expandedCategory === `selector-${index}` ? '▼' : '▶'}
+                          </div>
+                          <span className="font-medium">
+                            Category {index + 1} 
+                            {selectedCategories[index] && ` - ${selectedCategories[index].split(' › ').pop()}`}
+                          </span>
+                        </div>
+                        {selectedCategories[index] && (
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className="h-auto p-0 text-red-600 hover:text-red-800"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const newCategories = selectedCategories.filter((_, i) => i !== index);
+                              setSelectedCategories(newCategories);
+                            }}
+                          >
+                            Remove
+                          </Button>
+                        )}
+                      </div>
+                      
+                      {expandedCategory === `selector-${index}` && (
+                        <div className="p-4 border-t border-gray-200">
+                          <CategorySelector 
+                            marketplaceCategories={marketplaceCategories}
+                            selectedCategories={selectedCategories}
+                            onCategorySelect={(categoryPath) => {
+                              if (!selectedCategories.includes(categoryPath)) {
+                                const newCategories = [...selectedCategories];
+                                newCategories[index] = categoryPath;
+                                setSelectedCategories(newCategories.filter(Boolean));
+                              }
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
-                  )}
+                  ))}
                   
                   {/* Add Another Category Button */}
-                  {selectedCategories.length < 3 && selectedCategories.length > 0 && (
+                  {selectedCategories.length < 3 && (
                     <Button 
                       variant="link" 
                       className="text-blue-600 hover:text-blue-800 h-auto p-0"
                       onClick={() => {
-                        // This will trigger showing another category selector above
+                        if (selectedCategories.length === 0) {
+                          setExpandedCategory('selector-0');
+                        } else {
+                          setExpandedCategory(`selector-${selectedCategories.length}`);
+                        }
                       }}
                     >
                       Add another category
@@ -2572,7 +2610,7 @@ export default function EditBook() {
           </div>
           
           {/* Modal Footer */}
-          <div className="flex justify-between items-center border-t pt-4">
+          <div className="flex justify-between items-center border-t pt-4 flex-shrink-0 bg-white">
             <Button 
               variant="outline" 
               onClick={cancelCategoriesChanges}
