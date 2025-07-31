@@ -426,38 +426,29 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
                           setTimeout(() => {
                             console.log('Reconstructing navigation for level:', categoryData.level);
                             
-                            if (categoryData.level >= 2) {
-                              let level2Parent = categoryData;
-                              while (level2Parent && level2Parent.level > 2) {
-                                level2Parent = marketplaceCategories.find(cat => cat.categoryPath === level2Parent.parentPath);
-                              }
-                              if (level2Parent) {
-                                console.log('Setting level 1:', level2Parent.categoryPath);
-                                setSelectedLevel1(level2Parent.categoryPath);
-                              }
+                            // Build the full hierarchy path from the leaf category back to root
+                            const pathParts = categoryData.categoryPath.split(' > ');
+                            console.log('Category path parts:', pathParts);
+                            
+                            // For level 2+ categories, set level 1 (should be second segment)
+                            if (pathParts.length >= 2) {
+                              const level1Path = pathParts.slice(0, 2).join(' > ');
+                              console.log('Setting level 1:', level1Path);
+                              setSelectedLevel1(level1Path);
                             }
                             
-                            if (categoryData.level >= 3) {
-                              let level3Parent = categoryData;
-                              while (level3Parent && level3Parent.level > 3) {
-                                level3Parent = marketplaceCategories.find(cat => cat.categoryPath === level3Parent.parentPath);
-                              }
-                              if (level3Parent && level3Parent.level === 3) {
-                                console.log('Setting level 2:', level3Parent.categoryPath);
-                                setSelectedLevel2(level3Parent.categoryPath);
-                              }
+                            // For level 3+ categories, set level 2 (should be first 3 segments)
+                            if (pathParts.length >= 3) {
+                              const level2Path = pathParts.slice(0, 3).join(' > ');
+                              console.log('Setting level 2:', level2Path);
+                              setSelectedLevel2(level2Path);
                             }
                             
-                            if (categoryData.level >= 4) {
-                              // For level 4+ categories, find the direct level 3 parent
-                              let level3Parent = categoryData;
-                              while (level3Parent && level3Parent.level > 3) {
-                                level3Parent = marketplaceCategories.find(cat => cat.categoryPath === level3Parent.parentPath);
-                              }
-                              if (level3Parent && level3Parent.level === 3) {
-                                console.log('Setting level 3:', level3Parent.categoryPath);
-                                setSelectedLevel3(level3Parent.categoryPath);
-                              }
+                            // For level 4+ categories, set level 3 (should be first 4 segments)
+                            if (pathParts.length >= 4) {
+                              const level3Path = pathParts.slice(0, 4).join(' > ');
+                              console.log('Setting level 3:', level3Path);
+                              setSelectedLevel3(level3Path);
                             }
                             
                             // Reset manual navigation flag after a short delay
