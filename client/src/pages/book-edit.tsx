@@ -1645,7 +1645,7 @@ export default function EditBook() {
                     }, 50);
                   }
                 }}
-                className={`relative px-6 py-4 font-semibold text-base transition-all duration-200 ease-in-out ${
+                className={`relative px-6 py-2 font-semibold text-base transition-all duration-200 ease-in-out ${
                   activeTab === "details"
                     ? "text-white bg-[#38b6ff] rounded-t-lg shadow-lg border-b-3 border-[#38b6ff]"
                     : "text-gray-600 hover:text-[#146eb4] hover:bg-gray-50 rounded-t-lg border-b-2 border-transparent hover:border-gray-300"
@@ -1673,7 +1673,7 @@ export default function EditBook() {
                   }
                   setActiveTab("content");
                 }}
-                className={`relative px-6 py-4 font-semibold text-base transition-all duration-200 ease-in-out ${
+                className={`relative px-6 py-2 font-semibold text-base transition-all duration-200 ease-in-out ${
                   activeTab === "content"
                     ? "text-white bg-[#38b6ff] rounded-t-lg shadow-lg border-b-3 border-[#38b6ff]"
                     : "text-gray-600 hover:text-[#146eb4] hover:bg-gray-50 rounded-t-lg border-b-2 border-transparent hover:border-gray-300"
@@ -1701,7 +1701,7 @@ export default function EditBook() {
                   }
                   setActiveTab("pricing");
                 }}
-                className={`relative px-6 py-4 font-semibold text-base transition-all duration-200 ease-in-out ${
+                className={`relative px-6 py-2 font-semibold text-base transition-all duration-200 ease-in-out ${
                   activeTab === "pricing"
                     ? "text-white bg-[#38b6ff] rounded-t-lg shadow-lg border-b-3 border-[#38b6ff]"
                     : "text-gray-600 hover:text-[#146eb4] hover:bg-gray-50 rounded-t-lg border-b-2 border-transparent hover:border-gray-300"
