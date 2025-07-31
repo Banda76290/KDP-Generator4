@@ -2664,9 +2664,7 @@ export default function EditBook() {
               <div className="bg-teal-50 rounded-lg border border-teal-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">ISBN</h3>
                 <div className="space-y-4">
-                  <p className="text-sm text-gray-600">
-                    You can get a free KDP ISBN or use your own. Learn more about ISBNs.
-                  </p>
+                  <p className="text-sm text-gray-600">You can get a free KDP ISBN or use your own. KDP Generator automatically creates a “placeholder” ISBN for your book because it is necessary for the site to function properly until you replace it with a “real” one. Certain features (automatic import of your books, advertising management, income calculations, etc.) will only work fully automatically once you have replaced the placeholder ISBN with your book's real ISBN.</p>
                   <div className="space-y-3">
                     <div className="flex items-center space-x-2">
                       <input
@@ -3378,7 +3376,6 @@ export default function EditBook() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
       {/* Trim Size Modal */}
       <Dialog open={trimSizeModalOpen} onOpenChange={setTrimSizeModalOpen}>
         <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto">
