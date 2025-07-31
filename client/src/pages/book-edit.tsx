@@ -919,6 +919,8 @@ export default function EditBook() {
         seriesTitle: book.seriesTitle || "",
         seriesNumber: book.seriesNumber || null,
         editionNumber: book.editionNumber || null,
+        readingAgeMin: book.readingAgeMin ? parseInt(book.readingAgeMin) : null,
+        readingAgeMax: book.readingAgeMax ? parseInt(book.readingAgeMax) : null,
       });
 
       // Set series checkbox state and store original series data
