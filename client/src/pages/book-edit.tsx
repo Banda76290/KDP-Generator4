@@ -187,8 +187,9 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
   const maxDepth = useMemo(() => {
     if (marketplaceCategories.length === 0) return 3; // Default fallback
     const maxLevel = Math.max(...marketplaceCategories.map(cat => cat.level));
-    // We need one dropdown for each level except the final selectable level
-    return Math.max(maxLevel - 1, 1);
+    const minLevel = Math.min(...marketplaceCategories.map(cat => cat.level));
+    // We need one dropdown for each level from min to max-1
+    return Math.max(maxLevel - minLevel, 1);
   }, [marketplaceCategories]);
 
   // Dynamic state for navigation levels
@@ -274,24 +275,20 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
 
   // Get categories by level and parent (dynamic)
   const getCategoriesForLevel = (level: number, parentPath?: string) => {
-    console.log(`🔍 getCategoriesForLevel called with level=${level}, parentPath="${parentPath}"`);
-    console.log(`🔍 Total marketplaceCategories available: ${marketplaceCategories.length}`);
+    // Find the minimum level to start from
+    const minLevel = marketplaceCategories.length > 0 ? Math.min(...marketplaceCategories.map(cat => cat.level)) : 3;
     
-    if (level === 2) {
-      // Level 2 categories (main categories, children of "Books")
-      const level2Categories = marketplaceCategories
-        .filter(cat => cat.level === 2)
+    if (level === minLevel) {
+      // Root level categories (main categories, based on data structure)
+      return marketplaceCategories
+        .filter(cat => cat.level === minLevel)
         .sort((a, b) => a.sortOrder - b.sortOrder);
-      console.log(`🔍 Level 2 categories found: ${level2Categories.length}`, level2Categories.map(c => c.displayName));
-      return level2Categories;
     }
     
-    // For levels 3+, filter by parentPath
-    const levelCategories = marketplaceCategories
+    // For deeper levels, filter by parentPath
+    return marketplaceCategories
       .filter(cat => cat.level === level && cat.parentPath === parentPath)
       .sort((a, b) => a.sortOrder - b.sortOrder);
-    console.log(`🔍 Level ${level} categories found: ${levelCategories.length}`);
-    return levelCategories;
   };
 
   const getSelectableCategories = (parentPath: string) => {
@@ -344,7 +341,9 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
       <div className="space-y-4">
         {/* Generate dropdowns dynamically based on maxDepth */}
         {Array.from({ length: maxDepth }, (_, index) => {
-          const level = index + 2; // Levels start at 2 (main categories)
+          // Calculate the actual level based on the minimum level in our data
+          const minLevel = marketplaceCategories.length > 0 ? Math.min(...marketplaceCategories.map(cat => cat.level)) : 3;
+          const level = index + minLevel; // Levels start at the minimum level in our data
           const parentPath = index === 0 ? undefined : selectedLevels[index - 1];
           const shouldShow = index === 0 || (parentPath && parentPath !== "");
           
@@ -1356,14 +1355,7 @@ export default function EditBook() {
       const format = form.watch("format");
       const formatParam = format ? `?format=${encodeURIComponent(format)}` : '';
       const response = await apiRequest("GET", `/api/marketplace-categories/${encodeURIComponent(marketplace)}${formatParam}`);
-      console.log("📊 API Response received:", { 
-        marketplace, 
-        formatParam, 
-        responseLength: response?.length, 
-        firstCategory: response?.[0]?.displayName 
-      });
       setMarketplaceCategories(response || []);
-      console.log("📊 State updated, marketplaceCategories.length:", (response || []).length);
     } catch (error) {
       console.error("Error loading marketplace categories:", error);
       // Fallback to empty array if error
@@ -1374,7 +1366,6 @@ export default function EditBook() {
         variant: "destructive"
       });
     } finally {
-      console.log("📊 Setting loadingCategories to false");
       setLoadingCategories(false);
     }
   };
@@ -3421,12 +3412,7 @@ export default function EditBook() {
                 </div>
               )}
 
-              {/* Debug info */}
-              <div className="bg-yellow-50 border border-yellow-200 rounded p-2 text-xs">
-                <p>Debug: loadingCategories={loadingCategories.toString()}, marketplaceCategories.length={marketplaceCategories.length}</p>
-                <p>First category: {marketplaceCategories[0]?.displayName || 'N/A'}</p>
-                <p>Condition: !loadingCategories && marketplaceCategories.length &gt; 0 = {(!loadingCategories && marketplaceCategories.length > 0).toString()}</p>
-              </div>
+
 
               {/* Category Selection Interface */}
               {!loadingCategories && marketplaceCategories.length > 0 && (
