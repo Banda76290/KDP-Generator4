@@ -238,21 +238,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
     <div className="grid grid-cols-2 gap-4 min-w-[600px]">
       {/* Left side: Category dropdowns */}
       <div className="space-y-4">
-        {/* Reset Button */}
-        <div className="flex justify-end">
-          <Button
-            variant="link"
-            size="sm"
-            className="h-auto p-0 text-gray-600 hover:text-gray-800"
-            onClick={() => {
-              setSelectedLevel1("");
-              setSelectedLevel2("");
-              setSelectedLevel3("");
-            }}
-          >
-            Reset
-          </Button>
-        </div>
+        
 
         {/* Level 1: Main Categories */}
         <div className="space-y-2">
