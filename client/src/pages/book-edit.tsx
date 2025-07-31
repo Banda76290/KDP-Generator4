@@ -193,57 +193,38 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
   };
 
   return (
-    <div className="space-y-4">
-      {/* Reset Button */}
-      <div className="flex justify-end">
-        <Button
-          variant="link"
-          size="sm"
-          className="h-auto p-0 text-gray-600 hover:text-gray-800"
-          onClick={() => {
-            setSelectedLevel1("");
-            setSelectedLevel2("");
-            setSelectedLevel3("");
-          }}
-        >
-          Reset selections
-        </Button>
-      </div>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Left side: Category dropdowns */}
+      <div className="space-y-4">
+        {/* Reset Button */}
+        <div className="flex justify-end">
+          <Button
+            variant="link"
+            size="sm"
+            className="h-auto p-0 text-gray-600 hover:text-gray-800"
+            onClick={() => {
+              setSelectedLevel1("");
+              setSelectedLevel2("");
+              setSelectedLevel3("");
+            }}
+          >
+            Reset
+          </Button>
+        </div>
 
-      {/* Level 1: Main Categories */}
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Main Category</Label>
-        <Select value={selectedLevel1} onValueChange={(value) => {
-          setSelectedLevel1(value);
-          setSelectedLevel2("");
-          setSelectedLevel3("");
-        }}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select main category" />
-          </SelectTrigger>
-          <SelectContent>
-            {getLevel2Categories().map((category) => (
-              <SelectItem key={category.id} value={category.categoryPath}>
-                {category.displayName}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Level 2: Subcategories */}
-      {selectedLevel1 && (
+        {/* Level 1: Main Categories */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Subcategory</Label>
-          <Select value={selectedLevel2} onValueChange={(value) => {
-            setSelectedLevel2(value);
+          <Label className="text-sm font-medium">Category</Label>
+          <Select value={selectedLevel1} onValueChange={(value) => {
+            setSelectedLevel1(value);
+            setSelectedLevel2("");
             setSelectedLevel3("");
           }}>
             <SelectTrigger>
-              <SelectValue placeholder="Select subcategory" />
+              <SelectValue placeholder="Select category" />
             </SelectTrigger>
             <SelectContent>
-              {getLevel3Categories(selectedLevel1).map((category) => (
+              {getLevel2Categories().map((category) => (
                 <SelectItem key={category.id} value={category.categoryPath}>
                   {category.displayName}
                 </SelectItem>
@@ -251,71 +232,118 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
             </SelectContent>
           </Select>
         </div>
-      )}
 
-      {/* Level 3: Sub-subcategories */}
-      {selectedLevel2 && getLevel4Categories(selectedLevel2).length > 0 && (
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Subcategory Level 3</Label>
-          <Select value={selectedLevel3} onValueChange={setSelectedLevel3}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select subcategory" />
-            </SelectTrigger>
-            <SelectContent>
-              {getLevel4Categories(selectedLevel2).map((category) => (
-                <SelectItem key={category.id} value={category.categoryPath}>
-                  {category.displayName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
+        {/* Level 2: Subcategories */}
+        {selectedLevel1 && (
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Subcategory</Label>
+            <Select value={selectedLevel2} onValueChange={(value) => {
+              setSelectedLevel2(value);
+              setSelectedLevel3("");
+            }}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select subcategory" />
+              </SelectTrigger>
+              <SelectContent>
+                {getLevel3Categories(selectedLevel1).map((category) => (
+                  <SelectItem key={category.id} value={category.categoryPath}>
+                    {category.displayName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
-      {/* Final Selection */}
-      {(selectedLevel2 || selectedLevel3) && (
+        {/* Level 3: Sub-subcategories */}
+        {selectedLevel2 && getLevel4Categories(selectedLevel2).length > 0 && (
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Subcategory</Label>
+            <Select value={selectedLevel3} onValueChange={setSelectedLevel3}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select one" />
+              </SelectTrigger>
+              <SelectContent>
+                {getLevel4Categories(selectedLevel2).map((category) => (
+                  <SelectItem key={category.id} value={category.categoryPath}>
+                    {category.displayName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </div>
+
+      {/* Right side: Placement section */}
+      {(selectedLevel1 && (selectedLevel2 || selectedLevel3 || getSelectableCategories(selectedLevel1).length > 0)) && (
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Final Category Selection</Label>
-          <div className="bg-gray-50 rounded border p-3">
-            <h4 className="font-medium text-sm mb-3">Available categories to select:</h4>
-            <div className="space-y-2">
+          <Label className="text-sm font-medium">Placement</Label>
+          <div className="bg-gray-50 rounded border p-4 h-fit">
+            <div className="grid grid-cols-1 gap-3">
+              {/* Display selectable categories from current deepest level */}
               {getSelectableCategories(selectedLevel3 || selectedLevel2 || selectedLevel1).map((category) => (
-                <Button
-                  key={category.id}
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start text-left"
-                  onClick={() => onCategorySelect(category.categoryPath)}
-                  disabled={selectedCategories.includes(category.categoryPath)}
-                >
-                  {category.displayName}
-                  {selectedCategories.includes(category.categoryPath) && " (Selected)"}
-                </Button>
+                <div key={category.id} className="flex items-start space-x-2">
+                  <Checkbox
+                    id={`category-${category.id}`}
+                    checked={selectedCategories.includes(category.categoryPath)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        onCategorySelect(category.categoryPath);
+                      }
+                    }}
+                    className="mt-0.5"
+                  />
+                  <Label 
+                    htmlFor={`category-${category.id}`} 
+                    className="text-sm cursor-pointer leading-5"
+                  >
+                    {category.displayName}
+                  </Label>
+                </div>
               ))}
+              
               {/* Also allow selecting the current level if it's selectable */}
               {selectedLevel3 && marketplaceCategories.find(cat => cat.categoryPath === selectedLevel3)?.isSelectable && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start text-left"
-                  onClick={() => onCategorySelect(selectedLevel3)}
-                  disabled={selectedCategories.includes(selectedLevel3)}
-                >
-                  {marketplaceCategories.find(cat => cat.categoryPath === selectedLevel3)?.displayName}
-                  {selectedCategories.includes(selectedLevel3) && " (Selected)"}
-                </Button>
+                <div className="flex items-start space-x-2">
+                  <Checkbox
+                    id={`current-level3-${selectedLevel3}`}
+                    checked={selectedCategories.includes(selectedLevel3)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        onCategorySelect(selectedLevel3);
+                      }
+                    }}
+                    className="mt-0.5"
+                  />
+                  <Label 
+                    htmlFor={`current-level3-${selectedLevel3}`} 
+                    className="text-sm cursor-pointer leading-5"
+                  >
+                    {marketplaceCategories.find(cat => cat.categoryPath === selectedLevel3)?.displayName}
+                  </Label>
+                </div>
               )}
+              
               {selectedLevel2 && marketplaceCategories.find(cat => cat.categoryPath === selectedLevel2)?.isSelectable && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start text-left"
-                  onClick={() => onCategorySelect(selectedLevel2)}
-                  disabled={selectedCategories.includes(selectedLevel2)}
-                >
-                  {marketplaceCategories.find(cat => cat.categoryPath === selectedLevel2)?.displayName}
-                  {selectedCategories.includes(selectedLevel2) && " (Selected)"}
-                </Button>
+                <div className="flex items-start space-x-2">
+                  <Checkbox
+                    id={`current-level2-${selectedLevel2}`}
+                    checked={selectedCategories.includes(selectedLevel2)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        onCategorySelect(selectedLevel2);
+                      }
+                    }}
+                    className="mt-0.5"
+                  />
+                  <Label 
+                    htmlFor={`current-level2-${selectedLevel2}`} 
+                    className="text-sm cursor-pointer leading-5"
+                  >
+                    {marketplaceCategories.find(cat => cat.categoryPath === selectedLevel2)?.displayName}
+                  </Label>
+                </div>
               )}
             </div>
           </div>
