@@ -1212,7 +1212,14 @@ export default function EditBook() {
 
     setIsCheckingIsbn(true);
     try {
-      const response = await fetch(`/api/books/check-isbn/${encodeURIComponent(isbn.trim())}?excludeBookId=${bookId}`, {
+      // Only exclude current book if it doesn't already have this ISBN
+      // If the current book already has this ISBN, we don't exclude it to allow proper duplicate detection
+      const shouldExclude = book?.isbn !== isbn.trim();
+      const url = shouldExclude 
+        ? `/api/books/check-isbn/${encodeURIComponent(isbn.trim())}?excludeBookId=${bookId}`
+        : `/api/books/check-isbn/${encodeURIComponent(isbn.trim())}`;
+        
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -1246,7 +1253,7 @@ export default function EditBook() {
     }, 1000); // 1 second delay
 
     return () => clearTimeout(timer);
-  }, [officialIsbnContentValue, bookId]);
+  }, [officialIsbnContentValue, bookId, book?.isbn]);
 
   // ISBN Apply functionality
   const handleApplyIsbn = async () => {
