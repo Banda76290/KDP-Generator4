@@ -179,8 +179,8 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
 
   // Enhanced state restoration with proper stability checks
   useEffect(() => {
-    if (marketplaceCategories.length === 0 || isManualNavigation) {
-      return; // Wait for marketplace categories to load or skip during manual navigation
+    if (marketplaceCategories.length === 0 || isManualNavigation || tempUISelections.length > 0) {
+      return; // Wait for marketplace categories to load or skip during manual navigation or temp selections
     }
 
     // Find which category belongs to this instance based on instanceId
@@ -245,7 +245,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
         }
       }, 10); // Small delay to ensure proper state updates
     }
-  }, [selectedCategories, marketplaceCategories, instanceId, localCategorySnapshot, isManualNavigation]);
+  }, [selectedCategories, marketplaceCategories, instanceId, localCategorySnapshot, isManualNavigation, tempUISelections]);
 
   // Get categories by level and parent
   const getLevel2Categories = () => {
@@ -451,8 +451,8 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
                               setSelectedLevel3(level3Path);
                             }
                             
-                            // Reset manual navigation flag after a short delay
-                            setTimeout(() => setIsManualNavigation(false), 100);
+                            // Reset manual navigation flag after a longer delay to prevent conflicts
+                            setTimeout(() => setIsManualNavigation(false), 500);
                           }, 50);
                         }
                       }
