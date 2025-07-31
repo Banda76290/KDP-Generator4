@@ -750,16 +750,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get marketplace categories
+  // Get marketplace categories with format filter
   app.get('/api/marketplace-categories/:marketplace', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { marketplace } = req.params;
+      const { format } = req.query;
       
       if (!marketplace) {
         return res.status(400).json({ message: "Marketplace parameter is required" });
       }
 
-      const categories = await storage.getMarketplaceCategories(marketplace);
+      const categories = await storage.getMarketplaceCategoriesWithFormat(marketplace, format as string);
       res.json(categories);
     } catch (error) {
       console.error("Error fetching marketplace categories:", error);
@@ -1296,7 +1297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const result = await aiConfigService.generateContent({
         functionType,
-        context: context || { userId: req.user?.claims?.sub },
+        context: context || { userId: req.user?.id },
         customPrompt,
         customModel
       });
