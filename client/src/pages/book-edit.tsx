@@ -148,14 +148,24 @@ const fallbackCategories = [
 ];
 
 // Category Selector Component
-const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategorySelect }: {
+const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategorySelect, resetTrigger }: {
   marketplaceCategories: MarketplaceCategory[];
   selectedCategories: string[];
   onCategorySelect: (categoryPath: string) => void;
+  resetTrigger?: number;
 }) => {
   const [selectedLevel1, setSelectedLevel1] = useState<string>("");
   const [selectedLevel2, setSelectedLevel2] = useState<string>("");
   const [selectedLevel3, setSelectedLevel3] = useState<string>("");
+
+  // Reset selections when resetTrigger changes
+  useEffect(() => {
+    if (resetTrigger !== undefined) {
+      setSelectedLevel1("");
+      setSelectedLevel2("");
+      setSelectedLevel3("");
+    }
+  }, [resetTrigger]);
 
   // Get categories by level and parent
   const getLevel2Categories = () => {
@@ -184,6 +194,22 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
 
   return (
     <div className="space-y-4">
+      {/* Reset Button */}
+      <div className="flex justify-end">
+        <Button
+          variant="link"
+          size="sm"
+          className="h-auto p-0 text-gray-600 hover:text-gray-800"
+          onClick={() => {
+            setSelectedLevel1("");
+            setSelectedLevel2("");
+            setSelectedLevel3("");
+          }}
+        >
+          Reset selections
+        </Button>
+      </div>
+
       {/* Level 1: Main Categories */}
       <div className="space-y-2">
         <Label className="text-sm font-medium">Main Category</Label>
@@ -314,6 +340,7 @@ export default function EditBook() {
   const [hasRestoredFromStorage, setHasRestoredFromStorage] = useState(false);
   const [marketplaceCategories, setMarketplaceCategories] = useState<MarketplaceCategory[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
+  const [resetTriggers, setResetTriggers] = useState<{ [key: number]: number }>({});
   // Store original series data to restore when checkbox is checked again
   const [originalSeriesData, setOriginalSeriesData] = useState<{
     seriesTitle: string;
@@ -2522,20 +2549,44 @@ export default function EditBook() {
                             {selectedCategories[index] && ` - ${selectedCategories[index].split(' › ').pop()}`}
                           </span>
                         </div>
-                        {selectedCategories[index] && (
-                          <Button
-                            variant="link"
-                            size="sm"
-                            className="h-auto p-0 text-red-600 hover:text-red-800"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const newCategories = selectedCategories.filter((_, i) => i !== index);
-                              setSelectedCategories(newCategories);
-                            }}
-                          >
-                            Remove
-                          </Button>
-                        )}
+                        <div className="flex space-x-2">
+                          {selectedCategories[index] && (
+                            <>
+                              <Button
+                                variant="link"
+                                size="sm"
+                                className="h-auto p-0 text-gray-600 hover:text-gray-800"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // Reset the category selector for this index
+                                  setResetTriggers(prev => ({
+                                    ...prev,
+                                    [index]: (prev[index] || 0) + 1
+                                  }));
+                                  // Remove the category from selected categories
+                                  const newCategories = selectedCategories.filter((_, i) => i !== index);
+                                  setSelectedCategories(newCategories);
+                                  // Open the section to show the reset interface
+                                  setExpandedCategory(`selector-${index}`);
+                                }}
+                              >
+                                Reset
+                              </Button>
+                              <Button
+                                variant="link"
+                                size="sm"
+                                className="h-auto p-0 text-red-600 hover:text-red-800"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const newCategories = selectedCategories.filter((_, i) => i !== index);
+                                  setSelectedCategories(newCategories);
+                                }}
+                              >
+                                Remove
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </div>
                       
                       {expandedCategory === `selector-${index}` && (
@@ -2543,6 +2594,7 @@ export default function EditBook() {
                           <CategorySelector 
                             marketplaceCategories={marketplaceCategories}
                             selectedCategories={selectedCategories}
+                            resetTrigger={resetTriggers[index]}
                             onCategorySelect={(categoryPath) => {
                               if (!selectedCategories.includes(categoryPath)) {
                                 const newCategories = [...selectedCategories];
