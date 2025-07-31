@@ -30,6 +30,7 @@ export default function Projects() {
   const { data: projects, isLoading: projectsLoading, error } = useQuery({
     queryKey: ["/api/projects"],
     enabled: isAuthenticated,
+    staleTime: 0, // Always refetch to get latest book changes including ISBN
   });
 
   // Duplication mutation

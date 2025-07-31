@@ -83,6 +83,7 @@ function BooksContent() {
   // Fetch all books
   const { data: books = [], isLoading: booksLoading } = useQuery<Book[]>({
     queryKey: ["/api/books"],
+    staleTime: 0, // Always refetch to get latest ISBN changes
   });
 
   // Fetch all projects for assignment dropdown
