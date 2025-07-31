@@ -1642,7 +1642,7 @@ export default function EditBook() {
                       />
                       <div className="flex-1">
                         <Label htmlFor="useAI" className="text-sm font-medium">AI-generated content</Label>
-                        <p className="text-sm text-gray-600 mt-1">Check this box if this content has been generated using AI tools. When you check this box, you must also acknowledge that your use of AI-generated content follows all applicable guidelines. <span className="text-blue-600 underline cursor-pointer">Learn more</span></p>
+                        <p className="text-sm text-gray-600 mt-1">Check this box if this content has been generated using AI tools. When you check this box, you must also acknowledge that your use of AI-generated content follows all applicable guidelines.</p>
                       </div>
                     </div>
 
