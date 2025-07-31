@@ -1758,10 +1758,7 @@ export default function EditBook() {
                         />
                         <div className="flex-1">
                           <Label htmlFor="isLowContentBook" className="text-sm font-normal">
-                            Low-content book (e.g. journals, notebooks, and planners){' '}
-                            <button type="button" className="text-blue-600 hover:text-blue-800 underline">
-                              What's a low-content book?
-                            </button>
+                            Low-content book (e.g. journals, notebooks, and planners)
                           </Label>
                         </div>
                       </div>
