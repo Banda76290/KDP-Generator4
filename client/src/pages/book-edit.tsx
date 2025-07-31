@@ -1530,14 +1530,14 @@ export default function EditBook() {
                       onValueChange={(value) => form.setValue("publishingRights", value as any)}
                     >
                       <div className="flex items-start space-x-2">
-                        <RadioGroupItem value="owned" id="owned" className="mt-1" />
+                        <RadioGroupItem value="owned" id="owned" className="mt-1 bg-[#ffffff]" />
                         <div className="flex-1">
                           <Label htmlFor="owned" className="text-sm font-medium">I own the copyright and hold publishing rights</Label>
                           <p className="text-sm text-gray-600 mt-1">You wrote the book yourself, bought the rights from someone else, or work for the publisher that holds the rights.</p>
                         </div>
                       </div>
                       <div className="flex items-start space-x-2">
-                        <RadioGroupItem value="public-domain" id="public-domain" className="mt-1" />
+                        <RadioGroupItem value="public-domain" id="public-domain" className="mt-1 bg-[#ffffff]" />
                         <div className="flex-1">
                           <Label htmlFor="public-domain" className="text-sm font-medium">This is a public domain work</Label>
                           <p className="text-sm text-gray-600 mt-1">The content is in the public domain and you have the right to publish it.</p>
