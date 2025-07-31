@@ -1605,16 +1605,7 @@ export default function EditBook() {
               <p className="text-gray-600">{isCreating ? 'Set up your new book with all the details' : 'Update your book details and settings'}</p>
             </div>
           </div>
-          {!isCreating && (
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={deleteBook.isPending}
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete Book
-            </Button>
-          )}
+
         </div>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -3285,6 +3276,16 @@ export default function EditBook() {
               Cancel
             </Button>
             <div className="flex space-x-3">
+              {!isCreating && (
+                <Button
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={deleteBook.isPending}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Book
+                </Button>
+              )}
               <Button
                 type="button"
                 variant="outline"
