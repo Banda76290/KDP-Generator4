@@ -3382,16 +3382,8 @@ export default function EditBook() {
       {/* Trim Size Modal */}
       <Dialog open={trimSizeModalOpen} onOpenChange={setTrimSizeModalOpen}>
         <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <DialogHeader className="pb-2">
             <DialogTitle>Trim Size</DialogTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-              onClick={() => setTrimSizeModalOpen(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </DialogHeader>
           
           <div className="space-y-6">
