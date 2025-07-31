@@ -75,17 +75,10 @@ export default function SeriesListPage() {
       // Invalidate queries to refresh the data
       queryClient.invalidateQueries({ queryKey: ['/api/series'] });
       queryClient.invalidateQueries({ queryKey: ['/api/books'] });
-      toast({
-        title: "Book Removed",
-        description: "The book has been successfully removed from the series.",
-      });
+      toast.success({ title: "Book Removed", description: "The book has been successfully removed from the series." });
     },
     onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to remove book from series",
-        variant: "destructive",
-      });
+      toast.error({ title: "Error", description: error.message || "Failed to remove book from series" });
     },
   });
 
@@ -99,17 +92,10 @@ export default function SeriesListPage() {
       queryClient.invalidateQueries({ queryKey: ['/api/series'] });
       queryClient.invalidateQueries({ queryKey: ['/api/books'] });
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
-      toast({
-        title: "Series Deleted",
-        description: "The series has been successfully deleted.",
-      });
+      toast.success({ title: "Series Deleted", description: "The series has been successfully deleted." });
     },
     onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete series",
-        variant: "destructive",
-      });
+      toast.error({ title: "Error", description: error.message || "Failed to delete series" });
     },
   });
 
@@ -198,7 +184,7 @@ export default function SeriesListPage() {
               />
             </div>
             
-            <Select value={sortBy} onValueChange={setSortBy}>
+            <Select value={sortBy} onValueChange={(value) => setSortBy(value as typeof sortBy)}>
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
