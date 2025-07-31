@@ -7,6 +7,7 @@ import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, in
 import { aiService } from "./services/aiService";
 import { parseKDPReport } from "./services/kdpParser";
 import { generateUniqueIsbnPlaceholder, ensureIsbnPlaceholder } from "./utils/isbnGenerator";
+import { seedDatabase, forceSeedDatabase } from "./seedDatabase.js";
 import { z } from "zod";
 import OpenAI from "openai";
 
@@ -1506,6 +1507,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching field values:", error);
       res.status(500).json({ message: "Failed to fetch field values" });
+    }
+  });
+
+  // Database seeding endpoints (admin only)
+  app.post('/api/admin/database/seed', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      await seedDatabase();
+      res.json({ 
+        message: 'Database seeding completed successfully',
+        success: true 
+      });
+    } catch (error) {
+      console.error("Error seeding database:", error);
+      res.status(500).json({ 
+        message: "Failed to seed database",
+        error: error instanceof Error ? error.message : 'Unknown error',
+        success: false 
+      });
+    }
+  });
+
+  app.post('/api/admin/database/reset', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      await forceSeedDatabase();
+      res.json({ 
+        message: 'Database reset and re-seeding completed successfully',
+        success: true 
+      });
+    } catch (error) {
+      console.error("Error resetting database:", error);
+      res.status(500).json({ 
+        message: "Failed to reset database",
+        error: error instanceof Error ? error.message : 'Unknown error',
+        success: false 
+      });
     }
   });
 
