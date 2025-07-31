@@ -6,6 +6,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema } from "@shared/schema";
 import { aiService } from "./services/aiService";
 import { parseKDPReport } from "./services/kdpParser";
+import { generateUniqueIsbnPlaceholder, ensureIsbnPlaceholder } from "./utils/isbnGenerator";
 import { z } from "zod";
 import OpenAI from "openai";
 
@@ -310,6 +311,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const book = await storage.createBook(bookData);
       console.log('Created book:', book);
       
+      // Generate ISBN placeholder if book doesn't have an official ISBN
+      if (!book.isbn || book.isbn.startsWith('PlaceHolder-')) {
+        const isbnPlaceholder = await ensureIsbnPlaceholder(book.id, book.isbn);
+        if (isbnPlaceholder) {
+          console.log('Generated ISBN placeholder:', isbnPlaceholder);
+        }
+      }
+      
       res.json(book);
     } catch (error) {
       console.error("Error creating book:", error);
@@ -361,6 +370,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updates = insertBookSchema.partial().parse(req.body);
       
       const book = await storage.updateBook(req.params.id, userId, updates);
+      
+      // Generate or ensure ISBN placeholder if book doesn't have an official ISBN
+      if (!book.isbn || book.isbn.startsWith('PlaceHolder-')) {
+        const isbnPlaceholder = await ensureIsbnPlaceholder(book.id, book.isbn);
+        if (isbnPlaceholder) {
+          console.log('Ensured ISBN placeholder:', isbnPlaceholder);
+        }
+      }
+      
       res.json(book);
     } catch (error) {
       console.error("Error updating book:", error);
@@ -380,6 +398,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updates = insertBookSchema.partial().parse(req.body);
       
       const book = await storage.updateBook(req.params.id, userId, updates);
+      
+      // Generate or ensure ISBN placeholder if book doesn't have an official ISBN
+      if (!book.isbn || book.isbn.startsWith('PlaceHolder-')) {
+        const isbnPlaceholder = await ensureIsbnPlaceholder(book.id, book.isbn);
+        if (isbnPlaceholder) {
+          console.log('Ensured ISBN placeholder:', isbnPlaceholder);
+        }
+      }
+      
       res.json(book);
     } catch (error) {
       console.error("Error updating book:", error);

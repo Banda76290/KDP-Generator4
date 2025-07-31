@@ -2710,13 +2710,13 @@ export default function EditBook() {
                       <Label htmlFor="isbnPlaceholderContent" className="text-sm font-medium">ISBN Placeholder</Label>
                       <Input
                         id="isbnPlaceholderContent"
-                        placeholder="Free KDP ISBN will be assigned"
-                        defaultValue=""
+                        placeholder="PlaceHolder ISBN will be auto-generated"
+                        value={book?.isbnPlaceholder || ""}
                         disabled
                         className="bg-gray-100"
                       />
                       <p className="text-sm text-gray-500">
-                        Amazon will assign a free ISBN if Official ISBN is not provided
+                        This unique placeholder ISBN is automatically generated for system functionality
                       </p>
                     </div>
                     <div className="space-y-2">

@@ -186,6 +186,10 @@ export const books = pgTable("books", {
   publicationInfo: jsonb("publication_info"),
   coverImageUrl: varchar("cover_image_url"),
   
+  // ISBN Information
+  isbn: varchar("isbn").unique(),
+  isbnPlaceholder: varchar("isbn_placeholder").unique(),
+  
   // Sales tracking
   totalSales: integer("total_sales").default(0),
   totalRevenue: decimal("total_revenue", { precision: 10, scale: 2 }).default("0.00"),
