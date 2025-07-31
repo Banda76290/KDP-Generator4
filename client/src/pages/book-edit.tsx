@@ -1073,10 +1073,22 @@ export default function EditBook() {
 
   // Handle marketplace change with compatibility check
   const handleMarketplaceChange = async (newMarketplace: string) => {
-    const currentCategories = form.getValues("categories") || [];
+    // Check both form categories and local categories state
+    const formCategories = form.getValues("categories") || [];
+    const localCategories = categories || [];
+    const allCurrentCategories = [...new Set([...formCategories, ...localCategories])]; // Combine and deduplicate
     
-    if (currentCategories.length > 0) {
-      const incompatible = await checkCategoryCompatibility(newMarketplace, currentCategories);
+    console.log("Marketplace change check:", { 
+      newMarketplace, 
+      formCategories, 
+      localCategories, 
+      allCurrentCategories 
+    });
+    
+    if (allCurrentCategories.length > 0) {
+      const incompatible = await checkCategoryCompatibility(newMarketplace, allCurrentCategories);
+      
+      console.log("Compatibility check result:", { incompatible });
       
       if (incompatible.length > 0) {
         setPendingMarketplace(newMarketplace);
@@ -1093,12 +1105,15 @@ export default function EditBook() {
 
   // Handle conflict dialog actions
   const proceedWithMarketplaceChange = () => {
-    // Remove incompatible categories and change marketplace
-    const currentCategories = form.getValues("categories") || [];
-    const compatibleCategories = currentCategories.filter(cat => !incompatibleCategories.includes(cat));
+    // Remove incompatible categories from both form and local state
+    const formCategories = form.getValues("categories") || [];
+    const localCategories = categories || [];
     
-    form.setValue("categories", compatibleCategories);
-    setCategories(compatibleCategories);
+    const compatibleFormCategories = formCategories.filter(cat => !incompatibleCategories.includes(cat));
+    const compatibleLocalCategories = localCategories.filter(cat => !incompatibleCategories.includes(cat));
+    
+    form.setValue("categories", compatibleFormCategories);
+    setCategories(compatibleLocalCategories);
     form.setValue("primaryMarketplace", pendingMarketplace);
     loadMarketplaceCategories(pendingMarketplace);
     
@@ -1106,7 +1121,7 @@ export default function EditBook() {
     setPendingMarketplace("");
     setIncompatibleCategories([]);
     
-    toast.success("Marketplace changed and incompatible categories removed");
+    toast.success(`Marketplace changed to ${pendingMarketplace} and ${incompatibleCategories.length} incompatible categories removed`);
   };
 
   const cancelMarketplaceChange = () => {
