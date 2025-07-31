@@ -1667,6 +1667,27 @@ export default function EditBook() {
                 </div>
               </div>
 
+              {/* Marketplace Settings Section */}
+              <div className="bg-teal-50 rounded-lg border border-teal-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Marketplace Settings</h3>
+                <div className="space-y-2">
+                  <Label htmlFor="primaryMarketplace" className="font-medium text-[16px]">Primary Marketplace</Label>
+                  <Select 
+                    value={form.watch("primaryMarketplace") || ""} 
+                    onValueChange={(value) => form.setValue("primaryMarketplace", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select primary marketplace" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {marketplaces.map((marketplace) => (
+                        <SelectItem key={marketplace} value={marketplace}>{marketplace}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               {/* Categories & Keywords Section */}
               <div className="bg-indigo-50 rounded-lg border border-indigo-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Categories & Keywords</h3>
@@ -1824,26 +1845,7 @@ export default function EditBook() {
                 </div>
               </div>
 
-              {/* Marketplace Settings Section */}
-              <div className="bg-teal-50 rounded-lg border border-teal-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Marketplace Settings</h3>
-                <div className="space-y-2">
-                  <Label htmlFor="primaryMarketplace" className="font-medium text-[16px]">Primary Marketplace</Label>
-                  <Select 
-                    value={form.watch("primaryMarketplace") || ""} 
-                    onValueChange={(value) => form.setValue("primaryMarketplace", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select primary marketplace" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {marketplaces.map((marketplace) => (
-                        <SelectItem key={marketplace} value={marketplace}>{marketplace}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+
             </CardContent>
           </Card>
           )}

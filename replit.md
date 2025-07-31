@@ -456,6 +456,12 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Interface dynamique**: Les options disponibles changent en temps réel selon les sélections utilisateur
 - **Conformité KDP**: Logique conforme aux règles d'Amazon KDP pour la classification des âges
 
+### Element Deletion and Card Reorganization (31 Juillet 2025) ✅ RÉSOLU
+- **Suppression span "Learn more"**: Élément span supprimé de la ligne 1549 dans la section Sexually Explicit Content
+- **Réorganisation cartes**: Carte "Marketplace Settings" déplacée entre "Primary Audience" et "Categories & Keywords"
+- **Ordre logique optimisé**: Flux d'informations amélioré avec positionnement des cartes selon la logique métier
+- **Structure finale**: Primary Audience → Marketplace Settings → Categories & Keywords pour un workflow naturel
+
 ### Visual Section Separation Implementation (31 Juillet 2025) 🚧 EN COURS
 - **Cartes colorées**: Début d'implémentation de sections visuellement séparées avec des cartes colorées dans book-edit.tsx
 - **Structure améliorée**: Regroupement logique des champs en sections thématiques (projet, informations de base, série/édition, auteurs/contributeurs, description, droits/options)
