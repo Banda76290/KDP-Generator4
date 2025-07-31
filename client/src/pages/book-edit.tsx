@@ -3043,15 +3043,31 @@ export default function EditBook() {
               {/* ISBN Section */}
               <div className="bg-indigo-50 rounded-lg border border-indigo-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">ISBN</h3>
-                <div className="space-y-2">
-                  <Input
-                    id="isbnTemp"
-                    placeholder="Enter ISBN if you have one"
-                    defaultValue=""
-                  />
-                  <p className="text-sm text-gray-500">
-                    Leave blank to get a free Amazon ISBN
-                  </p>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="isbnPlaceholder" className="text-sm font-medium">ISBN Placeholder</Label>
+                    <Input
+                      id="isbnPlaceholder"
+                      placeholder="Free KDP ISBN will be assigned"
+                      defaultValue=""
+                      disabled
+                      className="bg-gray-100"
+                    />
+                    <p className="text-sm text-gray-500">
+                      Amazon will assign a free ISBN if Official ISBN is not provided
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="officialIsbn" className="text-sm font-medium">Official ISBN</Label>
+                    <Input
+                      id="officialIsbn"
+                      placeholder="Enter your own ISBN if you have one"
+                      defaultValue=""
+                    />
+                    <p className="text-sm text-gray-500">
+                      Enter your own ISBN number if you have purchased one
+                    </p>
+                  </div>
                 </div>
               </div>
 
