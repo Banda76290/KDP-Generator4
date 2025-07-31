@@ -1773,10 +1773,7 @@ export default function EditBook() {
                           </div>
                           <div className="flex-1">
                             <p className="text-sm text-blue-800">
-                              Low-content selection can't be changed after you've published your book.{' '}
-                              <button type="button" className="text-blue-600 hover:text-blue-800 underline">
-                                Learn more about low-content books.
-                              </button>
+                              Low-content selection can't be changed after you've published your book.
                             </p>
                           </div>
                         </div>
