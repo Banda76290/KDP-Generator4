@@ -179,13 +179,14 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
 
   // Enhanced state restoration with proper stability checks
   useEffect(() => {
-    if (marketplaceCategories.length === 0 || isManualNavigation || tempUISelections.length > 0) {
-      return; // Wait for marketplace categories to load or skip during manual navigation or temp selections
+    if (marketplaceCategories.length === 0 || isManualNavigation) {
+      return; // Wait for marketplace categories to load or skip during manual navigation
     }
 
     // Find which category belongs to this instance based on instanceId
     const instanceIndex = instanceId ? parseInt(instanceId.split('-')[1]) : 0;
-    const thisInstanceCategory = selectedCategories[instanceIndex];
+    // Use tempUISelections if available, otherwise fall back to selectedCategories
+    const thisInstanceCategory = tempUISelections[instanceIndex] || selectedCategories[instanceIndex];
     
     // Only trigger reconstruction if the category assigned to this instance has actually changed
     if (localCategorySnapshot === thisInstanceCategory) {
@@ -215,33 +216,32 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
         return; // Already correctly set, don't reconstruct
       }
       
-      // Reconstruct the hierarchy for this specific category only if needed
-      // Use a timeout to prevent state conflicts
+      // Reconstruct the hierarchy using the same logic as manual selection
       setTimeout(() => {
-        if (categoryData.level >= 2) {
-          // Find level 2 parent
-          let level2Parent = categoryData;
-          while (level2Parent && level2Parent.level > 2) {
-            level2Parent = marketplaceCategories.find(cat => cat.categoryPath === level2Parent.parentPath);
-          }
-          if (level2Parent && selectedLevel1 !== level2Parent.categoryPath) {
-            setSelectedLevel1(level2Parent.categoryPath);
+        const pathParts = categoryData.categoryPath.split(' > ');
+        
+        // For level 2+ categories, set level 1 (should be second segment)
+        if (pathParts.length >= 2) {
+          const level1Path = pathParts.slice(0, 2).join(' > ');
+          if (selectedLevel1 !== level1Path) {
+            setSelectedLevel1(level1Path);
           }
         }
         
-        if (categoryData.level >= 3) {
-          // Find level 3 parent
-          let level3Parent = categoryData;
-          while (level3Parent && level3Parent.level > 3) {
-            level3Parent = marketplaceCategories.find(cat => cat.categoryPath === level3Parent.parentPath);
-          }
-          if (level3Parent && level3Parent.level === 3 && selectedLevel2 !== level3Parent.categoryPath) {
-            setSelectedLevel2(level3Parent.categoryPath);
+        // For level 3+ categories, set level 2 (should be first 3 segments)
+        if (pathParts.length >= 3) {
+          const level2Path = pathParts.slice(0, 3).join(' > ');
+          if (selectedLevel2 !== level2Path) {
+            setSelectedLevel2(level2Path);
           }
         }
         
-        if (categoryData.level >= 4 && selectedLevel3 !== categoryData.categoryPath) {
-          setSelectedLevel3(categoryData.categoryPath);
+        // For level 4+ categories, set level 3 (should be first 4 segments)
+        if (pathParts.length >= 4) {
+          const level3Path = pathParts.slice(0, 4).join(' > ');
+          if (selectedLevel3 !== level3Path) {
+            setSelectedLevel3(level3Path);
+          }
         }
       }, 10); // Small delay to ensure proper state updates
     }
