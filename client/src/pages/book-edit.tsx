@@ -1367,6 +1367,7 @@ export default function EditBook() {
         variant: "destructive"
       });
     } finally {
+      console.log("📊 Setting loadingCategories to false");
       setLoadingCategories(false);
     }
   };
@@ -3417,6 +3418,7 @@ export default function EditBook() {
               <div className="bg-yellow-50 border border-yellow-200 rounded p-2 text-xs">
                 <p>Debug: loadingCategories={loadingCategories.toString()}, marketplaceCategories.length={marketplaceCategories.length}</p>
                 <p>First category: {marketplaceCategories[0]?.displayName || 'N/A'}</p>
+                <p>Condition: !loadingCategories && marketplaceCategories.length &gt; 0 = {(!loadingCategories && marketplaceCategories.length > 0).toString()}</p>
               </div>
 
               {/* Category Selection Interface */}
