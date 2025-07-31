@@ -2500,6 +2500,7 @@ export default function EditBook() {
                               type="date"
                               value={form.watch("previousPublicationDate") || ""}
                               onChange={(e) => form.setValue("previousPublicationDate", e.target.value || null)}
+                              max={new Date().toISOString().split('T')[0]}
                               className="max-w-xs"
                               placeholder="MM/DD/YYYY"
                             />
