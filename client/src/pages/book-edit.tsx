@@ -1576,7 +1576,6 @@ export default function EditBook() {
               <div className="bg-gray-50 rounded-lg border p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Project Association</h3>
                 <div className="space-y-2">
-                  <Label htmlFor="projectId" className="font-medium text-[16px]">Project *</Label>
                   <p className="text-sm text-gray-600">
                     Select the project this book belongs to.
                   </p>
