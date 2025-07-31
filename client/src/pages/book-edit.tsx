@@ -384,8 +384,23 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
         <Label className="text-sm font-medium">Placement</Label>
         <div className="bg-gray-50 rounded border p-4 h-fit">
           <div className="grid grid-cols-1 gap-3 max-h-80 overflow-y-auto">
-            {/* Display only leaf categories that are descendants of current navigation path */}
-            {getLeafCategoriesForCurrentPath().map((category) => (
+            {/* Display leaf categories for current path + already selected categories */}
+            {(() => {
+              const currentPathCategories = getLeafCategoriesForCurrentPath();
+              const selectedCategoryObjects = tempUISelections.map(path => 
+                marketplaceCategories.find(cat => cat.categoryPath === path)
+              ).filter(Boolean);
+              
+              // Combine current path categories with selected ones (remove duplicates)
+              const allCategories = [...currentPathCategories];
+              selectedCategoryObjects.forEach(selected => {
+                if (!allCategories.find(cat => cat.categoryPath === selected.categoryPath)) {
+                  allCategories.push(selected);
+                }
+              });
+              
+              return allCategories;
+            })().map((category) => (
               <div key={category.id} className="flex items-start space-x-2">
                 <Checkbox
                   id={`leaf-category-${category.id}`}
