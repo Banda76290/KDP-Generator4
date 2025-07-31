@@ -454,14 +454,14 @@ function BooksContent() {
 
                   {/* ISBN */}
                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <span className="text-xs font-medium">ISBN:</span>
+                    <span className="text-xs font-medium">ISBN/ASIN:</span>
                     <span>
                       {book.isbn ? (
                         <span className="font-medium text-foreground">{book.isbn}</span>
                       ) : book.isbnPlaceholder ? (
                         <span className="text-amber-600">{book.isbnPlaceholder}</span>
                       ) : (
-                        <span className="text-muted-foreground">No ISBN</span>
+                        <span className="text-muted-foreground">No ISBN/ASIN</span>
                       )}
                     </span>
                   </div>

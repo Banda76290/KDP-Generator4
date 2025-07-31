@@ -422,13 +422,13 @@ export default function Projects() {
                                       {book.language || 'English'}
                                     </div>
                                     <div className="flex items-center gap-1 text-xs text-gray-500 flex-shrink-0">
-                                      <span className="font-medium">ISBN:</span>
+                                      <span className="font-medium">ISBN/ASIN:</span>
                                       {book.isbn ? (
                                         <span className="font-medium text-gray-700">{book.isbn}</span>
                                       ) : book.isbnPlaceholder ? (
                                         <span className="text-amber-600">{book.isbnPlaceholder}</span>
                                       ) : (
-                                        <span>No ISBN</span>
+                                        <span>No ISBN/ASIN</span>
                                       )}
                                     </div>
                                   </div>

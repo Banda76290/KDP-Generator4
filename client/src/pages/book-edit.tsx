@@ -1229,16 +1229,16 @@ export default function EditBook() {
       if (response.ok) {
         const data = await response.json();
         if (data.exists) {
-          setIsbnValidationError("This ISBN is already in use by another book. Please enter a unique ISBN.");
+          setIsbnValidationError("This ISBN/ASIN is already in use by another book. Please enter a unique ISBN/ASIN.");
         } else {
           setIsbnValidationError("");
         }
       } else {
-        setIsbnValidationError("Unable to validate ISBN. Please try again.");
+        setIsbnValidationError("Unable to validate ISBN/ASIN. Please try again.");
       }
     } catch (error) {
       console.error('Error checking ISBN:', error);
-      setIsbnValidationError("Unable to validate ISBN. Please try again.");
+      setIsbnValidationError("Unable to validate ISBN/ASIN. Please try again.");
     } finally {
       setIsCheckingIsbn(false);
     }
@@ -1264,7 +1264,7 @@ export default function EditBook() {
     // Check for validation errors before applying
     if (isbnValidationError) {
       toast.error({
-        title: "Cannot apply ISBN",
+        title: "Cannot apply ISBN/ASIN",
         description: "Please resolve the validation error first."
       });
       return;
@@ -1277,8 +1277,8 @@ export default function EditBook() {
 
       if (response) {
         toast.success({
-          title: "ISBN Applied Successfully",
-          description: "The Official ISBN has been permanently applied to this book."
+          title: "ISBN/ASIN Applied Successfully",
+          description: "The Official ISBN/ASIN has been permanently applied to this book."
         });
         // Reset the input value and close dialog
         setOfficialIsbnContentValue("");
@@ -1291,7 +1291,7 @@ export default function EditBook() {
       console.error('Error applying ISBN:', error);
       toast.error({
         title: "Error",
-        description: "Failed to apply ISBN. Please try again."
+        description: "Failed to apply ISBN/ASIN. Please try again."
       });
     }
   };
@@ -2766,18 +2766,18 @@ export default function EditBook() {
             <CardContent className="space-y-8">
               {/* ISBN Section */}
               <div className="bg-teal-50 rounded-lg border border-teal-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">ISBN</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">ISBN/ASIN</h3>
                 <div className="space-y-4">
                   <p className="text-sm text-gray-600">
                     {book?.isbn 
-                      ? "Your book has an official ISBN assigned. This ISBN is now being used for all system functionality."
-                      : "You can get a free KDP ISBN or use your own. KDP Generator automatically creates a \"placeholder\" ISBN for your book because it is necessary for the site to function properly until you replace it with a \"real\" one. Certain features (automatic import of your books, advertising management, income calculations, etc.) will only work fully automatically once you have replaced the placeholder ISBN with your book's real ISBN."
+                      ? "Your book has an official ISBN/ASIN assigned. This ISBN/ASIN is now being used for all system functionality."
+                      : "You can get a free KDP ISBN/ASIN or use your own. KDP Generator automatically creates a \"placeholder\" ISBN/ASIN for your book because it is necessary for the site to function properly until you replace it with a \"real\" one. Certain features (automatic import of your books, advertising management, income calculations, etc.) will only work fully automatically once you have replaced the placeholder ISBN/ASIN with your book's real ISBN/ASIN."
                     }
                   </p>
                   {book?.isbn ? (
                     // Show only Official ISBN field in read-only mode when applied
                     <div className="space-y-2">
-                      <Label htmlFor="officialIsbnContentApplied" className="text-sm font-medium">Official ISBN</Label>
+                      <Label htmlFor="officialIsbnContentApplied" className="text-sm font-medium">Official ISBN/ASIN</Label>
                       <Input
                         id="officialIsbnContentApplied"
                         value={book.isbn}
@@ -2785,32 +2785,32 @@ export default function EditBook() {
                         className="bg-green-50 border-green-200 text-green-800 font-medium"
                       />
                       <p className="text-sm text-green-600">
-                        ✓ Official ISBN applied successfully. This ISBN is now active for your book.
+                        ✓ Official ISBN/ASIN applied successfully. This ISBN/ASIN is now active for your book.
                       </p>
                     </div>
                   ) : (
                     // Show both fields when no official ISBN is applied
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="isbnPlaceholderContent" className="text-sm font-medium">ISBN Placeholder</Label>
+                        <Label htmlFor="isbnPlaceholderContent" className="text-sm font-medium">ISBN/ASIN Placeholder</Label>
                         <Input
                           id="isbnPlaceholderContent"
-                          placeholder="PlaceHolder ISBN will be auto-generated"
+                          placeholder="PlaceHolder ISBN/ASIN will be auto-generated"
                           value={book?.isbnPlaceholder || ""}
                           disabled
                           className="bg-gray-100"
                         />
                         <p className="text-sm text-gray-500">
-                          This unique placeholder ISBN is automatically generated for system functionality
+                          This unique placeholder ISBN/ASIN is automatically generated for system functionality
                         </p>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="officialIsbnContent" className="text-sm font-medium">Official ISBN</Label>
+                        <Label htmlFor="officialIsbnContent" className="text-sm font-medium">Official ISBN/ASIN</Label>
                         <div className="flex gap-2">
                           <div className="flex-1">
                             <Input
                               id="officialIsbnContent"
-                              placeholder="Enter your own ISBN if you have one"
+                              placeholder="Enter your own ISBN/ASIN if you have one"
                               value={officialIsbnContentValue}
                               onChange={(e) => {
                                 setOfficialIsbnContentValue(e.target.value);
@@ -2824,7 +2824,7 @@ export default function EditBook() {
                             {isCheckingIsbn && (
                               <p className="text-sm text-blue-600 mt-1 flex items-center gap-1">
                                 <span className="animate-spin inline-block w-3 h-3 border border-current border-t-transparent rounded-full"></span>
-                                Checking ISBN availability...
+                                Checking ISBN/ASIN availability...
                               </p>
                             )}
                             {isbnValidationError && (
@@ -2840,7 +2840,7 @@ export default function EditBook() {
                             Apply
                           </Button>
                         </div>
-                        <p className="text-sm text-gray-500">Enter your own ISBN number if you have purchased one or get one from Amazon</p>
+                        <p className="text-sm text-gray-500">Enter your own ISBN/ASIN number if you have purchased one or get one from Amazon</p>
                       </div>
                     </div>
                   )}
@@ -3660,9 +3660,9 @@ export default function EditBook() {
       <AlertDialog open={showIsbnContentApplyDialog} onOpenChange={setShowIsbnContentApplyDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Apply Official ISBN</AlertDialogTitle>
+            <AlertDialogTitle>Apply Official ISBN/ASIN</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to apply this Official ISBN? This action is irreversible and the ISBN cannot be changed once applied to this book.
+              Are you sure you want to apply this Official ISBN/ASIN? This action is irreversible and the ISBN/ASIN cannot be changed once applied to this book.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -3671,7 +3671,7 @@ export default function EditBook() {
               onClick={handleApplyIsbn}
               className="bg-[#ef4444] hover:bg-red-600 text-white"
             >
-              Apply ISBN
+              Apply ISBN/ASIN
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
