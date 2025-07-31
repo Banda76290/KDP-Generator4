@@ -1729,10 +1729,10 @@ export default function EditBook() {
                     <span className="flex items-center">
                       <strong>ISBN/ASIN:</strong> 
                       <span className="ml-1">
-                        {form.watch("isbn") ? (
-                          <span className="font-semibold">{form.watch("isbn")}</span>
-                        ) : form.watch("isbnPlaceholder") ? (
-                          <span className="text-amber-600">{form.watch("isbnPlaceholder")}</span>
+                        {book?.isbn ? (
+                          <span className="font-semibold">{book.isbn}</span>
+                        ) : book?.isbnPlaceholder ? (
+                          <span className="text-amber-600">{book.isbnPlaceholder}</span>
                         ) : (
                           <span className="text-gray-400">No ISBN/ASIN</span>
                         )}
