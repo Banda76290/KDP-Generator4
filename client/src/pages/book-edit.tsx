@@ -2630,47 +2630,56 @@ export default function EditBook() {
           {activeTab === "content" && (
           <Card>
             <CardHeader>
-              <CardTitle>Upload your manuscript and configure content settings
-</CardTitle>
+              <CardTitle>Upload your manuscript and configure content settings</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
-                <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Upload Your Manuscript</h3>
-                <p className="text-gray-600 mb-4">
-                  Upload your completed manuscript in PDF format
-                </p>
-                <Button variant="outline">
-                  Choose File
-                </Button>
+            <CardContent className="space-y-8">
+              {/* Manuscript Upload Section */}
+              <div className="bg-blue-50 rounded-lg border border-blue-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Manuscript Upload</h3>
+                <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+                  <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                  <h4 className="text-lg font-medium text-gray-900 mb-2">Upload Your Manuscript</h4>
+                  <p className="text-gray-600 mb-4">
+                    Upload your completed manuscript in PDF format
+                  </p>
+                  <Button variant="outline">
+                    Choose File
+                  </Button>
+                </div>
               </div>
               
-              <div className="space-y-4">
-                <Label className="font-medium text-[16px]">Print Options</Label>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="bleedSettings" />
-                    <Label htmlFor="bleedSettings" className="font-medium text-[16px]">This book has bleed settings</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="largeBook" />
-                    <Label htmlFor="largeBook" className="font-medium text-[16px]">This is a large book (over 828 pages)</Label>
+              {/* Print Options Section */}
+              <div className="bg-green-50 rounded-lg border border-green-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Print Options</h3>
+                <div className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="bleedSettings" />
+                      <Label htmlFor="bleedSettings" className="text-sm font-medium">This book has bleed settings</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="largeBook" />
+                      <Label htmlFor="largeBook" className="text-sm font-medium">This is a large book (over 828 pages)</Label>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="printLengthTemp" className="font-medium text-[16px]">Print Length (pages)</Label>
-                <Input
-                  id="printLengthTemp"
-                  type="number"
-                  min="24"
-                  placeholder="100"
-                  defaultValue="100"
-                />
-                <p className="text-sm text-gray-500">
-                  Minimum 24 pages required for paperback printing
-                </p>
+              {/* Print Length Section */}
+              <div className="bg-purple-50 rounded-lg border border-purple-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Print Length</h3>
+                <div className="space-y-2">
+                  <Input
+                    id="printLengthTemp"
+                    type="number"
+                    min="24"
+                    placeholder="100"
+                    defaultValue="100"
+                  />
+                  <p className="text-sm text-gray-500">
+                    Minimum 24 pages required for paperback printing
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -2680,116 +2689,125 @@ export default function EditBook() {
           {activeTab === "pricing" && (
           <Card>
             <CardHeader>
-              <CardTitle>Set your pricing and distribution preferences
-</CardTitle>
+              <CardTitle>Set your pricing and distribution preferences</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Distribution Rights */}
-              <div className="space-y-4">
-                <Label className="font-medium text-[16px]">Territories</Label>
-                <p className="text-sm text-gray-600">
-                  Select the territories where you have rights to sell this book.
-                </p>
-                <RadioGroup defaultValue="worldwide">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="worldwide" id="worldwide" />
-                    <Label htmlFor="worldwide" className="font-medium text-[16px]">All territories (worldwide rights)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="individual" id="individual" />
-                    <Label htmlFor="individual" className="font-medium text-[16px]">Individual territories</Label>
-                  </div>
-                </RadioGroup>
+            <CardContent className="space-y-8">
+              {/* Distribution Rights Section */}
+              <div className="bg-red-50 rounded-lg border border-red-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Territories</h3>
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600">
+                    Select the territories where you have rights to sell this book.
+                  </p>
+                  <RadioGroup defaultValue="worldwide">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="worldwide" id="worldwide" className="bg-[#ffffff]" />
+                      <Label htmlFor="worldwide" className="text-sm font-medium">All territories (worldwide rights)</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="individual" id="individual" className="bg-[#ffffff]" />
+                      <Label htmlFor="individual" className="text-sm font-medium">Individual territories</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
               </div>
 
-              {/* Primary Marketplace */}
-              <div className="space-y-2">
-                <Label htmlFor="primaryMarketplace" className="font-medium text-[16px]">Primary Marketplace</Label>
-                <Select 
-                  value={form.watch("primaryMarketplace") || ""} 
-                  onValueChange={(value) => form.setValue("primaryMarketplace", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select primary marketplace" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {marketplaces.map((marketplace) => (
-                      <SelectItem key={marketplace} value={marketplace}>{marketplace}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              {/* Primary Marketplace Section */}
+              <div className="bg-teal-50 rounded-lg border border-teal-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Primary Marketplace</h3>
+                <div className="space-y-2">
+                  <Select 
+                    value={form.watch("primaryMarketplace") || ""} 
+                    onValueChange={(value) => form.setValue("primaryMarketplace", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select primary marketplace" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {marketplaces.map((marketplace) => (
+                        <SelectItem key={marketplace} value={marketplace}>{marketplace}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              {/* Pricing */}
-              <div className="space-y-4">
-                <Label className="font-medium text-[16px]">Pricing, royalties, and distribution</Label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="listPriceTemp" className="font-medium text-[16px]">List Price (USD)</Label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
-                      <Input
-                        id="listPriceTemp"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        className="pl-8"
-                        placeholder="9.99"
-                        defaultValue="9.99"
-                      />
+              {/* Pricing Section */}
+              <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Pricing, Royalties, and Distribution</h3>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="listPriceTemp" className="text-sm font-medium">List Price (USD)</Label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                        <Input
+                          id="listPriceTemp"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          className="pl-8"
+                          placeholder="9.99"
+                          defaultValue="9.99"
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="printCostTemp" className="font-medium text-[16px]">Print Cost</Label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
-                      <Input
-                        id="printCostTemp"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        className="pl-8"
-                        placeholder="0.00"
-                        defaultValue="2.50"
-                      />
+                    <div className="space-y-2">
+                      <Label htmlFor="printCostTemp" className="text-sm font-medium">Print Cost</Label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                        <Input
+                          id="printCostTemp"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          className="pl-8"
+                          placeholder="0.00"
+                          defaultValue="2.50"
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="royaltyRateTemp" className="font-medium text-[16px]">Royalty Rate</Label>
-                    <Select defaultValue="60">
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select royalty" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="60">60%</SelectItem>
-                        <SelectItem value="70">70%</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="space-y-2">
+                      <Label htmlFor="royaltyRateTemp" className="text-sm font-medium">Royalty Rate</Label>
+                      <Select defaultValue="60">
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select royalty" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="60">60%</SelectItem>
+                          <SelectItem value="70">70%</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* ISBN */}
-              <div className="space-y-2">
-                <Label htmlFor="isbnTemp" className="font-medium text-[16px]">ISBN (Optional)</Label>
-                <Input
-                  id="isbnTemp"
-                  placeholder="Enter ISBN if you have one"
-                  defaultValue=""
-                />
-                <p className="text-sm text-gray-500">
-                  Leave blank to get a free Amazon ISBN
-                </p>
+              {/* ISBN Section */}
+              <div className="bg-indigo-50 rounded-lg border border-indigo-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">ISBN</h3>
+                <div className="space-y-2">
+                  <Input
+                    id="isbnTemp"
+                    placeholder="Enter ISBN if you have one"
+                    defaultValue=""
+                  />
+                  <p className="text-sm text-gray-500">
+                    Leave blank to get a free Amazon ISBN
+                  </p>
+                </div>
               </div>
 
-              {/* Terms & Conditions */}
-              <div className="space-y-4">
-                <Label className="font-medium text-[16px]">Terms & Conditions</Label>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="acceptTerms" />
-                  <Label htmlFor="acceptTerms" className="font-medium text-[16px]">
-                    I confirm that I agree to and am in compliance with the KDP Terms and Conditions
-                  </Label>
+              {/* Terms & Conditions Section */}
+              <div className="bg-pink-50 rounded-lg border border-pink-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Terms & Conditions</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="acceptTerms" />
+                    <Label htmlFor="acceptTerms" className="text-sm font-medium">
+                      I confirm that I agree to and am in compliance with the KDP Terms and Conditions
+                    </Label>
+                  </div>
                 </div>
               </div>
             </CardContent>
