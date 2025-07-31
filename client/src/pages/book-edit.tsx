@@ -2335,14 +2335,9 @@ export default function EditBook() {
                             <div className="space-y-2">
                               <div className="flex items-center justify-between">
                                 <Label className="text-sm font-medium">Placement</Label>
-                                <div className="flex space-x-2">
-                                  <Button variant="link" size="sm" className="h-auto p-0 text-blue-600">
-                                    Reset
-                                  </Button>
-                                  <Button variant="link" size="sm" className="h-auto p-0 text-blue-600">
-                                    Delete
-                                  </Button>
-                                </div>
+                                <Button variant="link" size="sm" className="h-auto p-0 text-blue-600">
+                                  Reset
+                                </Button>
                               </div>
                               
                               <div className="bg-gray-50 rounded border p-3">
