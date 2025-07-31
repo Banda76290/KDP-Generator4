@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
@@ -244,7 +245,8 @@ function BooksContent() {
   const unassignedBooksCount = books.filter((book: Book) => !book.projectId).length;
 
   return (
-    <div className="w-full">
+    <TooltipProvider>
+      <div className="w-full">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold">Books</h1>
@@ -387,9 +389,23 @@ function BooksContent() {
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
                   <div className="flex-1 min-w-0">
-                    <CardTitle className="text-lg truncate">{book.title}</CardTitle>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <CardTitle className="text-lg truncate cursor-help">{book.title}</CardTitle>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{book.title}</p>
+                      </TooltipContent>
+                    </Tooltip>
                     {book.subtitle && (
-                      <p className="text-sm text-muted-foreground truncate">{book.subtitle}</p>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <p className="text-sm text-muted-foreground truncate cursor-help">{book.subtitle}</p>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{book.subtitle}</p>
+                        </TooltipContent>
+                      </Tooltip>
                     )}
                   </div>
                   <DropdownMenu>
@@ -566,6 +582,7 @@ function BooksContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }

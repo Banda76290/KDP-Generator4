@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, BarChart3, BookOpen, Globe, DollarSign, TrendingUp, ArrowUpDown, Copy } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { ProjectWithRelations } from "@shared/schema";
 
@@ -245,6 +246,7 @@ export default function Projects() {
 
   return (
     <Layout>
+      <TooltipProvider>
           {/* Projects Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
@@ -359,13 +361,27 @@ export default function Projects() {
                           {generateProjectInitials(project.name || 'Project')}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <CardTitle className="text-base font-medium text-gray-900 leading-tight mb-1">
-                            {project.name}
-                          </CardTitle>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <CardTitle className="text-base font-medium text-gray-900 leading-tight mb-1 cursor-help">
+                                {project.name}
+                              </CardTitle>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{project.name}</p>
+                            </TooltipContent>
+                          </Tooltip>
                           {project.description && (
-                            <p className="text-sm text-gray-600 leading-relaxed break-words">
-                              {project.description}
-                            </p>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <p className="text-sm text-gray-600 leading-relaxed break-words cursor-help">
+                                  {project.description}
+                                </p>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{project.description}</p>
+                              </TooltipContent>
+                            </Tooltip>
                           )}
                         </div>
                       </div>
@@ -412,7 +428,14 @@ export default function Projects() {
                             <div key={book.id} className="border rounded-lg p-3 bg-gray-50 space-y-2">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
-                                  <h4 className="text-sm font-medium text-gray-900 leading-tight break-words">{book.title}</h4>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <h4 className="text-sm font-medium text-gray-900 leading-tight break-words cursor-help">{book.title}</h4>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>{book.title}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
                                   <div className="flex flex-wrap items-center gap-2 mt-1">
                                     <Badge variant="outline" className="text-xs flex-shrink-0">
                                       {book.format}
@@ -590,6 +613,7 @@ export default function Projects() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </TooltipProvider>
     </Layout>
   );
 }
