@@ -148,11 +148,12 @@ const fallbackCategories = [
 ];
 
 // Category Selector Component
-const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategorySelect, resetTrigger }: {
+const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategorySelect, resetTrigger, instanceId }: {
   marketplaceCategories: MarketplaceCategory[];
   selectedCategories: string[];
   onCategorySelect: (categoryPath: string) => void;
   resetTrigger?: number;
+  instanceId?: string;
 }) => {
   const [selectedLevel1, setSelectedLevel1] = useState<string>("");
   const [selectedLevel2, setSelectedLevel2] = useState<string>("");
@@ -167,50 +168,11 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
     }
   }, [resetTrigger]);
 
-  // Sync dropdown selections with already selected categories only when there are actual selections
+  // Only sync dropdown selections when this specific instance should be restored
   useEffect(() => {
-    // Only sync if we have selected categories AND they exist in current marketplace categories
-    if (selectedCategories.length > 0 && marketplaceCategories.length > 0) {
-      // Find the first selected category that exists in current marketplace
-      const validSelectedCategory = selectedCategories.find(selectedCat => 
-        marketplaceCategories.some(cat => cat.categoryPath === selectedCat)
-      );
-      
-      if (validSelectedCategory) {
-        const categoryData = marketplaceCategories.find(cat => cat.categoryPath === validSelectedCategory);
-        
-        if (categoryData) {
-          // Only update if current selections are empty (to avoid overriding user actions)
-          if (!selectedLevel1 && !selectedLevel2 && !selectedLevel3) {
-            // Reconstruct the hierarchy by walking up the parent chain
-            if (categoryData.level === 4) {
-              setSelectedLevel3(categoryData.categoryPath);
-              const level3Parent = marketplaceCategories.find(cat => cat.categoryPath === categoryData.parentPath);
-              if (level3Parent) {
-                setSelectedLevel2(level3Parent.categoryPath);
-                const level2Parent = marketplaceCategories.find(cat => cat.categoryPath === level3Parent.parentPath);
-                if (level2Parent) {
-                  setSelectedLevel1(level2Parent.categoryPath);
-                }
-              }
-            } else if (categoryData.level === 3) {
-              setSelectedLevel2(categoryData.categoryPath);
-              const level2Parent = marketplaceCategories.find(cat => cat.categoryPath === categoryData.parentPath);
-              if (level2Parent) {
-                setSelectedLevel1(level2Parent.categoryPath);
-              }
-            } else if (categoryData.level === 2) {
-              setSelectedLevel1(categoryData.categoryPath);
-            }
-          }
-        }
-      } else {
-        // If no selected categories match current marketplace, clear selections
-        setSelectedLevel1("");
-        setSelectedLevel2("");
-        setSelectedLevel3("");
-      }
-    } else if (selectedCategories.length === 0) {
+    // Don't sync automatically - let each instance start fresh
+    // This avoids the problem of Category 2 inheriting Category 1's selections
+    if (selectedCategories.length === 0) {
       // Clear all selections when no categories are selected
       setSelectedLevel1("");
       setSelectedLevel2("");
@@ -2745,6 +2707,7 @@ export default function EditBook() {
                             marketplaceCategories={marketplaceCategories}
                             selectedCategories={selectedCategories}
                             resetTrigger={resetTriggers[index]}
+                            instanceId={`category-${index}`}
                             onCategorySelect={(categoryPath) => {
                               if (!selectedCategories.includes(categoryPath)) {
                                 const newCategories = [...selectedCategories];
