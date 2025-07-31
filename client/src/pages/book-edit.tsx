@@ -2796,7 +2796,7 @@ export default function EditBook() {
               {!loadingCategories && marketplaceCategories.length > 0 && (
                 <div className="space-y-4">
                   {/* Multiple Category Selectors */}
-                  {Array.from({ length: Math.max(1, selectedCategories.length + (selectedCategories.length < 3 ? 1 : 0)) }, (_, index) => (
+                  {Array.from({ length: Math.max(1, tempUISelections.length + (tempUISelections.length < 3 ? 1 : 0)) }, (_, index) => (
                     <div key={index} className="border border-gray-200 rounded">
                       <div 
                         className="flex items-center justify-between p-3 bg-gray-50 cursor-pointer hover:bg-gray-100"
@@ -2808,11 +2808,11 @@ export default function EditBook() {
                           </div>
                           <span className="font-medium">
                             Category {index + 1} 
-                            {selectedCategories[index] && ` - ${selectedCategories[index].split(' › ').pop()}`}
+                            {tempUISelections[index] && ` - ${tempUISelections[index].split(' › ').pop()}`}
                           </span>
                         </div>
                         <div className="flex space-x-2">
-                          {selectedCategories[index] && (
+                          {tempUISelections[index] && (
                             <>
                               <Button
                                 variant="link"
@@ -2825,9 +2825,9 @@ export default function EditBook() {
                                     ...prev,
                                     [index]: (prev[index] || 0) + 1
                                   }));
-                                  // Remove the category from selected categories
-                                  const newCategories = selectedCategories.filter((_, i) => i !== index);
-                                  setSelectedCategories(newCategories);
+                                  // Remove the category from temp UI selections
+                                  const newCategories = tempUISelections.filter((_, i) => i !== index);
+                                  setTempUISelections(newCategories);
                                   // Open the section to show the reset interface
                                   setExpandedCategory(`selector-${index}`);
                                 }}
@@ -2840,8 +2840,8 @@ export default function EditBook() {
                                 className="h-auto p-0 text-red-600 hover:text-red-800"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  const newCategories = selectedCategories.filter((_, i) => i !== index);
-                                  setSelectedCategories(newCategories);
+                                  const newCategories = tempUISelections.filter((_, i) => i !== index);
+                                  setTempUISelections(newCategories);
                                 }}
                               >
                                 Remove
@@ -2861,10 +2861,10 @@ export default function EditBook() {
                             resetTrigger={resetTriggers[index]}
                             instanceId={`category-${index}`}
                             onCategorySelect={(categoryPath) => {
-                              if (!selectedCategories.includes(categoryPath)) {
-                                const newCategories = [...selectedCategories];
+                              if (!tempUISelections.includes(categoryPath)) {
+                                const newCategories = [...tempUISelections];
                                 newCategories[index] = categoryPath;
-                                setSelectedCategories(newCategories.filter(Boolean));
+                                setTempUISelections(newCategories.filter(Boolean));
                               }
                             }}
                             onCategoryRemove={removeCategoryFromModal}
@@ -2875,15 +2875,15 @@ export default function EditBook() {
                   ))}
                   
                   {/* Add Another Category Button */}
-                  {selectedCategories.length < 3 && (
+                  {tempUISelections.length < 3 && (
                     <Button 
                       variant="link" 
                       className="text-blue-600 hover:text-blue-800 h-auto p-0"
                       onClick={() => {
-                        if (selectedCategories.length === 0) {
+                        if (tempUISelections.length === 0) {
                           setExpandedCategory('selector-0');
                         } else {
-                          setExpandedCategory(`selector-${selectedCategories.length}`);
+                          setExpandedCategory(`selector-${tempUISelections.length}`);
                         }
                       }}
                     >
