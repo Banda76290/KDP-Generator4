@@ -566,6 +566,29 @@ export default function EditBook() {
     }
   }, [book, bookId, hasRestoredFromStorage]); // Removed form from dependencies to prevent loops
 
+  // Manage Reading Age dropdowns based on explicit content setting
+  useEffect(() => {
+    const hasExplicitContent = form.watch("hasExplicitContent");
+    
+    if (hasExplicitContent) {
+      // If explicit content is selected, force both reading ages to 18+
+      form.setValue("readingAgeMin", 18);
+      form.setValue("readingAgeMax", 18);
+    }
+  }, [form.watch("hasExplicitContent")]);
+
+  // Ensure Maximum age is always >= Minimum age when explicit content is false
+  useEffect(() => {
+    const hasExplicitContent = form.watch("hasExplicitContent");
+    const minAge = form.watch("readingAgeMin");
+    const maxAge = form.watch("readingAgeMax");
+    
+    if (!hasExplicitContent && minAge && maxAge && maxAge < minAge) {
+      // If maximum age is less than minimum age, set maximum to minimum
+      form.setValue("readingAgeMax", minAge);
+    }
+  }, [form.watch("readingAgeMin"), form.watch("readingAgeMax"), form.watch("hasExplicitContent")]);
+
   // Fetch projects for selection
   const { data: projects = [] } = useQuery({
     queryKey: ["/api/projects"],
@@ -1552,30 +1575,37 @@ export default function EditBook() {
                         <Select 
                           value={form.watch("readingAgeMin")?.toString() || ""} 
                           onValueChange={(value) => form.setValue("readingAgeMin", value ? parseInt(value) : null)}
+                          disabled={form.watch("hasExplicitContent")}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select one" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="0">Baby</SelectItem>
-                            <SelectItem value="1">1</SelectItem>
-                            <SelectItem value="2">2</SelectItem>
-                            <SelectItem value="3">3</SelectItem>
-                            <SelectItem value="4">4</SelectItem>
-                            <SelectItem value="5">5</SelectItem>
-                            <SelectItem value="6">6</SelectItem>
-                            <SelectItem value="7">7</SelectItem>
-                            <SelectItem value="8">8</SelectItem>
-                            <SelectItem value="9">9</SelectItem>
-                            <SelectItem value="10">10</SelectItem>
-                            <SelectItem value="11">11</SelectItem>
-                            <SelectItem value="12">12</SelectItem>
-                            <SelectItem value="13">13</SelectItem>
-                            <SelectItem value="14">14</SelectItem>
-                            <SelectItem value="15">15</SelectItem>
-                            <SelectItem value="16">16</SelectItem>
-                            <SelectItem value="17">17</SelectItem>
-                            <SelectItem value="18">18+</SelectItem>
+                            {form.watch("hasExplicitContent") ? (
+                              <SelectItem value="18">18+</SelectItem>
+                            ) : (
+                              <>
+                                <SelectItem value="0">Baby</SelectItem>
+                                <SelectItem value="1">1</SelectItem>
+                                <SelectItem value="2">2</SelectItem>
+                                <SelectItem value="3">3</SelectItem>
+                                <SelectItem value="4">4</SelectItem>
+                                <SelectItem value="5">5</SelectItem>
+                                <SelectItem value="6">6</SelectItem>
+                                <SelectItem value="7">7</SelectItem>
+                                <SelectItem value="8">8</SelectItem>
+                                <SelectItem value="9">9</SelectItem>
+                                <SelectItem value="10">10</SelectItem>
+                                <SelectItem value="11">11</SelectItem>
+                                <SelectItem value="12">12</SelectItem>
+                                <SelectItem value="13">13</SelectItem>
+                                <SelectItem value="14">14</SelectItem>
+                                <SelectItem value="15">15</SelectItem>
+                                <SelectItem value="16">16</SelectItem>
+                                <SelectItem value="17">17</SelectItem>
+                                <SelectItem value="18">18+</SelectItem>
+                              </>
+                            )}
                           </SelectContent>
                         </Select>
                       </div>
@@ -1584,30 +1614,51 @@ export default function EditBook() {
                         <Select 
                           value={form.watch("readingAgeMax")?.toString() || ""} 
                           onValueChange={(value) => form.setValue("readingAgeMax", value ? parseInt(value) : null)}
+                          disabled={form.watch("hasExplicitContent")}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select one" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="0">Baby</SelectItem>
-                            <SelectItem value="1">1</SelectItem>
-                            <SelectItem value="2">2</SelectItem>
-                            <SelectItem value="3">3</SelectItem>
-                            <SelectItem value="4">4</SelectItem>
-                            <SelectItem value="5">5</SelectItem>
-                            <SelectItem value="6">6</SelectItem>
-                            <SelectItem value="7">7</SelectItem>
-                            <SelectItem value="8">8</SelectItem>
-                            <SelectItem value="9">9</SelectItem>
-                            <SelectItem value="10">10</SelectItem>
-                            <SelectItem value="11">11</SelectItem>
-                            <SelectItem value="12">12</SelectItem>
-                            <SelectItem value="13">13</SelectItem>
-                            <SelectItem value="14">14</SelectItem>
-                            <SelectItem value="15">15</SelectItem>
-                            <SelectItem value="16">16</SelectItem>
-                            <SelectItem value="17">17</SelectItem>
-                            <SelectItem value="18">18+</SelectItem>
+                            {form.watch("hasExplicitContent") ? (
+                              <SelectItem value="18">18+</SelectItem>
+                            ) : (
+                              <>
+                                {/* Only show ages >= minimum selected age */}
+                                {(() => {
+                                  const minAge = form.watch("readingAgeMin");
+                                  const ageOptions = [
+                                    { value: "0", label: "Baby" },
+                                    { value: "1", label: "1" },
+                                    { value: "2", label: "2" },
+                                    { value: "3", label: "3" },
+                                    { value: "4", label: "4" },
+                                    { value: "5", label: "5" },
+                                    { value: "6", label: "6" },
+                                    { value: "7", label: "7" },
+                                    { value: "8", label: "8" },
+                                    { value: "9", label: "9" },
+                                    { value: "10", label: "10" },
+                                    { value: "11", label: "11" },
+                                    { value: "12", label: "12" },
+                                    { value: "13", label: "13" },
+                                    { value: "14", label: "14" },
+                                    { value: "15", label: "15" },
+                                    { value: "16", label: "16" },
+                                    { value: "17", label: "17" },
+                                    { value: "18", label: "18+" }
+                                  ];
+                                  
+                                  return ageOptions
+                                    .filter(option => minAge == null || parseInt(option.value) >= minAge)
+                                    .map(option => (
+                                      <SelectItem key={option.value} value={option.value}>
+                                        {option.label}
+                                      </SelectItem>
+                                    ));
+                                })()}
+                              </>
+                            )}
                           </SelectContent>
                         </Select>
                       </div>

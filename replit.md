@@ -448,6 +448,14 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Intégration formulaire**: Connexion aux champs hasExplicitContent, readingAgeMin et readingAgeMax
 - **Design cohérent**: Utilisation d'une carte violette (purple-50) pour distinction visuelle
 
+### Reading Age Logic Implementation (31 Juillet 2025) ✅ RÉSOLU
+- **Logique contenu explicite**: Quand "Sexually Explicit" = "Yes", les dropdowns sont forcés à "18+" et désactivés
+- **Validation âge maximum**: Quand "Sexually Explicit" = "No", le dropdown Maximum ne propose que des âges >= Minimum
+- **Auto-ajustement**: Si l'âge maximum devient inférieur au minimum, il est automatiquement corrigé
+- **useEffect implémentés**: Deux hooks pour gérer automatiquement les contraintes sans intervention utilisateur
+- **Interface dynamique**: Les options disponibles changent en temps réel selon les sélections utilisateur
+- **Conformité KDP**: Logique conforme aux règles d'Amazon KDP pour la classification des âges
+
 ### Visual Section Separation Implementation (31 Juillet 2025) 🚧 EN COURS
 - **Cartes colorées**: Début d'implémentation de sections visuellement séparées avec des cartes colorées dans book-edit.tsx
 - **Structure améliorée**: Regroupement logique des champs en sections thématiques (projet, informations de base, série/édition, auteurs/contributeurs, description, droits/options)
