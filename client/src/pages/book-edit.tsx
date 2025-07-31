@@ -2580,10 +2580,7 @@ export default function EditBook() {
                             Release my book for sale now
                           </Label>
                           <p className="text-sm text-gray-600 mt-1">
-                            After you submit for publication, it can take up to 72 hours to go live. During this time, edits cannot be made to your book.{" "}
-                            <a href="#" className="text-[#38b6ff] hover:text-[#146eb4]">
-                              Learn more about release timelines
-                            </a>
+                            After you submit for publication, it can take up to 72 hours to go live. During this time, edits cannot be made to your book.
                           </p>
                         </div>
                       </div>
