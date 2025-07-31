@@ -1514,14 +1514,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/system/health', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { db } = await import('./db.js');
-      const { marketplaceCategories } = await import('@shared/schema');
+      const { marketplaceCategories, users, projects, books } = await import('@shared/schema');
       
-      const categoriesCount = await db.select().from(marketplaceCategories);
+      // Get database counts
+      const [categoriesCount, usersCount, projectsCount, booksCount] = await Promise.all([
+        db.select().from(marketplaceCategories),
+        db.select().from(users),
+        db.select().from(projects),
+        db.select().from(books)
+      ]);
+
+      // Get system metrics
+      const memUsage = process.memoryUsage();
+      const uptime = process.uptime();
+      
+      // Calculate uptime in human readable format
+      const uptimeHours = Math.floor(uptime / 3600);
+      const uptimeMinutes = Math.floor((uptime % 3600) / 60);
+      const uptimeFormatted = `${uptimeHours}h ${uptimeMinutes}m`;
+      
+      // Memory usage in MB
+      const memUsedMB = Math.round(memUsage.heapUsed / 1024 / 1024);
+      const memTotalMB = Math.round(memUsage.heapTotal / 1024 / 1024);
+      const memPercentage = Math.round((memUsage.heapUsed / memUsage.heapTotal) * 100);
       
       const health = {
         database: categoriesCount.length > 0 ? 'healthy' : 'warning',
         categories: categoriesCount.length,
-        lastSeeded: categoriesCount.length > 0 ? new Date().toISOString() : null
+        totalUsers: usersCount.length,
+        totalProjects: projectsCount.length,
+        totalBooks: booksCount.length,
+        lastSeeded: categoriesCount.length > 0 ? new Date().toISOString() : null,
+        uptime: uptimeFormatted,
+        memoryUsage: {
+          used: `${memUsedMB} MB`,
+          total: `${memTotalMB} MB`,
+          percentage: memPercentage
+        }
       };
       
       res.json(health);
@@ -1530,9 +1559,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         database: 'error',
         categories: 0,
+        totalUsers: 0,
+        totalProjects: 0,
+        totalBooks: 0,
         lastSeeded: null,
+        uptime: '0h 0m',
+        memoryUsage: { used: '0 MB', total: '0 MB', percentage: 0 },
         error: error instanceof Error ? error.message : 'Unknown error' 
       });
+    }
+  });
+
+  // Database backup endpoint (admin only) - Read-only export
+  app.get('/api/admin/database/export', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { db } = await import('./db.js');
+      const { marketplaceCategories, users, projects, books } = await import('@shared/schema');
+      
+      // Export only safe, non-sensitive data
+      const [categories, userStats, projectsStats, booksStats] = await Promise.all([
+        db.select().from(marketplaceCategories),
+        db.select({ id: users.id, username: users.username, createdAt: users.createdAt }).from(users),
+        db.select({ id: projects.id, name: projects.name, createdAt: projects.createdAt }).from(projects),
+        db.select({ id: books.id, title: books.title, createdAt: books.createdAt }).from(books)
+      ]);
+
+      const exportData = {
+        timestamp: new Date().toISOString(),
+        categories: categories.length,
+        users: userStats.length,
+        projects: projectsStats.length,
+        books: booksStats.length,
+        // Only include metadata, not sensitive content
+        categoriesData: categories.map(cat => ({
+          marketplace: cat.marketplace,
+          type: cat.type,
+          category: cat.category,
+          path: cat.path
+        }))
+      };
+
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="kdp-generator-export-${new Date().toISOString().split('T')[0]}.json"`);
+      res.json(exportData);
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Export failed' });
+    }
+  });
+
+  // System configuration endpoint (admin only) - Read-only
+  app.get('/api/admin/system/config', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const config = {
+        environment: process.env.NODE_ENV || 'development',
+        database: {
+          connected: true,
+          type: 'PostgreSQL'
+        },
+        features: {
+          autoSeeding: true,
+          cacheEnabled: true,
+          aiIntegration: !!process.env.OPENAI_API_KEY
+        },
+        version: process.env.npm_package_version || '1.0.0',
+        uptime: Math.floor(process.uptime()),
+        memoryUsage: process.memoryUsage()
+      };
+      
+      res.json(config);
+    } catch (error) {
+      console.error("Error getting system config:", error);
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Config fetch failed' });
     }
   });
 
