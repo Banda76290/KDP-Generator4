@@ -2117,7 +2117,7 @@ export default function EditBook() {
 
               {/* Publishing Rights & Content Options Section */}
               <div className="bg-red-50 rounded-lg border border-red-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Publishing Rights & Content Options</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Publishing Rights</h3>
                 <div className="space-y-6">
                   {/* Publishing Rights */}
                   <div className="space-y-4">
