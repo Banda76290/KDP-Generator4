@@ -167,39 +167,48 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
     }
   }, [resetTrigger]);
 
-  // Sync dropdown selections with already selected categories
+  // Sync dropdown selections with already selected categories only when there are actual selections
   useEffect(() => {
+    // Only sync if we have selected categories AND they exist in current marketplace categories
     if (selectedCategories.length > 0 && marketplaceCategories.length > 0) {
-      // Find the deepest selected category to reconstruct the hierarchy
-      const selectedCategory = selectedCategories[0]; // Take first selected category as reference
-      const categoryData = marketplaceCategories.find(cat => cat.categoryPath === selectedCategory);
+      // Find the first selected category that exists in current marketplace
+      const validSelectedCategory = selectedCategories.find(selectedCat => 
+        marketplaceCategories.some(cat => cat.categoryPath === selectedCat)
+      );
       
-      if (categoryData) {
-        // Clear current selections first
+      if (validSelectedCategory) {
+        const categoryData = marketplaceCategories.find(cat => cat.categoryPath === validSelectedCategory);
+        
+        if (categoryData) {
+          // Only update if current selections are empty (to avoid overriding user actions)
+          if (!selectedLevel1 && !selectedLevel2 && !selectedLevel3) {
+            // Reconstruct the hierarchy by walking up the parent chain
+            if (categoryData.level === 4) {
+              setSelectedLevel3(categoryData.categoryPath);
+              const level3Parent = marketplaceCategories.find(cat => cat.categoryPath === categoryData.parentPath);
+              if (level3Parent) {
+                setSelectedLevel2(level3Parent.categoryPath);
+                const level2Parent = marketplaceCategories.find(cat => cat.categoryPath === level3Parent.parentPath);
+                if (level2Parent) {
+                  setSelectedLevel1(level2Parent.categoryPath);
+                }
+              }
+            } else if (categoryData.level === 3) {
+              setSelectedLevel2(categoryData.categoryPath);
+              const level2Parent = marketplaceCategories.find(cat => cat.categoryPath === categoryData.parentPath);
+              if (level2Parent) {
+                setSelectedLevel1(level2Parent.categoryPath);
+              }
+            } else if (categoryData.level === 2) {
+              setSelectedLevel1(categoryData.categoryPath);
+            }
+          }
+        }
+      } else {
+        // If no selected categories match current marketplace, clear selections
         setSelectedLevel1("");
         setSelectedLevel2("");
         setSelectedLevel3("");
-        
-        // Reconstruct the hierarchy by walking up the parent chain
-        if (categoryData.level === 4) {
-          setSelectedLevel3(categoryData.categoryPath);
-          const level3Parent = marketplaceCategories.find(cat => cat.categoryPath === categoryData.parentPath);
-          if (level3Parent) {
-            setSelectedLevel2(level3Parent.categoryPath);
-            const level2Parent = marketplaceCategories.find(cat => cat.categoryPath === level3Parent.parentPath);
-            if (level2Parent) {
-              setSelectedLevel1(level2Parent.categoryPath);
-            }
-          }
-        } else if (categoryData.level === 3) {
-          setSelectedLevel2(categoryData.categoryPath);
-          const level2Parent = marketplaceCategories.find(cat => cat.categoryPath === categoryData.parentPath);
-          if (level2Parent) {
-            setSelectedLevel1(level2Parent.categoryPath);
-          }
-        } else if (categoryData.level === 2) {
-          setSelectedLevel1(categoryData.categoryPath);
-        }
       }
     } else if (selectedCategories.length === 0) {
       // Clear all selections when no categories are selected
