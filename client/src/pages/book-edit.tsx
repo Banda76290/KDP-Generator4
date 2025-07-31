@@ -1125,7 +1125,10 @@ export default function EditBook() {
     setPendingMarketplace("");
     setIncompatibleCategories([]);
     
-    toast.success(`Marketplace changed to ${marketplaceName} and ${removedCount} incompatible categories removed`);
+    toast.success({
+      title: "Marketplace Changed",
+      description: `Marketplace changed to ${marketplaceName} and ${removedCount} incompatible categories removed`
+    });
   };
 
   const cancelMarketplaceChange = () => {
@@ -2793,16 +2796,16 @@ export default function EditBook() {
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:justify-end">
+          <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 sm:gap-2 justify-center sm:justify-center">
             <AlertDialogCancel 
               onClick={cancelMarketplaceChange}
-              className="w-full sm:w-auto order-2 sm:order-1"
+              className="w-full sm:w-auto"
             >
               Cancel - Keep current marketplace
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={proceedWithMarketplaceChange}
-              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto order-1 sm:order-2"
+              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
             >
               Change marketplace and remove categories
             </AlertDialogAction>
