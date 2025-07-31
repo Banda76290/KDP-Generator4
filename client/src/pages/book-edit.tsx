@@ -1349,7 +1349,14 @@ export default function EditBook() {
       const format = form.watch("format");
       const formatParam = format ? `?format=${encodeURIComponent(format)}` : '';
       const response = await apiRequest("GET", `/api/marketplace-categories/${encodeURIComponent(marketplace)}${formatParam}`);
+      console.log("📊 API Response received:", { 
+        marketplace, 
+        formatParam, 
+        responseLength: response?.length, 
+        firstCategory: response?.[0]?.displayName 
+      });
       setMarketplaceCategories(response || []);
+      console.log("📊 State updated, marketplaceCategories.length:", (response || []).length);
     } catch (error) {
       console.error("Error loading marketplace categories:", error);
       // Fallback to empty array if error
@@ -3405,6 +3412,12 @@ export default function EditBook() {
                   <span className="ml-2">Loading categories...</span>
                 </div>
               )}
+
+              {/* Debug info */}
+              <div className="bg-yellow-50 border border-yellow-200 rounded p-2 text-xs">
+                <p>Debug: loadingCategories={loadingCategories.toString()}, marketplaceCategories.length={marketplaceCategories.length}</p>
+                <p>First category: {marketplaceCategories[0]?.displayName || 'N/A'}</p>
+              </div>
 
               {/* Category Selection Interface */}
               {!loadingCategories && marketplaceCategories.length > 0 && (
