@@ -2856,22 +2856,7 @@ export default function EditBook() {
                     </div>
                   ))}
                   
-                  {/* Add Another Category Button */}
-                  {tempUISelections.length < 3 && (
-                    <Button 
-                      variant="link" 
-                      className="text-blue-600 hover:text-blue-800 h-auto p-0"
-                      onClick={() => {
-                        if (tempUISelections.length === 0) {
-                          setExpandedCategory('selector-0');
-                        } else {
-                          setExpandedCategory(`selector-${tempUISelections.length}`);
-                        }
-                      }}
-                    >
-                      Add another category
-                    </Button>
-                  )}
+                  
                 </div>
               )}
 
