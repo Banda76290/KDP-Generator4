@@ -464,6 +464,7 @@ export class DatabaseStorage implements IStorage {
       
       for (const contributor of originalContributors) {
         await this.addContributor({
+          projectId: newProject.id, // Include the project ID from the new project
           bookId: newBook.id,
           name: contributor.name,
           role: contributor.role,
@@ -596,6 +597,7 @@ export class DatabaseStorage implements IStorage {
     
     for (const contributor of originalContributors) {
       await this.addContributor({
+        projectId: newBook.projectId, // Include the project ID from the new book
         bookId: newBook.id,
         name: contributor.name,
         role: contributor.role,
