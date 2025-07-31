@@ -320,38 +320,7 @@ export default function AdminSystem() {
           </CardContent>
         </Card>
 
-        {/* System Logs */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Journaux Système (Dernières 24h)</CardTitle>
-            <CardDescription>
-              Activité récente et événements système importants
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3 max-h-64 overflow-y-auto">
-              {[
-                { time: new Date().toLocaleTimeString('fr-FR'), level: 'info', message: 'Synchronisation automatique des catégories réussie' },
-                { time: new Date(Date.now() - 300000).toLocaleTimeString('fr-FR'), level: 'info', message: 'Vérification de l\'état du système' },
-                { time: new Date(Date.now() - 600000).toLocaleTimeString('fr-FR'), level: 'success', message: 'Démarrage du serveur Express réussi' },
-                { time: new Date(Date.now() - 900000).toLocaleTimeString('fr-FR'), level: 'info', message: 'Connexion à la base de données PostgreSQL établie' }
-              ].map((log, index) => (
-                <div key={index} className="flex items-center justify-between p-2 border border-gray-200 rounded">
-                  <div className="flex items-center space-x-3">
-                    <Badge 
-                      variant={log.level === 'success' ? 'default' : log.level === 'warning' ? 'destructive' : 'secondary'}
-                      className="text-xs"
-                    >
-                      {log.level.toUpperCase()}
-                    </Badge>
-                    <span className="text-sm">{log.message}</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">{log.time}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+
 
         {/* Cache Management */}
         <Card>
@@ -412,89 +381,74 @@ export default function AdminSystem() {
           </CardContent>
         </Card>
 
-        {/* Data Export & Backup */}
+        {/* Database Operations */}
         <Card>
           <CardHeader>
             <div className="flex items-center space-x-3">
               <Database className="h-5 w-5 text-purple-600" />
               <div>
-                <CardTitle>Sauvegarde & Export</CardTitle>
+                <CardTitle>Opérations Base de Données</CardTitle>
                 <CardDescription>
-                  Export sécurisé des données système (métadonnées uniquement)
+                  Actions réelles sur la base de données
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h4 className="font-medium text-yellow-900 mb-2">🔒 Sécurité</h4>
-              <p className="text-sm text-yellow-800">
-                L'export contient uniquement les métadonnées système et statistiques. 
-                Aucune donnée sensible (mots de passe, contenu utilisateur) n'est incluse.
-              </p>
-            </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-3">
-                <h4 className="font-medium">Export Système</h4>
+                <h4 className="font-medium">Statistiques Temps Réel</h4>
                 <p className="text-sm text-muted-foreground">
-                  Exporte les statistiques et métadonnées système au format JSON.
+                  Affiche les statistiques actuelles de la base de données.
                 </p>
                 <Button 
                   variant="outline" 
                   className="w-full"
                   onClick={async () => {
                     try {
-                      const response = await fetch('/api/admin/database/export');
+                      const response = await fetch('/api/admin/database/stats');
                       if (response.ok) {
-                        const blob = await response.blob();
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `kdp-generator-export-${new Date().toISOString().split('T')[0]}.json`;
-                        document.body.appendChild(a);
-                        a.click();
-                        window.URL.revokeObjectURL(url);
-                        document.body.removeChild(a);
+                        const stats = await response.json();
+                        queryClient.invalidateQueries({ queryKey: ["/api/admin/system/health"] });
                         toast({
-                          title: "Export réussi",
-                          description: "Les données système ont été exportées avec succès.",
+                          title: "Statistiques mises à jour",
+                          description: `${stats.categories} catégories, ${stats.users} utilisateurs, ${stats.projects} projets, ${stats.books} livres`,
                         });
                       } else {
-                        throw new Error('Export failed');
+                        throw new Error('Stats fetch failed');
                       }
                     } catch (error) {
                       toast({
-                        title: "Erreur d'export",
-                        description: "Impossible d'exporter les données système.",
+                        title: "Erreur de récupération",
+                        description: "Impossible de récupérer les statistiques.",
                         variant: "destructive",
                       });
                     }
                   }}
                 >
                   <Database className="h-4 w-4 mr-2" />
-                  Exporter les Données
+                  Actualiser les Stats
                 </Button>
               </div>
 
               <div className="space-y-3">
-                <h4 className="font-medium">Configuration</h4>
+                <h4 className="font-medium">Vérification Santé</h4>
                 <p className="text-sm text-muted-foreground">
-                  Visualise la configuration actuelle du système.
+                  Vérifie l'état de santé complet du système.
                 </p>
                 <Button 
                   variant="outline" 
                   className="w-full"
                   onClick={() => {
-                    // This would open a modal with system config
+                    queryClient.invalidateQueries({ queryKey: ["/api/admin/system/health"] });
                     toast({
-                      title: "Configuration système",
-                      description: "Environnement: Production, Base: PostgreSQL, Cache: Actif",
+                      title: "Vérification lancée",
+                      description: "État du système mis à jour.",
                     });
                   }}
                 >
                   <Server className="h-4 w-4 mr-2" />
-                  Voir la Config
+                  Vérifier la Santé
                 </Button>
               </div>
             </div>

@@ -1556,41 +1556,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Database backup endpoint (admin only) - Read-only export
-  app.get('/api/admin/database/export', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+  // Database stats endpoint (admin only) - Real data only
+  app.get('/api/admin/database/stats', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { db } = await import('./db.js');
       const { marketplaceCategories, users, projects, books } = await import('@shared/schema');
       
-      // Export only safe, non-sensitive data
-      const [categories, userStats, projectsStats, booksStats] = await Promise.all([
+      // Get real database statistics
+      const [categoriesCount, usersCount, projectsCount, booksCount] = await Promise.all([
         db.select().from(marketplaceCategories),
         db.select().from(users),
         db.select().from(projects),
         db.select().from(books)
       ]);
 
-      const exportData = {
+      const stats = {
         timestamp: new Date().toISOString(),
-        categories: categories.length,
-        users: userStats.length,
-        projects: projectsStats.length,
-        books: booksStats.length,
-        // Only include metadata, not sensitive content
-        categoriesData: categories.map(cat => ({
-          marketplace: cat.marketplace,
-          categoryPath: cat.categoryPath,
-          displayName: cat.displayName,
-          level: cat.level
-        }))
+        categories: categoriesCount.length,
+        users: usersCount.length,
+        projects: projectsCount.length,
+        books: booksCount.length
       };
 
-      res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Content-Disposition', `attachment; filename="kdp-generator-export-${new Date().toISOString().split('T')[0]}.json"`);
-      res.json(exportData);
+      res.json(stats);
     } catch (error) {
-      console.error("Error exporting data:", error);
-      res.status(500).json({ error: error instanceof Error ? error.message : 'Export failed' });
+      console.error("Error getting database stats:", error);
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Stats fetch failed' });
     }
   });
 
