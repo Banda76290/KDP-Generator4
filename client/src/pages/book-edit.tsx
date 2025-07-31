@@ -158,6 +158,9 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
   const [selectedLevel1, setSelectedLevel1] = useState<string>("");
   const [selectedLevel2, setSelectedLevel2] = useState<string>("");
   const [selectedLevel3, setSelectedLevel3] = useState<string>("");
+  
+  // Store a snapshot of the current category for this instance
+  const [localCategorySnapshot, setLocalCategorySnapshot] = useState<string>("");
 
   // Reset selections when resetTrigger changes
   useEffect(() => {
@@ -168,62 +171,65 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
     }
   }, [resetTrigger]);
 
-  // Sync dropdown selections only for this specific instance's category
+  // Enhanced state restoration with local snapshot
   useEffect(() => {
-    if (selectedCategories.length === 0) {
-      // Clear all selections when no categories are selected
-      setSelectedLevel1("");
-      setSelectedLevel2("");
-      setSelectedLevel3("");
-      return;
+    if (marketplaceCategories.length === 0) {
+      return; // Wait for marketplace categories to load
     }
 
     // Find which category belongs to this instance based on instanceId
     const instanceIndex = instanceId ? parseInt(instanceId.split('-')[1]) : 0;
     const thisInstanceCategory = selectedCategories[instanceIndex];
     
-    if (thisInstanceCategory && marketplaceCategories.length > 0) {
-      // Find this instance's category in the marketplace categories
-      const categoryData = marketplaceCategories.find(cat => cat.categoryPath === thisInstanceCategory);
-      
-      if (categoryData) {
-        // Only update if current selections are empty OR if they don't match the saved category
-        const currentPath = selectedLevel3 || selectedLevel2 || selectedLevel1;
-        if (!currentPath || currentPath !== thisInstanceCategory) {
-          // Clear first
-          setSelectedLevel1("");
-          setSelectedLevel2("");
-          setSelectedLevel3("");
-          
-          // Reconstruct the hierarchy for this specific category
-          if (categoryData.level === 4) {
-            setSelectedLevel3(categoryData.categoryPath);
-            const level3Parent = marketplaceCategories.find(cat => cat.categoryPath === categoryData.parentPath);
-            if (level3Parent) {
-              setSelectedLevel2(level3Parent.categoryPath);
-              const level2Parent = marketplaceCategories.find(cat => cat.categoryPath === level3Parent.parentPath);
-              if (level2Parent) {
-                setSelectedLevel1(level2Parent.categoryPath);
-              }
-            }
-          } else if (categoryData.level === 3) {
-            setSelectedLevel2(categoryData.categoryPath);
-            const level2Parent = marketplaceCategories.find(cat => cat.categoryPath === categoryData.parentPath);
-            if (level2Parent) {
-              setSelectedLevel1(level2Parent.categoryPath);
-            }
-          } else if (categoryData.level === 2) {
-            setSelectedLevel1(categoryData.categoryPath);
-          }
-        }
-      }
-    } else if (!thisInstanceCategory) {
-      // If this instance has no category assigned, clear the selections
+    // Update local snapshot when the assigned category changes
+    if (localCategorySnapshot !== thisInstanceCategory) {
+      setLocalCategorySnapshot(thisInstanceCategory || "");
+    }
+    
+    if (!thisInstanceCategory) {
+      // Clear selections if no category is assigned
       setSelectedLevel1("");
       setSelectedLevel2("");
       setSelectedLevel3("");
+      return;
     }
-  }, [selectedCategories, marketplaceCategories, instanceId]);
+
+    // Find this instance's category in the marketplace categories
+    const categoryData = marketplaceCategories.find(cat => cat.categoryPath === thisInstanceCategory);
+    
+    if (categoryData) {
+      // Check if current state already matches - if so, don't reconstruct
+      const currentPath = selectedLevel3 || selectedLevel2 || selectedLevel1;
+      if (currentPath === thisInstanceCategory) {
+        return; // Already correctly set
+      }
+      
+      // Reconstruct the hierarchy for this specific category
+      setTimeout(() => {
+        if (categoryData.level >= 2) {
+          // Find level 2 parent
+          let level2Parent = categoryData;
+          while (level2Parent && level2Parent.level > 2) {
+            level2Parent = marketplaceCategories.find(cat => cat.categoryPath === level2Parent.parentPath);
+          }
+          if (level2Parent) setSelectedLevel1(level2Parent.categoryPath);
+        }
+        
+        if (categoryData.level >= 3) {
+          // Find level 3 parent
+          let level3Parent = categoryData;
+          while (level3Parent && level3Parent.level > 3) {
+            level3Parent = marketplaceCategories.find(cat => cat.categoryPath === level3Parent.parentPath);
+          }
+          if (level3Parent && level3Parent.level === 3) setSelectedLevel2(level3Parent.categoryPath);
+        }
+        
+        if (categoryData.level >= 4) {
+          setSelectedLevel3(categoryData.categoryPath);
+        }
+      }, 10); // Small delay to ensure proper state updates
+    }
+  }, [selectedCategories, marketplaceCategories, instanceId, localCategorySnapshot]);
 
   // Get categories by level and parent
   const getLevel2Categories = () => {
