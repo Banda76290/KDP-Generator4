@@ -158,9 +158,16 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
   resetTrigger?: number;
   instanceId?: string;
 }) => {
-  const [selectedLevel1, setSelectedLevel1] = useState<string>("");
-  const [selectedLevel2, setSelectedLevel2] = useState<string>("");
-  const [selectedLevel3, setSelectedLevel3] = useState<string>("");
+  // Calculate maximum depth dynamically from marketplace categories
+  const maxDepth = useMemo(() => {
+    if (marketplaceCategories.length === 0) return 3; // Default fallback
+    const maxLevel = Math.max(...marketplaceCategories.map(cat => cat.level));
+    // We need one dropdown for each level except the final selectable level
+    return Math.max(maxLevel - 1, 1);
+  }, [marketplaceCategories]);
+
+  // Dynamic state for navigation levels
+  const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
   
   // Store a snapshot of the current category for this instance
   const [localCategorySnapshot, setLocalCategorySnapshot] = useState<string>("");
@@ -168,14 +175,17 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
   // Track manual navigation to prevent automatic synchronization conflicts
   const [isManualNavigation, setIsManualNavigation] = useState(false);
 
+  // Initialize selectedLevels when maxDepth changes
+  useEffect(() => {
+    setSelectedLevels(new Array(maxDepth).fill(""));
+  }, [maxDepth]);
+
   // Reset selections when resetTrigger changes
   useEffect(() => {
     if (resetTrigger !== undefined) {
-      setSelectedLevel1("");
-      setSelectedLevel2("");
-      setSelectedLevel3("");
+      setSelectedLevels(new Array(maxDepth).fill(""));
     }
-  }, [resetTrigger]);
+  }, [resetTrigger, maxDepth]);
 
   // Enhanced state restoration with proper stability checks
   useEffect(() => {
@@ -198,10 +208,8 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
     
     if (!thisInstanceCategory) {
       // Clear selections if no category is assigned, but only if they're not already empty
-      if (selectedLevel1 || selectedLevel2 || selectedLevel3) {
-        setSelectedLevel1("");
-        setSelectedLevel2("");
-        setSelectedLevel3("");
+      if (selectedLevels.some(level => level !== "")) {
+        setSelectedLevels(new Array(maxDepth).fill(""));
       }
       return;
     }
@@ -211,7 +219,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
     
     if (categoryData) {
       // Check if the current dropdown state already reflects this category
-      const currentDeepestPath = selectedLevel3 || selectedLevel2 || selectedLevel1;
+      const currentDeepestPath = selectedLevels.filter(level => level !== "").pop() || "";
       if (currentDeepestPath === thisInstanceCategory) {
         return; // Already correctly set, don't reconstruct
       }
@@ -219,50 +227,38 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
       // Reconstruct the hierarchy using the same logic as manual selection
       setTimeout(() => {
         const pathParts = categoryData.categoryPath.split(' > ');
+        const newLevels = new Array(maxDepth).fill("");
         
-        // For level 2+ categories, set level 1 (should be second segment)
-        if (pathParts.length >= 2) {
-          const level1Path = pathParts.slice(0, 2).join(' > ');
-          if (selectedLevel1 !== level1Path) {
-            setSelectedLevel1(level1Path);
+        // Build levels dynamically based on path depth
+        for (let i = 0; i < Math.min(pathParts.length - 1, maxDepth); i++) {
+          const levelPath = pathParts.slice(0, i + 2).join(' > ');
+          if (selectedLevels[i] !== levelPath) {
+            newLevels[i] = levelPath;
+          } else {
+            newLevels[i] = selectedLevels[i]; // Keep existing if same
           }
         }
         
-        // For level 3+ categories, set level 2 (should be first 3 segments)
-        if (pathParts.length >= 3) {
-          const level2Path = pathParts.slice(0, 3).join(' > ');
-          if (selectedLevel2 !== level2Path) {
-            setSelectedLevel2(level2Path);
-          }
-        }
-        
-        // For level 4+ categories, set level 3 (should be first 4 segments)
-        if (pathParts.length >= 4) {
-          const level3Path = pathParts.slice(0, 4).join(' > ');
-          if (selectedLevel3 !== level3Path) {
-            setSelectedLevel3(level3Path);
-          }
+        // Only update if there are actual changes
+        if (JSON.stringify(newLevels) !== JSON.stringify(selectedLevels)) {
+          setSelectedLevels(newLevels);
         }
       }, 10); // Small delay to ensure proper state updates
     }
   }, [selectedCategories, marketplaceCategories, instanceId, localCategorySnapshot, isManualNavigation, tempUISelections]);
 
-  // Get categories by level and parent
-  const getLevel2Categories = () => {
+  // Get categories by level and parent (dynamic)
+  const getCategoriesForLevel = (level: number, parentPath?: string) => {
+    if (level === 2) {
+      // Level 2 categories (main categories, children of "Books")
+      return marketplaceCategories
+        .filter(cat => cat.level === 2)
+        .sort((a, b) => a.sortOrder - b.sortOrder);
+    }
+    
+    // For levels 3+, filter by parentPath
     return marketplaceCategories
-      .filter(cat => cat.level === 2)
-      .sort((a, b) => a.sortOrder - b.sortOrder);
-  };
-
-  const getLevel3Categories = (parentPath: string) => {
-    return marketplaceCategories
-      .filter(cat => cat.level === 3 && cat.parentPath === parentPath)
-      .sort((a, b) => a.sortOrder - b.sortOrder);
-  };
-
-  const getLevel4Categories = (parentPath: string) => {
-    return marketplaceCategories
-      .filter(cat => cat.level === 4 && cat.parentPath === parentPath)
+      .filter(cat => cat.level === level && cat.parentPath === parentPath)
       .sort((a, b) => a.sortOrder - b.sortOrder);
   };
 
@@ -274,8 +270,8 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
 
   // Get leaf categories (final/deepest categories) that are descendants of the current navigation path
   const getLeafCategoriesForCurrentPath = () => {
-    // Determine the current deepest selected path
-    const currentPath = selectedLevel3 || selectedLevel2 || selectedLevel1;
+    // Determine the current deepest selected path from dynamic levels
+    const currentPath = selectedLevels.filter(level => level !== "").pop() || "";
     
     // If no path is selected, return empty array (Placement should be empty)
     if (!currentPath) {
@@ -312,71 +308,52 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
 
   return (
     <div className="grid grid-cols-2 gap-4 min-w-[600px]">
-      {/* Left side: Category dropdowns */}
+      {/* Left side: Dynamic Category dropdowns */}
       <div className="space-y-4">
-        
-
-        {/* Level 1: Main Categories */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Category</Label>
-          <Select value={selectedLevel1} onValueChange={(value) => {
-            setSelectedLevel1(value);
-            setSelectedLevel2("");
-            setSelectedLevel3("");
-          }}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              {getLevel2Categories().map((category) => (
-                <SelectItem key={category.id} value={category.categoryPath}>
-                  {category.displayName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Level 2: Subcategories */}
-        {selectedLevel1 && (
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Subcategory</Label>
-            <Select value={selectedLevel2} onValueChange={(value) => {
-              setSelectedLevel2(value);
-              setSelectedLevel3("");
-            }}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select subcategory" />
-              </SelectTrigger>
-              <SelectContent>
-                {getLevel3Categories(selectedLevel1).map((category) => (
-                  <SelectItem key={category.id} value={category.categoryPath}>
-                    {category.displayName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-
-        {/* Level 3: Sub-subcategories */}
-        {selectedLevel2 && getLevel4Categories(selectedLevel2).length > 0 && (
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Subcategory</Label>
-            <Select value={selectedLevel3} onValueChange={setSelectedLevel3}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select one" />
-              </SelectTrigger>
-              <SelectContent>
-                {getLevel4Categories(selectedLevel2).map((category) => (
-                  <SelectItem key={category.id} value={category.categoryPath}>
-                    {category.displayName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
+        {/* Generate dropdowns dynamically based on maxDepth */}
+        {Array.from({ length: maxDepth }, (_, index) => {
+          const level = index + 2; // Levels start at 2 (main categories)
+          const parentPath = index === 0 ? undefined : selectedLevels[index - 1];
+          const shouldShow = index === 0 || (parentPath && parentPath !== "");
+          
+          if (!shouldShow) return null;
+          
+          const categories = getCategoriesForLevel(level, parentPath);
+          
+          // Don't show dropdown if no categories available
+          if (categories.length === 0) return null;
+          
+          return (
+            <div key={`level-${level}`} className="space-y-2">
+              <Label className="text-sm font-medium">
+                {index === 0 ? "Category" : "Subcategory"}
+              </Label>
+              <Select 
+                value={selectedLevels[index] || ""} 
+                onValueChange={(value) => {
+                  const newLevels = [...selectedLevels];
+                  newLevels[index] = value;
+                  // Clear all subsequent levels when a parent changes
+                  for (let i = index + 1; i < maxDepth; i++) {
+                    newLevels[i] = "";
+                  }
+                  setSelectedLevels(newLevels);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={index === 0 ? "Select category" : "Select subcategory"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.categoryPath}>
+                      {category.displayName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          );
+        })}
       </div>
 
       {/* Right side: Placement section */}
@@ -442,26 +419,17 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
                           const pathParts = categoryData.categoryPath.split(' > ');
                           console.log('Category path parts:', pathParts);
                           
-                          // For level 2+ categories, set level 1 (should be second segment)
-                          if (pathParts.length >= 2) {
-                            const level1Path = pathParts.slice(0, 2).join(' > ');
-                            console.log('Setting level 1:', level1Path);
-                            setSelectedLevel1(level1Path);
+                          // Build new levels array dynamically
+                          const newLevels = new Array(maxDepth).fill("");
+                          
+                          // Fill levels based on path depth
+                          for (let i = 0; i < Math.min(pathParts.length - 1, maxDepth); i++) {
+                            const levelPath = pathParts.slice(0, i + 2).join(' > ');
+                            newLevels[i] = levelPath;
+                            console.log(`Setting level ${i + 2}:`, levelPath);
                           }
                           
-                          // For level 3+ categories, set level 2 (should be first 3 segments)
-                          if (pathParts.length >= 3) {
-                            const level2Path = pathParts.slice(0, 3).join(' > ');
-                            console.log('Setting level 2:', level2Path);
-                            setSelectedLevel2(level2Path);
-                          }
-                          
-                          // For level 4+ categories, set level 3 (should be first 4 segments)
-                          if (pathParts.length >= 4) {
-                            const level3Path = pathParts.slice(0, 4).join(' > ');
-                            console.log('Setting level 3:', level3Path);
-                            setSelectedLevel3(level3Path);
-                          }
+                          setSelectedLevels(newLevels);
                           
                           // Reset manual navigation flag after a longer delay to prevent conflicts
                           setTimeout(() => setIsManualNavigation(false), 500);
@@ -495,7 +463,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
             {/* Show message if no leaf categories available */}
             {getLeafCategoriesForCurrentPath().length === 0 && (
               <div className="text-center py-4 text-gray-500 text-sm">
-                {selectedLevel1 || selectedLevel2 || selectedLevel3 
+                {selectedLevels.some(level => level !== "") 
                   ? "No final categories available in this branch."
                   : "Navigate through categories to see placement options."
                 }
