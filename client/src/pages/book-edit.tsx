@@ -78,8 +78,18 @@ const languages = [
 ];
 
 const marketplaces = [
-  "Amazon.com", "Amazon.co.uk", "Amazon.de", "Amazon.fr", "Amazon.es", "Amazon.it", 
-  "Amazon.co.jp", "Amazon.ca", "Amazon.com.au", "Amazon.in", "Amazon.com.br", "Amazon.com.mx"
+  "Amazon.com",
+  "Amazon.co.uk", 
+  "Amazon.de",
+  "Amazon.fr",
+  "Amazon.es",
+  "Amazon.it",
+  "Amazon.nl",
+  "Amazon.pl",
+  "Amazon.se",
+  "Amazon.co.jp",
+  "Amazon.ca",
+  "Amazon.com.au"
 ];
 
 const readingAges = [
