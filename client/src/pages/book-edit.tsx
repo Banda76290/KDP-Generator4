@@ -2633,6 +2633,37 @@ export default function EditBook() {
               <CardTitle>Upload your manuscript and configure content settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-8">
+              {/* ISBN Section */}
+              <div className="bg-teal-50 rounded-lg border border-teal-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">ISBN</h3>
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600">
+                    You can get a free KDP ISBN or use your own. Learn more about ISBNs.
+                  </p>
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="freeISBN"
+                        name="isbnOption"
+                        defaultChecked
+                        className="w-4 h-4 text-[#38b6ff] border-gray-300 focus:ring-[#38b6ff]"
+                      />
+                      <Label htmlFor="freeISBN" className="text-sm font-medium">Get a free KDP ISBN</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="ownISBN"
+                        name="isbnOption"
+                        className="w-4 h-4 text-[#38b6ff] border-gray-300 focus:ring-[#38b6ff]"
+                      />
+                      <Label htmlFor="ownISBN" className="text-sm font-medium">Add your own ISBN</Label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Manuscript Upload Section */}
               <div className="bg-blue-50 rounded-lg border border-blue-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Manuscript</h3>
