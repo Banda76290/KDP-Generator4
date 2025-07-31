@@ -2404,7 +2404,6 @@ export default function EditBook() {
               <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Keywords</h3>
                 <div className="space-y-4">
-                  <Label className="font-medium text-[16px]">Keywords</Label>
                   <p className="text-sm text-gray-600">
                     Enter up to 7 keywords or short phrases that describe the content, topic, theme or type of your book. Separate keywords with commas.
                   </p>
