@@ -193,7 +193,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-2 gap-4 min-w-[600px]">
       {/* Left side: Category dropdowns */}
       <div className="space-y-4">
         {/* Reset Button */}
