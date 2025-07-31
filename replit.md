@@ -397,6 +397,18 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Extensive Logging**: Added detailed console logs to trace save/restore operations for future debugging
 - **Universal Coverage**: System works for both series creation and series editing workflows seamlessly
 
+### Dynamic Category Loading System (31 Juillet 2025) ✅ COMPLETED
+- **Database-Driven Categories**: Complete implementation of marketplace-specific category hierarchies in PostgreSQL
+- **Multi-Marketplace Support**: Added comprehensive category data for 6 Amazon marketplaces (Amazon.com, Amazon.fr, Amazon.de, Amazon.es, Amazon.it, Amazon.co.uk)
+- **Real User Data Integration**: Imported authentic category data from user-provided sample with 124+ categories across 5 languages
+- **Dynamic API Integration**: Categories modal now loads appropriate categories based on Primary Marketplace selection
+- **Hierarchical Category Structure**: Implemented proper parent-child relationships with selectable/non-selectable categories
+- **Loading Indicators**: Added proper loading states when switching between marketplaces
+- **Backend API System**: Complete REST API at `/api/marketplace-categories/:marketplace` with proper error handling
+- **Category Tree Building**: Frontend logic to build hierarchical category trees from flat database records
+- **Marketplace Mapping**: Intelligent language-based marketplace detection (French→Amazon.fr, English→Amazon.com, etc.)
+- **Production-Ready**: Fully functional system replacing static category lists with dynamic database-driven approach
+
 ### SSL Certificate Configuration Issue Resolved (30 Juillet 2025)
 - **Problem Identified**: Custom domain `kdpgenerator.com` was causing `NET::ERR_CERT_COMMON_NAME_INVALID` SSL errors
 - **Temporary Solution**: Temporarily disabled custom domain configuration to prevent SSL errors
