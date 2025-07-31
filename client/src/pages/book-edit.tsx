@@ -1457,7 +1457,7 @@ export default function EditBook() {
                   <div
                     id="description-editor"
                     contentEditable
-                    className="min-h-[200px] p-3 border border-gray-300 rounded-md resize-y overflow-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="min-h-[200px] p-3 border border-gray-300 rounded-md resize-y overflow-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                     style={{ 
                       minHeight: '200px',
                       maxHeight: '500px',

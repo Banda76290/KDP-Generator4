@@ -435,6 +435,11 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Interface utilisateur améliorée**: Le champ apparaît maintenant comme un simple input texte sur une seule ligne
 - **Expérience utilisateur optimisée**: Suppression des contrôles numériques visuels non nécessaires
 
+### Description Editor Background Fix (31 Juillet 2025) ✅ RÉSOLU
+- **Fond de l'éditeur de description corrigé**: Ajout de la classe `bg-white` à l'éditeur de description
+- **Contraste visuel amélioré**: L'intérieur de l'input est maintenant blanc au lieu d'hériter de la couleur orange de la carte parent
+- **Lisibilité optimisée**: Interface plus claire et professionnelle pour la saisie de description
+
 ### Visual Section Separation Implementation (31 Juillet 2025) 🚧 EN COURS
 - **Cartes colorées**: Début d'implémentation de sections visuellement séparées avec des cartes colorées dans book-edit.tsx
 - **Structure améliorée**: Regroupement logique des champs en sections thématiques (projet, informations de base, série/édition, auteurs/contributeurs, description, droits/options)
