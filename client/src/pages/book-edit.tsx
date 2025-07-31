@@ -919,8 +919,8 @@ export default function EditBook() {
         seriesTitle: book.seriesTitle || "",
         seriesNumber: book.seriesNumber || null,
         editionNumber: book.editionNumber || null,
-        readingAgeMin: book.readingAgeMin ? parseInt(book.readingAgeMin) : null,
-        readingAgeMax: book.readingAgeMax ? parseInt(book.readingAgeMax) : null,
+        readingAgeMin: book.readingAgeMin ? book.readingAgeMin.toString() : null,
+        readingAgeMax: book.readingAgeMax ? book.readingAgeMax.toString() : null,
       });
 
       // Set series checkbox state and store original series data
@@ -971,8 +971,8 @@ export default function EditBook() {
     
     if (hasExplicitContent) {
       // If explicit content is selected, force both reading ages to 18+
-      form.setValue("readingAgeMin", 18);
-      form.setValue("readingAgeMax", 18);
+      form.setValue("readingAgeMin", "18");
+      form.setValue("readingAgeMax", "18");
     }
   }, [form.watch("hasExplicitContent")]);
 
@@ -982,7 +982,7 @@ export default function EditBook() {
     const minAge = form.watch("readingAgeMin");
     const maxAge = form.watch("readingAgeMax");
     
-    if (!hasExplicitContent && minAge && maxAge && maxAge < minAge) {
+    if (!hasExplicitContent && minAge && maxAge && parseInt(maxAge) < parseInt(minAge)) {
       // If maximum age is less than minimum age, set maximum to minimum
       form.setValue("readingAgeMax", minAge);
     }
@@ -2170,9 +2170,9 @@ export default function EditBook() {
                       <div className="space-y-2">
                         <Label htmlFor="readingAgeMin" className="text-sm font-medium">Minimum</Label>
                         <Select 
-                          value={form.watch("readingAgeMin")?.toString() || ""} 
-                          onValueChange={(value) => form.setValue("readingAgeMin", value ? parseInt(value) : null)}
-                          disabled={form.watch("hasExplicitContent")}
+                          value={form.watch("readingAgeMin") || ""} 
+                          onValueChange={(value) => form.setValue("readingAgeMin", value || null)}
+                          disabled={form.watch("hasExplicitContent") || false}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select one" />
@@ -2209,9 +2209,9 @@ export default function EditBook() {
                       <div className="space-y-2">
                         <Label htmlFor="readingAgeMax" className="text-sm font-medium">Maximum</Label>
                         <Select 
-                          value={form.watch("readingAgeMax")?.toString() || ""} 
-                          onValueChange={(value) => form.setValue("readingAgeMax", value ? parseInt(value) : null)}
-                          disabled={form.watch("hasExplicitContent")}
+                          value={form.watch("readingAgeMax") || ""} 
+                          onValueChange={(value) => form.setValue("readingAgeMax", value || null)}
+                          disabled={form.watch("hasExplicitContent") || false}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select one" />
@@ -2247,7 +2247,7 @@ export default function EditBook() {
                                   ];
                                   
                                   return ageOptions
-                                    .filter(option => minAge == null || parseInt(option.value) >= minAge)
+                                    .filter(option => minAge == null || parseInt(option.value) >= parseInt(minAge))
                                     .map(option => (
                                       <SelectItem key={option.value} value={option.value}>
                                         {option.label}
