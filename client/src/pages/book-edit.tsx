@@ -250,6 +250,26 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
       .sort((a, b) => a.sortOrder - b.sortOrder);
   };
 
+  // Get leaf categories (final/deepest categories in each branch) for Placement dropdown
+  const getLeafCategories = () => {
+    // Find all categories that don't have any children (leaf nodes)
+    const leafCategories = marketplaceCategories.filter(category => {
+      // A category is a leaf if no other category has it as a parent
+      const hasChildren = marketplaceCategories.some(otherCat => 
+        otherCat.parentPath === category.categoryPath
+      );
+      return !hasChildren && category.isSelectable;
+    });
+    
+    return leafCategories.sort((a, b) => {
+      // Sort by level first (deeper categories first), then by display name
+      if (a.level !== b.level) {
+        return b.level - a.level; // Higher levels (deeper) first
+      }
+      return a.displayName.localeCompare(b.displayName);
+    });
+  };
+
   return (
     <div className="grid grid-cols-2 gap-4 min-w-[600px]">
       {/* Left side: Category dropdowns */}
@@ -320,79 +340,46 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
       </div>
 
       {/* Right side: Placement section */}
-      {(selectedLevel1 && (selectedLevel2 || selectedLevel3 || getSelectableCategories(selectedLevel1).length > 0)) && (
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Placement</Label>
-          <div className="bg-gray-50 rounded border p-4 h-fit">
-            <div className="grid grid-cols-1 gap-3">
-              {/* Display selectable categories from current deepest level */}
-              {getSelectableCategories(selectedLevel3 || selectedLevel2 || selectedLevel1).map((category) => (
-                <div key={category.id} className="flex items-start space-x-2">
-                  <Checkbox
-                    id={`category-${category.id}`}
-                    checked={selectedCategories.includes(category.categoryPath)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        onCategorySelect(category.categoryPath);
-                      }
-                    }}
-                    className="mt-0.5"
-                  />
-                  <Label 
-                    htmlFor={`category-${category.id}`} 
-                    className="text-sm cursor-pointer leading-5"
-                  >
-                    {category.displayName}
-                  </Label>
-                </div>
-              ))}
-              
-              {/* Also allow selecting the current level if it's selectable */}
-              {selectedLevel3 && marketplaceCategories.find(cat => cat.categoryPath === selectedLevel3)?.isSelectable && (
-                <div className="flex items-start space-x-2">
-                  <Checkbox
-                    id={`current-level3-${selectedLevel3}`}
-                    checked={selectedCategories.includes(selectedLevel3)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        onCategorySelect(selectedLevel3);
-                      }
-                    }}
-                    className="mt-0.5"
-                  />
-                  <Label 
-                    htmlFor={`current-level3-${selectedLevel3}`} 
-                    className="text-sm cursor-pointer leading-5"
-                  >
-                    {marketplaceCategories.find(cat => cat.categoryPath === selectedLevel3)?.displayName}
-                  </Label>
-                </div>
-              )}
-              
-              {selectedLevel2 && marketplaceCategories.find(cat => cat.categoryPath === selectedLevel2)?.isSelectable && (
-                <div className="flex items-start space-x-2">
-                  <Checkbox
-                    id={`current-level2-${selectedLevel2}`}
-                    checked={selectedCategories.includes(selectedLevel2)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        onCategorySelect(selectedLevel2);
-                      }
-                    }}
-                    className="mt-0.5"
-                  />
-                  <Label 
-                    htmlFor={`current-level2-${selectedLevel2}`} 
-                    className="text-sm cursor-pointer leading-5"
-                  >
-                    {marketplaceCategories.find(cat => cat.categoryPath === selectedLevel2)?.displayName}
-                  </Label>
-                </div>
-              )}
-            </div>
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Placement</Label>
+        <div className="bg-gray-50 rounded border p-4 h-fit">
+          <div className="grid grid-cols-1 gap-3 max-h-80 overflow-y-auto">
+            {/* Display only leaf categories (final categories in each branch) */}
+            {getLeafCategories().map((category) => (
+              <div key={category.id} className="flex items-start space-x-2">
+                <Checkbox
+                  id={`leaf-category-${category.id}`}
+                  checked={selectedCategories.includes(category.categoryPath)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      onCategorySelect(category.categoryPath);
+                    }
+                  }}
+                  className="mt-0.5"
+                />
+                <Label 
+                  htmlFor={`leaf-category-${category.id}`} 
+                  className="text-sm cursor-pointer leading-5"
+                >
+                  <div className="flex flex-col">
+                    <span className="font-medium">{category.displayName}</span>
+                    <span className="text-xs text-gray-500 mt-0.5">
+                      {category.categoryPath.replace(/^Books > /, '')}
+                    </span>
+                  </div>
+                </Label>
+              </div>
+            ))}
+            
+            {/* Show message if no leaf categories available */}
+            {getLeafCategories().length === 0 && (
+              <div className="text-center py-4 text-gray-500 text-sm">
+                No categories available for the selected marketplace.
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
