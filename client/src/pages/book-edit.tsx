@@ -529,6 +529,10 @@ export default function EditBook() {
     seriesNumber: number | null;
   } | null>(null);
   
+  // ISBN Apply functionality states
+  const [officialIsbnContentValue, setOfficialIsbnContentValue] = useState("");
+  const [showIsbnContentApplyDialog, setShowIsbnContentApplyDialog] = useState(false);
+  
   // WYSIWYG Editor states for Description
   const [descriptionCharacterCount, setDescriptionCharacterCount] = useState(0);
   const maxDescriptionCharacters = 4000;
@@ -1195,6 +1199,42 @@ export default function EditBook() {
 
   const removeContributor = (id: string) => {
     setContributors(contributors.filter(c => c.id !== id));
+  };
+
+  // ISBN Apply functionality
+  const handleApplyIsbn = async () => {
+    if (!officialIsbnContentValue.trim()) {
+      return;
+    }
+
+    try {
+      const response = await apiRequest("PATCH", `/api/books/${bookId}`, {
+        isbn: officialIsbnContentValue.trim()
+      });
+
+      if (response) {
+        toast.success({
+          title: "ISBN Applied Successfully",
+          description: "The Official ISBN has been permanently applied to this book."
+        });
+        // Reset the input value and close dialog
+        setOfficialIsbnContentValue("");
+        setShowIsbnContentApplyDialog(false);
+        // Invalidate and refetch book data
+        queryClient.invalidateQueries({ queryKey: [`/api/books/${bookId}`] });
+      }
+    } catch (error) {
+      console.error('Error applying ISBN:', error);
+      toast.error({
+        title: "Error",
+        description: "Failed to apply ISBN. Please try again."
+      });
+    }
+  };
+
+  const cancelIsbnApply = () => {
+    setOfficialIsbnContentValue("");
+    setShowIsbnContentApplyDialog(false);
   };
 
   // Force "immediate" release when book was previously published
@@ -2681,11 +2721,22 @@ export default function EditBook() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="officialIsbnContent" className="text-sm font-medium">Official ISBN</Label>
-                      <Input
-                        id="officialIsbnContent"
-                        placeholder="Enter your own ISBN if you have one"
-                        defaultValue=""
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          id="officialIsbnContent"
+                          placeholder="Enter your own ISBN if you have one"
+                          value={officialIsbnContentValue}
+                          onChange={(e) => setOfficialIsbnContentValue(e.target.value)}
+                        />
+                        <Button
+                          type="button"
+                          onClick={() => setShowIsbnContentApplyDialog(true)}
+                          className="bg-[#ef4444] hover:bg-red-600 text-white flex-shrink-0"
+                          disabled={!officialIsbnContentValue?.trim()}
+                        >
+                          Apply
+                        </Button>
+                      </div>
                       <p className="text-sm text-gray-500">Enter your own ISBN number if you have purchased one or get one from Amazon</p>
                     </div>
                   </div>
@@ -3500,6 +3551,27 @@ export default function EditBook() {
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* ISBN Apply Confirmation Dialog */}
+      <AlertDialog open={showIsbnContentApplyDialog} onOpenChange={setShowIsbnContentApplyDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apply Official ISBN</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to apply this Official ISBN? This action is irreversible and the ISBN cannot be changed once applied to this book.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelIsbnApply}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleApplyIsbn}
+              className="bg-[#ef4444] hover:bg-red-600 text-white"
+            >
+              Apply ISBN
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 }
