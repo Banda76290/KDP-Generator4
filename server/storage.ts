@@ -42,6 +42,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, sum, count, like, or } from "drizzle-orm";
+import { generateUniqueIsbnPlaceholder } from "./utils/isbnGenerator";
 
 export interface IStorage {
   // User operations
@@ -514,6 +515,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createBook(book: InsertBook): Promise<Book> {
+    // Generate unique ISBN placeholder if not provided
+    if (!book.isbnPlaceholder) {
+      book.isbnPlaceholder = await generateUniqueIsbnPlaceholder();
+    }
+    
     const [newBook] = await db.insert(books).values(book).returning();
     return newBook;
   }
