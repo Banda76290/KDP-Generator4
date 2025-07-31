@@ -167,6 +167,48 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
     }
   }, [resetTrigger]);
 
+  // Sync dropdown selections with already selected categories
+  useEffect(() => {
+    if (selectedCategories.length > 0 && marketplaceCategories.length > 0) {
+      // Find the deepest selected category to reconstruct the hierarchy
+      const selectedCategory = selectedCategories[0]; // Take first selected category as reference
+      const categoryData = marketplaceCategories.find(cat => cat.categoryPath === selectedCategory);
+      
+      if (categoryData) {
+        // Clear current selections first
+        setSelectedLevel1("");
+        setSelectedLevel2("");
+        setSelectedLevel3("");
+        
+        // Reconstruct the hierarchy by walking up the parent chain
+        if (categoryData.level === 4) {
+          setSelectedLevel3(categoryData.categoryPath);
+          const level3Parent = marketplaceCategories.find(cat => cat.categoryPath === categoryData.parentPath);
+          if (level3Parent) {
+            setSelectedLevel2(level3Parent.categoryPath);
+            const level2Parent = marketplaceCategories.find(cat => cat.categoryPath === level3Parent.parentPath);
+            if (level2Parent) {
+              setSelectedLevel1(level2Parent.categoryPath);
+            }
+          }
+        } else if (categoryData.level === 3) {
+          setSelectedLevel2(categoryData.categoryPath);
+          const level2Parent = marketplaceCategories.find(cat => cat.categoryPath === categoryData.parentPath);
+          if (level2Parent) {
+            setSelectedLevel1(level2Parent.categoryPath);
+          }
+        } else if (categoryData.level === 2) {
+          setSelectedLevel1(categoryData.categoryPath);
+        }
+      }
+    } else if (selectedCategories.length === 0) {
+      // Clear all selections when no categories are selected
+      setSelectedLevel1("");
+      setSelectedLevel2("");
+      setSelectedLevel3("");
+    }
+  }, [selectedCategories, marketplaceCategories]);
+
   // Get categories by level and parent
   const getLevel2Categories = () => {
     return marketplaceCategories
