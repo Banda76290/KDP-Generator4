@@ -3497,6 +3497,7 @@ export default function EditBook() {
                 <div className="text-center py-8">
                   <p className="text-gray-600">No categories available for the selected marketplace.</p>
                   <p className="text-sm text-gray-500 mt-2">Try selecting a different Primary Marketplace.</p>
+
                 </div>
               )}
 
