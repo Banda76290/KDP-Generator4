@@ -1619,8 +1619,8 @@ export default function EditBook() {
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {/* Tab Navigation */}
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
+          <div className="bg-white border-b border-gray-200 mb-8">
+            <nav className="-mb-px flex space-x-0">
               <button
                 type="button"
                 onClick={() => {
@@ -1645,12 +1645,19 @@ export default function EditBook() {
                     }, 50);
                   }
                 }}
-                className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`relative px-6 py-4 font-semibold text-base transition-all duration-200 ease-in-out ${
                   activeTab === "details"
-                    ? "border-orange-500 text-orange-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "text-white bg-gradient-to-r from-[#38b6ff] to-[#146eb4] rounded-t-lg shadow-lg border-b-3 border-[#38b6ff]"
+                    : "text-gray-600 hover:text-[#146eb4] hover:bg-gray-50 rounded-t-lg border-b-2 border-transparent hover:border-gray-300"
                 }`}
-              >Book Details</button>
+              >
+                <span className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Book Details
+                </span>
+              </button>
               <button
                 type="button"
                 onClick={() => {
@@ -1666,12 +1673,19 @@ export default function EditBook() {
                   }
                   setActiveTab("content");
                 }}
-                className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`relative px-6 py-4 font-semibold text-base transition-all duration-200 ease-in-out ${
                   activeTab === "content"
-                    ? "border-orange-500 text-orange-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "text-white bg-gradient-to-r from-[#38b6ff] to-[#146eb4] rounded-t-lg shadow-lg border-b-3 border-[#38b6ff]"
+                    : "text-gray-600 hover:text-[#146eb4] hover:bg-gray-50 rounded-t-lg border-b-2 border-transparent hover:border-gray-300"
                 }`}
-              >Book Content</button>
+              >
+                <span className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Book Content
+                </span>
+              </button>
               <button
                 type="button"
                 onClick={() => {
@@ -1687,12 +1701,19 @@ export default function EditBook() {
                   }
                   setActiveTab("pricing");
                 }}
-                className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`relative px-6 py-4 font-semibold text-base transition-all duration-200 ease-in-out ${
                   activeTab === "pricing"
-                    ? "border-orange-500 text-orange-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "text-white bg-gradient-to-r from-[#38b6ff] to-[#146eb4] rounded-t-lg shadow-lg border-b-3 border-[#38b6ff]"
+                    : "text-gray-600 hover:text-[#146eb4] hover:bg-gray-50 rounded-t-lg border-b-2 border-transparent hover:border-gray-300"
                 }`}
-              >Book Rights & Pricing</button>
+              >
+                <span className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  </svg>
+                  Book Rights & Pricing
+                </span>
+              </button>
             </nav>
           </div>
 
