@@ -1105,6 +1105,10 @@ export default function EditBook() {
 
   // Handle conflict dialog actions
   const proceedWithMarketplaceChange = () => {
+    // Store values before clearing state
+    const marketplaceName = pendingMarketplace;
+    const removedCount = incompatibleCategories.length;
+    
     // Remove incompatible categories from both form and local state
     const formCategories = form.getValues("categories") || [];
     const localCategories = categories || [];
@@ -1121,7 +1125,7 @@ export default function EditBook() {
     setPendingMarketplace("");
     setIncompatibleCategories([]);
     
-    toast.success(`Marketplace changed to ${pendingMarketplace} and ${incompatibleCategories.length} incompatible categories removed`);
+    toast.success(`Marketplace changed to ${marketplaceName} and ${removedCount} incompatible categories removed`);
   };
 
   const cancelMarketplaceChange = () => {
@@ -2789,16 +2793,16 @@ export default function EditBook() {
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+          <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:justify-end">
             <AlertDialogCancel 
               onClick={cancelMarketplaceChange}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto order-2 sm:order-1"
             >
               Cancel - Keep current marketplace
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={proceedWithMarketplaceChange}
-              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
+              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto order-1 sm:order-2"
             >
               Change marketplace and remove categories
             </AlertDialogAction>
