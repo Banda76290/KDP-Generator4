@@ -2264,10 +2264,7 @@ export default function EditBook() {
               {/* Header Text */}
               <div className="space-y-2">
                 <p className="text-sm text-gray-700">
-                  Select categories and subcategories in the drop-down menus below to find up to 3 category placements that most accurately describe your book's subject matter. Your book will appear in these locations in the Amazon Store.{' '}
-                  <button type="button" className="text-blue-600 hover:text-blue-800 underline">
-                    Tips for choosing categories
-                  </button>
+                  Select categories and subcategories in the drop-down menus below to find up to 3 category placements that most accurately describe your book's subject matter. Your book will appear in these locations in the Amazon Store.
                 </p>
               </div>
 
