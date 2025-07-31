@@ -2528,49 +2528,114 @@ export default function EditBook() {
                 </div>
               </div>
 
-              {/* Additional Options Section */}
-              <div className="bg-pink-50 rounded-lg border border-pink-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Options</h3>
+              {/* Release Date Section */}
+              <div className="bg-cyan-50 rounded-lg border border-cyan-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Release Date</h3>
+                
+                {/* Not Eligible Info Box */}
+                {form.watch("previouslyPublished") && (
+                  <div className="bg-cyan-100 border border-cyan-300 rounded-md p-4 mb-4 flex items-start space-x-3">
+                    <div className="flex-shrink-0">
+                      <svg className="w-5 h-5 text-[#38b6ff]" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900 mb-1">Not eligible</h4>
+                      <p className="text-sm text-gray-700">
+                        Scheduled release is not available for some titles such as previously published titles.{" "}
+                        <a href="#" className="text-[#38b6ff] hover:text-[#146eb4]">
+                          Learn more about title eligibility for scheduled release
+                        </a>
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="space-y-4">
-                  <Label className="font-medium text-[16px]">Content & Publishing Options</Label>
+                  <p className="text-sm text-gray-700 mb-4">
+                    Choose when to make your book available on Amazon.{" "}
+                    <a href="#" className="text-[#38b6ff] hover:text-[#146eb4]">
+                      Learn more about release date options
+                    </a>
+                  </p>
                   
                   <div className="space-y-4">
-                    <div className="flex items-start space-x-2">
-                      <Checkbox
-                        id="hasExplicitContent"
-                        checked={form.watch("hasExplicitContent") || false}
-                        onCheckedChange={(checked) => form.setValue("hasExplicitContent", checked as boolean)}
-                        className="mt-1"
-                      />
-                      <div className="flex-1">
-                        <Label htmlFor="hasExplicitContent" className="text-sm font-medium">Adult content</Label>
-                        <p className="text-sm text-gray-600 mt-1">Check this box if your book contains content unsuitable for minors under 18</p>
+                    {/* Release now option */}
+                    <div className="bg-white border border-gray-200 rounded-md p-4">
+                      <div className="flex items-start space-x-3">
+                        <input
+                          type="radio"
+                          id="releaseNow"
+                          name="releaseOption"
+                          value="immediate"
+                          checked={form.watch("releaseOption") === "immediate"}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              form.setValue("releaseOption", "immediate");
+                              form.setValue("scheduledReleaseDate", null);
+                            }
+                          }}
+                          className="w-4 h-4 text-[#38b6ff] mt-1"
+                        />
+                        <div className="flex-1">
+                          <Label htmlFor="releaseNow" className="font-medium text-gray-900 cursor-pointer">
+                            Release my book for sale now
+                          </Label>
+                          <p className="text-sm text-gray-600 mt-1">
+                            After you submit for publication, it can take up to 72 hours to go live. During this time, edits cannot be made to your book.{" "}
+                            <a href="#" className="text-[#38b6ff] hover:text-[#146eb4]">
+                              Learn more about release timelines
+                            </a>
+                          </p>
+                        </div>
                       </div>
                     </div>
-
-                    <div className="flex items-start space-x-2">
-                      <Checkbox
-                        id="useAI"
-                        checked={form.watch("useAI") || false}
-                        onCheckedChange={(checked) => form.setValue("useAI", checked as boolean)}
-                        className="mt-1"
-                      />
-                      <div className="flex-1">
-                        <Label htmlFor="useAI" className="text-sm font-medium">AI-generated content</Label>
-                        <p className="text-sm text-gray-600 mt-1">Check this box if this content has been generated using AI tools. When you check this box, you must also acknowledge that your use of AI-generated content follows all applicable guidelines.</p>
+                    
+                    {/* Schedule release option */}
+                    <div className="bg-white border border-gray-200 rounded-md p-4">
+                      <div className="flex items-start space-x-3">
+                        <input
+                          type="radio"
+                          id="scheduleRelease"
+                          name="releaseOption"
+                          value="scheduled"
+                          checked={form.watch("releaseOption") === "scheduled"}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              form.setValue("releaseOption", "scheduled");
+                            }
+                          }}
+                          disabled={!!form.watch("previouslyPublished")}
+                          className="w-4 h-4 text-[#38b6ff] mt-1 disabled:opacity-50"
+                        />
+                        <div className="flex-1">
+                          <Label 
+                            htmlFor="scheduleRelease" 
+                            className={`font-medium cursor-pointer ${
+                              form.watch("previouslyPublished") ? "text-gray-400" : "text-gray-900"
+                            }`}
+                          >
+                            Schedule my book's release
+                          </Label>
+                          
+                          {form.watch("releaseOption") === "scheduled" && !form.watch("previouslyPublished") && (
+                            <div className="mt-3">
+                              <Input
+                                type="date"
+                                value={form.watch("scheduledReleaseDate") || ""}
+                                onChange={(e) => form.setValue("scheduledReleaseDate", e.target.value || null)}
+                                min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                                className="max-w-xs"
+                                placeholder="Select release date"
+                              />
+                              <p className="text-xs text-gray-500 mt-1">
+                                Release date must be at least 24 hours from now
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-
-
-
-                    <div className="flex items-start space-x-2">
-                      <Checkbox
-                        id="isLowContentBook"
-                        checked={form.watch("isLowContentBook") || false}
-                        onCheckedChange={(checked) => form.setValue("isLowContentBook", checked as boolean)}
-                        className="mt-1"
-                      />
-                      <Label htmlFor="isLowContentBook" className="font-medium text-[16px]">Low-content book (e.g. journals, notebooks, and planners)</Label>
                     </div>
                   </div>
                 </div>
