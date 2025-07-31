@@ -274,17 +274,24 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
 
   // Get categories by level and parent (dynamic)
   const getCategoriesForLevel = (level: number, parentPath?: string) => {
+    console.log(`🔍 getCategoriesForLevel called with level=${level}, parentPath="${parentPath}"`);
+    console.log(`🔍 Total marketplaceCategories available: ${marketplaceCategories.length}`);
+    
     if (level === 2) {
       // Level 2 categories (main categories, children of "Books")
-      return marketplaceCategories
+      const level2Categories = marketplaceCategories
         .filter(cat => cat.level === 2)
         .sort((a, b) => a.sortOrder - b.sortOrder);
+      console.log(`🔍 Level 2 categories found: ${level2Categories.length}`, level2Categories.map(c => c.displayName));
+      return level2Categories;
     }
     
     // For levels 3+, filter by parentPath
-    return marketplaceCategories
+    const levelCategories = marketplaceCategories
       .filter(cat => cat.level === level && cat.parentPath === parentPath)
       .sort((a, b) => a.sortOrder - b.sortOrder);
+    console.log(`🔍 Level ${level} categories found: ${levelCategories.length}`);
+    return levelCategories;
   };
 
   const getSelectableCategories = (parentPath: string) => {
