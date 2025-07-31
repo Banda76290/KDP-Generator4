@@ -2543,10 +2543,7 @@ export default function EditBook() {
                     <div>
                       <h4 className="font-medium text-gray-900 mb-1">Not eligible</h4>
                       <p className="text-sm text-gray-700">
-                        Scheduled release is not available for some titles such as previously published titles.{" "}
-                        <a href="#" className="text-[#38b6ff] hover:text-[#146eb4]">
-                          Learn more about title eligibility for scheduled release
-                        </a>
+                        Scheduled release is not available for some titles such as previously published titles.
                       </p>
                     </div>
                   </div>
