@@ -2667,65 +2667,109 @@ export default function EditBook() {
               {/* Print Options Section */}
               <div className="bg-green-50 rounded-lg border border-green-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Print Options</h3>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <p className="text-sm text-gray-600">
-                    Choose the options for your book. Tell us more about the book content settings so we get your book published. <a href="#" className="text-blue-600 underline">Get more tips</a>
+                    Choose how you'd like to print your book. We've pre-selected the most common settings to get you started. <a href="#" className="text-blue-600 underline">How will printing cost be calculated?</a>
                   </p>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Left Column */}
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium">Trim Size</Label>
-                        <Select defaultValue="6x9">
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="5x8">5" x 8" (127 x 203 mm)</SelectItem>
-                            <SelectItem value="5.25x8">5.25" x 8" (133 x 203 mm)</SelectItem>
-                            <SelectItem value="5.5x8.5">5.5" x 8.5" (140 x 216 mm)</SelectItem>
-                            <SelectItem value="6x9">6" x 9" (152 x 229 mm)</SelectItem>
-                            <SelectItem value="6.14x9.21">6.14" x 9.21" (156 x 234 mm)</SelectItem>
-                            <SelectItem value="6.69x9.61">6.69" x 9.61" (170 x 244 mm)</SelectItem>
-                            <SelectItem value="7x10">7" x 10" (178 x 254 mm)</SelectItem>
-                            <SelectItem value="7.44x9.69">7.44" x 9.69" (189 x 246 mm)</SelectItem>
-                            <SelectItem value="7.5x9.25">7.5" x 9.25" (191 x 235 mm)</SelectItem>
-                            <SelectItem value="8x10">8" x 10" (203 x 254 mm)</SelectItem>
-                            <SelectItem value="8.25x11">8.25" x 11" (210 x 279 mm)</SelectItem>
-                            <SelectItem value="8.5x11">8.5" x 11" (216 x 279 mm)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium">Paper Color</Label>
-                        <Select defaultValue="white">
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="white">White</SelectItem>
-                            <SelectItem value="cream">Cream</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Left Column - Settings */}
+                    <div className="space-y-6">
+                      {/* Ink and Paper Type */}
                       <div className="space-y-3">
-                        <div className="flex items-start space-x-3">
-                          <Checkbox id="bleedSettings" className="mt-1" />
-                          <div>
-                            <Label htmlFor="bleedSettings" className="text-sm font-medium">Bleed Settings</Label>
-                            <p className="text-xs text-gray-500">Check this box if your interior has images or text that print to the edge of the page.</p>
-                          </div>
+                        <h4 className="font-medium text-gray-900">Ink and Paper Type</h4>
+                        <p className="text-sm text-gray-600">
+                          Pick which ink and paper type you'd like to print your manuscript with. <a href="#" className="text-blue-600 underline">↗</a>
+                        </p>
+                        <div className="space-y-2">
+                          <button className="w-full p-3 text-left border border-gray-300 rounded-md hover:bg-gray-50 text-sm">
+                            Black & white interior<br />
+                            <span className="text-gray-500">with cream paper</span>
+                          </button>
+                          <button className="w-full p-3 text-left border-2 border-teal-500 bg-teal-50 rounded-md text-sm font-medium">
+                            Black & white interior<br />
+                            <span className="text-gray-700">with white paper</span>
+                          </button>
+                          <button className="w-full p-3 text-left border border-gray-300 rounded-md hover:bg-gray-50 text-sm">
+                            Standard color interior<br />
+                            <span className="text-gray-500">with white paper</span>
+                          </button>
+                          <button className="w-full p-3 text-left border border-gray-300 rounded-md hover:bg-gray-50 text-sm">
+                            Premium color interior<br />
+                            <span className="text-gray-500">with white paper</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Trim Size */}
+                      <div className="space-y-3">
+                        <h4 className="font-medium text-gray-900">Trim Size</h4>
+                        <p className="text-sm text-gray-600">
+                          Select the height and width you want your book to be. <a href="#" className="text-blue-600 underline">↗</a>
+                        </p>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button className="p-3 text-left border-2 border-teal-500 bg-teal-50 rounded-md text-sm font-medium">
+                            6 x 9 in<br />
+                            <span className="text-gray-700">15.24 x 22.86 cm</span>
+                          </button>
+                          <button className="p-3 text-left border border-gray-300 rounded-md hover:bg-gray-50 text-sm">
+                            Select a different size
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Bleed Settings */}
+                      <div className="space-y-3">
+                        <h4 className="font-medium text-gray-900">Bleed Settings</h4>
+                        <p className="text-sm text-gray-600">
+                          Choose "Bleed" if you have images or illustrations extending to the page's edge in your manuscript. Otherwise, use "No Bleed." <a href="#" className="text-blue-600 underline">↗</a>
+                        </p>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button className="p-3 text-center border-2 border-teal-500 bg-teal-50 rounded-md text-sm font-medium">
+                            No Bleed
+                          </button>
+                          <button className="p-3 text-center border border-gray-300 rounded-md hover:bg-gray-50 text-sm">
+                            Bleed (PDF only)
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Paperback cover finish */}
+                      <div className="space-y-3">
+                        <h4 className="font-medium text-gray-900">Paperback cover finish</h4>
+                        <p className="text-sm text-gray-600">
+                          Choose how you'd like to laminate your book cover. <a href="#" className="text-blue-600 underline">↗</a>
+                        </p>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button className="p-3 text-center border border-gray-300 rounded-md hover:bg-gray-50 text-sm">
+                            Matte
+                          </button>
+                          <button className="p-3 text-center border-2 border-teal-500 bg-teal-50 rounded-md text-sm font-medium">
+                            Glossy
+                          </button>
                         </div>
                       </div>
                     </div>
 
-                    {/* Right Column - Preview Image */}
-                    <div className="flex items-center justify-center">
-                      <div className="w-32 h-40 bg-gray-200 border-2 border-gray-300 rounded-lg flex items-center justify-center">
-                        <BookOpen className="h-12 w-12 text-gray-400" />
+                    {/* Right Column - Preview */}
+                    <div className="flex flex-col items-center justify-start space-y-4">
+                      <div className="w-48 h-64 bg-white border-2 border-gray-300 rounded-lg shadow-lg flex items-center justify-center relative">
+                        <div className="w-40 h-56 bg-gray-100 border border-gray-200 rounded flex items-center justify-center">
+                          <div className="text-center">
+                            <BookOpen className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                            <div className="text-xs text-gray-500 space-y-1">
+                              <div>CHAPTER 1.</div>
+                              <div className="text-[10px]">Down the Rabbit-Hole</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-center space-y-2">
+                        <div className="font-medium text-sm">Black & white interior with white paper</div>
+                        <div className="text-xs text-gray-600 space-y-1">
+                          <div>• Typical for nonfiction</div>
+                          <div>• Paper weight: 50-61 pound, 74-90 grams per square meter</div>
+                        </div>
                       </div>
                     </div>
                   </div>
