@@ -171,7 +171,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
     }
   }, [resetTrigger]);
 
-  // Enhanced state restoration with local snapshot
+  // Enhanced state restoration with proper stability checks
   useEffect(() => {
     if (marketplaceCategories.length === 0) {
       return; // Wait for marketplace categories to load
@@ -181,16 +181,21 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
     const instanceIndex = instanceId ? parseInt(instanceId.split('-')[1]) : 0;
     const thisInstanceCategory = selectedCategories[instanceIndex];
     
-    // Update local snapshot when the assigned category changes
-    if (localCategorySnapshot !== thisInstanceCategory) {
-      setLocalCategorySnapshot(thisInstanceCategory || "");
+    // Only trigger reconstruction if the category assigned to this instance has actually changed
+    if (localCategorySnapshot === thisInstanceCategory) {
+      return; // No change, preserve current state
     }
     
+    // Update local snapshot
+    setLocalCategorySnapshot(thisInstanceCategory || "");
+    
     if (!thisInstanceCategory) {
-      // Clear selections if no category is assigned
-      setSelectedLevel1("");
-      setSelectedLevel2("");
-      setSelectedLevel3("");
+      // Clear selections if no category is assigned, but only if they're not already empty
+      if (selectedLevel1 || selectedLevel2 || selectedLevel3) {
+        setSelectedLevel1("");
+        setSelectedLevel2("");
+        setSelectedLevel3("");
+      }
       return;
     }
 
@@ -198,13 +203,14 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
     const categoryData = marketplaceCategories.find(cat => cat.categoryPath === thisInstanceCategory);
     
     if (categoryData) {
-      // Check if current state already matches - if so, don't reconstruct
-      const currentPath = selectedLevel3 || selectedLevel2 || selectedLevel1;
-      if (currentPath === thisInstanceCategory) {
-        return; // Already correctly set
+      // Check if the current dropdown state already reflects this category
+      const currentDeepestPath = selectedLevel3 || selectedLevel2 || selectedLevel1;
+      if (currentDeepestPath === thisInstanceCategory) {
+        return; // Already correctly set, don't reconstruct
       }
       
-      // Reconstruct the hierarchy for this specific category
+      // Reconstruct the hierarchy for this specific category only if needed
+      // Use a timeout to prevent state conflicts
       setTimeout(() => {
         if (categoryData.level >= 2) {
           // Find level 2 parent
@@ -212,7 +218,9 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
           while (level2Parent && level2Parent.level > 2) {
             level2Parent = marketplaceCategories.find(cat => cat.categoryPath === level2Parent.parentPath);
           }
-          if (level2Parent) setSelectedLevel1(level2Parent.categoryPath);
+          if (level2Parent && selectedLevel1 !== level2Parent.categoryPath) {
+            setSelectedLevel1(level2Parent.categoryPath);
+          }
         }
         
         if (categoryData.level >= 3) {
@@ -221,10 +229,12 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
           while (level3Parent && level3Parent.level > 3) {
             level3Parent = marketplaceCategories.find(cat => cat.categoryPath === level3Parent.parentPath);
           }
-          if (level3Parent && level3Parent.level === 3) setSelectedLevel2(level3Parent.categoryPath);
+          if (level3Parent && level3Parent.level === 3 && selectedLevel2 !== level3Parent.categoryPath) {
+            setSelectedLevel2(level3Parent.categoryPath);
+          }
         }
         
-        if (categoryData.level >= 4) {
+        if (categoryData.level >= 4 && selectedLevel3 !== categoryData.categoryPath) {
           setSelectedLevel3(categoryData.categoryPath);
         }
       }, 10); // Small delay to ensure proper state updates
