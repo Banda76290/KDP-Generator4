@@ -1515,6 +1515,107 @@ export default function EditBook() {
                 </div>
               </div>
 
+              {/* Primary Audience Section */}
+              <div className="bg-purple-50 rounded-lg border border-purple-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Primary Audience</h3>
+                <div className="space-y-6">
+                  {/* Sexually Explicit Content */}
+                  <div className="space-y-4">
+                    <Label className="font-medium text-[16px]">Sexually Explicit Images or Title</Label>
+                    <p className="text-sm text-gray-600">
+                      Does the book's cover or interior contain sexually explicit images, or does the book's title contain sexually explicit language? <span className="text-blue-600 underline cursor-pointer">Learn more.</span>
+                    </p>
+                    <RadioGroup 
+                      value={form.watch("hasExplicitContent") ? "yes" : "no"} 
+                      onValueChange={(value) => form.setValue("hasExplicitContent", value === "yes")}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="yes" id="explicit-yes" />
+                        <Label htmlFor="explicit-yes" className="text-sm font-medium">Yes</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="no" id="explicit-no" />
+                        <Label htmlFor="explicit-no" className="text-sm font-medium">No</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  {/* Reading Age */}
+                  <div className="space-y-4">
+                    <Label className="font-medium text-[16px]">Reading age <span className="text-gray-500">(Optional)</span></Label>
+                    <p className="text-sm text-gray-600">
+                      Choose the youngest and oldest ages at which a person could enjoy this book.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="readingAgeMin" className="text-sm font-medium">Minimum</Label>
+                        <Select 
+                          value={form.watch("readingAgeMin")?.toString() || ""} 
+                          onValueChange={(value) => form.setValue("readingAgeMin", value ? parseInt(value) : null)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select one" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="0">Baby</SelectItem>
+                            <SelectItem value="1">1</SelectItem>
+                            <SelectItem value="2">2</SelectItem>
+                            <SelectItem value="3">3</SelectItem>
+                            <SelectItem value="4">4</SelectItem>
+                            <SelectItem value="5">5</SelectItem>
+                            <SelectItem value="6">6</SelectItem>
+                            <SelectItem value="7">7</SelectItem>
+                            <SelectItem value="8">8</SelectItem>
+                            <SelectItem value="9">9</SelectItem>
+                            <SelectItem value="10">10</SelectItem>
+                            <SelectItem value="11">11</SelectItem>
+                            <SelectItem value="12">12</SelectItem>
+                            <SelectItem value="13">13</SelectItem>
+                            <SelectItem value="14">14</SelectItem>
+                            <SelectItem value="15">15</SelectItem>
+                            <SelectItem value="16">16</SelectItem>
+                            <SelectItem value="17">17</SelectItem>
+                            <SelectItem value="18">18+</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="readingAgeMax" className="text-sm font-medium">Maximum</Label>
+                        <Select 
+                          value={form.watch("readingAgeMax")?.toString() || ""} 
+                          onValueChange={(value) => form.setValue("readingAgeMax", value ? parseInt(value) : null)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select one" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="0">Baby</SelectItem>
+                            <SelectItem value="1">1</SelectItem>
+                            <SelectItem value="2">2</SelectItem>
+                            <SelectItem value="3">3</SelectItem>
+                            <SelectItem value="4">4</SelectItem>
+                            <SelectItem value="5">5</SelectItem>
+                            <SelectItem value="6">6</SelectItem>
+                            <SelectItem value="7">7</SelectItem>
+                            <SelectItem value="8">8</SelectItem>
+                            <SelectItem value="9">9</SelectItem>
+                            <SelectItem value="10">10</SelectItem>
+                            <SelectItem value="11">11</SelectItem>
+                            <SelectItem value="12">12</SelectItem>
+                            <SelectItem value="13">13</SelectItem>
+                            <SelectItem value="14">14</SelectItem>
+                            <SelectItem value="15">15</SelectItem>
+                            <SelectItem value="16">16</SelectItem>
+                            <SelectItem value="17">17</SelectItem>
+                            <SelectItem value="18">18+</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Categories & Keywords Section */}
               <div className="bg-indigo-50 rounded-lg border border-indigo-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Categories & Keywords</h3>

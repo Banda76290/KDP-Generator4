@@ -440,6 +440,14 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Contraste visuel amélioré**: L'intérieur de l'input est maintenant blanc au lieu d'hériter de la couleur orange de la carte parent
 - **Lisibilité optimisée**: Interface plus claire et professionnelle pour la saisie de description
 
+### Primary Audience Card Implementation (31 Juillet 2025) ✅ RÉSOLU
+- **Nouvelle carte Primary Audience ajoutée**: Intégration complète de la carte manquante dans l'onglet Book Details
+- **Positionnement correct**: Placée juste en dessous de la carte "Publishing Rights" comme spécifié
+- **Section Sexually Explicit Content**: Implémentation des boutons radio Yes/No avec texte d'aide et lien "Learn more"
+- **Section Reading Age**: Ajout des dropdowns Minimum et Maximum avec toutes les options d'âge (Baby, 1-17, 18+)
+- **Intégration formulaire**: Connexion aux champs hasExplicitContent, readingAgeMin et readingAgeMax
+- **Design cohérent**: Utilisation d'une carte violette (purple-50) pour distinction visuelle
+
 ### Visual Section Separation Implementation (31 Juillet 2025) 🚧 EN COURS
 - **Cartes colorées**: Début d'implémentation de sections visuellement séparées avec des cartes colorées dans book-edit.tsx
 - **Structure améliorée**: Regroupement logique des champs en sections thématiques (projet, informations de base, série/édition, auteurs/contributeurs, description, droits/options)
