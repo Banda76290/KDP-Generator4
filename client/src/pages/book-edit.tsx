@@ -148,10 +148,11 @@ const fallbackCategories = [
 ];
 
 // Category Selector Component
-const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategorySelect, resetTrigger, instanceId }: {
+const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategorySelect, onCategoryRemove, resetTrigger, instanceId }: {
   marketplaceCategories: MarketplaceCategory[];
   selectedCategories: string[];
   onCategorySelect: (categoryPath: string) => void;
+  onCategoryRemove?: (categoryPath: string) => void;
   resetTrigger?: number;
   instanceId?: string;
 }) => {
@@ -388,21 +389,30 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
                   id={`leaf-category-${category.id}`}
                   checked={selectedCategories.includes(category.categoryPath)}
                   onCheckedChange={(checked) => {
+                    console.log('Placement checkbox clicked:', { checked, categoryPath: category.categoryPath, selectedCategories });
+                    
                     if (checked) {
                       // First, populate the navigation dropdowns to show the path to this category
                       const categoryData = marketplaceCategories.find(cat => cat.categoryPath === category.categoryPath);
+                      console.log('Found category data:', categoryData);
+                      
                       if (categoryData) {
                         // Mark as manual navigation to prevent sync conflicts
                         setIsManualNavigation(true);
                         
                         // Reconstruct the navigation hierarchy to show the breadcrumb path
                         setTimeout(() => {
+                          console.log('Reconstructing navigation for level:', categoryData.level);
+                          
                           if (categoryData.level >= 2) {
                             let level2Parent = categoryData;
                             while (level2Parent && level2Parent.level > 2) {
                               level2Parent = marketplaceCategories.find(cat => cat.categoryPath === level2Parent.parentPath);
                             }
-                            if (level2Parent) setSelectedLevel1(level2Parent.categoryPath);
+                            if (level2Parent) {
+                              console.log('Setting level 1:', level2Parent.categoryPath);
+                              setSelectedLevel1(level2Parent.categoryPath);
+                            }
                           }
                           
                           if (categoryData.level >= 3) {
@@ -410,10 +420,14 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
                             while (level3Parent && level3Parent.level > 3) {
                               level3Parent = marketplaceCategories.find(cat => cat.categoryPath === level3Parent.parentPath);
                             }
-                            if (level3Parent && level3Parent.level === 3) setSelectedLevel2(level3Parent.categoryPath);
+                            if (level3Parent && level3Parent.level === 3) {
+                              console.log('Setting level 2:', level3Parent.categoryPath);
+                              setSelectedLevel2(level3Parent.categoryPath);
+                            }
                           }
                           
                           if (categoryData.level >= 4) {
+                            console.log('Setting level 3:', categoryData.categoryPath);
                             setSelectedLevel3(categoryData.categoryPath);
                           }
                           
@@ -423,7 +437,21 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
                       }
                       
                       // Then, add to selected categories
+                      console.log('Calling onCategorySelect with:', category.categoryPath);
                       onCategorySelect(category.categoryPath);
+                    } else {
+                      // Handle unchecking - remove from selected categories
+                      console.log('Unchecking category:', category.categoryPath);
+                      // Find current instance and remove this category
+                      const instanceIndex = instanceId ? parseInt(instanceId.split('-')[1]) : 0;
+                      const newCategories = [...selectedCategories];
+                      const categoryIndex = newCategories.indexOf(category.categoryPath);
+                      if (categoryIndex !== -1) {
+                        newCategories.splice(categoryIndex, 1);
+                        console.log('New categories after removal:', newCategories);
+                        // Call the remove function passed from parent
+                        onCategoryRemove?.(category.categoryPath);
+                      }
                     }
                   }}
                   className="mt-0.5"
@@ -2821,6 +2849,7 @@ export default function EditBook() {
                                 setSelectedCategories(newCategories.filter(Boolean));
                               }
                             }}
+                            onCategoryRemove={removeCategoryFromModal}
                           />
                         </div>
                       )}
