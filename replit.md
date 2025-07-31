@@ -409,7 +409,7 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Marketplace Mapping**: Intelligent language-based marketplace detection (French→Amazon.fr, English→Amazon.com, etc.)
 - **Production-Ready**: Fully functional system replacing static category lists with dynamic database-driven approach
 
-### Category Selector State Management Fix (31 Juillet 2025) ✅ RESOLVED
+### Category Selector State Management Fix (31 Juillet 2025) ✅ COMPLETED
 - **Independent Instance States**: Fixed critical bug where Category 2 inherited selections from Category 1
 - **Instance-Specific Synchronization**: Each CategorySelector now has unique instanceId for independent state management
 - **Intelligent State Restoration**: Categories maintain their selections when collapsed/expanded without affecting other categories
@@ -417,6 +417,9 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Targeted Synchronization**: Added smart synchronization that only restores the specific category assigned to each instance
 - **User Experience**: Resolved confusing behavior where empty categories showed pre-filled values from other categories
 - **Collapse/Expand Persistence**: Selected categories properly restore their dropdown states when sections are collapsed and expanded
+- **Complete Dropdown Restoration**: Fixed final issue where dropdowns lost populated state during collapse/expand cycles
+- **Unified Reconstruction Logic**: Both manual selection and automatic restoration use identical path segment reconstruction
+- **TempUISelections Integration**: Enhanced useEffect to use tempUISelections for proper state management during interactions
 
 ### SSL Certificate Configuration Issue Resolved (30 Juillet 2025)
 - **Problem Identified**: Custom domain `kdpgenerator.com` was causing `NET::ERR_CERT_COMMON_NAME_INVALID` SSL errors
