@@ -1241,10 +1241,9 @@ export default function EditBook() {
                     </p>
                     <Input
                       id="editionNumber"
-                      type="number"
-                      min="1"
+                      type="text"
                       placeholder="1"
-                      {...form.register("editionNumber", { valueAsNumber: true })}
+                      {...form.register("editionNumber")}
                     />
                   </div>
                 </div>

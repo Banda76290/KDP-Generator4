@@ -424,6 +424,17 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Taille de police ajustée**: Label "Contributors" mis à jour de 16px à 14px selon les préférences utilisateur
 - **Validation complète**: Duplication testée et validée fonctionnelle pour projets et livres avec contributeurs
 
+### JSX Syntax Error Resolution (31 Juillet 2025) ✅ RÉSOLU
+- **Erreur de syntaxe JSX corrigée**: Résolu l'erreur "JSX element 'div' has no corresponding closing tag" dans book-edit.tsx
+- **Tag div manquant ajouté**: Ajout du tag de fermeture manquant dans la section Book Description  
+- **Application redémarrée**: Serveur maintenant fonctionnel sur le port 5000 sans erreurs
+- **Environment de développement stable**: Configuration OIDC et base de données PostgreSQL opérationnels
+
+### Edition Number Field UI Fix (31 Juillet 2025) ✅ RÉSOLU
+- **Champ Edition Number corrigé**: Changé de `type="number"` à `type="text"` pour éliminer les boutons de navigation
+- **Interface utilisateur améliorée**: Le champ apparaît maintenant comme un simple input texte sur une seule ligne
+- **Expérience utilisateur optimisée**: Suppression des contrôles numériques visuels non nécessaires
+
 ### Visual Section Separation Implementation (31 Juillet 2025) 🚧 EN COURS
 - **Cartes colorées**: Début d'implémentation de sections visuellement séparées avec des cartes colorées dans book-edit.tsx
 - **Structure améliorée**: Regroupement logique des champs en sections thématiques (projet, informations de base, série/édition, auteurs/contributeurs, description, droits/options)
