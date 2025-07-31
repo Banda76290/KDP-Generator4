@@ -100,6 +100,38 @@ const contributorRoles = [
   "Author", "Editor", "Foreword", "Illustrator", "Introduction", "Narrator", "Photographer", "Preface", "Translator", "Contributions by"
 ];
 
+// Categories structure matching Amazon KDP
+const availableCategories = [
+  {
+    path: "Books › Computers & Technology › Business Technology",
+    subcategories: [
+      "Content Management",
+      "User Experience & Usability", 
+      "User Generated Content"
+    ]
+  },
+  {
+    path: "Books › Computers & Technology › Internet & Social Media",
+    subcategories: [
+      "Web Marketing",
+      "Web Services",
+      "Website Analytics",
+      "Search Engine Optimization"
+    ]
+  },
+  {
+    path: "Books › Computers & Technology › Web Development & Design",
+    subcategories: [
+      "Content Management",
+      "User Experience & Usability",
+      "User Generated Content",
+      "Web Marketing",
+      "Web Services", 
+      "Website Analytics"
+    ]
+  }
+];
+
 export default function EditBook() {
   const { bookId } = useParams();
   const [location, setLocation] = useLocation();
@@ -108,6 +140,9 @@ export default function EditBook() {
   const [categories, setCategories] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState("details");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showCategoriesModal, setShowCategoriesModal] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [isPartOfSeries, setIsPartOfSeries] = useState(false);
   const [hasRestoredFromStorage, setHasRestoredFromStorage] = useState(false);
   // Store original series data to restore when checkbox is checked again
@@ -797,6 +832,35 @@ export default function EditBook() {
 
   const removeCategory = (category: string) => {
     setCategories(categories.filter(c => c !== category));
+  };
+
+  // Categories modal handlers
+  const openCategoriesModal = () => {
+    setSelectedCategories([...categories]);
+    setShowCategoriesModal(true);
+  };
+
+  const saveCategoriesChanges = () => {
+    setCategories([...selectedCategories]);
+    setShowCategoriesModal(false);
+  };
+
+  const cancelCategoriesChanges = () => {
+    setSelectedCategories([]);
+    setShowCategoriesModal(false);
+  };
+
+  const toggleCategorySelection = (categoryPath: string) => {
+    const isSelected = selectedCategories.includes(categoryPath);
+    if (isSelected) {
+      setSelectedCategories(selectedCategories.filter(c => c !== categoryPath));
+    } else if (selectedCategories.length < 3) {
+      setSelectedCategories([...selectedCategories, categoryPath]);
+    }
+  };
+
+  const removeCategoryFromModal = (categoryPath: string) => {
+    setSelectedCategories(selectedCategories.filter(c => c !== categoryPath));
   };
 
   const onSubmit = (data: BookFormData) => {
@@ -1563,11 +1627,11 @@ export default function EditBook() {
                       onValueChange={(value) => form.setValue("hasExplicitContent", value === "yes")}
                     >
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="yes" id="explicit-yes" />
+                        <RadioGroupItem value="yes" id="explicit-yes" className="bg-[#ffffff]" />
                         <Label htmlFor="explicit-yes" className="text-sm font-medium">Yes</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="no" id="explicit-no" />
+                        <RadioGroupItem value="no" id="explicit-no" className="bg-[#ffffff]" />
                         <Label htmlFor="explicit-no" className="text-sm font-medium">No</Label>
                       </div>
                     </RadioGroup>
@@ -1738,6 +1802,7 @@ export default function EditBook() {
                       variant="outline" 
                       size="sm"
                       className="mt-3"
+                      onClick={openCategoriesModal}
                     >
                       Edit categories
                     </Button>
@@ -2176,6 +2241,207 @@ export default function EditBook() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Categories Edit Modal */}
+      <Dialog open={showCategoriesModal} onOpenChange={setShowCategoriesModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+          <DialogHeader className="border-b pb-4">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-xl font-semibold">Categories</DialogTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={cancelCategoriesChanges}
+                className="h-auto p-1"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+          </DialogHeader>
+          
+          <div className="overflow-y-auto max-h-[60vh] pr-2">
+            <div className="space-y-6">
+              {/* Header Text */}
+              <div className="space-y-2">
+                <p className="text-sm text-gray-700">
+                  Select categories and subcategories in the drop-down menus below to find up to 3 category placements that most accurately describe your book's subject matter. Your book will appear in these locations in the Amazon Store.{' '}
+                  <button type="button" className="text-blue-600 hover:text-blue-800 underline">
+                    Tips for choosing categories
+                  </button>
+                </p>
+              </div>
+
+              {/* Category Tree Structure */}
+              <div className="space-y-2">
+                {availableCategories.map((category, index) => (
+                  <div key={index} className="border border-gray-200 rounded">
+                    {/* Collapsed Category Header */}
+                    <div 
+                      className="flex items-center justify-between p-3 bg-gray-50 cursor-pointer hover:bg-gray-100"
+                      onClick={() => setExpandedCategory(expandedCategory === category.path ? null : category.path)}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 flex items-center justify-center">
+                          {expandedCategory === category.path ? '▼' : '▶'}
+                        </div>
+                        <span className="text-blue-600 font-medium">{category.path}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Expanded Category Content */}
+                    {expandedCategory === category.path && (
+                      <div className="p-4 border-t border-gray-200">
+                        <div className="flex justify-between items-start space-x-6">
+                          {/* Left Side - Dropdowns */}
+                          <div className="flex-1 space-y-4">
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">Category</Label>
+                              <Select>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Computers & Technology" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="computers">Computers & Technology</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">Subcategory</Label>
+                              <Select>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Web Development & Design" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="web-dev">Web Development & Design</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">Subcategory</Label>
+                              <Select>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select one" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="content">Content Management</SelectItem>
+                                  <SelectItem value="ux">User Experience & Usability</SelectItem>
+                                  <SelectItem value="user-content">User Generated Content</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          
+                          {/* Right Side - Placement Options */}
+                          <div className="flex-1">
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <Label className="text-sm font-medium">Placement</Label>
+                                <div className="flex space-x-2">
+                                  <Button variant="link" size="sm" className="h-auto p-0 text-blue-600">
+                                    Reset
+                                  </Button>
+                                  <Button variant="link" size="sm" className="h-auto p-0 text-blue-600">
+                                    Delete
+                                  </Button>
+                                </div>
+                              </div>
+                              
+                              <div className="bg-gray-50 rounded border p-3">
+                                <h4 className="font-medium text-sm mb-3">Web Development & Design</h4>
+                                <div className="grid grid-cols-2 gap-3 text-xs">
+                                  {category.subcategories.map((subcategory, subIndex) => (
+                                    <div key={subIndex} className="flex items-center space-x-2">
+                                      <Checkbox 
+                                        id={`${category.path}-${subcategory}`}
+                                        checked={selectedCategories.includes(`${category.path} › ${subcategory}`)}
+                                        onCheckedChange={(checked) => {
+                                          if (checked) {
+                                            toggleCategorySelection(`${category.path} › ${subcategory}`);
+                                          } else {
+                                            removeCategoryFromModal(`${category.path} › ${subcategory}`);
+                                          }
+                                        }}
+                                        disabled={selectedCategories.length >= 3 && !selectedCategories.includes(`${category.path} › ${subcategory}`)}
+                                      />
+                                      <Label 
+                                        htmlFor={`${category.path}-${subcategory}`}
+                                        className="text-xs cursor-pointer"
+                                      >
+                                        {subcategory}
+                                      </Label>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                
+                {/* Add Another Category Button */}
+                <Button 
+                  variant="link" 
+                  className="text-blue-600 hover:text-blue-800 h-auto p-0"
+                  disabled={selectedCategories.length >= 3}
+                >
+                  Add another category
+                </Button>
+              </div>
+
+              {/* Selected Categories Summary */}
+              <div className="space-y-4 bg-gray-50 rounded p-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-sm">
+                    {selectedCategories.length} out of 3 category placements selected
+                  </h4>
+                </div>
+                
+                <div className="space-y-2">
+                  {selectedCategories.map((categoryPath, index) => (
+                    <div key={index} className="flex items-center justify-between text-sm">
+                      <span className="text-gray-700">Books › {categoryPath}</span>
+                      <div className="flex items-center space-x-2">
+                        <button 
+                          type="button"
+                          className="text-blue-600 hover:text-blue-800"
+                          onClick={() => removeCategoryFromModal(categoryPath)}
+                        >
+                          Remove
+                        </button>
+                        <X 
+                          className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
+                          onClick={() => removeCategoryFromModal(categoryPath)}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Modal Footer */}
+          <div className="flex justify-between items-center border-t pt-4">
+            <Button 
+              variant="outline" 
+              onClick={cancelCategoriesChanges}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={saveCategoriesChanges}
+              className="bg-yellow-500 hover:bg-yellow-600 text-black"
+            >
+              Save categories
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }
