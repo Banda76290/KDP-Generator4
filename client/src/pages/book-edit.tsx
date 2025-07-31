@@ -1372,13 +1372,20 @@ export default function EditBook() {
   };
 
   const onSubmit = (data: BookFormData) => {
-    saveBook.mutate({ bookData: data, shouldNavigate: true });
+    const processedData = {
+      ...data,
+      readingAgeMin: data.readingAgeMin ? String(data.readingAgeMin) : null,
+      readingAgeMax: data.readingAgeMax ? String(data.readingAgeMax) : null,
+    };
+    saveBook.mutate({ bookData: processedData, shouldNavigate: true });
   };
 
   const handleSaveAsDraft = (data: BookFormData) => {
     const draftData = {
       ...data,
       status: "draft" as const,
+      readingAgeMin: data.readingAgeMin ? String(data.readingAgeMin) : null,
+      readingAgeMax: data.readingAgeMax ? String(data.readingAgeMax) : null,
     };
     
     saveBook.mutate({ bookData: draftData });
@@ -1392,7 +1399,13 @@ export default function EditBook() {
       nextTab = "pricing";
     }
     
-    saveBook.mutate({ bookData: data, nextTab });
+    const processedData = {
+      ...data,
+      readingAgeMin: data.readingAgeMin ? String(data.readingAgeMin) : null,
+      readingAgeMax: data.readingAgeMax ? String(data.readingAgeMax) : null,
+    };
+    
+    saveBook.mutate({ bookData: processedData, nextTab });
   };
 
   const handleDelete = () => {
