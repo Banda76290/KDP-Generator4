@@ -2768,60 +2768,82 @@ export default function EditBook() {
               <div className="bg-teal-50 rounded-lg border border-teal-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">ISBN</h3>
                 <div className="space-y-4">
-                  <p className="text-sm text-gray-600">You can get a free KDP ISBN or use your own. KDP Generator automatically creates a “placeholder” ISBN for your book because it is necessary for the site to function properly until you replace it with a “real” one. Certain features (automatic import of your books, advertising management, income calculations, etc.) will only work fully automatically once you have replaced the placeholder ISBN with your book's real ISBN.</p>
-                  <div className="space-y-4">
+                  <p className="text-sm text-gray-600">
+                    {book?.isbn 
+                      ? "Your book has an official ISBN assigned. This ISBN is now being used for all system functionality."
+                      : "You can get a free KDP ISBN or use your own. KDP Generator automatically creates a \"placeholder\" ISBN for your book because it is necessary for the site to function properly until you replace it with a \"real\" one. Certain features (automatic import of your books, advertising management, income calculations, etc.) will only work fully automatically once you have replaced the placeholder ISBN with your book's real ISBN."
+                    }
+                  </p>
+                  {book?.isbn ? (
+                    // Show only Official ISBN field in read-only mode when applied
                     <div className="space-y-2">
-                      <Label htmlFor="isbnPlaceholderContent" className="text-sm font-medium">ISBN Placeholder</Label>
+                      <Label htmlFor="officialIsbnContentApplied" className="text-sm font-medium">Official ISBN</Label>
                       <Input
-                        id="isbnPlaceholderContent"
-                        placeholder="PlaceHolder ISBN will be auto-generated"
-                        value={book?.isbnPlaceholder || ""}
+                        id="officialIsbnContentApplied"
+                        value={book.isbn}
                         disabled
-                        className="bg-gray-100"
+                        className="bg-green-50 border-green-200 text-green-800 font-medium"
                       />
-                      <p className="text-sm text-gray-500">
-                        This unique placeholder ISBN is automatically generated for system functionality
+                      <p className="text-sm text-green-600">
+                        ✓ Official ISBN applied successfully. This ISBN is now active for your book.
                       </p>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="officialIsbnContent" className="text-sm font-medium">Official ISBN</Label>
-                      <div className="flex gap-2">
-                        <div className="flex-1">
-                          <Input
-                            id="officialIsbnContent"
-                            placeholder="Enter your own ISBN if you have one"
-                            value={officialIsbnContentValue}
-                            onChange={(e) => {
-                              setOfficialIsbnContentValue(e.target.value);
-                              // Clear any existing error when user starts typing
-                              if (isbnValidationError) {
-                                setIsbnValidationError("");
-                              }
-                            }}
-                            className={`${isbnValidationError ? 'border-red-500 focus:border-red-500' : ''}`}
-                          />
-                          {isCheckingIsbn && (
-                            <p className="text-sm text-blue-600 mt-1 flex items-center gap-1">
-                              <span className="animate-spin inline-block w-3 h-3 border border-current border-t-transparent rounded-full"></span>
-                              Checking ISBN availability...
-                            </p>
-                          )}
-                          {isbnValidationError && (
-                            <p className="text-sm text-red-600 mt-1">{isbnValidationError}</p>
-                          )}
-                        </div>
-                        <Button
-                          type="button"
-                          onClick={() => setShowIsbnContentApplyDialog(true)}
-                          className="bg-[#ef4444] hover:bg-red-600 text-white flex-shrink-0"
-                          disabled={!officialIsbnContentValue?.trim() || !!isbnValidationError || isCheckingIsbn}
-                        >
-                          Apply
-                        </Button>
+                  ) : (
+                    // Show both fields when no official ISBN is applied
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="isbnPlaceholderContent" className="text-sm font-medium">ISBN Placeholder</Label>
+                        <Input
+                          id="isbnPlaceholderContent"
+                          placeholder="PlaceHolder ISBN will be auto-generated"
+                          value={book?.isbnPlaceholder || ""}
+                          disabled
+                          className="bg-gray-100"
+                        />
+                        <p className="text-sm text-gray-500">
+                          This unique placeholder ISBN is automatically generated for system functionality
+                        </p>
                       </div>
-                      <p className="text-sm text-gray-500">Enter your own ISBN number if you have purchased one or get one from Amazon</p>
+                      <div className="space-y-2">
+                        <Label htmlFor="officialIsbnContent" className="text-sm font-medium">Official ISBN</Label>
+                        <div className="flex gap-2">
+                          <div className="flex-1">
+                            <Input
+                              id="officialIsbnContent"
+                              placeholder="Enter your own ISBN if you have one"
+                              value={officialIsbnContentValue}
+                              onChange={(e) => {
+                                setOfficialIsbnContentValue(e.target.value);
+                                // Clear any existing error when user starts typing
+                                if (isbnValidationError) {
+                                  setIsbnValidationError("");
+                                }
+                              }}
+                              className={`${isbnValidationError ? 'border-red-500 focus:border-red-500' : ''}`}
+                            />
+                            {isCheckingIsbn && (
+                              <p className="text-sm text-blue-600 mt-1 flex items-center gap-1">
+                                <span className="animate-spin inline-block w-3 h-3 border border-current border-t-transparent rounded-full"></span>
+                                Checking ISBN availability...
+                              </p>
+                            )}
+                            {isbnValidationError && (
+                              <p className="text-sm text-red-600 mt-1">{isbnValidationError}</p>
+                            )}
+                          </div>
+                          <Button
+                            type="button"
+                            onClick={() => setShowIsbnContentApplyDialog(true)}
+                            className="bg-[#ef4444] hover:bg-red-600 text-white flex-shrink-0"
+                            disabled={!officialIsbnContentValue?.trim() || !!isbnValidationError || isCheckingIsbn}
+                          >
+                            Apply
+                          </Button>
+                        </div>
+                        <p className="text-sm text-gray-500">Enter your own ISBN number if you have purchased one or get one from Amazon</p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
