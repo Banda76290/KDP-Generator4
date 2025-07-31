@@ -134,7 +134,7 @@ export default function EditBook() {
       // Check if execCommand is supported
       if (typeof document.execCommand !== 'function') {
         console.error('execCommand is not supported in this browser');
-        toast.error('Cette fonctionnalité n\'est pas supportée dans votre navigateur');
+        toast({ title: "Erreur", description: "Cette fonctionnalité n'est pas supportée dans votre navigateur", variant: "destructive" });
         return;
       }
 
@@ -147,7 +147,7 @@ export default function EditBook() {
       updateDescriptionFromHTML();
     } catch (error) {
       console.error('Error applying description formatting:', error);
-      toast.error('Erreur lors de l\'application du formatage');
+      toast({ title: "Erreur", description: "Erreur lors de l'application du formatage", variant: "destructive" });
     }
   };
 
@@ -226,7 +226,7 @@ export default function EditBook() {
       }
     } catch (error) {
       console.error('Error in handleDescriptionFormatChange:', error);
-      toast.error('Erreur lors du changement de format');
+      toast({ title: "Erreur", description: "Erreur lors du changement de format", variant: "destructive" });
     }
   };
 

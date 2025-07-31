@@ -467,8 +467,13 @@ export class DatabaseStorage implements IStorage {
           bookId: newBook.id,
           name: contributor.name,
           role: contributor.role,
+          firstName: contributor.firstName,
+          lastName: contributor.lastName,
+          prefix: contributor.prefix,
+          middleName: contributor.middleName,
+          suffix: contributor.suffix,
         });
-        console.log(`Added contributor: ${contributor.name} (${contributor.role})`);
+        console.log(`Added contributor: ${contributor.firstName} ${contributor.lastName} (${contributor.role})`);
       }
     }
     
@@ -594,8 +599,13 @@ export class DatabaseStorage implements IStorage {
         bookId: newBook.id,
         name: contributor.name,
         role: contributor.role,
+        firstName: contributor.firstName,
+        lastName: contributor.lastName,
+        prefix: contributor.prefix,
+        middleName: contributor.middleName,
+        suffix: contributor.suffix,
       });
-      console.log(`Added contributor: ${contributor.name} (${contributor.role})`);
+      console.log(`Added contributor: ${contributor.firstName} ${contributor.lastName} (${contributor.role})`);
     }
 
     console.log(`Completed book duplication: ${newBook.id}`);
