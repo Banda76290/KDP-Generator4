@@ -355,7 +355,6 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
           );
         })}
       </div>
-
       {/* Right side: Placement section */}
       <div className="space-y-2">
         <Label className="text-sm font-medium">Placement</Label>
@@ -445,18 +444,18 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
                   }}
                   className="mt-0.5"
                 />
-                <Label 
-                  htmlFor={`leaf-category-${category.id}`} 
-                  className="text-sm cursor-pointer leading-5"
-                >
-                  <div className="flex flex-col">
-                    <span className="font-medium">{category.displayName}</span>
-                    <span className="text-xs text-gray-500 mt-0.5">
-                      {category.categoryPath.replace(/^Books > /, '')}
-                    </span>
-                  </div>
-                </Label>
-              </div>
+                  <Label 
+                    htmlFor={`leaf-category-${category.id}`} 
+                    className="text-sm cursor-pointer leading-5"
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-medium">{category.displayName}</span>
+                      <span className="text-xs text-gray-500 mt-0.5">
+                        {category.categoryPath.replace(/^Books > /, '')}
+                      </span>
+                    </div>
+                  </Label>
+                </div>
               );
             })}
             
@@ -2280,7 +2279,7 @@ export default function EditBook() {
 
               {/* Marketplace Settings Section */}
               <div className="bg-teal-50 rounded-lg border border-teal-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Marketplace Settings</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Primary Marketplace</h3>
                 <div className="space-y-2">
                   <Label htmlFor="primaryMarketplace" className="font-medium text-[16px]">Primary Marketplace</Label>
                   <Select 
@@ -2895,7 +2894,6 @@ export default function EditBook() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
       {/* Categories Edit Modal */}
       <Dialog open={showCategoriesModal} onOpenChange={setShowCategoriesModal}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -3059,7 +3057,6 @@ export default function EditBook() {
           </div>
         </DialogContent>
       </Dialog>
-
       {/* Marketplace Conflict Dialog */}
       <AlertDialog open={showMarketplaceConflictDialog} onOpenChange={setShowMarketplaceConflictDialog}>
         <AlertDialogContent className="max-w-2xl w-[95vw] max-h-[90vh] overflow-y-auto">
