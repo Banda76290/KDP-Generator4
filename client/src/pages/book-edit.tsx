@@ -277,17 +277,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
       return !hasChildren;
     });
     
-    // Debug logging
-    console.log("Placement Debug:", {
-      currentPath,
-      totalCategories: marketplaceCategories.length,
-      leafCategoriesFound: leafCategories.length,
-      leafCategories: leafCategories.map(cat => ({
-        name: cat.displayName,
-        path: cat.categoryPath,
-        level: cat.level
-      }))
-    });
+    // Debug logging (removed for production)
     
     return leafCategories.sort((a, b) => {
       // Sort by level first (deeper categories first), then by display name
