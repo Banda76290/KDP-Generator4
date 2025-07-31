@@ -1701,48 +1701,112 @@ export default function EditBook() {
               {/* Categories Section */}
               <div className="bg-indigo-50 rounded-lg border border-indigo-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Categories</h3>
-                <div className="space-y-4">
-                  <Label className="font-medium text-[16px]">Categories</Label>
-                  <p className="text-sm text-gray-600">
-                    Choose up to 2 categories that best describe your book. This will help customers find your book. You can search by keyword, see all categories, or browse by subject.
-                  </p>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {categories.map((category) => (
-                      <Badge key={category} variant="secondary" className="flex items-center gap-1">
-                        {category}
-                        <X 
-                          className="w-3 h-3 cursor-pointer" 
-                          onClick={() => removeCategory(category)}
-                        />
-                      </Badge>
-                    ))}
+                <div className="space-y-6">
+                  {/* Header Text */}
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-700">
+                      Choose up to three categories that describe your book. Note: You must select your primary marketplace and audience first.{' '}
+                      <button type="button" className="text-blue-600 hover:text-blue-800 underline">
+                        What are categories?
+                      </button>
+                    </p>
                   </div>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Add a category"
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          addCategory(e.currentTarget.value);
-                          e.currentTarget.value = '';
-                        }
-                      }}
-                    />
+
+                  {/* Current Categories Display */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-gray-900">Your title's current categories</h4>
+                    <div className="space-y-2">
+                      {categories.length > 0 ? (
+                        categories.map((category, index) => (
+                          <div key={index} className="text-sm text-gray-700 flex items-center">
+                            <span className="text-gray-500">Books › </span>
+                            <span className="text-gray-700">{category}</span>
+                            <button 
+                              type="button"
+                              className="ml-2 text-blue-600 hover:text-blue-800"
+                              onClick={() => removeCategory(category)}
+                            >
+                              ✏
+                            </button>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-gray-500 italic">No categories selected</p>
+                      )}
+                    </div>
+                    
+                    {/* Edit Categories Button */}
                     <Button 
-                      type="button"
-                      variant="outline"
-                      onClick={(e) => {
-                        const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                        if (input.value) {
-                          addCategory(input.value);
-                          input.value = '';
-                        }
-                      }}
+                      type="button" 
+                      variant="outline" 
+                      size="sm"
+                      className="mt-3"
                     >
-                      Add
+                      Edit categories
                     </Button>
                   </div>
-                  <p className="text-sm text-gray-500">Add up to 10 categories that best describe your book.</p>
+
+                  {/* Book Classification Section */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-gray-900">Does your book classify as any of these types? Choose all that apply.</h4>
+                    
+                    {/* Low-content book */}
+                    <div className="space-y-3">
+                      <div className="flex items-start space-x-3">
+                        <Checkbox
+                          id="isLowContentBook"
+                          checked={form.watch("isLowContentBook") || false}
+                          onCheckedChange={(checked) => form.setValue("isLowContentBook", checked as boolean)}
+                          className="mt-1"
+                        />
+                        <div className="flex-1">
+                          <Label htmlFor="isLowContentBook" className="text-sm font-normal">
+                            Low-content book (e.g. journals, notebooks, and planners){' '}
+                            <button type="button" className="text-blue-600 hover:text-blue-800 underline">
+                              What's a low-content book?
+                            </button>
+                          </Label>
+                        </div>
+                      </div>
+                      
+                      {/* Info Alert for Low-content */}
+                      {form.watch("isLowContentBook") && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-md p-4 flex items-start space-x-3">
+                          <div className="flex-shrink-0">
+                            <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                              <span className="text-white text-xs font-bold">i</span>
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm text-blue-800">
+                              Low-content selection can't be changed after you've published your book.{' '}
+                              <button type="button" className="text-blue-600 hover:text-blue-800 underline">
+                                Learn more about low-content books.
+                              </button>
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Large-print book */}
+                    <div className="flex items-start space-x-3">
+                      <Checkbox
+                        id="isLargePrintBook"
+                        checked={form.watch("isLargePrintBook") || false}
+                        onCheckedChange={(checked) => form.setValue("isLargePrintBook", checked as boolean)}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <Label htmlFor="isLargePrintBook" className="text-sm font-normal">
+                          Large-print book (content is 16-point font size or greater){' '}
+                          <button type="button" className="text-blue-600 hover:text-blue-800 underline">
+                            What's a large-print book?
+                          </button>
+                        </Label>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
