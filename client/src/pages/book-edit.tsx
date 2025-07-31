@@ -341,6 +341,9 @@ export default function EditBook() {
   const [marketplaceCategories, setMarketplaceCategories] = useState<MarketplaceCategory[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [resetTriggers, setResetTriggers] = useState<{ [key: number]: number }>({});
+  const [showMarketplaceConflictDialog, setShowMarketplaceConflictDialog] = useState(false);
+  const [pendingMarketplace, setPendingMarketplace] = useState<string>("");
+  const [incompatibleCategories, setIncompatibleCategories] = useState<string[]>([]);
   // Store original series data to restore when checkbox is checked again
   const [originalSeriesData, setOriginalSeriesData] = useState<{
     seriesTitle: string;
@@ -1050,6 +1053,66 @@ export default function EditBook() {
     } finally {
       setLoadingCategories(false);
     }
+  };
+
+  // Function to check if categories are compatible with marketplace
+  const checkCategoryCompatibility = async (newMarketplace: string, currentCategories: string[]) => {
+    if (currentCategories.length === 0) return [];
+    
+    try {
+      const response = await apiRequest("GET", `/api/marketplace-categories/${encodeURIComponent(newMarketplace)}`);
+      const newMarketplaceCategories: MarketplaceCategory[] = response || [];
+      const validCategoryPaths = newMarketplaceCategories.map(cat => cat.categoryPath);
+      
+      return currentCategories.filter(category => !validCategoryPaths.includes(category));
+    } catch (error) {
+      console.error("Error checking category compatibility:", error);
+      return currentCategories; // Assume all incompatible on error
+    }
+  };
+
+  // Handle marketplace change with compatibility check
+  const handleMarketplaceChange = async (newMarketplace: string) => {
+    const currentCategories = form.getValues("categories") || [];
+    
+    if (currentCategories.length > 0) {
+      const incompatible = await checkCategoryCompatibility(newMarketplace, currentCategories);
+      
+      if (incompatible.length > 0) {
+        setPendingMarketplace(newMarketplace);
+        setIncompatibleCategories(incompatible);
+        setShowMarketplaceConflictDialog(true);
+        return; // Don't change marketplace yet
+      }
+    }
+    
+    // No conflicts, proceed with change
+    form.setValue("primaryMarketplace", newMarketplace);
+    loadMarketplaceCategories(newMarketplace);
+  };
+
+  // Handle conflict dialog actions
+  const proceedWithMarketplaceChange = () => {
+    // Remove incompatible categories and change marketplace
+    const currentCategories = form.getValues("categories") || [];
+    const compatibleCategories = currentCategories.filter(cat => !incompatibleCategories.includes(cat));
+    
+    form.setValue("categories", compatibleCategories);
+    setCategories(compatibleCategories);
+    form.setValue("primaryMarketplace", pendingMarketplace);
+    loadMarketplaceCategories(pendingMarketplace);
+    
+    setShowMarketplaceConflictDialog(false);
+    setPendingMarketplace("");
+    setIncompatibleCategories([]);
+    
+    toast.success("Marketplace changed and incompatible categories removed");
+  };
+
+  const cancelMarketplaceChange = () => {
+    setShowMarketplaceConflictDialog(false);
+    setPendingMarketplace("");
+    setIncompatibleCategories([]);
   };
 
   // Function to build category tree structure from flat database records
@@ -2012,7 +2075,7 @@ export default function EditBook() {
                   <Label htmlFor="primaryMarketplace" className="font-medium text-[16px]">Primary Marketplace</Label>
                   <Select 
                     value={form.watch("primaryMarketplace") || ""} 
-                    onValueChange={(value) => form.setValue("primaryMarketplace", value)}
+                    onValueChange={handleMarketplaceChange}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select primary marketplace" />
@@ -2678,6 +2741,43 @@ export default function EditBook() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Marketplace Conflict Dialog */}
+      <AlertDialog open={showMarketplaceConflictDialog} onOpenChange={setShowMarketplaceConflictDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Marketplace Change Warning</AlertDialogTitle>
+            <AlertDialogDescription>
+              The new marketplace <strong>{pendingMarketplace}</strong> is incompatible with some of your selected categories.
+              
+              <div className="mt-4">
+                <strong>Incompatible categories:</strong>
+                <ul className="list-disc list-inside mt-2 text-sm">
+                  {incompatibleCategories.map((category, index) => (
+                    <li key={index} className="text-red-600">Books › {category}</li>
+                  ))}
+                </ul>
+              </div>
+              
+              <p className="mt-4">
+                You can proceed with the marketplace change, but the incompatible categories will be removed, 
+                or cancel to keep your current categories and marketplace.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelMarketplaceChange}>
+              Cancel - Keep current marketplace
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={proceedWithMarketplaceChange}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Change marketplace and remove categories
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 }
