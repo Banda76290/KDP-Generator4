@@ -3506,7 +3506,7 @@ export default function EditBook() {
                 // Here you would update the trim size in the form
                 setTrimSizeModalOpen(false);
               }}
-              className="bg-[#38b6ff] hover:bg-[#146eb4] text-white"
+              className="bg-[#ff9500] hover:bg-orange-700 text-white"
             >
               Select Size
             </Button>
