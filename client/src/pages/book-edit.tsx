@@ -2492,11 +2492,7 @@ export default function EditBook() {
                         <div className="ml-7 space-y-3 bg-gray-50 p-4 rounded-md">
                           <p className="text-sm text-gray-700">
                             Enter the date your book was previously published. One example of why a book might have a previous publish date is if you 
-                            purchased the rights for your book from another publisher.{' '}
-                            <a href="#" className="text-[#38b6ff] hover:text-[#146eb4] underline">
-                              Learn more about previously published dates for books
-                            </a>
-                            . This will not affect your Amazon release date.
+                            purchased the rights for your book from another publisher. This will not affect your Amazon release date.
                           </p>
                           
                           <div className="flex items-center space-x-2">
