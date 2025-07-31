@@ -2686,9 +2686,7 @@ export default function EditBook() {
                         placeholder="Enter your own ISBN if you have one"
                         defaultValue=""
                       />
-                      <p className="text-sm text-gray-500">
-                        Enter your own ISBN number if you have purchased one
-                      </p>
+                      <p className="text-sm text-gray-500">Enter your own ISBN number if you have purchased one or get one from Amazon</p>
                     </div>
                   </div>
                 </div>
