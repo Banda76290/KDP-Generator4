@@ -2325,9 +2325,14 @@ export default function EditBook() {
                             <div className="space-y-2">
                               <div className="flex items-center justify-between">
                                 <Label className="text-sm font-medium">Placement</Label>
-                                <Button variant="link" size="sm" className="h-auto p-0 text-blue-600">
-                                  Reset
-                                </Button>
+                                <div className="flex space-x-2">
+                                  <Button variant="link" size="sm" className="h-auto p-0 text-blue-600">
+                                    Reset
+                                  </Button>
+                                  <Button variant="link" size="sm" className="h-auto p-0 text-blue-600">
+                                    Delete
+                                  </Button>
+                                </div>
                               </div>
                               
                               <div className="bg-gray-50 rounded border p-3">
@@ -2402,7 +2407,13 @@ export default function EditBook() {
           </div>
           
           {/* Modal Footer */}
-          <div className="flex justify-end items-center border-t pt-4">
+          <div className="flex justify-between items-center border-t pt-4">
+            <Button 
+              variant="outline" 
+              onClick={cancelCategoriesChanges}
+            >
+              Cancel
+            </Button>
             <Button 
               onClick={saveCategoriesChanges}
               className="bg-yellow-500 hover:bg-yellow-600 text-black"
