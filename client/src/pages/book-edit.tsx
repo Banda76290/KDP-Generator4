@@ -3412,7 +3412,6 @@ export default function EditBook() {
             <div>
               <div className="flex justify-between items-center mb-3">
                 <h3 className="font-semibold text-base">More Standard Trim Sizes:</h3>
-                <a href="#" className="text-blue-600 underline text-sm">Compare all standard sizes</a>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {trimSizes.moreStandard.map((size) => (
