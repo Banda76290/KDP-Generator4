@@ -1717,6 +1717,53 @@ export default function EditBook() {
             </nav>
           </div>
 
+          {/* Book Information Header - Always Visible */}
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="flex-1">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-1">
+                    {form.watch("title") || "Untitled Book"}
+                  </h2>
+                  {form.watch("subtitle") && (
+                    <p className="text-gray-600 text-sm mb-2">{form.watch("subtitle")}</p>
+                  )}
+                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                    <span className="flex items-center">
+                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                      </svg>
+                      <strong>ISBN/ASIN:</strong> 
+                      <span className="ml-1">
+                        {form.watch("isbn") ? (
+                          <span className="font-semibold">{form.watch("isbn")}</span>
+                        ) : form.watch("isbn_placeholder") ? (
+                          <span className="text-amber-600">{form.watch("isbn_placeholder")}</span>
+                        ) : (
+                          <span className="text-gray-400">No ISBN/ASIN</span>
+                        )}
+                      </span>
+                    </span>
+                    {form.watch("language") && (
+                      <span className="flex items-center">
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21L6.3 11.53c-.576.288-.776.96-.465 1.549C7.257 15.707 9.293 17.743 11.921 19.165c.589.311 1.261.111 1.549-.465l2.143-3.924a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.948V20a2 2 0 01-2 2h-1C9.716 22 2 14.284 2 5V4z" />
+                        </svg>
+                        <strong>Language:</strong> 
+                        <span className="ml-1">{form.watch("language")}</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  {form.watch("status") || "Draft"}
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Paperback Details Tab */}
           {activeTab === "details" && (
           <Card>
