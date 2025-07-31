@@ -2246,17 +2246,7 @@ export default function EditBook() {
       <Dialog open={showCategoriesModal} onOpenChange={setShowCategoriesModal}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
           <DialogHeader className="border-b pb-4">
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-xl font-semibold">Categories</DialogTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={cancelCategoriesChanges}
-                className="h-auto p-1"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
+            <DialogTitle className="text-xl font-semibold">Categories</DialogTitle>
           </DialogHeader>
           
           <div className="overflow-y-auto max-h-[60vh] pr-2">
