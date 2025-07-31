@@ -1148,17 +1148,14 @@ export class DatabaseStorage implements IStorage {
     // If format is provided, filter categories based on discriminant
     if (discriminant) {
       categories = categories.filter(cat => {
-        // Include categories that either:
-        // 1. Are the matching discriminant itself
-        // 2. Belong to the correct format discriminant path
+        // NEVER include the discriminants themselves as selectable categories
         const isDiscriminant = cat.displayName === 'kindle_ebook' || cat.displayName === 'print_kdp_paperback';
         
         if (isDiscriminant) {
-          // Only include the matching discriminant
-          return cat.displayName === discriminant;
+          return false; // Exclude discriminants from selectable categories
         }
         
-        // For other categories, check if they belong to the correct format path
+        // Only include categories that belong to the correct format path
         const belongsToPath = cat.categoryPath.includes(`> ${discriminant} >`) || 
                              cat.categoryPath === `Books > ${discriminant}`;
         
