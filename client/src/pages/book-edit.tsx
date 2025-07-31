@@ -1171,6 +1171,17 @@ export default function EditBook() {
     setContributors(contributors.filter(c => c.id !== id));
   };
 
+  // Force "immediate" release when book was previously published
+  useEffect(() => {
+    const previouslyPublished = form.watch("previouslyPublished");
+    const currentReleaseOption = form.watch("releaseOption");
+    
+    if (previouslyPublished && currentReleaseOption === "scheduled") {
+      form.setValue("releaseOption", "immediate");
+      form.setValue("scheduledReleaseDate", null);
+    }
+  }, [form.watch("previouslyPublished")]);
+
   const addKeyword = (keyword: string) => {
     if (keyword.trim() && !keywords.includes(keyword.trim()) && keywords.length < 7) {
       setKeywords([...keywords, keyword.trim()]);
@@ -2569,7 +2580,7 @@ export default function EditBook() {
                     </div>
                     
                     {/* Schedule release option */}
-                    <div className="bg-white border border-gray-200 rounded-md p-4">
+                    <div className={`bg-white border border-gray-200 rounded-md p-4 ${form.watch("previouslyPublished") ? "opacity-50" : ""}`}>
                       <div className="flex items-start space-x-3">
                         <input
                           type="radio"
@@ -2577,15 +2588,16 @@ export default function EditBook() {
                           name="releaseOption"
                           value="scheduled"
                           checked={form.watch("releaseOption") === "scheduled"}
+                          disabled={!!form.watch("previouslyPublished")}
                           onChange={(e) => {
-                            if (e.target.checked) {
+                            if (e.target.checked && !form.watch("previouslyPublished")) {
                               form.setValue("releaseOption", "scheduled");
                             }
                           }}
-                          className="w-4 h-4 text-[#38b6ff] mt-1"
+                          className={`w-4 h-4 mt-1 ${form.watch("previouslyPublished") ? "text-gray-400 cursor-not-allowed" : "text-[#38b6ff]"}`}
                         />
                         <div className="flex-1">
-                          <Label htmlFor="scheduleRelease" className="font-medium text-gray-900 cursor-pointer">
+                          <Label htmlFor="scheduleRelease" className={`font-medium ${form.watch("previouslyPublished") ? "text-gray-500 cursor-not-allowed" : "text-gray-900 cursor-pointer"}`}>
                             Schedule my book's release
                           </Label>
                           
