@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Bell, ChevronDown, Settings, LogOut, Crown, Menu } from "lucide-react";
 import logoImage from "@assets/image_1753719885932.png";
-import { ThemeToggle } from "@/components/ThemeToggle";
+
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -20,7 +20,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className="bg-white dark:bg-background border-b border-border fixed top-0 left-0 right-0 z-50 h-16">
+    <header className="bg-white border-b border-border fixed top-0 left-0 right-0 z-50 h-16">
       <div className="flex items-center justify-between px-6 h-full">
         <div className="flex items-center space-x-4">
           {/* Mobile Menu Button */}
@@ -47,8 +47,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
         </div>
         
         <div className="flex items-center space-x-4">
-          {/* Theme Toggle */}
-          <ThemeToggle />
+
           
           {/* Notification Bell */}
           <Button variant="ghost" size="sm" className="relative p-2 text-muted-foreground hover:text-foreground">

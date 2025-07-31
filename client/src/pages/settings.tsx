@@ -9,11 +9,10 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bell, User as UserIcon, Shield, Palette, Download, Trash2 } from "lucide-react";
 import Layout from "@/components/Layout";
-import { useTheme } from "@/hooks/useTheme";
+
 
 export default function Settings() {
-  const { user, isLoading } = useAuth();
-  const { theme, setTheme } = useTheme();
+  const { user, isLoading } = useAuth() as { user: User | undefined; isLoading: boolean };
 
   const getUserInitials = (firstName?: string, lastName?: string) => {
     if (!firstName && !lastName) return "U";
@@ -209,20 +208,7 @@ export default function Settings() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Dark Mode</Label>
-                      <p className="text-sm text-muted-foreground">
-                        Toggle between light and dark themes
-                      </p>
-                    </div>
-                    <Switch 
-                      checked={theme === "dark"} 
-                      onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
-                    />
-                  </div>
 
-                  <Separator />
 
                   <div className="space-y-2">
                     <Label htmlFor="timezone">Timezone</Label>
