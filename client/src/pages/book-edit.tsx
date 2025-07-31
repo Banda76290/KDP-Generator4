@@ -1705,10 +1705,7 @@ export default function EditBook() {
                   {/* Header Text */}
                   <div className="space-y-2">
                     <p className="text-sm text-gray-700">
-                      Choose up to three categories that describe your book. Note: You must select your primary marketplace and audience first.{' '}
-                      <button type="button" className="text-blue-600 hover:text-blue-800 underline">
-                        What are categories?
-                      </button>
+                      Choose up to three categories that describe your book. Note: You must select your primary marketplace and audience first.
                     </p>
                   </div>
 
