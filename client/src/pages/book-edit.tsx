@@ -250,15 +250,43 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
       .sort((a, b) => a.sortOrder - b.sortOrder);
   };
 
-  // Get leaf categories (final/deepest categories in each branch) for Placement dropdown
-  const getLeafCategories = () => {
-    // Find all categories that don't have any children (leaf nodes)
+  // Get leaf categories (final/deepest categories) that are descendants of the current navigation path
+  const getLeafCategoriesForCurrentPath = () => {
+    // Determine the current deepest selected path
+    const currentPath = selectedLevel3 || selectedLevel2 || selectedLevel1;
+    
+    // If no path is selected, return empty array (Placement should be empty)
+    if (!currentPath) {
+      return [];
+    }
+    
+    // Find all categories that are descendants of the current path and have no children
     const leafCategories = marketplaceCategories.filter(category => {
+      // Must be a descendant of the current path (category path should start with current path)
+      const isDescendant = category.categoryPath.startsWith(currentPath + ' > ') || category.categoryPath === currentPath;
+      
+      if (!isDescendant || !category.isSelectable) {
+        return false;
+      }
+      
       // A category is a leaf if no other category has it as a parent
       const hasChildren = marketplaceCategories.some(otherCat => 
         otherCat.parentPath === category.categoryPath
       );
-      return !hasChildren && category.isSelectable;
+      
+      return !hasChildren;
+    });
+    
+    // Debug logging
+    console.log("Placement Debug:", {
+      currentPath,
+      totalCategories: marketplaceCategories.length,
+      leafCategoriesFound: leafCategories.length,
+      leafCategories: leafCategories.map(cat => ({
+        name: cat.displayName,
+        path: cat.categoryPath,
+        level: cat.level
+      }))
     });
     
     return leafCategories.sort((a, b) => {
@@ -344,8 +372,8 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
         <Label className="text-sm font-medium">Placement</Label>
         <div className="bg-gray-50 rounded border p-4 h-fit">
           <div className="grid grid-cols-1 gap-3 max-h-80 overflow-y-auto">
-            {/* Display only leaf categories (final categories in each branch) */}
-            {getLeafCategories().map((category) => (
+            {/* Display only leaf categories that are descendants of current navigation path */}
+            {getLeafCategoriesForCurrentPath().map((category) => (
               <div key={category.id} className="flex items-start space-x-2">
                 <Checkbox
                   id={`leaf-category-${category.id}`}
@@ -372,9 +400,12 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
             ))}
             
             {/* Show message if no leaf categories available */}
-            {getLeafCategories().length === 0 && (
+            {getLeafCategoriesForCurrentPath().length === 0 && (
               <div className="text-center py-4 text-gray-500 text-sm">
-                No categories available for the selected marketplace.
+                {selectedLevel1 || selectedLevel2 || selectedLevel3 
+                  ? "No final categories available in this branch."
+                  : "Navigate through categories to see placement options."
+                }
               </div>
             )}
           </div>
