@@ -2691,7 +2691,7 @@ export default function EditBook() {
                     handleSaveAndContinue(formData);
                   }}
                   disabled={saveBook.isPending || descriptionCharacterCount > maxDescriptionCharacters}
-                  className="bg-orange-600 hover:bg-orange-700"
+                  className="bg-[#ff9500] hover:bg-orange-700"
                 >
                   {saveBook.isPending ? (
                     <>
@@ -2707,7 +2707,7 @@ export default function EditBook() {
                 <Button
                   type="submit"
                   disabled={saveBook.isPending || descriptionCharacterCount > maxDescriptionCharacters}
-                  className="bg-orange-600 hover:bg-orange-700"
+                  className="bg-[#ff9500] hover:bg-orange-700"
                 >
                   {saveBook.isPending ? (
                     <>
