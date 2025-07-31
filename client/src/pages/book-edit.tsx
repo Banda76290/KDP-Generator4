@@ -2554,10 +2554,7 @@ export default function EditBook() {
                 
                 <div className="space-y-4">
                   <p className="text-sm text-gray-700 mb-4">
-                    Choose when to make your book available on Amazon.{" "}
-                    <a href="#" className="text-[#38b6ff] hover:text-[#146eb4]">
-                      Learn more about release date options
-                    </a>
+                    Choose when to make your book available on Amazon.
                   </p>
                   
                   <div className="space-y-4">
