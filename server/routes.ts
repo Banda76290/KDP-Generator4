@@ -1510,6 +1510,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // System health endpoint (admin only)
+  app.get('/api/admin/system/health', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { db } = await import('./db.js');
+      const { marketplaceCategories } = await import('@shared/schema');
+      
+      const categoriesCount = await db.select().from(marketplaceCategories);
+      
+      const health = {
+        database: categoriesCount.length > 0 ? 'healthy' : 'warning',
+        categories: categoriesCount.length,
+        lastSeeded: categoriesCount.length > 0 ? new Date().toISOString() : null
+      };
+      
+      res.json(health);
+    } catch (error) {
+      console.error("Error checking system health:", error);
+      res.status(500).json({ 
+        database: 'error',
+        categories: 0,
+        lastSeeded: null,
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
   // Database seeding endpoints (admin only)
   app.post('/api/admin/database/seed', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {

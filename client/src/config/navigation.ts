@@ -11,7 +11,8 @@ import {
   FileText,
   Zap,
   Variable,
-  Tags
+  Tags,
+  Server
 } from "lucide-react";
 
 interface NavigationItem {
@@ -42,6 +43,7 @@ export const adminNavigation: NavigationItem[] = [
   { name: "User Management", href: "/admin/users", icon: Settings },
   { name: "AI Configuration", href: "/admin/ai-config", icon: Bot },
   { name: "Variables IA", href: "/admin/ai-variables", icon: Variable },
+  { name: "Système", href: "/admin/system", icon: Server },
 ];
 
 export const blogAdminNavigation: NavigationItem[] = [
