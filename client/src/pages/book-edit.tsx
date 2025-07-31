@@ -1304,8 +1304,8 @@ export default function EditBook() {
                     
                     <div>
                       <Label className="font-medium text-[14px]">Contributors <span className="text-sm font-normal text-gray-500">(Optional)</span></Label>
-                  
-                  {contributors.map((contributor, index) => (
+                      
+                      {contributors.map((contributor, index) => (
                     <div key={contributor.id} className="grid grid-cols-7 gap-3 mt-2 items-center">
                       <Select 
                         value={contributor.role} 
@@ -1374,7 +1374,7 @@ export default function EditBook() {
                     >
                       Add Another
                     </Button>
-                      )}
+                  )}
                     </div>
                   </div>
                 </div>
@@ -1480,6 +1480,7 @@ export default function EditBook() {
                     </span>
                   </div>
                 </div>
+              </div>
               </div>
 
               {/* Publishing Rights & Content Options Section */}
