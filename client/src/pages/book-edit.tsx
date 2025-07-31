@@ -2532,8 +2532,8 @@ export default function EditBook() {
               <div className="bg-cyan-50 rounded-lg border border-cyan-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Release Date</h3>
                 
-                {/* Not Eligible Info Box */}
-                {form.watch("previouslyPublished") && (
+                {/* Not Eligible Info Box - Only show if user selects Schedule AND book was previously published */}
+                {form.watch("releaseOption") === "scheduled" && form.watch("previouslyPublished") && (
                   <div className="bg-cyan-100 border border-cyan-300 rounded-md p-4 mb-4 flex items-start space-x-3">
                     <div className="flex-shrink-0">
                       <svg className="w-5 h-5 text-[#38b6ff]" fill="currentColor" viewBox="0 0 20 20">
@@ -2606,31 +2606,48 @@ export default function EditBook() {
                               form.setValue("releaseOption", "scheduled");
                             }
                           }}
-                          disabled={!!form.watch("previouslyPublished")}
-                          className="w-4 h-4 text-[#38b6ff] mt-1 disabled:opacity-50"
+                          className="w-4 h-4 text-[#38b6ff] mt-1"
                         />
                         <div className="flex-1">
-                          <Label 
-                            htmlFor="scheduleRelease" 
-                            className={`font-medium cursor-pointer ${
-                              form.watch("previouslyPublished") ? "text-gray-400" : "text-gray-900"
-                            }`}
-                          >
+                          <Label htmlFor="scheduleRelease" className="font-medium text-gray-900 cursor-pointer">
                             Schedule my book's release
                           </Label>
                           
-                          {form.watch("releaseOption") === "scheduled" && !form.watch("previouslyPublished") && (
+                          {form.watch("releaseOption") === "scheduled" && (
                             <div className="mt-3">
                               <Input
                                 type="date"
                                 value={form.watch("scheduledReleaseDate") || ""}
                                 onChange={(e) => form.setValue("scheduledReleaseDate", e.target.value || null)}
-                                min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
-                                className="max-w-xs"
+                                min={new Date().toISOString().split('T')[0]}
+                                disabled={!!form.watch("previouslyPublished")}
+                                className={`max-w-xs ${form.watch("previouslyPublished") ? "opacity-50 cursor-not-allowed" : ""}`}
                                 placeholder="Select release date"
                               />
+                              <div className="flex items-center space-x-2 mt-2">
+                                <div className="w-6 h-6 bg-gray-200 rounded border flex items-center justify-center">
+                                  <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                                  </svg>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => form.setValue("scheduledReleaseDate", null)}
+                                  disabled={!!form.watch("previouslyPublished")}
+                                  className={`text-sm ${
+                                    form.watch("previouslyPublished") 
+                                      ? "text-gray-400 cursor-not-allowed" 
+                                      : "text-[#38b6ff] hover:text-[#146eb4]"
+                                  }`}
+                                >
+                                  Clear Date
+                                </button>
+                              </div>
                               <p className="text-xs text-gray-500 mt-1">
-                                Release date must be at least 24 hours from now
+                                {form.watch("previouslyPublished") 
+                                  ? "Scheduled release not available for previously published titles"
+                                  : "Release date must be today or later"
+                                }
                               </p>
                             </div>
                           )}
