@@ -2665,25 +2665,30 @@ export default function EditBook() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">ISBN</h3>
                 <div className="space-y-4">
                   <p className="text-sm text-gray-600">You can get a free KDP ISBN or use your own. KDP Generator automatically creates a “placeholder” ISBN for your book because it is necessary for the site to function properly until you replace it with a “real” one. Certain features (automatic import of your books, advertising management, income calculations, etc.) will only work fully automatically once you have replaced the placeholder ISBN with your book's real ISBN.</p>
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        id="freeISBN"
-                        name="isbnOption"
-                        defaultChecked
-                        className="w-4 h-4 text-[#38b6ff] border-gray-300 focus:ring-[#38b6ff]"
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="isbnPlaceholderContent" className="text-sm font-medium">ISBN Placeholder</Label>
+                      <Input
+                        id="isbnPlaceholderContent"
+                        placeholder="Free KDP ISBN will be assigned"
+                        defaultValue=""
+                        disabled
+                        className="bg-gray-100"
                       />
-                      <Label htmlFor="freeISBN" className="text-sm font-medium">Get a free KDP ISBN</Label>
+                      <p className="text-sm text-gray-500">
+                        Amazon will assign a free ISBN if Official ISBN is not provided
+                      </p>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        id="ownISBN"
-                        name="isbnOption"
-                        className="w-4 h-4 text-[#38b6ff] border-gray-300 focus:ring-[#38b6ff]"
+                    <div className="space-y-2">
+                      <Label htmlFor="officialIsbnContent" className="text-sm font-medium">Official ISBN</Label>
+                      <Input
+                        id="officialIsbnContent"
+                        placeholder="Enter your own ISBN if you have one"
+                        defaultValue=""
                       />
-                      <Label htmlFor="ownISBN" className="text-sm font-medium">Add your own ISBN</Label>
+                      <p className="text-sm text-gray-500">
+                        Enter your own ISBN number if you have purchased one
+                      </p>
                     </div>
                   </div>
                 </div>
