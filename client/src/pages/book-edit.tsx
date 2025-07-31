@@ -100,6 +100,8 @@ const contributorRoles = [
   "Author", "Editor", "Foreword", "Illustrator", "Introduction", "Narrator", "Photographer", "Preface", "Translator", "Contributions by"
 ];
 
+
+
 // Categories interface for API data
 interface MarketplaceCategory {
   id: string;
@@ -144,6 +146,158 @@ const fallbackCategories = [
     ]
   }
 ];
+
+// Category Selector Component
+const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategorySelect }: {
+  marketplaceCategories: MarketplaceCategory[];
+  selectedCategories: string[];
+  onCategorySelect: (categoryPath: string) => void;
+}) => {
+  const [selectedLevel1, setSelectedLevel1] = useState<string>("");
+  const [selectedLevel2, setSelectedLevel2] = useState<string>("");
+  const [selectedLevel3, setSelectedLevel3] = useState<string>("");
+
+  // Get categories by level and parent
+  const getLevel2Categories = () => {
+    return marketplaceCategories
+      .filter(cat => cat.level === 2)
+      .sort((a, b) => a.sortOrder - b.sortOrder);
+  };
+
+  const getLevel3Categories = (parentPath: string) => {
+    return marketplaceCategories
+      .filter(cat => cat.level === 3 && cat.parentPath === parentPath)
+      .sort((a, b) => a.sortOrder - b.sortOrder);
+  };
+
+  const getLevel4Categories = (parentPath: string) => {
+    return marketplaceCategories
+      .filter(cat => cat.level === 4 && cat.parentPath === parentPath)
+      .sort((a, b) => a.sortOrder - b.sortOrder);
+  };
+
+  const getSelectableCategories = (parentPath: string) => {
+    return marketplaceCategories
+      .filter(cat => cat.parentPath === parentPath && cat.isSelectable)
+      .sort((a, b) => a.sortOrder - b.sortOrder);
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Level 1: Main Categories */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Main Category</Label>
+        <Select value={selectedLevel1} onValueChange={(value) => {
+          setSelectedLevel1(value);
+          setSelectedLevel2("");
+          setSelectedLevel3("");
+        }}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select main category" />
+          </SelectTrigger>
+          <SelectContent>
+            {getLevel2Categories().map((category) => (
+              <SelectItem key={category.id} value={category.categoryPath}>
+                {category.displayName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Level 2: Subcategories */}
+      {selectedLevel1 && (
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Subcategory</Label>
+          <Select value={selectedLevel2} onValueChange={(value) => {
+            setSelectedLevel2(value);
+            setSelectedLevel3("");
+          }}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select subcategory" />
+            </SelectTrigger>
+            <SelectContent>
+              {getLevel3Categories(selectedLevel1).map((category) => (
+                <SelectItem key={category.id} value={category.categoryPath}>
+                  {category.displayName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* Level 3: Sub-subcategories */}
+      {selectedLevel2 && getLevel4Categories(selectedLevel2).length > 0 && (
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Subcategory Level 3</Label>
+          <Select value={selectedLevel3} onValueChange={setSelectedLevel3}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select subcategory" />
+            </SelectTrigger>
+            <SelectContent>
+              {getLevel4Categories(selectedLevel2).map((category) => (
+                <SelectItem key={category.id} value={category.categoryPath}>
+                  {category.displayName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* Final Selection */}
+      {(selectedLevel2 || selectedLevel3) && (
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Final Category Selection</Label>
+          <div className="bg-gray-50 rounded border p-3">
+            <h4 className="font-medium text-sm mb-3">Available categories to select:</h4>
+            <div className="space-y-2">
+              {getSelectableCategories(selectedLevel3 || selectedLevel2 || selectedLevel1).map((category) => (
+                <Button
+                  key={category.id}
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start text-left"
+                  onClick={() => onCategorySelect(category.categoryPath)}
+                  disabled={selectedCategories.includes(category.categoryPath)}
+                >
+                  {category.displayName}
+                  {selectedCategories.includes(category.categoryPath) && " (Selected)"}
+                </Button>
+              ))}
+              {/* Also allow selecting the current level if it's selectable */}
+              {selectedLevel3 && marketplaceCategories.find(cat => cat.categoryPath === selectedLevel3)?.isSelectable && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start text-left"
+                  onClick={() => onCategorySelect(selectedLevel3)}
+                  disabled={selectedCategories.includes(selectedLevel3)}
+                >
+                  {marketplaceCategories.find(cat => cat.categoryPath === selectedLevel3)?.displayName}
+                  {selectedCategories.includes(selectedLevel3) && " (Selected)"}
+                </Button>
+              )}
+              {selectedLevel2 && marketplaceCategories.find(cat => cat.categoryPath === selectedLevel2)?.isSelectable && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start text-left"
+                  onClick={() => onCategorySelect(selectedLevel2)}
+                  disabled={selectedCategories.includes(selectedLevel2)}
+                >
+                  {marketplaceCategories.find(cat => cat.categoryPath === selectedLevel2)?.displayName}
+                  {selectedCategories.includes(selectedLevel2) && " (Selected)"}
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function EditBook() {
   const { bookId } = useParams();
@@ -876,6 +1030,8 @@ export default function EditBook() {
     const tree: any[] = [];
     const categoryMap = new Map();
 
+    console.log("Building category tree from categories:", categories);
+
     // Sort by level and sort order
     const sortedCategories = [...categories].sort((a, b) => {
       if (a.level !== b.level) return a.level - b.level;
@@ -893,7 +1049,7 @@ export default function EditBook() {
         subcategories: []
       };
 
-      if (category.level === 1) {
+      if (category.level === 2) { // Main categories start at level 2 (Books is level 1)
         tree.push(item);
         categoryMap.set(category.categoryPath, item);
       } else if (category.parentPath) {
@@ -905,6 +1061,7 @@ export default function EditBook() {
       }
     });
 
+    console.log("Built category tree:", tree);
     return tree;
   };
 
@@ -914,6 +1071,7 @@ export default function EditBook() {
     
     // Load categories for current marketplace
     const currentMarketplace = form.watch("primaryMarketplace") || "Amazon.com";
+    console.log("Loading categories for marketplace:", currentMarketplace);
     await loadMarketplaceCategories(currentMarketplace);
     
     setShowCategoriesModal(true);
@@ -2345,127 +2503,45 @@ export default function EditBook() {
                 </div>
               )}
 
-              {/* Category Tree Structure */}
-              {!loadingCategories && (
-                <div className="space-y-2">
-                  {buildCategoryTree(marketplaceCategories).map((category, index) => (
-                  <div key={index} className="border border-gray-200 rounded">
-                    {/* Collapsed Category Header */}
-                    <div 
-                      className="flex items-center justify-between p-3 bg-gray-50 cursor-pointer hover:bg-gray-100"
-                      onClick={() => setExpandedCategory(expandedCategory === category.path ? null : category.path)}
-                    >
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 flex items-center justify-center">
-                          {expandedCategory === category.path ? '▼' : '▶'}
-                        </div>
-                        <span className="text-blue-600 font-medium">{category.path}</span>
-                      </div>
+              {/* Category Selection Interface */}
+              {!loadingCategories && marketplaceCategories.length > 0 && (
+                <div className="space-y-4">
+                  {/* Dynamic Category Selectors */}
+                  {selectedCategories.length < 3 && (
+                    <div className="border border-gray-200 rounded p-4">
+                      <h4 className="font-medium text-sm mb-3">Add Category {selectedCategories.length + 1}</h4>
+                      <CategorySelector 
+                        marketplaceCategories={marketplaceCategories}
+                        selectedCategories={selectedCategories}
+                        onCategorySelect={(categoryPath) => {
+                          if (!selectedCategories.includes(categoryPath)) {
+                            setSelectedCategories([...selectedCategories, categoryPath]);
+                          }
+                        }}
+                      />
                     </div>
-                    
-                    {/* Expanded Category Content */}
-                    {expandedCategory === category.path && (
-                      <div className="p-4 border-t border-gray-200">
-                        <div className="flex justify-between items-start space-x-6">
-                          {/* Left Side - Dropdowns */}
-                          <div className="flex-1 space-y-4">
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Category</Label>
-                              <Select>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Computers & Technology" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="computers">Computers & Technology</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Subcategory</Label>
-                              <Select>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Web Development & Design" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="web-dev">Web Development & Design</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Subcategory</Label>
-                              <Select>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select one" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="content">Content Management</SelectItem>
-                                  <SelectItem value="ux">User Experience & Usability</SelectItem>
-                                  <SelectItem value="user-content">User Generated Content</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                          
-                          {/* Right Side - Placement Options */}
-                          <div className="flex-1">
-                            <div className="space-y-2">
-                              <div className="flex items-center justify-between">
-                                <Label className="text-sm font-medium">Placement</Label>
-                                <div className="flex space-x-2">
-                                  <Button variant="link" size="sm" className="h-auto p-0 text-blue-600">
-                                    Reset
-                                  </Button>
-                                  <Button variant="link" size="sm" className="h-auto p-0 text-blue-600">
-                                    Delete
-                                  </Button>
-                                </div>
-                              </div>
-                              
-                              <div className="bg-gray-50 rounded border p-3">
-                                <h4 className="font-medium text-sm mb-3">Web Development & Design</h4>
-                                <div className="grid grid-cols-2 gap-3 text-xs">
-                                  {category.subcategories.map((subcategory, subIndex) => (
-                                    <div key={subIndex} className="flex items-center space-x-2">
-                                      <Checkbox 
-                                        id={`${category.path}-${subcategory}`}
-                                        checked={selectedCategories.includes(`${category.path} › ${subcategory}`)}
-                                        onCheckedChange={(checked) => {
-                                          if (checked) {
-                                            toggleCategorySelection(`${category.path} › ${subcategory}`);
-                                          } else {
-                                            removeCategoryFromModal(`${category.path} › ${subcategory}`);
-                                          }
-                                        }}
-                                        disabled={selectedCategories.length >= 3 && !selectedCategories.includes(`${category.path} › ${subcategory}`)}
-                                      />
-                                      <Label 
-                                        htmlFor={`${category.path}-${subcategory}`}
-                                        className="text-xs cursor-pointer"
-                                      >
-                                        {subcategory}
-                                      </Label>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-                
-                {/* Add Another Category Button */}
-                <Button 
-                  variant="link" 
-                  className="text-blue-600 hover:text-blue-800 h-auto p-0"
-                  disabled={selectedCategories.length >= 3}
-                >
-                  Add another category
-                </Button>
+                  )}
+                  
+                  {/* Add Another Category Button */}
+                  {selectedCategories.length < 3 && selectedCategories.length > 0 && (
+                    <Button 
+                      variant="link" 
+                      className="text-blue-600 hover:text-blue-800 h-auto p-0"
+                      onClick={() => {
+                        // This will trigger showing another category selector above
+                      }}
+                    >
+                      Add another category
+                    </Button>
+                  )}
+                </div>
+              )}
+
+              {/* No Categories Available Message */}
+              {!loadingCategories && marketplaceCategories.length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-gray-600">No categories available for the selected marketplace.</p>
+                  <p className="text-sm text-gray-500 mt-2">Try selecting a different Primary Marketplace.</p>
                 </div>
               )}
 
