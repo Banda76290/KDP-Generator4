@@ -434,8 +434,15 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
                             }
                             
                             if (categoryData.level >= 4) {
-                              console.log('Setting level 3:', categoryData.categoryPath);
-                              setSelectedLevel3(categoryData.categoryPath);
+                              // For level 4+ categories, find the direct level 3 parent
+                              let level3Parent = categoryData;
+                              while (level3Parent && level3Parent.level > 3) {
+                                level3Parent = marketplaceCategories.find(cat => cat.categoryPath === level3Parent.parentPath);
+                              }
+                              if (level3Parent && level3Parent.level === 3) {
+                                console.log('Setting level 3:', level3Parent.categoryPath);
+                                setSelectedLevel3(level3Parent.categoryPath);
+                              }
                             }
                             
                             // Reset manual navigation flag after a short delay
@@ -2892,18 +2899,20 @@ export default function EditBook() {
               <div className="space-y-4 bg-gray-50 rounded p-4">
                 <div className="flex items-center justify-between">
                   <h4 className="font-medium text-sm">
-                    {selectedCategories.length} out of 3 category placements selected
+                    {tempUISelections.length} out of 3 category placements selected
                   </h4>
                 </div>
                 
                 <div className="space-y-2">
-                  {selectedCategories.map((categoryPath, index) => (
+                  {tempUISelections.map((categoryPath, index) => (
                     <div key={index} className="flex items-center justify-between text-sm">
-                      <span className="text-gray-700">Books › {categoryPath}</span>
+                      <span className="text-gray-700">{categoryPath}</span>
                       <button 
                         type="button"
                         className="text-blue-600 hover:text-blue-800"
-                        onClick={() => removeCategoryFromModal(categoryPath)}
+                        onClick={() => {
+                          setTempUISelections(tempUISelections.filter(c => c !== categoryPath));
+                        }}
                       >
                         Remove
                       </button>
