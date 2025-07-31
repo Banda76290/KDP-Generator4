@@ -416,6 +416,14 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Tab Content Preservation**: Description content properly saved and restored when switching between form tabs
 - **Unified Implementation**: Same cleaning function and validation logic applied consistently across all WYSIWYG editors
 
+### Critical Bug Fix - Duplication System (31 Juillet 2025) ✅ RÉSOLU
+- **Erreur de contrainte database corrigée**: Résolu l'erreur "null value in column project_id violates not-null constraint"
+- **Fonction duplicateBook mise à jour**: Ajout du projectId du livre parent lors de la duplication des contributeurs
+- **Fonction duplicateProject mise à jour**: Ajout du projectId du nouveau projet lors de la duplication des contributeurs
+- **Gestion d'erreur améliorée**: Messages de toast convertis au format correct pour éviter les erreurs TypeScript
+- **Taille de police ajustée**: Label "Contributors" mis à jour de 16px à 14px selon les préférences utilisateur
+- **Validation complète**: Duplication testée et validée fonctionnelle pour projets et livres avec contributeurs
+
 ### Current Features Available
 - **Complete Dashboard**: KPI cards, sales charts, format distribution, recent projects table
 - **Project Management**: Complete KDP project creation and editing system with dedicated pages
