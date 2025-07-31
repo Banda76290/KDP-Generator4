@@ -2402,19 +2402,13 @@ export default function EditBook() {
                   {selectedCategories.map((categoryPath, index) => (
                     <div key={index} className="flex items-center justify-between text-sm">
                       <span className="text-gray-700">Books › {categoryPath}</span>
-                      <div className="flex items-center space-x-2">
-                        <button 
-                          type="button"
-                          className="text-blue-600 hover:text-blue-800"
-                          onClick={() => removeCategoryFromModal(categoryPath)}
-                        >
-                          Remove
-                        </button>
-                        <X 
-                          className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
-                          onClick={() => removeCategoryFromModal(categoryPath)}
-                        />
-                      </div>
+                      <button 
+                        type="button"
+                        className="text-blue-600 hover:text-blue-800"
+                        onClick={() => removeCategoryFromModal(categoryPath)}
+                      >
+                        Remove
+                      </button>
                     </div>
                   ))}
                 </div>
