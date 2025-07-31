@@ -2664,12 +2664,80 @@ export default function EditBook() {
                 </div>
               </div>
 
+              {/* Print Options Section */}
+              <div className="bg-green-50 rounded-lg border border-green-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Print Options</h3>
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600">
+                    Choose the options for your book. Tell us more about the book content settings so we get your book published. <a href="#" className="text-blue-600 underline">Get more tips</a>
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Left Column */}
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Trim Size</Label>
+                        <Select defaultValue="6x9">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="5x8">5" x 8" (127 x 203 mm)</SelectItem>
+                            <SelectItem value="5.25x8">5.25" x 8" (133 x 203 mm)</SelectItem>
+                            <SelectItem value="5.5x8.5">5.5" x 8.5" (140 x 216 mm)</SelectItem>
+                            <SelectItem value="6x9">6" x 9" (152 x 229 mm)</SelectItem>
+                            <SelectItem value="6.14x9.21">6.14" x 9.21" (156 x 234 mm)</SelectItem>
+                            <SelectItem value="6.69x9.61">6.69" x 9.61" (170 x 244 mm)</SelectItem>
+                            <SelectItem value="7x10">7" x 10" (178 x 254 mm)</SelectItem>
+                            <SelectItem value="7.44x9.69">7.44" x 9.69" (189 x 246 mm)</SelectItem>
+                            <SelectItem value="7.5x9.25">7.5" x 9.25" (191 x 235 mm)</SelectItem>
+                            <SelectItem value="8x10">8" x 10" (203 x 254 mm)</SelectItem>
+                            <SelectItem value="8.25x11">8.25" x 11" (210 x 279 mm)</SelectItem>
+                            <SelectItem value="8.5x11">8.5" x 11" (216 x 279 mm)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Paper Color</Label>
+                        <Select defaultValue="white">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="white">White</SelectItem>
+                            <SelectItem value="cream">Cream</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="flex items-start space-x-3">
+                          <Checkbox id="bleedSettings" className="mt-1" />
+                          <div>
+                            <Label htmlFor="bleedSettings" className="text-sm font-medium">Bleed Settings</Label>
+                            <p className="text-xs text-gray-500">Check this box if your interior has images or text that print to the edge of the page.</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Column - Preview Image */}
+                    <div className="flex items-center justify-center">
+                      <div className="w-32 h-40 bg-gray-200 border-2 border-gray-300 rounded-lg flex items-center justify-center">
+                        <BookOpen className="h-12 w-12 text-gray-400" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Manuscript Upload Section */}
               <div className="bg-blue-50 rounded-lg border border-blue-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Manuscript</h3>
                 <div className="space-y-4">
                   <p className="text-sm text-gray-600">
-                    Upload your book interior. Please review our content guidelines and quality standards to help ensure 
+                    Upload your book interior. Please review our <a href="#" className="text-blue-600 underline">content guidelines</a> and <a href="#" className="text-blue-600 underline">quality standards</a> to help ensure 
                     your submission process goes smoothly. The file must be a single PDF.
                   </p>
                   <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg bg-white">
@@ -2678,32 +2746,6 @@ export default function EditBook() {
                     <Button variant="outline" size="sm">
                       Upload a different file
                     </Button>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Print Options Section */}
-              <div className="bg-green-50 rounded-lg border border-green-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Print Options</h3>
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-600">
-                    Choose the options for your book. Tell us more about the book content settings so we get your book published.
-                  </p>
-                  <div className="space-y-3">
-                    <div className="flex items-start space-x-3">
-                      <Checkbox id="bleedSettings" className="mt-1" />
-                      <div>
-                        <Label htmlFor="bleedSettings" className="text-sm font-medium">Bleed Settings</Label>
-                        <p className="text-xs text-gray-500">Check this box if your interior has images or text that print to the edge of the page.</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                      <Checkbox id="paperbackCover" className="mt-1" />
-                      <div>
-                        <Label htmlFor="paperbackCover" className="text-sm font-medium">Paperback Cover Finish</Label>
-                        <p className="text-xs text-gray-500">Check this box if you want a matte finish. Otherwise, your cover will have a glossy finish.</p>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
