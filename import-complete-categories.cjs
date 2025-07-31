@@ -2,58 +2,63 @@
 const fs = require('fs');
 const path = require('path');
 
-// Read the attached file content
-const dataContent = `amazon.it		kindle_ebook	Affari e Finanza	Imprenditoria	Startup	Raccolta fondi					
-amazon.it		print_kdp_paperback	Affari e Finanza	Imprenditoria	Startup	Raccolta fondi					
-amazon.it		kindle_ebook	Bambini e Ragazzi	Libri per bambini	Libri illustrati	Animali					
-amazon.it		print_kdp_paperback	Bambini e Ragazzi	Libri per bambini	Libri illustrati	Animali					
-amazon.co.uk		print_kdp_paperback	Business & Finance	Entrepreneurship	Startups	Fundraising					
-amazon.co.uk		kindle_ebook	Business & Finance	Entrepreneurship	Startups	Fundraising					
-amazon.de		kindle_ebook	Bücher & Literatur	Fantasy	High Fantasy	Episch	Mittelalterlich				
-amazon.de		print_kdp_paperback	Bücher & Literatur	Fantasy	High Fantasy	Episch	Mittelalterlich				
-amazon.co.uk		print_kdp_paperback	Children & Teens	Children's Books	Picture Books	Animals					
-amazon.co.uk		kindle_ebook	Children & Teens	Children's Books	Picture Books	Animals					
-amazon.es		kindle_ebook	Ciencia, Tecnología y Medicina	Informática	Programación	Python	Ciencia de datos				
-amazon.es		print_kdp_paperback	Ciencia, Tecnología y Medicina	Informática	Programación	Python	Ciencia de datos				
-amazon.fr		print_kdp_paperback	Enfants & Adolescents	Livres pour enfants	Albums illustrés	Animaux					
-amazon.fr		kindle_ebook	Enfants & Adolescents	Livres pour enfants	Albums illustrés	Animaux					
-amazon.fr		print_kdp_paperback	Entreprise & Bourse	Entrepreneuriat	Start-up	Levée de fonds					
-amazon.fr		kindle_ebook	Entreprise & Bourse	Entrepreneuriat	Start-up	Levée de fonds					
-amazon.fr		kindle_ebook	Guide & Conseils	Bien-être	Méditation	Pleine conscience	Yoga	Yoga sur chaise			
-amazon.fr		print_kdp_paperback	Guide & Conseils	Bien-être	Méditation	Pleine conscience	Yoga				
-amazon.it		kindle_ebook	Guide e Consigli	Benessere	Meditazione	Consapevolezza	Yoga				
-amazon.it		print_kdp_paperback	Guide e Consigli	Benessere	Meditazione	Consapevolezza	Yoga				
-amazon.co.uk		kindle_ebook	Guides & Advice	Wellness	Meditation	Mindfulness	Yoga				
-amazon.co.uk		print_kdp_paperback	Guides & Advice	Wellness	Meditation	Mindfulness	Yoga				
-amazon.es		kindle_ebook	Guías y Consejos	Bienestar	Meditación	Atención plena	Yoga				
-amazon.es		print_kdp_paperback	Guías y Consejos	Bienestar	Meditación	Atención plena	Yoga				
-amazon.es		kindle_ebook	Infantil y Juvenil	Libros infantiles	Libros ilustrados	Animales					
-amazon.es		print_kdp_paperback	Infantil y Juvenil	Libros infantiles	Libros ilustrados	Animales					
-amazon.de		kindle_ebook	Kinder & Jugendbücher	Kinderbücher	Bilderbücher	Tiere					
-amazon.de		print_kdp_paperback	Kinder & Jugendbücher	Kinderbücher	Bilderbücher	Tiere					
-amazon.it		print_kdp_paperback	Libri e Letteratura	Fantasy	High Fantasy	Epico	Medievale				
-amazon.it		kindle_ebook	Libri e Letteratura	Fantasy	High Fantasy	Epico	Medievale				
-amazon.es		print_kdp_paperback	Libros y Literatura	Fantasía	Alta fantasía	Épica	Medieval				
-amazon.es		kindle_ebook	Libros y Literatura	Fantasía	Alta fantasía	Épica	Medieval				
-amazon.co.uk		print_kdp_paperback	Literature & Fiction	Fantasy	High Fantasy	Epic	Medieval				
-amazon.co.uk		kindle_ebook	Literature & Fiction	Fantasy	High Fantasy	Epic	Medieval				
-amazon.fr		print_kdp_paperback	Littérature & Fiction	Fantasy	High Fantasy2	Épique	Médiéval				
-amazon.fr		kindle_ebook	Littérature & Fiction	Roman	Amour	Épique	Médiéval	Tip	Top	Cool	Moule
-amazon.fr		kindle_ebook	Littérature & Fiction	Fantasy	High Fantasy	Épique	Médiéval				
-amazon.es		print_kdp_paperback	Negocios y Finanzas	Emprendimiento	Startups	Recaudación de fondos					
-amazon.es		kindle_ebook	Negocios y Finanzas	Emprendimiento	Startups	Recaudación de fondos					
-amazon.de		kindle_ebook	Ratgeber & Tipps	Wellness	Meditation	Achtsamkeit	Yoga				
-amazon.de		print_kdp_paperback	Ratgeber & Tipps	Wellness	Meditation	Achtsamkeit	Yoga				
-amazon.co.uk		print_kdp_paperback	Science, Tech & Medical	Computers & Technology	Programming	Python	Data Science				
-amazon.co.uk		kindle_ebook	Science, Tech & Medical	Computers & Technology	Programming	Python	Data Science				
-amazon.fr		print_kdp_paperback	Sciences, Techniques & Médecine	Informatique	Programmation	Python	Data Science				
-amazon.fr		kindle_ebook	Sciences, Techniques & Médecine	Informatique	Programmation	Python	Data Science				
-amazon.it		kindle_ebook	Scienza, Tecnologia e Medicina	Informatica	Programmazione	Python	Data Science				
-amazon.it		print_kdp_paperback	Scienza, Tecnologia e Medicina	Informatica	Programmazione	Python	Data Science				
-amazon.de		print_kdp_paperback	Wirtschaft & Finanzen	Unternehmertum	Startups	Finanzierung					
-amazon.de		kindle_ebook	Wirtschaft & Finanzen	Unternehmertum	Startups	Finanzierung					
-amazon.de		kindle_ebook	Wissenschaft, Technik & Medizin	Computer & Technologie	Programmierung	Python	Datenwissenschaft				
-amazon.de		print_kdp_paperback	Wissenschaft, Technik & Medizin	Computer & Technologie	Programmierung	Python	Datenwissenschaft				`;
+// Read the attached file content + add missing Amazon.com data
+const dataContent = `amazon.com         print_kdp_paperback     Business & Finance      Entrepreneurship        Startups        Fundraising                                     
+amazon.com              print_kdp_paperback     Children & Teens        Children's Books        Picture Books   Animals                                 
+amazon.com              print_kdp_paperback     Literature & Fiction    Fantasy High Fantasy    Epic    Medieval                                
+amazon.com              print_kdp_paperback     Science, Tech & Medical Computers & Technology  Programming     Python  Data Science                            
+amazon.com              print_kdp_paperback     Guides & Advice Wellness        Meditation      Mindfulness     Yoga                            
+amazon.it               kindle_ebook    Affari e Finanza        Imprenditoria   Startup Raccolta fondi                                  
+amazon.it               print_kdp_paperback     Affari e Finanza        Imprenditoria   Startup Raccolta fondi                                  
+amazon.it               kindle_ebook    Bambini e Ragazzi       Libri per bambini       Libri illustrati        Animali                                 
+amazon.it               print_kdp_paperback     Bambini e Ragazzi       Libri per bambini       Libri illustrati        Animali                                 
+amazon.co.uk            print_kdp_paperback     Business & Finance      Entrepreneurship        Startups        Fundraising                                     
+amazon.co.uk            kindle_ebook    Business & Finance      Entrepreneurship        Startups        Fundraising                                     
+amazon.de               kindle_ebook    Bücher & Literatur      Fantasy High Fantasy    Episch  Mittelalterlich                         
+amazon.de               print_kdp_paperback     Bücher & Literatur      Fantasy High Fantasy    Episch  Mittelalterlich                         
+amazon.co.uk            print_kdp_paperback     Children & Teens        Children's Books        Picture Books   Animals                                 
+amazon.co.uk            kindle_ebook    Children & Teens        Children's Books        Picture Books   Animals                                 
+amazon.es               kindle_ebook    Ciencia, Tecnología y Medicina  Informática     Programación    Python  Ciencia de datos                                
+amazon.es               print_kdp_paperback     Ciencia, Tecnología y Medicina  Informática     Programación    Python  Ciencia de datos                                
+amazon.fr               print_kdp_paperback     Enfants & Adolescents   Livres pour enfants     Albums illustrés        Animaux                                 
+amazon.fr               kindle_ebook    Enfants & Adolescents   Livres pour enfants     Albums illustrés        Animaux                                 
+amazon.fr               print_kdp_paperback     Entreprise & Bourse     Entrepreneuriat Start-up        Levée de fonds                                  
+amazon.fr               kindle_ebook    Entreprise & Bourse     Entrepreneuriat Start-up        Levée de fonds                                  
+amazon.fr               kindle_ebook    Guide & Conseils        Bien-être       Méditation      Pleine conscience       Yoga    Yoga sur chaise                 
+amazon.fr               print_kdp_paperback     Guide & Conseils        Bien-être       Méditation      Pleine conscience       Yoga                            
+amazon.it               kindle_ebook    Guide e Consigli        Benessere       Meditazione     Consapevolezza  Yoga                            
+amazon.it               print_kdp_paperback     Guide e Consigli        Benessere       Meditazione     Consapevolezza  Yoga                            
+amazon.co.uk            kindle_ebook    Guides & Advice Wellness        Meditation      Mindfulness     Yoga                            
+amazon.co.uk            print_kdp_paperback     Guides & Advice Wellness        Meditation      Mindfulness     Yoga                            
+amazon.es               kindle_ebook    Guías y Consejos        Bienestar       Meditación      Atención plena  Yoga                            
+amazon.es               print_kdp_paperback     Guías y Consejos        Bienestar       Meditación      Atención plena  Yoga                            
+amazon.es               kindle_ebook    Infantil y Juvenil      Libros infantiles       Libros ilustrados       Animales                                        
+amazon.es               print_kdp_paperback     Infantil y Juvenil      Libros infantiles       Libros ilustrados       Animales                                        
+amazon.de               kindle_ebook    Kinder & Jugendbücher   Kinderbücher    Bilderbücher    Tiere                                   
+amazon.de               print_kdp_paperback     Kinder & Jugendbücher   Kinderbücher    Bilderbücher    Tiere                                   
+amazon.it               print_kdp_paperback     Libri e Letteratura     Fantasy High Fantasy    Epico   Medievale                               
+amazon.it               kindle_ebook    Libri e Letteratura     Fantasy High Fantasy    Epico   Medievale                               
+amazon.es               print_kdp_paperback     Libros y Literatura     Fantasía        Alta fantasía   Épica   Medieval                                
+amazon.es               kindle_ebook    Libros y Literatura     Fantasía        Alta fantasía   Épica   Medieval                                
+amazon.co.uk            print_kdp_paperback     Literature & Fiction    Fantasy High Fantasy    Epic    Medieval                                
+amazon.co.uk            kindle_ebook    Literature & Fiction    Fantasy High Fantasy    Epic    Medieval                                
+amazon.fr               print_kdp_paperback     Littérature & Fiction   Fantasy High Fantasy2   Épique  Médiéval                                
+amazon.fr               kindle_ebook    Littérature & Fiction   Roman   Amour   Épique  Médiéval        Tip     Top     Cool    Moule
+amazon.fr               kindle_ebook    Littérature & Fiction   Fantasy High Fantasy    Épique  Médiéval                                
+amazon.es               print_kdp_paperback     Negocios y Finanzas     Emprendimiento  Startups        Recaudación de fondos                                   
+amazon.es               kindle_ebook    Negocios y Finanzas     Emprendimiento  Startups        Recaudación de fondos                                   
+amazon.de               kindle_ebook    Ratgeber & Tipps        Wellness        Meditation      Achtsamkeit     Yoga                            
+amazon.de               print_kdp_paperback     Ratgeber & Tipps        Wellness        Meditation      Achtsamkeit     Yoga                            
+amazon.co.uk            print_kdp_paperback     Science, Tech & Medical Computers & Technology  Programming     Python  Data Science                            
+amazon.co.uk            kindle_ebook    Science, Tech & Medical Computers & Technology  Programming     Python  Data Science                            
+amazon.fr               print_kdp_paperback     Sciences, Techniques & Médecine Informatique    Programmation   Python  Data Science                            
+amazon.fr               kindle_ebook    Sciences, Techniques & Médecine Informatique    Programmation   Python  Data Science                            
+amazon.it               kindle_ebook    Scienza, Tecnologia e Medicina  Informatica     Programmazione  Python  Data Science                            
+amazon.it               print_kdp_paperback     Scienza, Tecnologia e Medicina  Informatica     Programmazione  Python  Data Science                            
+amazon.de               print_kdp_paperback     Wirtschaft & Finanzen   Unternehmertum  Startups        Finanzierung                                    
+amazon.de               kindle_ebook    Wirtschaft & Finanzen   Unternehmertum  Startups        Finanzierung                                    
+amazon.de               kindle_ebook    Wissenschaft, Technik & Medizin Computer & Technologie  Programmierung  Python  Datenwissenschaft                               
+amazon.de               print_kdp_paperback     Wissenschaft, Technik & Medizin Computer & Technologie  Programmierung  Python  Datenwissenschaft                               `;
 
 function parseCompleteCategories() {
   const lines = dataContent.trim().split('\n');
@@ -67,6 +72,9 @@ function parseCompleteCategories() {
     const marketplace = columns[0].trim();
     const format = columns[1].trim(); // kindle_ebook or print_kdp_paperback
     
+    // For now, only process print_kdp_paperback categories (skip kindle_ebook)
+    if (format !== 'print_kdp_paperback') return;
+
     // Extract all category levels (columns 2 onwards, stopping at empty columns)
     const categoryLevels = [];
     for (let i = 2; i < columns.length; i++) {
