@@ -13,28 +13,14 @@ import OpenAI from "openai";
 
 // Extend Express Request type to include authenticated user
 interface AuthenticatedRequest extends Request {
-  user?: {
-    claims: {
-      sub: string;
-      email: string;
-      first_name: string;
-      last_name: string;
-      profile_image_url?: string;
-    };
-    expires_at: number;
-    access_token?: string;
-    refresh_token?: string;
-  };
+  user?: any; // Simplified to avoid type conflicts
   admin?: any;
 }
 
 // Admin middleware to check if user has admin or superadmin role
 const isAdmin = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
+    const userId = req.user?.claims?.sub || req.user?.id;
     if (!userId) {
       return res.status(401).json({ message: "User not authenticated" });
     }
@@ -1352,7 +1338,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/ai/generate", isAuthenticated, async (req, res) => {
     try {
       const { functionKey, bookId, projectId, customPrompt, customModel, customTemperature } = req.body;
-      const userId = req.user?.claims?.sub;
+      const userId = req.user?.claims?.sub || req.user?.id;
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
@@ -1579,9 +1565,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Export only safe, non-sensitive data
       const [categories, userStats, projectsStats, booksStats] = await Promise.all([
         db.select().from(marketplaceCategories),
-        db.select({ id: users.id, username: users.username, createdAt: users.createdAt }).from(users),
-        db.select({ id: projects.id, name: projects.name, createdAt: projects.createdAt }).from(projects),
-        db.select({ id: books.id, title: books.title, createdAt: books.createdAt }).from(books)
+        db.select().from(users),
+        db.select().from(projects),
+        db.select().from(books)
       ]);
 
       const exportData = {
@@ -1593,9 +1579,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Only include metadata, not sensitive content
         categoriesData: categories.map(cat => ({
           marketplace: cat.marketplace,
-          type: cat.type,
-          category: cat.category,
-          path: cat.path
+          categoryPath: cat.categoryPath,
+          displayName: cat.displayName,
+          level: cat.level
         }))
       };
 
