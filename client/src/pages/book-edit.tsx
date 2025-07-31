@@ -2281,7 +2281,6 @@ export default function EditBook() {
               <div className="bg-teal-50 rounded-lg border border-teal-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Primary Marketplace</h3>
                 <div className="space-y-2">
-                  <Label htmlFor="primaryMarketplace" className="font-medium text-[16px]">Primary Marketplace</Label>
                   <Select 
                     value={form.watch("primaryMarketplace") || ""} 
                     onValueChange={handleMarketplaceChange}
