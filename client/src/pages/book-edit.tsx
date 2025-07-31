@@ -2921,7 +2921,7 @@ export default function EditBook() {
             </Button>
             <Button 
               onClick={saveCategoriesChanges}
-              className="bg-yellow-500 hover:bg-yellow-600 text-black"
+              className="bg-[#ff9500] hover:bg-yellow-600 text-black"
             >
               Save categories
             </Button>
