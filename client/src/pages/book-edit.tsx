@@ -148,9 +148,11 @@ const fallbackCategories = [
 ];
 
 // Category Selector Component
-const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategorySelect, onCategoryRemove, resetTrigger, instanceId }: {
+const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISelections, setTempUISelections, onCategorySelect, onCategoryRemove, resetTrigger, instanceId }: {
   marketplaceCategories: MarketplaceCategory[];
   selectedCategories: string[];
+  tempUISelections: string[];
+  setTempUISelections: (selections: string[]) => void;
   onCategorySelect: (categoryPath: string) => void;
   onCategoryRemove?: (categoryPath: string) => void;
   resetTrigger?: number;
@@ -387,71 +389,64 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, onCategor
               <div key={category.id} className="flex items-start space-x-2">
                 <Checkbox
                   id={`leaf-category-${category.id}`}
-                  checked={selectedCategories.includes(category.categoryPath)}
+                  checked={tempUISelections.includes(category.categoryPath)}
                   onCheckedChange={(checked) => {
-                    console.log('Placement checkbox clicked:', { checked, categoryPath: category.categoryPath, selectedCategories });
+                    console.log('Placement checkbox clicked:', { checked, categoryPath: category.categoryPath, tempUISelections });
                     
                     if (checked) {
-                      // First, populate the navigation dropdowns to show the path to this category
-                      const categoryData = marketplaceCategories.find(cat => cat.categoryPath === category.categoryPath);
-                      console.log('Found category data:', categoryData);
-                      
-                      if (categoryData) {
-                        // Mark as manual navigation to prevent sync conflicts
-                        setIsManualNavigation(true);
+                      // Add to temporary UI selections (no validation yet)
+                      if (tempUISelections.length < 3) {
+                        setTempUISelections([...tempUISelections, category.categoryPath]);
+                        console.log('Added to temp selections:', category.categoryPath);
                         
-                        // Reconstruct the navigation hierarchy to show the breadcrumb path
-                        setTimeout(() => {
-                          console.log('Reconstructing navigation for level:', categoryData.level);
+                        // Populate the navigation dropdowns to show the path to this category
+                        const categoryData = marketplaceCategories.find(cat => cat.categoryPath === category.categoryPath);
+                        console.log('Found category data:', categoryData);
+                        
+                        if (categoryData) {
+                          // Mark as manual navigation to prevent sync conflicts
+                          setIsManualNavigation(true);
                           
-                          if (categoryData.level >= 2) {
-                            let level2Parent = categoryData;
-                            while (level2Parent && level2Parent.level > 2) {
-                              level2Parent = marketplaceCategories.find(cat => cat.categoryPath === level2Parent.parentPath);
+                          // Reconstruct the navigation hierarchy to show the breadcrumb path
+                          setTimeout(() => {
+                            console.log('Reconstructing navigation for level:', categoryData.level);
+                            
+                            if (categoryData.level >= 2) {
+                              let level2Parent = categoryData;
+                              while (level2Parent && level2Parent.level > 2) {
+                                level2Parent = marketplaceCategories.find(cat => cat.categoryPath === level2Parent.parentPath);
+                              }
+                              if (level2Parent) {
+                                console.log('Setting level 1:', level2Parent.categoryPath);
+                                setSelectedLevel1(level2Parent.categoryPath);
+                              }
                             }
-                            if (level2Parent) {
-                              console.log('Setting level 1:', level2Parent.categoryPath);
-                              setSelectedLevel1(level2Parent.categoryPath);
+                            
+                            if (categoryData.level >= 3) {
+                              let level3Parent = categoryData;
+                              while (level3Parent && level3Parent.level > 3) {
+                                level3Parent = marketplaceCategories.find(cat => cat.categoryPath === level3Parent.parentPath);
+                              }
+                              if (level3Parent && level3Parent.level === 3) {
+                                console.log('Setting level 2:', level3Parent.categoryPath);
+                                setSelectedLevel2(level3Parent.categoryPath);
+                              }
                             }
-                          }
-                          
-                          if (categoryData.level >= 3) {
-                            let level3Parent = categoryData;
-                            while (level3Parent && level3Parent.level > 3) {
-                              level3Parent = marketplaceCategories.find(cat => cat.categoryPath === level3Parent.parentPath);
+                            
+                            if (categoryData.level >= 4) {
+                              console.log('Setting level 3:', categoryData.categoryPath);
+                              setSelectedLevel3(categoryData.categoryPath);
                             }
-                            if (level3Parent && level3Parent.level === 3) {
-                              console.log('Setting level 2:', level3Parent.categoryPath);
-                              setSelectedLevel2(level3Parent.categoryPath);
-                            }
-                          }
-                          
-                          if (categoryData.level >= 4) {
-                            console.log('Setting level 3:', categoryData.categoryPath);
-                            setSelectedLevel3(categoryData.categoryPath);
-                          }
-                          
-                          // Reset manual navigation flag after a short delay
-                          setTimeout(() => setIsManualNavigation(false), 100);
-                        }, 50);
+                            
+                            // Reset manual navigation flag after a short delay
+                            setTimeout(() => setIsManualNavigation(false), 100);
+                          }, 50);
+                        }
                       }
-                      
-                      // Then, add to selected categories
-                      console.log('Calling onCategorySelect with:', category.categoryPath);
-                      onCategorySelect(category.categoryPath);
                     } else {
-                      // Handle unchecking - remove from selected categories
-                      console.log('Unchecking category:', category.categoryPath);
-                      // Find current instance and remove this category
-                      const instanceIndex = instanceId ? parseInt(instanceId.split('-')[1]) : 0;
-                      const newCategories = [...selectedCategories];
-                      const categoryIndex = newCategories.indexOf(category.categoryPath);
-                      if (categoryIndex !== -1) {
-                        newCategories.splice(categoryIndex, 1);
-                        console.log('New categories after removal:', newCategories);
-                        // Call the remove function passed from parent
-                        onCategoryRemove?.(category.categoryPath);
-                      }
+                      // Handle unchecking - remove from temporary selections
+                      console.log('Unchecking category from temp selections:', category.categoryPath);
+                      setTempUISelections(tempUISelections.filter(cat => cat !== category.categoryPath));
                     }
                   }}
                   className="mt-0.5"
@@ -496,6 +491,8 @@ export default function EditBook() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showCategoriesModal, setShowCategoriesModal] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  // Temporary UI selections that don't trigger validation until modal save
+  const [tempUISelections, setTempUISelections] = useState<string[]>([]);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [isPartOfSeries, setIsPartOfSeries] = useState(false);
   const [hasRestoredFromStorage, setHasRestoredFromStorage] = useState(false);
@@ -1341,6 +1338,7 @@ export default function EditBook() {
   // Categories modal handlers
   const openCategoriesModal = async () => {
     setSelectedCategories([...categories]);
+    setTempUISelections([...categories]); // Initialize temp selections with current categories
     
     // Load categories for current marketplace
     const currentMarketplace = form.watch("primaryMarketplace") || "Amazon.com";
@@ -1351,26 +1349,31 @@ export default function EditBook() {
   };
 
   const saveCategoriesChanges = () => {
-    setCategories([...selectedCategories]);
+    // Use temporary UI selections for final validation
+    setCategories([...tempUISelections]);
+    setSelectedCategories([...tempUISelections]);
     setShowCategoriesModal(false);
   };
 
   const cancelCategoriesChanges = () => {
     setSelectedCategories([]);
+    setTempUISelections([]); // Reset temporary selections
     setShowCategoriesModal(false);
   };
 
   const toggleCategorySelection = (categoryPath: string) => {
-    const isSelected = selectedCategories.includes(categoryPath);
+    const isSelected = tempUISelections.includes(categoryPath);
     if (isSelected) {
-      setSelectedCategories(selectedCategories.filter(c => c !== categoryPath));
-    } else if (selectedCategories.length < 3) {
-      setSelectedCategories([...selectedCategories, categoryPath]);
+      setTempUISelections(tempUISelections.filter(c => c !== categoryPath));
+    } else if (tempUISelections.length < 3) {
+      setTempUISelections([...tempUISelections, categoryPath]);
     }
   };
 
   const removeCategoryFromModal = (categoryPath: string) => {
     setSelectedCategories(selectedCategories.filter(c => c !== categoryPath));
+    // Also remove from temporary selections
+    setTempUISelections(tempUISelections.filter(c => c !== categoryPath));
   };
 
   const onSubmit = (data: BookFormData) => {
@@ -2840,6 +2843,8 @@ export default function EditBook() {
                           <CategorySelector 
                             marketplaceCategories={marketplaceCategories}
                             selectedCategories={selectedCategories}
+                            tempUISelections={tempUISelections}
+                            setTempUISelections={setTempUISelections}
                             resetTrigger={resetTriggers[index]}
                             instanceId={`category-${index}`}
                             onCategorySelect={(categoryPath) => {
