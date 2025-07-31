@@ -1793,10 +1793,7 @@ export default function EditBook() {
                       />
                       <div className="flex-1">
                         <Label htmlFor="isLargePrintBook" className="text-sm font-normal">
-                          Large-print book (content is 16-point font size or greater){' '}
-                          <button type="button" className="text-blue-600 hover:text-blue-800 underline">
-                            What's a large-print book?
-                          </button>
+                          Large-print book (content is 16-point font size or greater)
                         </Label>
                       </div>
                     </div>
