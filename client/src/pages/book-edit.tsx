@@ -1698,106 +1698,106 @@ export default function EditBook() {
                 </div>
               </div>
 
-              {/* Categories & Keywords Section */}
+              {/* Categories Section */}
               <div className="bg-indigo-50 rounded-lg border border-indigo-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Categories & Keywords</h3>
-                <div className="space-y-6">
-                  {/* Categories */}
-                  <div className="space-y-4">
-                    <Label className="font-medium text-[16px]">Categories</Label>
-                    <p className="text-sm text-gray-600">
-                      Choose up to 2 categories that best describe your book. This will help customers find your book. You can search by keyword, see all categories, or browse by subject.
-                    </p>
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {categories.map((category) => (
-                        <Badge key={category} variant="secondary" className="flex items-center gap-1">
-                          {category}
-                          <X 
-                            className="w-3 h-3 cursor-pointer" 
-                            onClick={() => removeCategory(category)}
-                          />
-                        </Badge>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Add a category"
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            addCategory(e.currentTarget.value);
-                            e.currentTarget.value = '';
-                          }
-                        }}
-                      />
-                      <Button 
-                        type="button"
-                        variant="outline"
-                        onClick={(e) => {
-                          const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                          if (input.value) {
-                            addCategory(input.value);
-                            input.value = '';
-                          }
-                        }}
-                      >
-                        Add
-                      </Button>
-                    </div>
-                    <p className="text-sm text-gray-500">Add up to 10 categories that best describe your book.</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Categories</h3>
+                <div className="space-y-4">
+                  <Label className="font-medium text-[16px]">Categories</Label>
+                  <p className="text-sm text-gray-600">
+                    Choose up to 2 categories that best describe your book. This will help customers find your book. You can search by keyword, see all categories, or browse by subject.
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {categories.map((category) => (
+                      <Badge key={category} variant="secondary" className="flex items-center gap-1">
+                        {category}
+                        <X 
+                          className="w-3 h-3 cursor-pointer" 
+                          onClick={() => removeCategory(category)}
+                        />
+                      </Badge>
+                    ))}
                   </div>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Add a category"
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          addCategory(e.currentTarget.value);
+                          e.currentTarget.value = '';
+                        }
+                      }}
+                    />
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      onClick={(e) => {
+                        const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                        if (input.value) {
+                          addCategory(input.value);
+                          input.value = '';
+                        }
+                      }}
+                    >
+                      Add
+                    </Button>
+                  </div>
+                  <p className="text-sm text-gray-500">Add up to 10 categories that best describe your book.</p>
+                </div>
+              </div>
 
-                  {/* Keywords */}
-                  <div className="space-y-4">
-                    <Label className="font-medium text-[16px]">Keywords</Label>
-                    <p className="text-sm text-gray-600">
-                      Enter up to 7 keywords or short phrases that describe the content, topic, theme or type of your book. Separate keywords with commas.
-                    </p>
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {keywords.map((keyword) => (
-                        <Badge key={keyword} variant="secondary" className="flex items-center gap-1">
-                          {keyword}
-                          <X 
-                            className="w-3 h-3 cursor-pointer" 
-                            onClick={() => removeKeyword(keyword)}
-                          />
-                        </Badge>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Add a keyword"
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            addKeyword(e.currentTarget.value);
-                            e.currentTarget.value = '';
-                          }
-                        }}
-                      />
-                      <Button 
-                        type="button"
-                        variant="outline"
-                        onClick={(e) => {
-                          const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                          if (input.value) {
-                            addKeyword(input.value);
-                            input.value = '';
-                          }
-                        }}
-                      >
-                        Add
-                      </Button>
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      <p>Examples: vampires, romance, cooking, gardening, mystery, young adult</p>
-                    </div>
+              {/* Keywords Section */}
+              <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Keywords</h3>
+                <div className="space-y-4">
+                  <Label className="font-medium text-[16px]">Keywords</Label>
+                  <p className="text-sm text-gray-600">
+                    Enter up to 7 keywords or short phrases that describe the content, topic, theme or type of your book. Separate keywords with commas.
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {keywords.map((keyword) => (
+                      <Badge key={keyword} variant="secondary" className="flex items-center gap-1">
+                        {keyword}
+                        <X 
+                          className="w-3 h-3 cursor-pointer" 
+                          onClick={() => removeKeyword(keyword)}
+                        />
+                      </Badge>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Add a keyword"
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          addKeyword(e.currentTarget.value);
+                          e.currentTarget.value = '';
+                        }
+                      }}
+                    />
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      onClick={(e) => {
+                        const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                        if (input.value) {
+                          addKeyword(input.value);
+                          input.value = '';
+                        }
+                      }}
+                    >
+                      Add
+                    </Button>
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    <p>Examples: vampires, romance, cooking, gardening, mystery, young adult</p>
                   </div>
                 </div>
               </div>
 
               {/* Additional Options Section */}
-              <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-6">
+              <div className="bg-pink-50 rounded-lg border border-pink-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Options</h3>
                 <div className="space-y-4">
                   <Label className="font-medium text-[16px]">Content & Publishing Options</Label>

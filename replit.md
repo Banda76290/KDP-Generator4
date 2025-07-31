@@ -462,6 +462,8 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Ordre logique optimisé**: Flux d'informations amélioré avec positionnement des cartes selon la logique métier
 - **Structure finale**: Primary Audience → Marketplace Settings → Categories & Keywords pour un workflow naturel
 - **Liste marketplaces mise à jour**: Dropdown "Primary Marketplace" mis à jour avec les 12 marketplaces Amazon officiels selon l'interface KDP réelle
+- **Séparation Categories/Keywords**: Division de la carte "Categories & Keywords" en deux cartes distinctes avec couleurs différentes (indigo pour Categories, jaune pour Keywords)
+- **Réorganisation couleurs**: Carte "Additional Options" changée en rose pour éviter la confusion avec la nouvelle carte Keywords jaune
 
 ### Visual Section Separation Implementation (31 Juillet 2025) 🚧 EN COURS
 - **Cartes colorées**: Début d'implémentation de sections visuellement séparées avec des cartes colorées dans book-edit.tsx
