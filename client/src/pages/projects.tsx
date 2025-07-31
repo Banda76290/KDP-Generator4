@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, BarChart3, BookOpen, Globe, DollarSign, TrendingUp, ArrowUpDown, Copy, Hash } from "lucide-react";
+import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, BarChart3, BookOpen, Globe, DollarSign, TrendingUp, ArrowUpDown, Copy } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -421,7 +421,7 @@ export default function Projects() {
                                       {book.language || 'English'}
                                     </div>
                                     <div className="flex items-center gap-1 text-xs text-gray-500 flex-shrink-0">
-                                      <Hash className="w-3 h-3" />
+                                      <span className="font-medium">ISBN:</span>
                                       {book.isbn ? (
                                         <span className="font-medium text-gray-700">{book.isbn}</span>
                                       ) : book.isbnPlaceholder ? (

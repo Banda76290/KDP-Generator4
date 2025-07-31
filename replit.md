@@ -407,7 +407,7 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Apply Button Functionality**: Red Apply button with confirmation dialog for permanent ISBN assignment
 - **Cross-User Protection**: Prevents ISBN conflicts between different users in multi-tenant environment
 - **ISBN Display Integration**: Added ISBN information display on both Books page and Projects page book cards
-- **Visual ISBN Differentiation**: Official ISBNs displayed in bold, placeholders in amber color, with Hash icon for clarity
+- **Visual ISBN Differentiation**: Official ISBNs displayed in bold, placeholders in amber color, with clear "ISBN:" label
 
 ### Dynamic Category Loading System (31 Juillet 2025) ✅ COMPLETED
 - **Database-Driven Categories**: Complete implementation of marketplace-specific category hierarchies in PostgreSQL

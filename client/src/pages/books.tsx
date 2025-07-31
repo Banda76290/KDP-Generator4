@@ -28,8 +28,7 @@ import {
   Globe,
   TrendingUp,
   DollarSign,
-  Library,
-  Hash
+  Library
 } from "lucide-react";
 import type { Book, Project } from "@shared/schema";
 
@@ -454,7 +453,7 @@ function BooksContent() {
 
                   {/* ISBN */}
                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <Hash className="h-4 w-4" />
+                    <span className="text-xs font-medium">ISBN:</span>
                     <span>
                       {book.isbn ? (
                         <span className="font-medium text-foreground">{book.isbn}</span>
