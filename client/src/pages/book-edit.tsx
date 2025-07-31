@@ -1737,7 +1737,7 @@ export default function EditBook() {
                       type="button" 
                       variant="outline" 
                       size="sm"
-                      className="mt-3"
+                      className="mt-3 bg-[#ff9500] text-[#ffffff]"
                     >
                       Edit categories
                     </Button>
