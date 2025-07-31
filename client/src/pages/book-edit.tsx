@@ -2732,7 +2732,7 @@ export default function EditBook() {
                       <div className="space-y-3">
                         <h4 className="font-medium text-gray-900">Trim Size</h4>
                         <p className="text-sm text-gray-600">
-                          Select the height and width you want your book to be. <a href="#" className="text-blue-600 underline">↗</a>
+                          Select the height and width you want your book to be.
                         </p>
                         <div className="grid grid-cols-2 gap-2">
                           <button className="p-3 text-left border-2 border-teal-500 bg-teal-50 rounded-md text-sm font-medium">
