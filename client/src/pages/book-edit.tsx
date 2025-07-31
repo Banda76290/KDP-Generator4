@@ -2762,22 +2762,26 @@ export default function EditBook() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Marketplace Change Warning</AlertDialogTitle>
-            <AlertDialogDescription>
-              The new marketplace <strong>{pendingMarketplace}</strong> is incompatible with some of your selected categories.
-              
-              <div className="mt-4">
-                <strong>Incompatible categories:</strong>
-                <ul className="list-disc list-inside mt-2 text-sm">
-                  {incompatibleCategories.map((category, index) => (
-                    <li key={index} className="text-red-600">Books › {category}</li>
-                  ))}
-                </ul>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4">
+                <p>
+                  The new marketplace <strong>{pendingMarketplace}</strong> is incompatible with some of your selected categories.
+                </p>
+                
+                <div>
+                  <strong>Incompatible categories:</strong>
+                  <ul className="list-disc list-inside mt-2 text-sm">
+                    {incompatibleCategories.map((category, index) => (
+                      <li key={index} className="text-red-600">Books › {category}</li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <p>
+                  You can proceed with the marketplace change, but the incompatible categories will be removed, 
+                  or cancel to keep your current categories and marketplace.
+                </p>
               </div>
-              
-              <p className="mt-4">
-                You can proceed with the marketplace change, but the incompatible categories will be removed, 
-                or cancel to keep your current categories and marketplace.
-              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
