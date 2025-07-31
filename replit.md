@@ -489,12 +489,12 @@ The application is designed to be deployed on Replit with integrated authenticat
 - **Séparation Categories/Keywords**: Division de la carte "Categories & Keywords" en deux cartes distinctes avec couleurs différentes (indigo pour Categories, jaune pour Keywords)
 - **Réorganisation couleurs**: Carte "Additional Options" changée en rose pour éviter la confusion avec la nouvelle carte Keywords jaune
 
-### Visual Section Separation Implementation (31 Juillet 2025) 🚧 EN COURS
-- **Cartes colorées**: Début d'implémentation de sections visuellement séparées avec des cartes colorées dans book-edit.tsx
-- **Structure améliorée**: Regroupement logique des champs en sections thématiques (projet, informations de base, série/édition, auteurs/contributeurs, description, droits/options)
-- **Couleurs distinctives**: Attribution de couleurs spécifiques pour chaque section (gris, bleu, vert, violet, orange, rouge, indigo, jaune, turquoise)
-- **Espacement optimisé**: Amélioration de l'espacement entre les sections avec marges et padding appropriés
-- **Problème technique**: Erreurs de fermeture JSX à résoudre pour finaliser l'implémentation
+### Logique Release Date Intelligente (31 Juillet 2025) ✅ RÉSOLU
+- **Désactivation automatique**: L'option "Schedule my book's release" se désactive automatiquement quand "My book was previously published" est coché
+- **Interface désactivée**: Ajout de styles visuels (opacité réduite, curseur non autorisé) pour indiquer clairement l'état désactivé
+- **Logique automatique**: useEffect qui force la sélection de "Release my book for sale now" quand le livre était publié précédemment
+- **Prévention des erreurs**: L'utilisateur ne peut plus accidentellement programmer la sortie d'un livre déjà publié
+- **Conformité KDP**: Respecte les règles d'Amazon KDP concernant les livres précédemment publiés
 
 ### Current Features Available
 - **Complete Dashboard**: KPI cards, sales charts, format distribution, recent projects table
