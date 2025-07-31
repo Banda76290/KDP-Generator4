@@ -2017,7 +2017,6 @@ export default function EditBook() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Book Description</h3>
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="description-editor" className="font-medium text-[16px]">Description</Label>
                     <p className="text-sm text-gray-600 mt-1">
                       Provide a description that will entice readers to buy your book. What is your book about? What makes it interesting? What should readers expect? This can be copied from the back cover of your book. Maximum {maxDescriptionCharacters.toLocaleString()} characters.
                     </p>
