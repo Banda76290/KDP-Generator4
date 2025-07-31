@@ -2498,29 +2498,14 @@ export default function EditBook() {
                             purchased the rights for your book from another publisher. This will not affect your Amazon release date.
                           </p>
                           
-                          <div className="flex items-center space-x-2">
-                            <Input
-                              type="date"
-                              value={form.watch("previousPublicationDate") || ""}
-                              onChange={(e) => form.setValue("previousPublicationDate", e.target.value || null)}
-                              max={new Date().toISOString().split('T')[0]}
-                              className="max-w-xs"
-                              placeholder="MM/DD/YYYY"
-                            />
-                            <div className="w-6 h-6 bg-gray-200 rounded border flex items-center justify-center">
-                              <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                              </svg>
-                            </div>
-                          </div>
-                          
-                          <button
-                            type="button"
-                            onClick={() => form.setValue("previousPublicationDate", null)}
-                            className="text-[#38b6ff] hover:text-[#146eb4] text-sm"
-                          >
-                            Clear Date
-                          </button>
+                          <Input
+                            type="date"
+                            value={form.watch("previousPublicationDate") || ""}
+                            onChange={(e) => form.setValue("previousPublicationDate", e.target.value || null)}
+                            max={new Date().toISOString().split('T')[0]}
+                            className="max-w-xs"
+                            placeholder="MM/DD/YYYY"
+                          />
                         </div>
                       )}
                     </div>
