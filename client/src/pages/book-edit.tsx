@@ -1546,7 +1546,7 @@ export default function EditBook() {
                   <div className="space-y-4">
                     <Label className="font-medium text-[16px]">Sexually Explicit Images or Title</Label>
                     <p className="text-sm text-gray-600">
-                      Does the book's cover or interior contain sexually explicit images, or does the book's title contain sexually explicit language? <span className="text-blue-600 underline cursor-pointer">Learn more.</span>
+                      Does the book's cover or interior contain sexually explicit images, or does the book's title contain sexually explicit language?
                     </p>
                     <RadioGroup 
                       value={form.watch("hasExplicitContent") ? "yes" : "no"} 
