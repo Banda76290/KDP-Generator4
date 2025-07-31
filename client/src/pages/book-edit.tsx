@@ -2759,38 +2759,46 @@ export default function EditBook() {
 
       {/* Marketplace Conflict Dialog */}
       <AlertDialog open={showMarketplaceConflictDialog} onOpenChange={setShowMarketplaceConflictDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-2xl w-[95vw] max-h-[90vh] overflow-y-auto">
           <AlertDialogHeader>
-            <AlertDialogTitle>Marketplace Change Warning</AlertDialogTitle>
+            <AlertDialogTitle className="text-lg font-semibold">
+              Marketplace Change Warning
+            </AlertDialogTitle>
             <AlertDialogDescription asChild>
-              <div className="space-y-4">
-                <p>
-                  The new marketplace <strong>{pendingMarketplace}</strong> is incompatible with some of your selected categories.
+              <div className="space-y-4 text-sm">
+                <p className="text-gray-700">
+                  The new marketplace <strong className="text-gray-900">{pendingMarketplace}</strong> is incompatible with some of your selected categories.
                 </p>
                 
-                <div>
-                  <strong>Incompatible categories:</strong>
-                  <ul className="list-disc list-inside mt-2 text-sm">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="font-medium text-red-800 mb-2">Incompatible categories:</p>
+                  <ul className="space-y-1 text-red-700">
                     {incompatibleCategories.map((category, index) => (
-                      <li key={index} className="text-red-600">Books › {category}</li>
+                      <li key={index} className="flex items-start">
+                        <span className="text-red-500 mr-2 mt-0.5">•</span>
+                        <span className="break-words">{category}</span>
+                      </li>
                     ))}
                   </ul>
                 </div>
                 
-                <p>
+                <p className="text-gray-700">
                   You can proceed with the marketplace change, but the incompatible categories will be removed, 
                   or cancel to keep your current categories and marketplace.
                 </p>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={cancelMarketplaceChange}>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+            <AlertDialogCancel 
+              onClick={cancelMarketplaceChange}
+              className="w-full sm:w-auto"
+            >
               Cancel - Keep current marketplace
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={proceedWithMarketplaceChange}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
             >
               Change marketplace and remove categories
             </AlertDialogAction>
