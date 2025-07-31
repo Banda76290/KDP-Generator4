@@ -2635,16 +2635,19 @@ export default function EditBook() {
             <CardContent className="space-y-8">
               {/* Manuscript Upload Section */}
               <div className="bg-blue-50 rounded-lg border border-blue-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Manuscript Upload</h3>
-                <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
-                  <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                  <h4 className="text-lg font-medium text-gray-900 mb-2">Upload Your Manuscript</h4>
-                  <p className="text-gray-600 mb-4">
-                    Upload your completed manuscript in PDF format
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Manuscript</h3>
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600">
+                    Upload your book interior. Please review our content guidelines and quality standards to help ensure 
+                    your submission process goes smoothly. The file must be a single PDF.
                   </p>
-                  <Button variant="outline">
-                    Choose File
-                  </Button>
+                  <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg bg-white">
+                    <BookOpen className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-600 mb-3">Upload a PDF file</p>
+                    <Button variant="outline" size="sm">
+                      Upload a different file
+                    </Button>
+                  </div>
                 </div>
               </div>
               
@@ -2652,33 +2655,142 @@ export default function EditBook() {
               <div className="bg-green-50 rounded-lg border border-green-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Print Options</h3>
                 <div className="space-y-4">
+                  <p className="text-sm text-gray-600">
+                    Choose the options for your book. Tell us more about the book content settings so we get your book published.
+                  </p>
                   <div className="space-y-3">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="bleedSettings" />
-                      <Label htmlFor="bleedSettings" className="text-sm font-medium">This book has bleed settings</Label>
+                    <div className="flex items-start space-x-3">
+                      <Checkbox id="bleedSettings" className="mt-1" />
+                      <div>
+                        <Label htmlFor="bleedSettings" className="text-sm font-medium">Bleed Settings</Label>
+                        <p className="text-xs text-gray-500">Check this box if your interior has images or text that print to the edge of the page.</p>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="largeBook" />
-                      <Label htmlFor="largeBook" className="text-sm font-medium">This is a large book (over 828 pages)</Label>
+                    <div className="flex items-start space-x-3">
+                      <Checkbox id="paperbackCover" className="mt-1" />
+                      <div>
+                        <Label htmlFor="paperbackCover" className="text-sm font-medium">Paperback Cover Finish</Label>
+                        <p className="text-xs text-gray-500">Check this box if you want a matte finish. Otherwise, your cover will have a glossy finish.</p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Print Length Section */}
-              <div className="bg-purple-50 rounded-lg border border-purple-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Print Length</h3>
-                <div className="space-y-2">
-                  <Input
-                    id="printLengthTemp"
-                    type="number"
-                    min="24"
-                    placeholder="100"
-                    defaultValue="100"
-                  />
-                  <p className="text-sm text-gray-500">
-                    Minimum 24 pages required for paperback printing
+              {/* Launch Preview Section */}
+              <div className="bg-orange-50 rounded-lg border border-orange-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Launch Preview</h3>
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600">
+                    Preview and approve your book before publishing.
                   </p>
+                  <div className="bg-blue-100 border border-blue-200 rounded-md p-4 flex items-start space-x-3">
+                    <div className="flex-shrink-0">
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center bg-blue-500">
+                        <span className="text-white text-xs font-bold">i</span>
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-blue-800">
+                        <strong>Download</strong> the Zine & Maker erez Google Analytics or G2 pdf* uploaded
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Book Cover Section */}
+              <div className="bg-purple-50 rounded-lg border border-purple-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Book Cover</h3>
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600">
+                    Create a cover using Cover Creator or upload a PDF cover. Cover Creator is the easy option, 
+                    which takes care of technical requirements and creates cover files for you.
+                  </p>
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="coverCreator"
+                        name="coverOption"
+                        defaultChecked
+                        className="w-4 h-4 text-[#38b6ff] border-gray-300 focus:ring-[#38b6ff]"
+                      />
+                      <Label htmlFor="coverCreator" className="text-sm font-medium">Upload a cover you already have (PDF only)</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="uploadCover"
+                        name="coverOption"
+                        className="w-4 h-4 text-[#38b6ff] border-gray-300 focus:ring-[#38b6ff]"
+                      />
+                      <Label htmlFor="uploadCover" className="text-sm font-medium">Cover Creator (recommended)</Label>
+                    </div>
+                  </div>
+                  <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg bg-white">
+                    <BookOpen className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-600 mb-3">Upload a PDF file</p>
+                    <Button variant="outline" size="sm">
+                      Cover uploaded successfully!
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* AI-Generated Content Section */}
+              <div className="bg-red-50 rounded-lg border border-red-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">AI-Generated Content</h3>
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600">
+                    Guidance for AI-based content: We prohibit content that violates our content policies. However, we allow books that 
+                    have been authored or co-authored by humans and include or incorporate AI-generated text, imagery, and/or translations if you abide by our guidelines.
+                  </p>
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="aiContentYes"
+                        name="aiContent"
+                        className="w-4 h-4 text-[#38b6ff] border-gray-300 focus:ring-[#38b6ff]"
+                      />
+                      <Label htmlFor="aiContentYes" className="text-sm font-medium">Yes</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="aiContentNo"
+                        name="aiContent"
+                        defaultChecked
+                        className="w-4 h-4 text-[#38b6ff] border-gray-300 focus:ring-[#38b6ff]"
+                      />
+                      <Label htmlFor="aiContentNo" className="text-sm font-medium">No</Label>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Description</Label>
+                    <textarea
+                      className="w-full p-3 border border-gray-300 rounded-md text-sm"
+                      rows={3}
+                      placeholder="Provide details about the AI-generated content in your book..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Book Preview Section */}
+              <div className="bg-indigo-50 rounded-lg border border-indigo-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Book Preview</h3>
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600">
+                    Preview your book to see how it will look when published.
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    className="bg-yellow-400 hover:bg-yellow-500 text-black border-yellow-400"
+                  >
+                    Launch Previewer
+                  </Button>
                 </div>
               </div>
             </CardContent>
