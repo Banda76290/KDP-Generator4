@@ -384,82 +384,95 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
         <Label className="text-sm font-medium">Placement</Label>
         <div className="bg-gray-50 rounded border p-4 h-fit">
           <div className="grid grid-cols-1 gap-3 max-h-80 overflow-y-auto">
-            {/* Display leaf categories for current path + already selected categories */}
+            {/* Display leaf categories for current path + this instance's selected category */}
             {(() => {
               const currentPathCategories = getLeafCategoriesForCurrentPath();
-              const selectedCategoryObjects = tempUISelections.map(path => 
-                marketplaceCategories.find(cat => cat.categoryPath === path)
-              ).filter(Boolean);
               
-              // Combine current path categories with selected ones (remove duplicates)
+              // Find this instance's category in the tempUISelections
+              const instanceIndex = instanceId ? parseInt(instanceId.split('-')[1]) : 0;
+              const thisInstanceCategory = tempUISelections[instanceIndex];
+              
+              // Start with current path categories
               const allCategories = [...currentPathCategories];
-              selectedCategoryObjects.forEach(selected => {
-                if (!allCategories.find(cat => cat.categoryPath === selected.categoryPath)) {
-                  allCategories.push(selected);
+              
+              // If this instance has a selected category that's not in current path, add it
+              if (thisInstanceCategory) {
+                const selectedCategoryObject = marketplaceCategories.find(cat => cat.categoryPath === thisInstanceCategory);
+                if (selectedCategoryObject && !allCategories.find(cat => cat.categoryPath === selectedCategoryObject.categoryPath)) {
+                  allCategories.push(selectedCategoryObject);
                 }
-              });
+              }
               
               return allCategories;
-            })().map((category) => (
-              <div key={category.id} className="flex items-start space-x-2">
-                <Checkbox
-                  id={`leaf-category-${category.id}`}
-                  checked={tempUISelections.includes(category.categoryPath)}
-                  onCheckedChange={(checked) => {
+            })().map((category) => {
+              // Find this instance's category in the tempUISelections
+              const instanceIndex = instanceId ? parseInt(instanceId.split('-')[1]) : 0;
+              const thisInstanceCategory = tempUISelections[instanceIndex];
+              
+              return (
+                <div key={category.id} className="flex items-start space-x-2">
+                  <Checkbox
+                    id={`leaf-category-${category.id}`}
+                    checked={thisInstanceCategory === category.categoryPath}
+                    onCheckedChange={(checked) => {
                     console.log('Placement checkbox clicked:', { checked, categoryPath: category.categoryPath, tempUISelections });
                     
+                    const instanceIndex = instanceId ? parseInt(instanceId.split('-')[1]) : 0;
+                    
                     if (checked) {
-                      // Add to temporary UI selections (no validation yet)
-                      if (tempUISelections.length < 3) {
-                        setTempUISelections([...tempUISelections, category.categoryPath]);
-                        console.log('Added to temp selections:', category.categoryPath);
+                      // Set this category for this specific instance
+                      const newSelections = [...tempUISelections];
+                      newSelections[instanceIndex] = category.categoryPath;
+                      setTempUISelections(newSelections);
+                      console.log('Added to temp selections:', category.categoryPath);
+                      
+                      // Populate the navigation dropdowns to show the path to this category
+                      const categoryData = marketplaceCategories.find(cat => cat.categoryPath === category.categoryPath);
+                      console.log('Found category data:', categoryData);
+                      
+                      if (categoryData) {
+                        // Mark as manual navigation to prevent sync conflicts
+                        setIsManualNavigation(true);
                         
-                        // Populate the navigation dropdowns to show the path to this category
-                        const categoryData = marketplaceCategories.find(cat => cat.categoryPath === category.categoryPath);
-                        console.log('Found category data:', categoryData);
-                        
-                        if (categoryData) {
-                          // Mark as manual navigation to prevent sync conflicts
-                          setIsManualNavigation(true);
+                        // Reconstruct the navigation hierarchy to show the breadcrumb path
+                        setTimeout(() => {
+                          console.log('Reconstructing navigation for level:', categoryData.level);
                           
-                          // Reconstruct the navigation hierarchy to show the breadcrumb path
-                          setTimeout(() => {
-                            console.log('Reconstructing navigation for level:', categoryData.level);
-                            
-                            // Build the full hierarchy path from the leaf category back to root
-                            const pathParts = categoryData.categoryPath.split(' > ');
-                            console.log('Category path parts:', pathParts);
-                            
-                            // For level 2+ categories, set level 1 (should be second segment)
-                            if (pathParts.length >= 2) {
-                              const level1Path = pathParts.slice(0, 2).join(' > ');
-                              console.log('Setting level 1:', level1Path);
-                              setSelectedLevel1(level1Path);
-                            }
-                            
-                            // For level 3+ categories, set level 2 (should be first 3 segments)
-                            if (pathParts.length >= 3) {
-                              const level2Path = pathParts.slice(0, 3).join(' > ');
-                              console.log('Setting level 2:', level2Path);
-                              setSelectedLevel2(level2Path);
-                            }
-                            
-                            // For level 4+ categories, set level 3 (should be first 4 segments)
-                            if (pathParts.length >= 4) {
-                              const level3Path = pathParts.slice(0, 4).join(' > ');
-                              console.log('Setting level 3:', level3Path);
-                              setSelectedLevel3(level3Path);
-                            }
-                            
-                            // Reset manual navigation flag after a longer delay to prevent conflicts
-                            setTimeout(() => setIsManualNavigation(false), 500);
-                          }, 50);
-                        }
+                          // Build the full hierarchy path from the leaf category back to root
+                          const pathParts = categoryData.categoryPath.split(' > ');
+                          console.log('Category path parts:', pathParts);
+                          
+                          // For level 2+ categories, set level 1 (should be second segment)
+                          if (pathParts.length >= 2) {
+                            const level1Path = pathParts.slice(0, 2).join(' > ');
+                            console.log('Setting level 1:', level1Path);
+                            setSelectedLevel1(level1Path);
+                          }
+                          
+                          // For level 3+ categories, set level 2 (should be first 3 segments)
+                          if (pathParts.length >= 3) {
+                            const level2Path = pathParts.slice(0, 3).join(' > ');
+                            console.log('Setting level 2:', level2Path);
+                            setSelectedLevel2(level2Path);
+                          }
+                          
+                          // For level 4+ categories, set level 3 (should be first 4 segments)
+                          if (pathParts.length >= 4) {
+                            const level3Path = pathParts.slice(0, 4).join(' > ');
+                            console.log('Setting level 3:', level3Path);
+                            setSelectedLevel3(level3Path);
+                          }
+                          
+                          // Reset manual navigation flag after a longer delay to prevent conflicts
+                          setTimeout(() => setIsManualNavigation(false), 500);
+                        }, 50);
                       }
                     } else {
-                      // Handle unchecking - remove from temporary selections
+                      // Handle unchecking - remove from this specific instance
                       console.log('Unchecking category from temp selections:', category.categoryPath);
-                      setTempUISelections(tempUISelections.filter(cat => cat !== category.categoryPath));
+                      const newSelections = [...tempUISelections];
+                      newSelections[instanceIndex] = undefined;
+                      setTempUISelections(newSelections.filter(Boolean));
                     }
                   }}
                   className="mt-0.5"
@@ -476,7 +489,8 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
                   </div>
                 </Label>
               </div>
-            ))}
+              );
+            })}
             
             {/* Show message if no leaf categories available */}
             {getLeafCategoriesForCurrentPath().length === 0 && (
