@@ -1767,7 +1767,7 @@ export default function EditBook() {
                       {form.watch("isLowContentBook") && (
                         <div className="bg-blue-50 border border-blue-200 rounded-md p-4 flex items-start space-x-3">
                           <div className="flex-shrink-0">
-                            <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                            <div className="w-5 h-5 rounded-full flex items-center justify-center bg-[#ff9500]">
                               <span className="text-white text-xs font-bold">i</span>
                             </div>
                           </div>
