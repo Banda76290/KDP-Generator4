@@ -170,7 +170,7 @@ export default function CreateBook() {
 
   // Function to handle author selection from dropdown
   const handleAuthorSelection = (authorId: string) => {
-    if (authorId && authorId !== "none") {
+    if (authorId) {
       const selectedAuthor = authors.find(author => author.id === authorId);
       if (selectedAuthor) {
         // Populate form fields with selected author data
@@ -181,14 +181,6 @@ export default function CreateBook() {
         form.setValue("authorSuffix", selectedAuthor.suffix || "");
         setSelectedAuthorId(authorId);
       }
-    } else {
-      // Clear author fields when no author selected
-      form.setValue("authorPrefix", "");
-      form.setValue("authorFirstName", "");
-      form.setValue("authorMiddleName", "");
-      form.setValue("authorLastName", "");
-      form.setValue("authorSuffix", "");
-      setSelectedAuthorId("");
     }
   };
 
@@ -388,7 +380,6 @@ export default function CreateBook() {
                                 <SelectValue placeholder="Choisir un auteur..." />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="none">Aucun auteur sélectionné</SelectItem>
                                 {authors.map((author) => (
                                   <SelectItem key={author.id} value={author.id}>
                                     {author.fullName}
@@ -406,60 +397,7 @@ export default function CreateBook() {
                           </div>
                         </div>
 
-                        {selectedAuthorId && (
-                          <div className="mt-4">
-                            <Label className="font-medium text-[14px]">Détails de l'auteur (depuis l'auteur sélectionné)</Label>
-                            <div className="grid grid-cols-5 gap-2 mt-2">
-                              <div>
-                                <Label>Préfixe</Label>
-                                <Input
-                                  {...form.register("authorPrefix")}
-                                  placeholder="Dr."
-                                  className="mt-1 bg-gray-50"
-                                  readOnly
-                                />
-                              </div>
-                              <div>
-                                <Label>Prénom</Label>
-                                <Input
-                                  {...form.register("authorFirstName")}
-                                  placeholder="Sébastien"
-                                  className="mt-1 bg-gray-50"
-                                  readOnly
-                                />
-                              </div>
-                              <div>
-                                <Label>Deuxième Prénom</Label>
-                                <Input
-                                  {...form.register("authorMiddleName")}
-                                  className="mt-1 bg-gray-50"
-                                  readOnly
-                                />
-                              </div>
-                              <div>
-                                <Label>Nom</Label>
-                                <Input
-                                  {...form.register("authorLastName")}
-                                  placeholder="JULLIARD-BESSON"
-                                  className="mt-1 bg-gray-50"
-                                  readOnly
-                                />
-                              </div>
-                              <div>
-                                <Label>Suffixe</Label>
-                                <Input
-                                  {...form.register("authorSuffix")}
-                                  placeholder="PhD"
-                                  className="mt-1 bg-gray-50"
-                                  readOnly
-                                />
-                              </div>
-                            </div>
-                            <p className="text-sm text-gray-600 mt-1">
-                              Les détails de l'auteur sont remplis depuis le profil de l'auteur sélectionné.
-                            </p>
-                          </div>
-                        )}
+
 
 
                       </CardContent>

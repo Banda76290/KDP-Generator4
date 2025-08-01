@@ -1412,7 +1412,7 @@ export default function EditBook() {
 
   // Function to handle author selection from dropdown
   const handleAuthorSelection = (authorId: string) => {
-    if (authorId && authorId !== "none") {
+    if (authorId) {
       const selectedAuthor = authors.find(author => author.id === authorId);
       if (selectedAuthor) {
         // Populate form fields with selected author data
@@ -1423,14 +1423,6 @@ export default function EditBook() {
         form.setValue("authorSuffix", selectedAuthor.suffix || "");
         setSelectedAuthorId(authorId);
       }
-    } else {
-      // Clear author fields when no author selected
-      form.setValue("authorPrefix", "");
-      form.setValue("authorFirstName", "");
-      form.setValue("authorMiddleName", "");
-      form.setValue("authorLastName", "");
-      form.setValue("authorSuffix", "");
-      setSelectedAuthorId("");
     }
   };
 
@@ -2378,7 +2370,6 @@ export default function EditBook() {
                             <SelectValue placeholder="Choose an author..." />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="none">No author selected</SelectItem>
                             {authors.map((author) => (
                               <SelectItem key={author.id} value={author.id}>
                                 {author.fullName}
@@ -2400,46 +2391,7 @@ export default function EditBook() {
                       </div>
                     </div>
 
-                    {selectedAuthorId && (
-                      <div>
-                        <Label className="font-medium text-[14px]">Author Details (from selected author)</Label>
-                        <div className="grid grid-cols-5 gap-3 mt-2">
-                          <Input
-                            placeholder="Prefix"
-                            {...form.register("authorPrefix")}
-                            readOnly
-                            className="bg-gray-50"
-                          />
-                          <Input
-                            placeholder="First name"
-                            {...form.register("authorFirstName", { required: "First name is required" })}
-                            readOnly
-                            className="bg-gray-50"
-                          />
-                          <Input
-                            placeholder="Middle name"
-                            {...form.register("authorMiddleName")}
-                            readOnly
-                            className="bg-gray-50"
-                          />
-                          <Input
-                            placeholder="Last name"
-                            {...form.register("authorLastName", { required: "Last name is required" })}
-                            readOnly
-                            className="bg-gray-50"
-                          />
-                          <Input
-                            placeholder="Suffix"
-                            {...form.register("authorSuffix")}
-                            readOnly
-                            className="bg-gray-50"
-                          />
-                        </div>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Author details are populated from the selected author profile.
-                        </p>
-                      </div>
-                    )}
+
 
 
                   </div>
