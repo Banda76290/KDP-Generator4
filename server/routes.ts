@@ -1123,8 +1123,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Return last N logs, most recent first
       const recentLogs = logs.slice(-limitNum).reverse();
       
-      systemLog(`Logs récupérés: ${recentLogs.length} entrées`, 'info', 'API');
-      
       res.json({
         logs: recentLogs,
         total: logs.length,
