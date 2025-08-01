@@ -1746,29 +1746,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const timestamp = new Date().toISOString();
     
     try {
+      console.log(`[${timestamp}] ⚠️ [RESET] ========================================`);
       console.log(`[${timestamp}] ⚠️ [RESET] DÉBUT DU RESET COMPLET DE LA BASE DE DONNÉES`);
+      console.log(`[${timestamp}] ⚠️ [RESET] ========================================`);
       console.log(`[${timestamp}] 👤 [RESET] Demande initiée par l'utilisateur: ${req.user?.email || 'Inconnu'}`);
-      console.log(`[${timestamp}] 🔥 [RESET] ATTENTION: Toutes les catégories vont être supprimées`);
+      console.log(`[${timestamp}] 🌐 [RESET] IP: ${req.ip}, User-Agent: ${req.get('User-Agent')?.substring(0, 50)}...`);
+      console.log(`[${timestamp}] 🔥 [RESET] ATTENTION: Toutes les catégories vont être supprimées et recréées`);
+      console.log(`[${timestamp}] 📊 [RESET] Heure de début: ${new Date(startTime).toLocaleString('fr-FR')}`);
+      
+      // Vérifier l'état avant le reset
+      const { db } = await import('./db.js');
+      const { marketplaceCategories } = await import('@shared/schema');
+      const preResetCount = await db.select().from(marketplaceCategories);
+      console.log(`[${timestamp}] 📈 [RESET] État pré-reset: ${preResetCount.length} catégories en base`);
+      
       console.log(`[${timestamp}] 🔍 [RESET] Lancement de forceSeedDatabase()...`);
+      console.log(`[${timestamp}] ⚡ [RESET] Début de l'opération de force seeding...`);
       
       await forceSeedDatabase();
       
+      // Vérifier l'état après le reset
+      const postResetCount = await db.select().from(marketplaceCategories);
+      console.log(`[${timestamp}] 📈 [RESET] État post-reset: ${postResetCount.length} catégories en base`);
+      
       const duration = Date.now() - startTime;
-      console.log(`[${timestamp}] ✅ [RESET] Reset et re-synchronisation terminés avec succès en ${duration}ms`);
-      console.log(`[${timestamp}] 📊 [RESET] Toutes les données ont été remplacées, retour de la réponse positive`);
+      console.log(`[${timestamp}] ✅ [RESET] Reset et re-synchronisation terminés avec succès`);
+      console.log(`[${timestamp}] ⏱️ [RESET] Durée totale: ${duration}ms (${(duration/1000).toFixed(2)}s)`);
+      console.log(`[${timestamp}] 📊 [RESET] Résultat: ${preResetCount.length} → ${postResetCount.length} catégories`);
+      console.log(`[${timestamp}] 🎯 [RESET] Statut: ${postResetCount.length === 249 ? 'SUCCÈS COMPLET' : 'PROBLÈME DÉTECTÉ'}`);
+      console.log(`[${timestamp}] ✅ [RESET] Retour de la réponse positive au client`);
       
       res.json({ 
         message: 'Database reset and re-seeding completed successfully',
         success: true,
         duration: `${duration}ms`,
-        timestamp: timestamp
+        timestamp: timestamp,
+        categoriesCount: postResetCount.length,
+        expectedCount: 249,
+        isComplete: postResetCount.length === 249
       });
     } catch (error) {
       const duration = Date.now() - startTime;
-      console.error(`[${timestamp}] ❌ [RESET] Erreur critique lors du reset:`, error);
-      console.error(`[${timestamp}] 🔍 [RESET] Stack trace:`, error instanceof Error ? error.stack : 'Non disponible');
+      console.error(`[${timestamp}] ❌ [RESET] ========================================`);
+      console.error(`[${timestamp}] ❌ [RESET] ERREUR CRITIQUE LORS DU RESET`);
+      console.error(`[${timestamp}] ❌ [RESET] ========================================`);
+      console.error(`[${timestamp}] 💥 [RESET] Type d'erreur: ${error instanceof Error ? error.constructor.name : typeof error}`);
+      console.error(`[${timestamp}] 💬 [RESET] Message: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(`[${timestamp}] 📍 [RESET] Stack trace:`, error instanceof Error ? error.stack : 'Non disponible');
       console.error(`[${timestamp}] ⏱️ [RESET] Échec après ${duration}ms`);
-      console.error(`[${timestamp}] 🚨 [RESET] ÉTAT DE LA BASE INCERTAIN - VÉRIFICATION REQUISE`);
+      console.error(`[${timestamp}] 🚨 [RESET] ÉTAT DE LA BASE INCERTAIN - VÉRIFICATION MANUELLE REQUISE`);
+      
+      // Vérifier l'état de la base en cas d'erreur
+      try {
+        const { db } = await import('./db.js');
+        const { marketplaceCategories } = await import('@shared/schema');
+        const errorStateCount = await db.select().from(marketplaceCategories);
+        console.error(`[${timestamp}] 📊 [RESET] État de la base après erreur: ${errorStateCount.length} catégories`);
+      } catch (checkError) {
+        console.error(`[${timestamp}] 🔥 [RESET] Impossible de vérifier l'état de la base:`, checkError);
+      }
+      
+      console.error(`[${timestamp}] ❌ [RESET] Envoi de la réponse d'erreur au client`);
       
       res.status(500).json({ 
         message: "Failed to reset database",

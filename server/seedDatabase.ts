@@ -93,11 +93,30 @@ export async function forceSeedDatabase() {
     console.log(`[${timestamp}] 🔥 [FORCE-SEED] DÉBUT DU FORCE SEEDING (suppression complète)`);
     console.log(`[${timestamp}] ⚠️ [FORCE-SEED] ATTENTION: Toutes les catégories vont être supprimées`);
     
+    // Count existing categories first
+    const existingCount = await db.select().from(marketplaceCategories);
+    console.log(`[${timestamp}] 📊 [FORCE-SEED] Catégories existantes trouvées: ${existingCount.length}`);
+    
+    if (existingCount.length > 0) {
+      console.log(`[${timestamp}] 🔍 [FORCE-SEED] Échantillon de catégories existantes:`);
+      existingCount.slice(0, 3).forEach((cat, i) => {
+        console.log(`[${timestamp}] 📝 [FORCE-SEED] ${i+1}. ID: ${cat.id}, Path: ${cat.categoryPath}, Level: ${cat.level}`);
+      });
+    }
+
     // Clear existing categories
-    console.log(`[${timestamp}] 🗑️ [FORCE-SEED] Suppression de toutes les catégories existantes...`);
+    console.log(`[${timestamp}] 🗑️ [FORCE-SEED] Début de la suppression de ${existingCount.length} catégories existantes...`);
     const deleteResult = await db.delete(marketplaceCategories);
-    console.log(`[${timestamp}] ✅ [FORCE-SEED] Suppression terminée`);
-    console.log(`[${timestamp}] 📊 [FORCE-SEED] Toutes les données de catégories ont été effacées`);
+    console.log(`[${timestamp}] ✅ [FORCE-SEED] Suppression terminée - Résultat: ${JSON.stringify(deleteResult)}`);
+    
+    // Verify deletion
+    const verifyEmpty = await db.select().from(marketplaceCategories);
+    console.log(`[${timestamp}] 🔍 [FORCE-SEED] Vérification post-suppression: ${verifyEmpty.length} catégories restantes`);
+    if (verifyEmpty.length > 0) {
+      console.error(`[${timestamp}] ⚠️ [FORCE-SEED] PROBLÈME: ${verifyEmpty.length} catégories n'ont pas été supprimées!`);
+    } else {
+      console.log(`[${timestamp}] ✅ [FORCE-SEED] Table complètement vidée`);
+    }
     
     // Re-seed without checking for existing data
     console.log(`[${timestamp}] 🔄 [FORCE-SEED] Lancement du seeding complet...`);
@@ -122,22 +141,51 @@ export async function forceSeedDatabase() {
     for (let i = 0; i < statements.length; i++) {
       const stmt = statements[i].trim();
       if (stmt) {
+        console.log(`[${timestamp}] 🔄 [FORCE-SEED] Exécution instruction ${i + 1}/${statements.length}: ${stmt.substring(0, 150)}...`);
+        
         try {
-          await db.execute(sql.raw(stmt));
+          const result = await db.execute(sql.raw(stmt));
+          console.log(`[${timestamp}] ✅ [FORCE-SEED] Instruction ${i + 1} exécutée - Résultat: ${JSON.stringify(result)}`);
           
           if (stmt.startsWith('DELETE')) {
             deleteCount++;
-            if (deleteCount === 1) console.log(`[${timestamp}] 🗑️ [FORCE-SEED] Suppression des données existantes...`);
+            console.log(`[${timestamp}] 🗑️ [FORCE-SEED] Suppression ${deleteCount} effectuée`);
           } else if (stmt.startsWith('INSERT')) {
             insertCount++;
-            if (insertCount === 1) console.log(`[${timestamp}] 📝 [FORCE-SEED] Début des insertions...`);
-            if (insertCount % 50 === 0) console.log(`[${timestamp}] 📊 [FORCE-SEED] ${insertCount} catégories insérées...`);
+            console.log(`[${timestamp}] 📝 [FORCE-SEED] Insertion ${insertCount} effectuée`);
+            
+            // Vérifier les 10 premières insertions en détail
+            if (insertCount <= 10) {
+              const match = stmt.match(/VALUES\s*\('([^']+)',\s*'([^']+)',\s*'([^']+)',\s*'([^']+)',\s*(\d+)/);
+              if (match) {
+                console.log(`[${timestamp}] 🔍 [FORCE-SEED] Détails insertion ${insertCount}: ID=${match[1]}, Marketplace=${match[2]}, Path=${match[3]}, Parent=${match[4]}, Level=${match[5]}`);
+              }
+            }
+            
+            // Logs de progression
+            if (insertCount % 25 === 0) console.log(`[${timestamp}] 📊 [FORCE-SEED] Progression: ${insertCount}/${statements.length} catégories insérées (${Math.round((insertCount/statements.length)*100)}%)`);
           }
           
-          if (i === statements.length - 1) console.log(`[${timestamp}] 🏁 [FORCE-SEED] Dernière instruction exécutée`);
+          // Vérifier l'état de la base après chaque insertion des 5 premières
+          if (insertCount <= 5) {
+            const currentCount = await db.select().from(marketplaceCategories);
+            console.log(`[${timestamp}] 📈 [FORCE-SEED] État actuel de la base: ${currentCount.length} catégories total`);
+          }
+          
+          if (i === statements.length - 1) {
+            console.log(`[${timestamp}] 🏁 [FORCE-SEED] Dernière instruction exécutée avec succès`);
+          }
         } catch (error) {
-          console.error(`[${timestamp}] ❌ [FORCE-SEED] Erreur instruction ${i + 1}: ${stmt.substring(0, 100)}...`);
-          console.error(`[${timestamp}] 🔍 [FORCE-SEED] Erreur détaillée:`, error);
+          console.error(`[${timestamp}] ❌ [FORCE-SEED] ERREUR instruction ${i + 1}/${statements.length}`);
+          console.error(`[${timestamp}] 📄 [FORCE-SEED] Instruction échouée: ${stmt}`);
+          console.error(`[${timestamp}] 🔍 [FORCE-SEED] Type d'erreur: ${error instanceof Error ? error.constructor.name : typeof error}`);
+          console.error(`[${timestamp}] 💬 [FORCE-SEED] Message d'erreur: ${error instanceof Error ? error.message : String(error)}`);
+          console.error(`[${timestamp}] 📍 [FORCE-SEED] Stack trace:`, error instanceof Error ? error.stack : 'Non disponible');
+          
+          // Vérifier l'état de la base en cas d'erreur
+          const errorCount = await db.select().from(marketplaceCategories);
+          console.error(`[${timestamp}] 📊 [FORCE-SEED] État de la base lors de l'erreur: ${errorCount.length} catégories`);
+          
           throw error;
         }
       }
@@ -145,13 +193,66 @@ export async function forceSeedDatabase() {
     
     console.log(`[${timestamp}] 📈 [FORCE-SEED] Statistiques: ${deleteCount} suppressions, ${insertCount} insertions`);
     
-    // Verify seeding
-    console.log(`[${timestamp}] 🔍 [FORCE-SEED] Vérification du résultat final...`);
+    // Verify seeding with detailed analysis
+    console.log(`[${timestamp}] 🔍 [FORCE-SEED] Début de la vérification complète du résultat...`);
     const categoryCount = await db.select().from(marketplaceCategories);
-    console.log(`[${timestamp}] ✅ [FORCE-SEED] Succès! ${categoryCount.length} catégories marketplace insérées`);
+    console.log(`[${timestamp}] 📊 [FORCE-SEED] Nombre total de catégories insérées: ${categoryCount.length}`);
     
-    if (categoryCount.length !== 249) {
-      console.error(`[${timestamp}] ⚠️ [FORCE-SEED] ATTENTION: ${categoryCount.length} catégories au lieu de 249 attendues`);
+    // Analyser par niveau
+    const levelCounts = await db.execute(sql.raw(`
+      SELECT level, COUNT(*) as count 
+      FROM marketplace_categories 
+      GROUP BY level 
+      ORDER BY level
+    `)) as any[];
+    console.log(`[${timestamp}] 📈 [FORCE-SEED] Répartition par niveau:`);
+    levelCounts.forEach((row: any) => {
+      console.log(`[${timestamp}] 📊 [FORCE-SEED] Niveau ${row.level}: ${row.count} catégories`);
+    });
+    
+    // Analyser par marketplace
+    const marketplaceCounts = await db.execute(sql.raw(`
+      SELECT marketplace, COUNT(*) as count 
+      FROM marketplace_categories 
+      GROUP BY marketplace 
+      ORDER BY marketplace
+    `)) as any[];
+    console.log(`[${timestamp}] 🌍 [FORCE-SEED] Répartition par marketplace:`);
+    marketplaceCounts.forEach((row: any) => {
+      console.log(`[${timestamp}] 📊 [FORCE-SEED] ${row.marketplace}: ${row.count} catégories`);
+    });
+    
+    // Vérifier l'intégrité des données
+    console.log(`[${timestamp}] 🔍 [FORCE-SEED] Vérification de l'intégrité des données...`);
+    
+    // Échantillon des catégories créées
+    const sampleCategories = categoryCount.slice(0, 5);
+    console.log(`[${timestamp}] 📝 [FORCE-SEED] Échantillon des catégories créées:`);
+    sampleCategories.forEach((cat, i) => {
+      console.log(`[${timestamp}] 📄 [FORCE-SEED] ${i+1}. ID: "${cat.id}", Marketplace: "${cat.marketplace}", Path: "${cat.categoryPath}", Level: ${cat.level}, Sélectionnable: ${cat.isSelectable}`);
+    });
+    
+    // Vérifier les niveaux racines critiques
+    const level1Count = categoryCount.filter(c => c.level === 1).length;
+    const level2Count = categoryCount.filter(c => c.level === 2).length;
+    const level3Count = categoryCount.filter(c => c.level === 3).length;
+    
+    console.log(`[${timestamp}] 🌳 [FORCE-SEED] Vérification hiérarchie:`);
+    console.log(`[${timestamp}] 📊 [FORCE-SEED] Niveau 1 (racines): ${level1Count} catégories`);
+    console.log(`[${timestamp}] 📊 [FORCE-SEED] Niveau 2 (sous-catégories): ${level2Count} catégories`);
+    console.log(`[${timestamp}] 📊 [FORCE-SEED] Niveau 3 (branches): ${level3Count} catégories`);
+    
+    // Statut final
+    if (categoryCount.length === 249) {
+      console.log(`[${timestamp}] ✅ [FORCE-SEED] SUCCÈS COMPLET: 249 catégories insérées comme attendu`);
+      if (level1Count > 0 && level2Count > 0 && level3Count > 0) {
+        console.log(`[${timestamp}] ✅ [FORCE-SEED] Hiérarchie complète confirmée avec tous les niveaux racines`);
+      } else {
+        console.log(`[${timestamp}] ⚠️ [FORCE-SEED] ATTENTION: Hiérarchie incomplète détectée`);
+      }
+    } else {
+      console.error(`[${timestamp}] ❌ [FORCE-SEED] PROBLÈME: ${categoryCount.length} catégories au lieu de 249 attendues`);
+      console.error(`[${timestamp}] 🔍 [FORCE-SEED] Différence: ${249 - categoryCount.length} catégories manquantes`);
     }
     
     console.log(`[${timestamp}] ✅ [FORCE-SEED] Force seeding terminé avec succès`);
