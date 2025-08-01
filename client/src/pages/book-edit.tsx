@@ -498,22 +498,38 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
                         // Mark as manual navigation to prevent sync conflicts
                         setIsManualNavigation(true);
                         
-                        // Reconstruct the navigation hierarchy to show the breadcrumb path
+                        // Reconstruct the navigation hierarchy using compatible logic for virtual hierarchy
                         setTimeout(() => {
                           console.log('Reconstructing navigation for level:', categoryData.level);
                           
-                          // Build the full hierarchy path from the leaf category back to root
                           const pathParts = categoryData.categoryPath.split(' > ');
                           console.log('Category path parts:', pathParts);
                           
-                          // Build new levels array dynamically
                           const newLevels = new Array(maxDepth).fill("");
                           
-                          // Fill levels based on path depth
-                          for (let i = 0; i < Math.min(pathParts.length - 1, maxDepth); i++) {
-                            const levelPath = pathParts.slice(0, i + 2).join(' > ');
-                            newLevels[i] = levelPath;
-                            console.log(`Setting level ${i + 2}:`, levelPath);
+                          // Check if we're using virtual hierarchy (minLevel >= 4)
+                          const minLevel = Math.min(...marketplaceCategories.map(cat => cat.level));
+                          const isVirtualHierarchy = minLevel >= 4;
+                          
+                          if (isVirtualHierarchy) {
+                            // For virtual hierarchy, start from level 2 (Books > discriminant > ...)
+                            const cleanPath = categoryData.categoryPath.replace(/^Books > /, '').replace(/kindle_ebook > |print_kdp_paperback > /, '');
+                            const cleanSegments = cleanPath.split(' > ');
+                            
+                            // Build progressive paths starting from level 2
+                            for (let i = 0; i < Math.min(cleanSegments.length, maxDepth); i++) {
+                              const discriminant = categoryData.categoryPath.includes('kindle_ebook') ? 'kindle_ebook' : 'print_kdp_paperback';
+                              const levelPath = 'Books > ' + discriminant + ' > ' + cleanSegments.slice(0, i + 1).join(' > ');
+                              newLevels[i] = levelPath;
+                              console.log(`Virtual hierarchy level ${i + 2}:`, levelPath);
+                            }
+                          } else {
+                            // Original logic for normal level-based categories
+                            for (let i = 0; i < Math.min(pathParts.length - 1, maxDepth); i++) {
+                              const levelPath = pathParts.slice(0, i + 2).join(' > ');
+                              newLevels[i] = levelPath;
+                              console.log(`Setting level ${i + 2}:`, levelPath);
+                            }
                           }
                           
                           setSelectedLevels(newLevels);
