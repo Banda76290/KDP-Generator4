@@ -423,6 +423,105 @@ export default function AdminSystem() {
     }
   };
 
+  const handleExportSQL = async () => {
+    try {
+      addLog('📤 Début de l\'export SQL...', 'info');
+      const exportResult = await exportCategories.mutateAsync();
+      
+      if (exportResult.categories && exportResult.categories.length > 0) {
+        // Generate SQL file content
+        const categories = exportResult.categories;
+        let sqlContent = `-- Export SQL des catégories KDP Generator\n`;
+        sqlContent += `-- Généré le ${new Date().toLocaleString('fr-FR')}\n`;
+        sqlContent += `-- ${categories.length} catégories exportées\n\n`;
+        
+        sqlContent += `-- Vider et recréer la table\n`;
+        sqlContent += `TRUNCATE TABLE marketplace_categories CASCADE;\n\n`;
+        
+        categories.forEach(cat => {
+          const values = [
+            `'${cat.marketplace.replace(/'/g, "''")}'`,
+            `'${cat.categoryPath.replace(/'/g, "''")}'`,
+            cat.parentPath ? `'${cat.parentPath.replace(/'/g, "''")}'` : 'NULL',
+            cat.level,
+            `'${cat.displayName.replace(/'/g, "''")}'`,
+            cat.isSelectable,
+            cat.sortOrder,
+            cat.isActive,
+            'NOW()',
+            'NOW()'
+          ];
+          
+          sqlContent += `INSERT INTO marketplace_categories (marketplace, category_path, parent_path, level, display_name, is_selectable, sort_order, is_active, created_at, updated_at) VALUES (${values.join(', ')});\n`;
+        });
+        
+        // Download file
+        const blob = new Blob([sqlContent], { type: 'text/sql' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `kdp-categories-export-${new Date().toISOString().split('T')[0]}.sql`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        addLog(`✅ Fichier SQL téléchargé: ${categories.length} catégories`, 'success');
+        toast({
+          title: "Export SQL réussi",
+          description: `${categories.length} catégories exportées vers un fichier SQL.`,
+        });
+      }
+    } catch (error: any) {
+      addLog(`❌ Erreur lors de l'export SQL: ${error.message}`, 'error');
+      toast({
+        title: "Erreur d'export SQL",
+        description: error.message || "Impossible d'exporter en SQL.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleExportJSON = async () => {
+    try {
+      addLog('📤 Début de l\'export JSON...', 'info');
+      const exportResult = await exportCategories.mutateAsync();
+      
+      if (exportResult.categories && exportResult.categories.length > 0) {
+        const exportData = {
+          timestamp: new Date().toISOString(),
+          version: "1.0",
+          categoriesCount: exportResult.categories.length,
+          categories: exportResult.categories
+        };
+        
+        // Download file
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `kdp-categories-export-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        addLog(`✅ Fichier JSON téléchargé: ${exportResult.categories.length} catégories`, 'success');
+        toast({
+          title: "Export JSON réussi",
+          description: `${exportResult.categories.length} catégories exportées vers un fichier JSON.`,
+        });
+      }
+    } catch (error: any) {
+      addLog(`❌ Erreur lors de l'export JSON: ${error.message}`, 'error');
+      toast({
+        title: "Erreur d'export JSON",
+        description: error.message || "Impossible d'exporter en JSON.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Initialize with welcome log
   useEffect(() => {
     if (isAdmin && logs.length === 0) {
@@ -648,10 +747,16 @@ export default function AdminSystem() {
           <CardContent className="space-y-4">
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
               <h4 className="font-medium text-orange-900 mb-2">⚠️ Attention</h4>
-              <p className="text-sm text-orange-800">
+              <p className="text-sm text-orange-800 mb-3">
                 Cette fonctionnalité permet de pousser les catégories de cet environnement de développement 
                 vers la base de données de production. Cette action remplacera toutes les catégories existantes en production.
               </p>
+              <div className="bg-orange-100 border border-orange-300 rounded p-2">
+                <p className="text-xs text-orange-700">
+                  <strong>Alternative :</strong> Si la synchronisation directe échoue, vous pouvez exporter un fichier SQL 
+                  et l'importer manuellement sur votre serveur de production.
+                </p>
+              </div>
             </div>
 
             <div className="space-y-4">
@@ -691,7 +796,7 @@ export default function AdminSystem() {
                 </div>
               </div>
 
-              <div className="pt-4 border-t">
+              <div className="pt-4 border-t space-y-3">
                 <Button 
                   onClick={handleSyncToProduction}
                   disabled={seedingStatus !== 'idle' || !productionUrl.trim()}
@@ -709,10 +814,31 @@ export default function AdminSystem() {
                     </>
                   )}
                 </Button>
+
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleExportSQL}
+                    disabled={seedingStatus !== 'idle'}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <Database className="h-4 w-4 mr-2" />
+                    Exporter SQL
+                  </Button>
+                  <Button 
+                    onClick={handleExportJSON}
+                    disabled={seedingStatus !== 'idle'}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Exporter JSON
+                  </Button>
+                </div>
                 
                 {!productionUrl.trim() && (
                   <p className="text-xs text-muted-foreground mt-2 text-center">
-                    Veuillez saisir l'URL de production pour activer la synchronisation
+                    Veuillez saisir l'URL de production pour la synchronisation directe
                   </p>
                 )}
               </div>

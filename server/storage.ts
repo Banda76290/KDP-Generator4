@@ -1412,6 +1412,9 @@ export class DatabaseStorage implements IStorage {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json',
+          'User-Agent': 'KDP-Generator-DevSync/1.0'
         },
         body: JSON.stringify({ categories })
       });
@@ -1419,9 +1422,21 @@ export class DatabaseStorage implements IStorage {
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`[SYNC] Production API returned ${response.status}: ${errorText}`);
+        
+        // Provide specific error messages for common issues
+        let errorMessage = `Production API error (${response.status}): ${errorText}`;
+        
+        if (response.status === 403) {
+          errorMessage = `Accès refusé par la production. Vérifiez que:\n- L'URL est correcte\n- Le serveur de production accepte les requêtes cross-origin\n- Erreur: ${errorText}`;
+        } else if (response.status === 404) {
+          errorMessage = `Endpoint non trouvé. Vérifiez que l'URL de production est correcte et que l'API /api/admin/categories/migrate existe.`;
+        } else if (response.status === 500) {
+          errorMessage = `Erreur serveur sur la production. Vérifiez les logs du serveur de production.`;
+        }
+        
         return {
           success: false,
-          error: `Production API error (${response.status}): ${errorText}`
+          error: errorMessage
         };
       }
 
