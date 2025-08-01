@@ -752,72 +752,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get marketplace categories with format filter
   app.get('/api/marketplace-categories/:marketplace', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    const timestamp = new Date().toISOString();
-    const requestId = Math.random().toString(36).substring(7);
-    
     try {
       const { marketplace } = req.params;
       const { format } = req.query;
       
-      console.log(`[${timestamp}] 🔍 [API-CATEGORIES-${requestId}] DÉBUT - Demande de catégories`);
-      console.log(`[${timestamp}] 📋 [API-CATEGORIES-${requestId}] Paramètres: marketplace=${marketplace}, format=${format}`);
-      console.log(`[${timestamp}] 👤 [API-CATEGORIES-${requestId}] Utilisateur: ${req.user?.email || 'Inconnu'}`);
-      
       if (!marketplace) {
-        console.log(`[${timestamp}] ❌ [API-CATEGORIES-${requestId}] Erreur: Marketplace manquant`);
         return res.status(400).json({ message: "Marketplace parameter is required" });
       }
 
-      // Vérifier l'état de la base de données avant la requête
-      console.log(`[${timestamp}] 🔍 [API-CATEGORIES-${requestId}] ÉTAPE 1: Vérification de l'état de la base...`);
-      const { db } = await import('./db.js');
-      const { marketplaceCategories } = await import('@shared/schema');
-      const totalCategoriesInDb = await db.select().from(marketplaceCategories);
-      console.log(`[${timestamp}] 📊 [API-CATEGORIES-${requestId}] Total catégories dans la base: ${totalCategoriesInDb.length}`);
-      
-      // Statistiques par marketplace
-      const marketplaceCount = await db.select().from(marketplaceCategories).where(sql`marketplace = ${marketplace}`);
-      console.log(`[${timestamp}] 📊 [API-CATEGORIES-${requestId}] Catégories pour ${marketplace}: ${marketplaceCount.length}`);
-      
-      // Si format spécifié, compter avec format
-      if (format) {
-        const formatCount = await db.select().from(marketplaceCategories)
-          .where(sql`marketplace = ${marketplace} AND category_path LIKE ${`%${format}%`}`);
-        console.log(`[${timestamp}] 📊 [API-CATEGORIES-${requestId}] Catégories ${marketplace} + format ${format}: ${formatCount.length}`);
-      }
-
-      console.log(`[${timestamp}] 🔄 [API-CATEGORIES-${requestId}] ÉTAPE 2: Appel du storage...`);
       const categories = await storage.getMarketplaceCategoriesWithFormat(marketplace, format as string);
-      
-      console.log(`[${timestamp}] 📊 [API-CATEGORIES-${requestId}] ÉTAPE 3: Résultat du storage: ${categories.length} catégories`);
-      
-      if (categories.length === 0) {
-        console.log(`[${timestamp}] ⚠️ [API-CATEGORIES-${requestId}] ATTENTION: Aucune catégorie retournée par le storage!`);
-        console.log(`[${timestamp}] 🔍 [API-CATEGORIES-${requestId}] Debug: Tentative de requête directe...`);
-        
-        const directQuery = await db.select().from(marketplaceCategories)
-          .where(sql`marketplace = ${marketplace}`)
-          .limit(3);
-        
-        console.log(`[${timestamp}] 🔍 [API-CATEGORIES-${requestId}] Requête directe résultat: ${directQuery.length} catégories`);
-        if (directQuery.length > 0) {
-          console.log(`[${timestamp}] 📋 [API-CATEGORIES-${requestId}] Exemple catégorie directe:`);
-          console.log(`[${timestamp}] 📋 [API-CATEGORIES-${requestId}] - ID: ${directQuery[0].id}`);
-          console.log(`[${timestamp}] 📋 [API-CATEGORIES-${requestId}] - Marketplace: ${directQuery[0].marketplace}`);
-          console.log(`[${timestamp}] 📋 [API-CATEGORIES-${requestId}] - Chemin: ${directQuery[0].categoryPath}`);
-        }
-      } else {
-        console.log(`[${timestamp}] ✅ [API-CATEGORIES-${requestId}] Catégories récupérées avec succès`);
-        console.log(`[${timestamp}] 📋 [API-CATEGORIES-${requestId}] Première catégorie: ${categories[0]?.displayName || 'N/A'}`);
-      }
-      
-      console.log(`[${timestamp}] 🚀 [API-CATEGORIES-${requestId}] ÉTAPE 4: Envoi de la réponse...`);
       res.json(categories);
-      console.log(`[${timestamp}] ✅ [API-CATEGORIES-${requestId}] FIN - Réponse envoyée avec ${categories.length} catégories`);
-      
     } catch (error) {
-      console.error(`[${timestamp}] ❌ [API-CATEGORIES-${requestId}] Erreur critique:`, error);
-      console.error(`[${timestamp}] 🔍 [API-CATEGORIES-${requestId}] Stack trace:`, error instanceof Error ? error.stack : 'Non disponible');
+      console.error("Error fetching marketplace categories:", error);
       res.status(500).json({ message: "Failed to fetch marketplace categories" });
     }
   });
@@ -1800,29 +1746,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const timestamp = new Date().toISOString();
     
     try {
+      console.log(`[${timestamp}] ⚠️ [RESET] ========================================`);
       console.log(`[${timestamp}] ⚠️ [RESET] DÉBUT DU RESET COMPLET DE LA BASE DE DONNÉES`);
+      console.log(`[${timestamp}] ⚠️ [RESET] ========================================`);
       console.log(`[${timestamp}] 👤 [RESET] Demande initiée par l'utilisateur: ${req.user?.email || 'Inconnu'}`);
-      console.log(`[${timestamp}] 🔥 [RESET] ATTENTION: Toutes les catégories vont être supprimées`);
+      console.log(`[${timestamp}] 🌐 [RESET] IP: ${req.ip}, User-Agent: ${req.get('User-Agent')?.substring(0, 50)}...`);
+      console.log(`[${timestamp}] 🔥 [RESET] ATTENTION: Toutes les catégories vont être supprimées et recréées`);
+      console.log(`[${timestamp}] 📊 [RESET] Heure de début: ${new Date(startTime).toLocaleString('fr-FR')}`);
+      
+      // Vérifier l'état avant le reset
+      const { db } = await import('./db.js');
+      const { marketplaceCategories } = await import('@shared/schema');
+      const preResetCount = await db.select().from(marketplaceCategories);
+      console.log(`[${timestamp}] 📈 [RESET] État pré-reset: ${preResetCount.length} catégories en base`);
+      
       console.log(`[${timestamp}] 🔍 [RESET] Lancement de forceSeedDatabase()...`);
+      console.log(`[${timestamp}] ⚡ [RESET] Début de l'opération de force seeding...`);
       
       await forceSeedDatabase();
       
+      // Vérifier l'état après le reset
+      const postResetCount = await db.select().from(marketplaceCategories);
+      console.log(`[${timestamp}] 📈 [RESET] État post-reset: ${postResetCount.length} catégories en base`);
+      
       const duration = Date.now() - startTime;
-      console.log(`[${timestamp}] ✅ [RESET] Reset et re-synchronisation terminés avec succès en ${duration}ms`);
-      console.log(`[${timestamp}] 📊 [RESET] Toutes les données ont été remplacées, retour de la réponse positive`);
+      console.log(`[${timestamp}] ✅ [RESET] Reset et re-synchronisation terminés avec succès`);
+      console.log(`[${timestamp}] ⏱️ [RESET] Durée totale: ${duration}ms (${(duration/1000).toFixed(2)}s)`);
+      console.log(`[${timestamp}] 📊 [RESET] Résultat: ${preResetCount.length} → ${postResetCount.length} catégories`);
+      console.log(`[${timestamp}] 🎯 [RESET] Statut: ${postResetCount.length === 249 ? 'SUCCÈS COMPLET' : 'PROBLÈME DÉTECTÉ'}`);
+      console.log(`[${timestamp}] ✅ [RESET] Retour de la réponse positive au client`);
       
       res.json({ 
         message: 'Database reset and re-seeding completed successfully',
         success: true,
         duration: `${duration}ms`,
-        timestamp: timestamp
+        timestamp: timestamp,
+        categoriesCount: postResetCount.length,
+        expectedCount: 249,
+        isComplete: postResetCount.length === 249
       });
     } catch (error) {
       const duration = Date.now() - startTime;
-      console.error(`[${timestamp}] ❌ [RESET] Erreur critique lors du reset:`, error);
-      console.error(`[${timestamp}] 🔍 [RESET] Stack trace:`, error instanceof Error ? error.stack : 'Non disponible');
+      console.error(`[${timestamp}] ❌ [RESET] ========================================`);
+      console.error(`[${timestamp}] ❌ [RESET] ERREUR CRITIQUE LORS DU RESET`);
+      console.error(`[${timestamp}] ❌ [RESET] ========================================`);
+      console.error(`[${timestamp}] 💥 [RESET] Type d'erreur: ${error instanceof Error ? error.constructor.name : typeof error}`);
+      console.error(`[${timestamp}] 💬 [RESET] Message: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(`[${timestamp}] 📍 [RESET] Stack trace:`, error instanceof Error ? error.stack : 'Non disponible');
       console.error(`[${timestamp}] ⏱️ [RESET] Échec après ${duration}ms`);
-      console.error(`[${timestamp}] 🚨 [RESET] ÉTAT DE LA BASE INCERTAIN - VÉRIFICATION REQUISE`);
+      console.error(`[${timestamp}] 🚨 [RESET] ÉTAT DE LA BASE INCERTAIN - VÉRIFICATION MANUELLE REQUISE`);
+      
+      // Vérifier l'état de la base en cas d'erreur
+      try {
+        const { db } = await import('./db.js');
+        const { marketplaceCategories } = await import('@shared/schema');
+        const errorStateCount = await db.select().from(marketplaceCategories);
+        console.error(`[${timestamp}] 📊 [RESET] État de la base après erreur: ${errorStateCount.length} catégories`);
+      } catch (checkError) {
+        console.error(`[${timestamp}] 🔥 [RESET] Impossible de vérifier l'état de la base:`, checkError);
+      }
+      
+      console.error(`[${timestamp}] ❌ [RESET] Envoi de la réponse d'erreur au client`);
       
       res.status(500).json({ 
         message: "Failed to reset database",
