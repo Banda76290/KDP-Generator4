@@ -1131,10 +1131,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMarketplaceCategoriesWithFormat(marketplace: string, format?: string): Promise<MarketplaceCategory[]> {
+    console.log(`[DEBUG] getMarketplaceCategoriesWithFormat called with marketplace: ${marketplace}, format: ${format}`);
+    
     // Map format to discriminant
     const discriminant = format === 'ebook' ? 'kindle_ebook' : 
                         (format === 'paperback' || format === 'hardcover') ? 'print_kdp_paperback' : 
                         null;
+    
+    console.log(`[DEBUG] Discriminant mapped to: ${discriminant}`);
 
     let categories = await db
       .select()
@@ -1145,13 +1149,19 @@ export class DatabaseStorage implements IStorage {
       ))
       .orderBy(marketplaceCategories.level, marketplaceCategories.sortOrder, marketplaceCategories.displayName);
 
+    console.log(`[DEBUG] Total categories found: ${categories.length}`);
+
     // If format is provided, filter categories based on discriminant
     if (discriminant) {
+      console.log(`[DEBUG] Filtering categories with discriminant: ${discriminant}`);
+      
+      const beforeFilter = categories.length;
       categories = categories.filter(cat => {
         // NEVER include the discriminants themselves as selectable categories
         const isDiscriminant = cat.displayName === 'kindle_ebook' || cat.displayName === 'print_kdp_paperback';
         
         if (isDiscriminant) {
+          console.log(`[DEBUG] Excluding discriminant category: ${cat.displayName}`);
           return false; // Exclude discriminants from selectable categories
         }
         
@@ -1159,8 +1169,26 @@ export class DatabaseStorage implements IStorage {
         const belongsToPath = cat.categoryPath.includes(`> ${discriminant} >`) || 
                              cat.categoryPath === `Books > ${discriminant}`;
         
+        if (!belongsToPath) {
+          console.log(`[DEBUG] Category does not belong to format path: ${cat.categoryPath}`);
+        }
+        
         return belongsToPath;
       });
+      
+      console.log(`[DEBUG] Categories after filtering: ${categories.length} (was ${beforeFilter})`);
+      
+      if (categories.length === 0) {
+        console.log(`[DEBUG] No categories found for discriminant ${discriminant}. Sample paths from DB:`);
+        const samplePaths = await db
+          .select({ categoryPath: marketplaceCategories.categoryPath })
+          .from(marketplaceCategories)
+          .where(eq(marketplaceCategories.marketplace, marketplace))
+          .limit(5);
+        console.log(`[DEBUG] Sample category paths:`, samplePaths.map(p => p.categoryPath));
+      }
+    } else {
+      console.log(`[DEBUG] No format specified, returning all categories`);
     }
 
     return categories;
