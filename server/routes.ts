@@ -1614,18 +1614,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Database seeding endpoints (admin only)
   app.post('/api/admin/database/seed', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    const startTime = Date.now();
+    const timestamp = new Date().toISOString();
+    
     try {
+      console.log(`[${timestamp}] 🚀 [SEED] Début de la synchronisation de la base de données`);
+      console.log(`[${timestamp}] 👤 [SEED] Demande initiée par l'utilisateur: ${req.user?.email || 'Inconnu'}`);
+      console.log(`[${timestamp}] 🔍 [SEED] Vérification des catégories existantes...`);
+      
       await seedDatabase();
+      
+      const duration = Date.now() - startTime;
+      console.log(`[${timestamp}] ✅ [SEED] Synchronisation terminée avec succès en ${duration}ms`);
+      console.log(`[${timestamp}] 📊 [SEED] Opération complète, retour de la réponse positive`);
+      
       res.json({ 
         message: 'Database seeding completed successfully',
-        success: true 
+        success: true,
+        duration: `${duration}ms`,
+        timestamp: timestamp
       });
     } catch (error) {
-      console.error("Error seeding database:", error);
+      const duration = Date.now() - startTime;
+      console.error(`[${timestamp}] ❌ [SEED] Erreur lors de la synchronisation:`, error);
+      console.error(`[${timestamp}] 🔍 [SEED] Stack trace:`, error instanceof Error ? error.stack : 'Non disponible');
+      console.error(`[${timestamp}] ⏱️ [SEED] Échec après ${duration}ms`);
+      
       res.status(500).json({ 
         message: "Failed to seed database",
         error: error instanceof Error ? error.message : 'Unknown error',
-        success: false 
+        success: false,
+        duration: `${duration}ms`,
+        timestamp: timestamp
       });
     }
   });
@@ -1703,18 +1723,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post('/api/admin/database/reset', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    const startTime = Date.now();
+    const timestamp = new Date().toISOString();
+    
     try {
+      console.log(`[${timestamp}] ⚠️ [RESET] DÉBUT DU RESET COMPLET DE LA BASE DE DONNÉES`);
+      console.log(`[${timestamp}] 👤 [RESET] Demande initiée par l'utilisateur: ${req.user?.email || 'Inconnu'}`);
+      console.log(`[${timestamp}] 🔥 [RESET] ATTENTION: Toutes les catégories vont être supprimées`);
+      console.log(`[${timestamp}] 🔍 [RESET] Lancement de forceSeedDatabase()...`);
+      
       await forceSeedDatabase();
+      
+      const duration = Date.now() - startTime;
+      console.log(`[${timestamp}] ✅ [RESET] Reset et re-synchronisation terminés avec succès en ${duration}ms`);
+      console.log(`[${timestamp}] 📊 [RESET] Toutes les données ont été remplacées, retour de la réponse positive`);
+      
       res.json({ 
         message: 'Database reset and re-seeding completed successfully',
-        success: true 
+        success: true,
+        duration: `${duration}ms`,
+        timestamp: timestamp
       });
     } catch (error) {
-      console.error("Error resetting database:", error);
+      const duration = Date.now() - startTime;
+      console.error(`[${timestamp}] ❌ [RESET] Erreur critique lors du reset:`, error);
+      console.error(`[${timestamp}] 🔍 [RESET] Stack trace:`, error instanceof Error ? error.stack : 'Non disponible');
+      console.error(`[${timestamp}] ⏱️ [RESET] Échec après ${duration}ms`);
+      console.error(`[${timestamp}] 🚨 [RESET] ÉTAT DE LA BASE INCERTAIN - VÉRIFICATION REQUISE`);
+      
       res.status(500).json({ 
         message: "Failed to reset database",
         error: error instanceof Error ? error.message : 'Unknown error',
-        success: false 
+        success: false,
+        duration: `${duration}ms`,
+        timestamp: timestamp
       });
     }
   });

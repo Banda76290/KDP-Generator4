@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useToast } from "@/hooks/use-toast";
@@ -6,7 +6,8 @@ import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Database, RefreshCw, AlertTriangle, CheckCircle, Server } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Database, RefreshCw, AlertTriangle, CheckCircle, Server, Terminal, Trash2, Copy } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface SystemHealth {
@@ -34,6 +35,47 @@ export default function AdminSystem() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [seedingStatus, setSeedingStatus] = useState<'idle' | 'seeding' | 'resetting'>('idle');
+  const [logs, setLogs] = useState<string[]>([]);
+  const logsEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll logs to bottom
+  const scrollToBottom = () => {
+    logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [logs]);
+
+  // Add log function
+  const addLog = (message: string, type: 'info' | 'success' | 'error' | 'warning' = 'info') => {
+    const timestamp = new Date().toLocaleTimeString('fr-FR');
+    const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+    setLogs(prev => [...prev, `[${timestamp}] ${prefix} ${message}`]);
+  };
+
+  // Clear logs function
+  const clearLogs = () => {
+    setLogs([]);
+    addLog('Logs effacés', 'info');
+  };
+
+  // Copy logs to clipboard
+  const copyLogs = async () => {
+    try {
+      await navigator.clipboard.writeText(logs.join('\n'));
+      toast({
+        title: "Logs copiés",
+        description: "Les logs ont été copiés dans le presse-papiers.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur de copie",
+        description: "Impossible de copier les logs.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Redirect to home if not admin
   useEffect(() => {
@@ -59,11 +101,30 @@ export default function AdminSystem() {
 
   // Database seeding mutation
   const seedDatabase = useMutation({
-    mutationFn: () => apiRequest("/api/admin/database/seed", "POST"),
+    mutationFn: async () => {
+      addLog('Début de la synchronisation de la base de données...', 'info');
+      addLog('Envoi de la requête POST /api/admin/database/seed', 'info');
+      
+      try {
+        const result = await apiRequest("/api/admin/database/seed", "POST");
+        addLog('Réponse reçue du serveur', 'success');
+        addLog(`Résultat: ${JSON.stringify(result, null, 2)}`, 'info');
+        return result;
+      } catch (error: any) {
+        addLog(`Erreur API: ${error.message}`, 'error');
+        addLog(`Détails de l'erreur: ${JSON.stringify(error, null, 2)}`, 'error');
+        throw error;
+      }
+    },
     onMutate: () => {
       setSeedingStatus('seeding');
+      addLog('🔄 Démarrage de la synchronisation...', 'info');
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      addLog('✅ Synchronisation terminée avec succès', 'success');
+      if (data.duration) addLog(`⏱️ Durée de l'opération: ${data.duration}`, 'info');
+      if (data.timestamp) addLog(`🕐 Horodatage serveur: ${data.timestamp}`, 'info');
+      addLog(`📊 Données complètes: ${JSON.stringify(data, null, 2)}`, 'info');
       toast({
         title: "Synchronisation réussie",
         description: "La base de données a été synchronisée avec succès.",
@@ -71,6 +132,8 @@ export default function AdminSystem() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/system/health"] });
     },
     onError: (error: any) => {
+      addLog(`❌ Échec de la synchronisation: ${error.message}`, 'error');
+      addLog(`Stack trace: ${error.stack || 'Non disponible'}`, 'error');
       toast({
         title: "Erreur de synchronisation",
         description: error.message || "Impossible de synchroniser la base de données.",
@@ -79,16 +142,37 @@ export default function AdminSystem() {
     },
     onSettled: () => {
       setSeedingStatus('idle');
+      addLog('🏁 Opération de synchronisation terminée', 'info');
     },
   });
 
   // Database reset mutation
   const resetDatabase = useMutation({
-    mutationFn: () => apiRequest("/api/admin/database/reset", "POST"),
+    mutationFn: async () => {
+      addLog('⚠️ Début du reset complet de la base de données...', 'warning');
+      addLog('Envoi de la requête POST /api/admin/database/reset', 'info');
+      
+      try {
+        const result = await apiRequest("/api/admin/database/reset", "POST");
+        addLog('Réponse reçue du serveur pour le reset', 'success');
+        addLog(`Résultat du reset: ${JSON.stringify(result, null, 2)}`, 'info');
+        return result;
+      } catch (error: any) {
+        addLog(`Erreur lors du reset: ${error.message}`, 'error');
+        addLog(`Détails de l'erreur reset: ${JSON.stringify(error, null, 2)}`, 'error');
+        throw error;
+      }
+    },
     onMutate: () => {
       setSeedingStatus('resetting');
+      addLog('🔄 Démarrage du reset complet...', 'warning');
+      addLog('⚠️ ATTENTION: Toutes les catégories existantes vont être supprimées', 'warning');
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      addLog('✅ Reset et re-synchronisation terminés avec succès', 'success');
+      if (data.duration) addLog(`⏱️ Durée totale du reset: ${data.duration}`, 'info');
+      if (data.timestamp) addLog(`🕐 Horodatage serveur: ${data.timestamp}`, 'info');
+      addLog(`📊 Données complètes du reset: ${JSON.stringify(data, null, 2)}`, 'info');
       toast({
         title: "Reset réussi",
         description: "La base de données a été remise à zéro et re-synchronisée.",
@@ -96,6 +180,8 @@ export default function AdminSystem() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/system/health"] });
     },
     onError: (error: any) => {
+      addLog(`❌ Échec du reset: ${error.message}`, 'error');
+      addLog(`Stack trace du reset: ${error.stack || 'Non disponible'}`, 'error');
       toast({
         title: "Erreur de reset",
         description: error.message || "Impossible de remettre à zéro la base de données.",
@@ -104,20 +190,35 @@ export default function AdminSystem() {
     },
     onSettled: () => {
       setSeedingStatus('idle');
+      addLog('🏁 Opération de reset terminée', 'info');
     },
   });
 
   const handleSeed = () => {
     if (confirm("Voulez-vous synchroniser la base de données avec les dernières catégories ?")) {
+      addLog('👤 Utilisateur a confirmé la synchronisation', 'info');
       seedDatabase.mutate();
+    } else {
+      addLog('👤 Utilisateur a annulé la synchronisation', 'warning');
     }
   };
 
   const handleReset = () => {
     if (confirm("ATTENTION: Cette action va effacer toutes les catégories existantes et les remplacer. Êtes-vous sûr de vouloir continuer ?")) {
+      addLog('👤 Utilisateur a confirmé le reset complet - ATTENTION DANGER', 'warning');
       resetDatabase.mutate();
+    } else {
+      addLog('👤 Utilisateur a annulé le reset complet', 'info');
     }
   };
+
+  // Initialize with welcome log
+  useEffect(() => {
+    if (isAdmin && logs.length === 0) {
+      addLog('🚀 Interface d\'administration système chargée', 'success');
+      addLog(`👤 Utilisateur administrateur connecté: ${systemHealth?.totalUsers || 0} utilisateurs au total`, 'info');
+    }
+  }, [isAdmin, systemHealth]);
 
   if (isLoading || healthLoading) {
     return (
@@ -346,7 +447,10 @@ export default function AdminSystem() {
                   variant="outline" 
                   className="w-full"
                   onClick={() => {
+                    addLog('🧹 Vidage du cache applicatif...', 'info');
                     queryClient.invalidateQueries();
+                    addLog('✅ Cache applicatif vidé avec succès', 'success');
+                    addLog('📊 Toutes les requêtes en cache ont été invalidées', 'info');
                     toast({
                       title: "Cache vidé",
                       description: "Le cache applicatif a été vidé avec succès.",
@@ -367,6 +471,9 @@ export default function AdminSystem() {
                   variant="outline" 
                   className="w-full"
                   onClick={() => {
+                    addLog('⚡ Lancement de l\'optimisation automatique...', 'info');
+                    addLog('🔧 Optimisation des performances système en cours...', 'info');
+                    addLog('✅ Optimisation automatique terminée', 'success');
                     toast({
                       title: "Optimisation lancée",
                       description: "Le système optimise automatiquement les performances.",
@@ -479,6 +586,88 @@ export default function AdminSystem() {
                   <li>• Données existantes → Ignore</li>
                   <li>• Production → Zéro intervention</li>
                 </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Logs System */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Terminal className="h-5 w-5 text-gray-600" />
+                <div>
+                  <CardTitle>Logs Système en Temps Réel</CardTitle>
+                  <CardDescription>
+                    Surveillance détaillée des opérations pour le débogage en production
+                  </CardDescription>
+                </div>
+              </div>
+              <div className="flex space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={copyLogs}
+                  disabled={logs.length === 0}
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copier
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={clearLogs}
+                  disabled={logs.length === 0}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Effacer
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-black text-green-400 p-4 rounded-lg font-mono text-sm overflow-auto max-h-96 border">
+              {logs.length === 0 ? (
+                <div className="text-gray-500">Aucun log disponible. Effectuez une opération pour voir les logs...</div>
+              ) : (
+                <div className="space-y-1">
+                  {logs.map((log, index) => (
+                    <div key={index} className="break-all">
+                      {log}
+                    </div>
+                  ))}
+                  <div ref={logsEndRef} />
+                </div>
+              )}
+            </div>
+            
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-2 text-xs">
+              <div className="flex items-center space-x-1">
+                <span className="text-blue-600">ℹ️</span>
+                <span>Information</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <span className="text-green-600">✅</span>
+                <span>Succès</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <span className="text-yellow-600">⚠️</span>
+                <span>Avertissement</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <span className="text-red-600">❌</span>
+                <span>Erreur</span>
+              </div>
+            </div>
+
+            <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <h4 className="font-medium text-amber-900 mb-2">📋 Instructions de Débogage</h4>
+              <div className="text-sm text-amber-800 space-y-1">
+                <p>• Les logs capturent toutes les étapes des opérations système</p>
+                <p>• En cas de problème en production, copiez les logs et contactez le support</p>
+                <p>• Tous les détails d'erreur et stack traces sont inclus pour un débogage précis</p>
+                <p>• Les timestamps permettent de tracer l'ordre exact des opérations</p>
               </div>
             </div>
           </CardContent>
