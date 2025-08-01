@@ -1467,7 +1467,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/ai/generate", isAuthenticated, async (req, res) => {
     try {
       const { functionKey, bookId, projectId, customPrompt, customModel, customTemperature } = req.body;
-      const userId = req.user?.id;
+      const userId = req.user?.replit?.id;
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
@@ -1845,6 +1845,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Migration failed", 
         success: false,
         errors: [error instanceof Error ? error.message : 'Unknown error']
+      });
+    }
+  });
+
+  // Export current categories for dev-to-production sync
+  app.get('/api/admin/categories/export', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      systemLog('📤 Export des catégories demandé', 'info', 'EXPORT');
+      systemLog(`👤 Demande initiée par: ${req.user?.email || 'Inconnu'}`, 'info', 'EXPORT');
+      
+      const categories = await storage.exportAllMarketplaceCategories();
+      systemLog(`📊 ${categories.length} catégories exportées`, 'info', 'EXPORT');
+      
+      res.json({
+        success: true,
+        categories,
+        count: categories.length,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      systemLog(`❌ Erreur lors de l'export: ${error}`, 'error', 'EXPORT');
+      console.error("Error exporting categories:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to export categories",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Sync categories from development to production
+  app.post('/api/admin/categories/sync-to-production', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    const startTime = Date.now();
+    
+    try {
+      const { productionUrl, categories } = req.body;
+      
+      if (!productionUrl || !categories || !Array.isArray(categories)) {
+        return res.status(400).json({ 
+          success: false, 
+          errors: ['Production URL and categories array are required'] 
+        });
+      }
+
+      systemLog('🔄 Début de la synchronisation Dev → Production', 'info', 'SYNC');
+      systemLog(`👤 Demande initiée par: ${req.user?.email || 'Inconnu'}`, 'info', 'SYNC');
+      systemLog(`🎯 URL de production: ${productionUrl}`, 'info', 'SYNC');
+      systemLog(`📊 ${categories.length} catégories à synchroniser`, 'info', 'SYNC');
+
+      const result = await storage.syncCategoriesToProduction(productionUrl, categories);
+      
+      const duration = Date.now() - startTime;
+      
+      if (result.success) {
+        systemLog(`✅ Synchronisation réussie en ${duration}ms`, 'info', 'SYNC');
+        systemLog(`📊 ${result.syncedCount || categories.length} catégories synchronisées`, 'info', 'SYNC');
+        
+        res.json({
+          success: true,
+          message: `Successfully synced ${result.syncedCount || categories.length} categories to production`,
+          syncedCount: result.syncedCount || categories.length,
+          duration: `${duration}ms`,
+          timestamp: new Date().toISOString()
+        });
+      } else {
+        systemLog(`❌ Échec de la synchronisation: ${result.error}`, 'error', 'SYNC');
+        res.status(500).json({
+          success: false,
+          message: 'Failed to sync categories to production',
+          error: result.error,
+          duration: `${duration}ms`
+        });
+      }
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      systemLog(`❌ Erreur critique lors de la synchronisation: ${error}`, 'error', 'SYNC');
+      console.error("Error syncing to production:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Failed to sync categories to production",
+        error: error instanceof Error ? error.message : 'Unknown error',
+        duration: `${duration}ms`
       });
     }
   });

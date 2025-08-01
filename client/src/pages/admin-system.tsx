@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Database, RefreshCw, AlertTriangle, CheckCircle, Server, Terminal, Trash2, Copy, Play, Pause } from "lucide-react";
+import { ArrowLeft, ArrowRight, Database, RefreshCw, AlertTriangle, CheckCircle, Server, Terminal, Trash2, Copy, Play, Pause } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface SystemHealth {
@@ -34,7 +34,8 @@ export default function AdminSystem() {
   const { isAdmin, isLoading } = useAdmin();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [seedingStatus, setSeedingStatus] = useState<'idle' | 'seeding' | 'resetting'>('idle');
+  const [seedingStatus, setSeedingStatus] = useState<'idle' | 'seeding' | 'resetting' | 'syncing'>('idle');
+  const [productionUrl, setProductionUrl] = useState('');
   const [logs, setLogs] = useState<string[]>([]);
   const [autoRefreshLogs, setAutoRefreshLogs] = useState(true);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
@@ -319,6 +320,109 @@ export default function AdminSystem() {
     }
   };
 
+  // Export categories mutation
+  const exportCategories = useMutation({
+    mutationFn: async () => {
+      addLog('📤 Début de l\'export des catégories...', 'info');
+      try {
+        const result = await apiRequest("GET", "/api/admin/categories/export");
+        addLog(`✅ Export réussi: ${result.count} catégories`, 'success');
+        return result;
+      } catch (error: any) {
+        addLog(`❌ Erreur lors de l\'export: ${error.message}`, 'error');
+        throw error;
+      }
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Export réussi",
+        description: `${data.count} catégories exportées avec succès.`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erreur d'export",
+        description: error.message || "Impossible d'exporter les catégories.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Sync to production mutation
+  const syncToProduction = useMutation({
+    mutationFn: async ({ productionUrl, categories }: { productionUrl: string, categories: any[] }) => {
+      addLog(`🔄 Début de la synchronisation vers: ${productionUrl}`, 'info');
+      addLog(`📊 ${categories.length} catégories à synchroniser`, 'info');
+      
+      try {
+        const result = await apiRequest("POST", "/api/admin/categories/sync-to-production", {
+          productionUrl,
+          categories
+        });
+        addLog('✅ Synchronisation réussie', 'success');
+        return result;
+      } catch (error: any) {
+        addLog(`❌ Erreur de synchronisation: ${error.message}`, 'error');
+        throw error;
+      }
+    },
+    onMutate: () => {
+      setSeedingStatus('syncing');
+      addLog('🚀 Démarrage de la synchronisation Dev → Production...', 'info');
+    },
+    onSuccess: (data) => {
+      addLog(`✅ ${data.syncedCount} catégories synchronisées`, 'success');
+      if (data.duration) addLog(`⏱️ Durée: ${data.duration}`, 'info');
+      toast({
+        title: "Synchronisation réussie",
+        description: `${data.syncedCount} catégories synchronisées vers la production.`,
+      });
+    },
+    onError: (error: any) => {
+      addLog(`❌ Échec de la synchronisation: ${error.message}`, 'error');
+      toast({
+        title: "Erreur de synchronisation",
+        description: error.message || "Impossible de synchroniser vers la production.",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      setSeedingStatus('idle');
+      addLog('🏁 Opération de synchronisation terminée', 'info');
+    },
+  });
+
+  const handleSyncToProduction = async () => {
+    if (!productionUrl.trim()) {
+      toast({
+        title: "URL manquante",
+        description: "Veuillez saisir l'URL de production.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (confirm(`Synchroniser les catégories de développement vers:\n${productionUrl}\n\nCette action remplacera toutes les catégories de production. Continuer ?`)) {
+      addLog(`👤 Utilisateur a confirmé la synchronisation vers: ${productionUrl}`, 'info');
+      
+      // First export current categories
+      try {
+        const exportResult = await exportCategories.mutateAsync();
+        if (exportResult.categories && exportResult.categories.length > 0) {
+          // Then sync to production
+          syncToProduction.mutate({
+            productionUrl: productionUrl.trim(),
+            categories: exportResult.categories
+          });
+        }
+      } catch (error) {
+        addLog('❌ Impossible d\'exporter les catégories pour la synchronisation', 'error');
+      }
+    } else {
+      addLog('👤 Utilisateur a annulé la synchronisation', 'warning');
+    }
+  };
+
   // Initialize with welcome log
   useEffect(() => {
     if (isAdmin && logs.length === 0) {
@@ -528,7 +632,93 @@ export default function AdminSystem() {
           </CardContent>
         </Card>
 
+        {/* Dev to Production Sync */}
+        <Card className="border-l-4 border-l-orange-500">
+          <CardHeader>
+            <div className="flex items-center space-x-3">
+              <ArrowRight className="h-5 w-5 text-orange-600" />
+              <div>
+                <CardTitle>Synchronisation Développement → Production</CardTitle>
+                <CardDescription>
+                  Transférer les catégories de développement vers la production
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+              <h4 className="font-medium text-orange-900 mb-2">⚠️ Attention</h4>
+              <p className="text-sm text-orange-800">
+                Cette fonctionnalité permet de pousser les catégories de cet environnement de développement 
+                vers la base de données de production. Cette action remplacera toutes les catégories existantes en production.
+              </p>
+            </div>
 
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <h4 className="font-medium">Environnement Actuel</h4>
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Catégories locales:</span>
+                      <Badge variant="secondary">{systemHealth?.categories || 0}</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Statut:</span>
+                      <Badge className="bg-blue-100 text-blue-800 border-blue-200">Développement</Badge>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h4 className="font-medium">URL de Production</h4>
+                  <div className="space-y-2">
+                    <label htmlFor="production-url" className="text-sm font-medium">
+                      URL de votre site de production:
+                    </label>
+                    <input
+                      id="production-url"
+                      type="url"
+                      value={productionUrl}
+                      onChange={(e) => setProductionUrl(e.target.value)}
+                      placeholder="https://votre-site.replit.app"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Exemple: https://monapp.replit.app
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t">
+                <Button 
+                  onClick={handleSyncToProduction}
+                  disabled={seedingStatus !== 'idle' || !productionUrl.trim()}
+                  className="w-full bg-orange-600 hover:bg-orange-700"
+                >
+                  {seedingStatus === 'syncing' ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Synchronisation en cours...
+                    </>
+                  ) : (
+                    <>
+                      <ArrowRight className="h-4 w-4 mr-2" />
+                      Synchroniser vers Production
+                    </>
+                  )}
+                </Button>
+                
+                {!productionUrl.trim() && (
+                  <p className="text-xs text-muted-foreground mt-2 text-center">
+                    Veuillez saisir l'URL de production pour activer la synchronisation
+                  </p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Cache Management */}
         <Card>

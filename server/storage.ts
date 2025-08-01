@@ -1369,6 +1369,77 @@ export class DatabaseStorage implements IStorage {
 
     return categories;
   }
+
+  async exportAllMarketplaceCategories(): Promise<any[]> {
+    try {
+      const categories = await db.select().from(marketplaceCategories).orderBy(
+        marketplaceCategories.marketplace,
+        marketplaceCategories.level,
+        marketplaceCategories.sortOrder,
+        marketplaceCategories.displayName
+      );
+      
+      return categories.map(cat => ({
+        marketplace: cat.marketplace,
+        categoryPath: cat.categoryPath,
+        parentPath: cat.parentPath,
+        level: cat.level,
+        displayName: cat.displayName,
+        isSelectable: cat.isSelectable,
+        sortOrder: cat.sortOrder,
+        isActive: cat.isActive
+      }));
+    } catch (error) {
+      console.error('Error exporting categories:', error);
+      throw error;
+    }
+  }
+
+  async syncCategoriesToProduction(productionUrl: string, categories: any[]): Promise<{
+    success: boolean;
+    error?: string;
+    syncedCount?: number;
+  }> {
+    try {
+      // Clean up production URL
+      const cleanUrl = productionUrl.replace(/\/$/, '');
+      const endpoint = `${cleanUrl}/api/admin/categories/migrate`;
+      
+      console.log(`[SYNC] Attempting to sync ${categories.length} categories to ${endpoint}`);
+      
+      // Make the API call to production
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ categories })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`[SYNC] Production API returned ${response.status}: ${errorText}`);
+        return {
+          success: false,
+          error: `Production API error (${response.status}): ${errorText}`
+        };
+      }
+
+      const result = await response.json();
+      console.log(`[SYNC] Production sync successful:`, result);
+      
+      return {
+        success: true,
+        syncedCount: result.categoriesCount || categories.length
+      };
+    } catch (error) {
+      console.error('[SYNC] Error syncing to production:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown sync error'
+      };
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
