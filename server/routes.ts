@@ -1630,6 +1630,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Category Migration Routes
+  app.post('/api/admin/categories/backup', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const success = await storage.backupMarketplaceCategories();
+      if (success) {
+        res.json({ message: 'Categories backed up successfully', success: true });
+      } else {
+        res.status(500).json({ message: 'Failed to backup categories', success: false });
+      }
+    } catch (error) {
+      console.error("Error backing up categories:", error);
+      res.status(500).json({ message: "Failed to backup categories", success: false });
+    }
+  });
+
+  app.post('/api/admin/categories/rollback', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const success = await storage.rollbackMarketplaceCategories();
+      if (success) {
+        res.json({ message: 'Categories rolled back successfully', success: true });
+      } else {
+        res.status(500).json({ message: 'Failed to rollback categories', success: false });
+      }
+    } catch (error) {
+      console.error("Error rolling back categories:", error);
+      res.status(500).json({ message: "Failed to rollback categories", success: false });
+    }
+  });
+
+  app.post('/api/admin/categories/validate', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { categories } = req.body;
+      const validation = await storage.validateCategoryStructure(categories);
+      res.json(validation);
+    } catch (error) {
+      console.error("Error validating categories:", error);
+      res.status(500).json({ isValid: false, errors: ['Validation failed'] });
+    }
+  });
+
+  app.post('/api/admin/categories/migrate', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { categories } = req.body;
+      if (!categories || !Array.isArray(categories)) {
+        return res.status(400).json({ success: false, errors: ['Categories array is required'] });
+      }
+
+      const result = await storage.migrateMarketplaceCategoriesWithFormats(categories);
+      
+      if (result.success) {
+        res.json({ 
+          message: `Successfully migrated ${categories.length} categories`,
+          success: true,
+          categoriesCount: categories.length
+        });
+      } else {
+        res.status(400).json({
+          message: 'Migration failed',
+          success: false,
+          errors: result.errors
+        });
+      }
+    } catch (error) {
+      console.error("Error migrating categories:", error);
+      res.status(500).json({ 
+        message: "Migration failed", 
+        success: false,
+        errors: [error instanceof Error ? error.message : 'Unknown error']
+      });
+    }
+  });
+
   app.post('/api/admin/database/reset', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       await forceSeedDatabase();

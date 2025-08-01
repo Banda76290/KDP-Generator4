@@ -120,6 +120,12 @@ export interface IStorage {
   // Marketplace Categories operations
   getMarketplaceCategories(marketplace: string): Promise<MarketplaceCategory[]>;
   getMarketplaceCategoriesWithFormat(marketplace: string, format?: string): Promise<MarketplaceCategory[]>;
+  
+  // Category migration utilities
+  backupMarketplaceCategories(): Promise<boolean>;
+  validateCategoryStructure(categories: any[]): Promise<{isValid: boolean, errors: string[]}>;
+  rollbackMarketplaceCategories(): Promise<boolean>;
+  migrateMarketplaceCategoriesWithFormats(newCategories: any[]): Promise<{success: boolean, errors: string[]}>;
 
   // Blog operations
   getBlogCategories(): Promise<BlogCategory[]>;
@@ -844,6 +850,125 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  // Category migration and backup utilities
+  async backupMarketplaceCategories(): Promise<boolean> {
+    try {
+      // Create backup table if it doesn't exist
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS marketplace_categories_backup AS 
+        SELECT * FROM marketplace_categories
+      `);
+      
+      // Clear and repopulate backup
+      await db.execute(sql`DELETE FROM marketplace_categories_backup`);
+      await db.execute(sql`
+        INSERT INTO marketplace_categories_backup 
+        SELECT * FROM marketplace_categories
+      `);
+      
+      console.log('[BACKUP] Marketplace categories backed up successfully');
+      return true;
+    } catch (error) {
+      console.error('[BACKUP] Failed to backup marketplace categories:', error);
+      return false;
+    }
+  }
+
+  async validateCategoryStructure(categories: any[]): Promise<{isValid: boolean, errors: string[]}> {
+    const errors: string[] = [];
+    
+    if (!Array.isArray(categories)) {
+      errors.push('Categories must be an array');
+      return { isValid: false, errors };
+    }
+
+    for (let i = 0; i < categories.length; i++) {
+      const cat = categories[i];
+      
+      if (!cat.marketplace || typeof cat.marketplace !== 'string') {
+        errors.push(`Category ${i}: Invalid marketplace`);
+      }
+      
+      if (!cat.categoryPath || typeof cat.categoryPath !== 'string') {
+        errors.push(`Category ${i}: Invalid categoryPath`);
+      }
+      
+      if (!cat.displayName || typeof cat.displayName !== 'string') {
+        errors.push(`Category ${i}: Invalid displayName`);
+      }
+      
+      if (typeof cat.level !== 'number' || cat.level < 1) {
+        errors.push(`Category ${i}: Invalid level`);
+      }
+    }
+
+    return { isValid: errors.length === 0, errors };
+  }
+
+  async rollbackMarketplaceCategories(): Promise<boolean> {
+    try {
+      // Check if backup exists
+      const backupExists = await db.execute(sql`
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_name = 'marketplace_categories_backup'
+        )
+      `);
+      
+      if (!backupExists) {
+        console.error('[ROLLBACK] No backup table found');
+        return false;
+      }
+
+      // Restore from backup
+      await db.execute(sql`DELETE FROM marketplace_categories`);
+      await db.execute(sql`
+        INSERT INTO marketplace_categories 
+        SELECT * FROM marketplace_categories_backup
+      `);
+      
+      console.log('[ROLLBACK] Marketplace categories restored from backup');
+      return true;
+    } catch (error) {
+      console.error('[ROLLBACK] Failed to rollback marketplace categories:', error);
+      return false;
+    }
+  }
+
+  async migrateMarketplaceCategoriesWithFormats(newCategories: any[]): Promise<{success: boolean, errors: string[]}> {
+    try {
+      // Step 1: Validate the new categories
+      const validation = await this.validateCategoryStructure(newCategories);
+      if (!validation.isValid) {
+        return { success: false, errors: validation.errors };
+      }
+
+      // Step 2: Create backup
+      const backupSuccess = await this.backupMarketplaceCategories();
+      if (!backupSuccess) {
+        return { success: false, errors: ['Failed to create backup'] };
+      }
+
+      // Step 3: Clear existing categories and insert new ones
+      await db.delete(marketplaceCategories);
+      
+      // Insert new categories in batches to avoid memory issues
+      const batchSize = 100;
+      for (let i = 0; i < newCategories.length; i += batchSize) {
+        const batch = newCategories.slice(i, i + batchSize);
+        await db.insert(marketplaceCategories).values(batch);
+      }
+
+      console.log(`[MIGRATION] Successfully migrated ${newCategories.length} categories`);
+      return { success: true, errors: [] };
+    } catch (error) {
+      console.error('[MIGRATION] Failed to migrate categories:', error);
+      // Attempt rollback on failure
+      await this.rollbackMarketplaceCategories();
+      return { success: false, errors: [`Migration failed: ${error.message}`] };
+    }
+  }
+
   async getSystemStats(): Promise<{
     totalUsers: number;
     totalProjects: number;
@@ -1131,14 +1256,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMarketplaceCategoriesWithFormat(marketplace: string, format?: string): Promise<MarketplaceCategory[]> {
-    console.log(`[DEBUG] getMarketplaceCategoriesWithFormat called with marketplace: ${marketplace}, format: ${format}`);
-    
     // Map format to discriminant
     const discriminant = format === 'ebook' ? 'kindle_ebook' : 
                         (format === 'paperback' || format === 'hardcover') ? 'print_kdp_paperback' : 
                         null;
-    
-    console.log(`[DEBUG] Discriminant mapped to: ${discriminant}`);
 
     let categories = await db
       .select()
@@ -1149,19 +1270,13 @@ export class DatabaseStorage implements IStorage {
       ))
       .orderBy(marketplaceCategories.level, marketplaceCategories.sortOrder, marketplaceCategories.displayName);
 
-    console.log(`[DEBUG] Total categories found: ${categories.length}`);
-
-    // If format is provided, filter categories based on discriminant
+    // If format is provided, try to filter categories based on discriminant
     if (discriminant) {
-      console.log(`[DEBUG] Filtering categories with discriminant: ${discriminant}`);
-      
-      const beforeFilter = categories.length;
-      categories = categories.filter(cat => {
+      const filteredCategories = categories.filter(cat => {
         // NEVER include the discriminants themselves as selectable categories
         const isDiscriminant = cat.displayName === 'kindle_ebook' || cat.displayName === 'print_kdp_paperback';
         
         if (isDiscriminant) {
-          console.log(`[DEBUG] Excluding discriminant category: ${cat.displayName}`);
           return false; // Exclude discriminants from selectable categories
         }
         
@@ -1169,26 +1284,17 @@ export class DatabaseStorage implements IStorage {
         const belongsToPath = cat.categoryPath.includes(`> ${discriminant} >`) || 
                              cat.categoryPath === `Books > ${discriminant}`;
         
-        if (!belongsToPath) {
-          console.log(`[DEBUG] Category does not belong to format path: ${cat.categoryPath}`);
-        }
-        
         return belongsToPath;
       });
       
-      console.log(`[DEBUG] Categories after filtering: ${categories.length} (was ${beforeFilter})`);
-      
-      if (categories.length === 0) {
-        console.log(`[DEBUG] No categories found for discriminant ${discriminant}. Sample paths from DB:`);
-        const samplePaths = await db
-          .select({ categoryPath: marketplaceCategories.categoryPath })
-          .from(marketplaceCategories)
-          .where(eq(marketplaceCategories.marketplace, marketplace))
-          .limit(5);
-        console.log(`[DEBUG] Sample category paths:`, samplePaths.map(p => p.categoryPath));
+      // RÉTROCOMPATIBILITÉ: Si aucune catégorie filtrée n'est trouvée, 
+      // retourner toutes les catégories pour éviter de casser l'interface
+      if (filteredCategories.length === 0) {
+        console.log(`[COMPAT] No format-specific categories found for ${discriminant}, returning all categories for backward compatibility`);
+        return categories;
       }
-    } else {
-      console.log(`[DEBUG] No format specified, returning all categories`);
+      
+      return filteredCategories;
     }
 
     return categories;
