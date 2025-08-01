@@ -772,7 +772,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`[${timestamp}] 🔍 [API-CATEGORIES-${requestId}] ÉTAPE 1: Vérification de l'état de la base...`);
       const { db } = await import('./db.js');
       const { marketplaceCategories } = await import('@shared/schema');
-      const { sql } = await import('drizzle-orm');
       const totalCategoriesInDb = await db.select().from(marketplaceCategories);
       console.log(`[${timestamp}] 📊 [API-CATEGORIES-${requestId}] Total catégories dans la base: ${totalCategoriesInDb.length}`);
       
