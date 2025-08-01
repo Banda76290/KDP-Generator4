@@ -1346,14 +1346,43 @@ export default function EditBook() {
     setCategories(categories.filter(c => c !== category));
   };
 
+  // Function to determine format from book properties
+  const deriveBookFormat = () => {
+    const format = form.watch("format");
+    const isLargePrintBook = form.watch("isLargePrintBook");
+    const isLowContentBook = form.watch("isLowContentBook");
+    
+    console.log('Format derivation inputs:', { format, isLargePrintBook, isLowContentBook });
+    
+    // If format is explicitly set, use it
+    if (format) {
+      console.log('Using explicit format:', format);
+      return format;
+    }
+    
+    // Derive format from boolean flags - large print and low content are typically paperback
+    if (isLargePrintBook || isLowContentBook) {
+      console.log('Deriving paperback from flags:', { isLargePrintBook, isLowContentBook });
+      return "paperback";
+    }
+    
+    // Default to ebook if no clear indicators
+    console.log('Defaulting to ebook');
+    return "ebook";
+  };
+
   // Function to load categories for a specific marketplace
   const loadMarketplaceCategories = async (marketplace: string) => {
     if (!marketplace) return;
     
+    console.log('Loading categories for marketplace:', marketplace);
+    
     setLoadingCategories(true);
     try {
-      const format = form.watch("format");
-      const formatParam = format ? `?format=${encodeURIComponent(format)}` : '';
+      const derivedFormat = deriveBookFormat();
+      console.log('Derived format:', derivedFormat);
+      
+      const formatParam = derivedFormat ? `?format=${encodeURIComponent(derivedFormat)}` : '';
       const response = await apiRequest("GET", `/api/marketplace-categories/${encodeURIComponent(marketplace)}${formatParam}`);
       setMarketplaceCategories(response || []);
     } catch (error) {
@@ -1375,8 +1404,8 @@ export default function EditBook() {
     if (currentCategories.length === 0) return [];
     
     try {
-      const format = form.watch("format");
-      const formatParam = format ? `?format=${encodeURIComponent(format)}` : '';
+      const derivedFormat = deriveBookFormat();
+      const formatParam = derivedFormat ? `?format=${encodeURIComponent(derivedFormat)}` : '';
       const response = await apiRequest("GET", `/api/marketplace-categories/${encodeURIComponent(newMarketplace)}${formatParam}`);
       const newMarketplaceCategories: MarketplaceCategory[] = response || [];
       const validCategoryPaths = newMarketplaceCategories.map(cat => cat.categoryPath);
