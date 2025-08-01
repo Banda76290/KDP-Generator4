@@ -1344,6 +1344,8 @@ export class DatabaseStorage implements IStorage {
         return belongsToPath;
       });
       
+      console.log(`Found ${filteredCategories.length} categories for ${discriminant} in ${normalizedMarketplace}`);
+      
       // RÉTROCOMPATIBILITÉ: Si aucune catégorie filtrée n'est trouvée, 
       // retourner toutes les catégories pour éviter de casser l'interface
       if (filteredCategories.length === 0) {
