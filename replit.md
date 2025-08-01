@@ -31,7 +31,7 @@ The application follows a modern full-stack architecture with clear separation b
 - **Project Management**: Comprehensive creation, editing, duplication, and deletion of KDP projects, including intelligent naming and association with books and contributors.
 - **Book Editing Interface**: KDP-style 3-tab interface (Paperback Details, Content, Rights & Pricing) with save functionalities, form pre-population, and integration with project cards.
 - **Series Management**: Complete setup and management with advanced WYSIWYG editor supporting rich text and multiple languages, including series creation, editing, and deletion.
-- **AI Assistant**: AI-powered content generation for various content types (structure, descriptions, marketing) with an admin interface for managing prompts, models, and usage limits.
+- **AI Assistant**: AI-powered content generation with hybrid database-driven and static function system. Admin interface for managing prompts that automatically integrate with AI Functions page. Database templates take priority over static functions with automatic fallback.
 - **Sales Data Import**: Functionality to upload and parse KDP reports (Excel/CSV) for data extraction, normalization, and analytics.
 - **ISBN System**: Auto-generation of unique ISBN placeholders, real-time uniqueness validation, and integration with book and project duplication.
 - **Dynamic Category Loading**: Database-driven, multi-marketplace category hierarchies with dynamic loading based on marketplace selection and hierarchical structure.
@@ -42,6 +42,7 @@ The application follows a modern full-stack architecture with clear separation b
 - **Admin System Management**: Comprehensive system administration interface with real-time monitoring, database health checks, memory usage tracking, cache management, and operational controls for database synchronization and system optimization.
 - **Persistent Logging System**: Server-side log collection with real-time display, intelligent user interaction detection, pause/resume controls, scroll management, and permanent log clearing functionality with optimized performance.
 - **Development-to-Production Sync**: Comprehensive synchronization system with multiple export options (direct sync, SQL copy-paste, SQL file download, JSON export) for transferring marketplace categories from development to production environments with detailed logging and error handling. Manual "Copier SQL" method confirmed working as reliable alternative when direct sync fails due to CORS/authentication issues.
+- **AI Prompt Integration System**: Complete integration between AI prompt administration and execution systems. Database-configured prompts automatically appear in AI Functions interface and are used for content generation. Hybrid system combines database templates with static fallback functions, with database templates taking priority.
 
 ## External Dependencies
 

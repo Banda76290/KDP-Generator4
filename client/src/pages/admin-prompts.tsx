@@ -213,6 +213,11 @@ export default function AdminPrompts() {
             <p className="text-muted-foreground">
               Configurez les templates de prompts pour les recommandations IA
             </p>
+            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>💡 Intégration automatique :</strong> Les prompts créés ici apparaissent automatiquement dans la page "AI Functions" et sont utilisés par le système de génération IA.
+              </p>
+            </div>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>

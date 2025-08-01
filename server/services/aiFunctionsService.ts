@@ -54,7 +54,7 @@ class AIFunctionsService {
   }
 
   // Convert database template to AI function
-  private templateToFunction(template: AiPromptTemplate): AIFunction {
+  private templateToFunction = (template: AiPromptTemplate): AIFunction => {
     return {
       key: template.type, // Use type as key
       name: template.name,
