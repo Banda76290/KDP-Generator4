@@ -319,7 +319,8 @@ export default function AuthorViewPage() {
           {/* Left Column - Biography */}
           <div className="space-y-6">
             {/* Biography Editor */}
-            <div className="bg-orange-50 rounded-lg border border-orange-200 p-6">
+            <Card className="border-2" style={{ borderColor: 'var(--kdp-secondary-orange)', backgroundColor: '#fff9f0' }}>
+              <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Biography - {author.fullName}</h3>
                 <Select value={selectedLanguage} onValueChange={handleLanguageChange}>
@@ -438,7 +439,7 @@ export default function AuthorViewPage() {
                     <Button 
                       onClick={handleSaveBiography} 
                       disabled={updateBiographyMutation.isPending}
-                      className="bg-primary hover:bg-primary/90"
+                      className="kdp-btn-primary"
                     >
                       <Save className="w-4 h-4 mr-2" />
                       {updateBiographyMutation.isPending ? "Saving..." : "Save Biography"}
@@ -446,7 +447,8 @@ export default function AuthorViewPage() {
                   </div>
                 </div>
               )}
-            </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Right Column - Projects & Books */}

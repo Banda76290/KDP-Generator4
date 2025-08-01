@@ -134,7 +134,7 @@ export default function AuthorCreatePage() {
                 <Button 
                   type="submit" 
                   disabled={createAuthorMutation.isPending}
-                  className="bg-primary hover:bg-primary/90"
+                  className="kdp-btn-primary"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   {createAuthorMutation.isPending ? "Creating..." : "Create Author"}

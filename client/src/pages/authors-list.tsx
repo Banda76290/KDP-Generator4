@@ -26,7 +26,7 @@ export default function AuthorsListPage() {
             <h1 className="text-3xl font-bold dark:text-white text-[#1a1a1a]">Authors</h1>
             <p className="text-gray-600 dark:text-gray-400">Manage your publishing authors</p>
           </div>
-          <Button onClick={() => setLocation("/authors/create")} className="bg-primary hover:bg-primary/90">
+          <Button onClick={() => setLocation("/authors/create")} className="kdp-btn-primary">
             <Plus className="w-4 h-4 mr-2" />
             Create Author
           </Button>
@@ -43,7 +43,7 @@ export default function AuthorsListPage() {
               <p className="text-gray-500 dark:text-gray-400 mb-4">
                 Get started by creating your first author
               </p>
-              <Button onClick={() => setLocation("/authors/create")} className="bg-primary hover:bg-primary/90">
+              <Button onClick={() => setLocation("/authors/create")} className="kdp-btn-primary">
                 <Plus className="w-4 h-4 mr-2" />
                 Create First Author
               </Button>
@@ -54,7 +54,7 @@ export default function AuthorsListPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <User className="w-5 h-5 mr-2 text-primary" />
+                      <User className="w-5 h-5 mr-2" style={{ color: 'var(--kdp-primary-blue)' }} />
                       <span className="truncate">{author.fullName}</span>
                     </div>
                   </CardTitle>
@@ -64,11 +64,11 @@ export default function AuthorsListPage() {
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-1">
                         <BookOpen className="w-4 h-4" />
-                        <span>{author.books?.length || 0} books</span>
+                        <span>0 books</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <FolderOpen className="w-4 h-4" />
-                        <span>{author.projects?.length || 0} projects</span>
+                        <span>0 projects</span>
                       </div>
                     </div>
                   </div>
