@@ -661,9 +661,59 @@ export default function EditBook() {
 
   // Function to clean HTML and remove unnecessary styles
   const cleanHTML = (html: string): string => {
-    // Create a temporary div to parse the HTML
+    // Create a temporary div to parse the HTML safely
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
+    // Use textContent first to prevent XSS, then parse as DOM
+    tempDiv.textContent = html;
+    const escapedHtml = tempDiv.innerHTML;
+    tempDiv.innerHTML = '';
+    
+    // Create a DOMParser for safe HTML parsing
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    
+    // Clear tempDiv and safely append parsed content
+    while (tempDiv.firstChild) {
+      tempDiv.removeChild(tempDiv.firstChild);
+    }
+    
+    // Only copy text nodes and safe elements
+    const allowedTags = ['P', 'BR', 'STRONG', 'EM', 'U', 'H4', 'H5', 'H6', 'DIV', 'SPAN', 'A'];
+    const copyNode = (source: Node, target: Element) => {
+      if (source.nodeType === Node.TEXT_NODE) {
+        target.appendChild(document.createTextNode(source.textContent || ''));
+      } else if (source.nodeType === Node.ELEMENT_NODE) {
+        const element = source as Element;
+        if (allowedTags.includes(element.tagName)) {
+          const newElement = document.createElement(element.tagName.toLowerCase());
+          
+          // Copy only safe attributes
+          if (element.tagName === 'A' && element.getAttribute('href')) {
+            const href = element.getAttribute('href');
+            if (href && (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('mailto:'))) {
+              newElement.setAttribute('href', href);
+            }
+          }
+          
+          target.appendChild(newElement);
+          
+          // Recursively copy child nodes
+          for (let child of Array.from(source.childNodes)) {
+            copyNode(child, newElement);
+          }
+        } else {
+          // For disallowed tags, copy only their text content
+          for (let child of Array.from(source.childNodes)) {
+            copyNode(child, target);
+          }
+        }
+      }
+    };
+    
+    // Copy body content to tempDiv safely
+    for (let child of Array.from(doc.body.childNodes)) {
+      copyNode(child, tempDiv);
+    }
     
     // Remove all style attributes that contain Tailwind CSS variables
     const allElements = tempDiv.querySelectorAll('*');
@@ -952,19 +1002,43 @@ export default function EditBook() {
           setIsPartOfSeries(savedIsPartOfSeries);
         }
         
-        // Restore description in WYSIWYG editor
+        // Restore description in WYSIWYG editor safely
         if (formFields.description) {
           setDescriptionEditorContent(formFields.description);
-          const tempDiv = document.createElement('div');
-          tempDiv.innerHTML = formFields.description;
-          const textContent = tempDiv.innerText || tempDiv.textContent || '';
+          // Safely get text content length
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(formFields.description, 'text/html');
+          const textContent = doc.body.textContent || doc.body.innerText || '';
           setDescriptionCharacterCount(textContent.length);
           
-          // Set the editor content after a short delay to ensure the editor is rendered
+          // Set the editor content safely after a short delay
           setTimeout(() => {
             const editor = document.getElementById('description-editor') as HTMLDivElement;
             if (editor) {
-              editor.innerHTML = formFields.description || '';
+              // Clear editor first
+              while (editor.firstChild) {
+                editor.removeChild(editor.firstChild);
+              }
+              
+              // Use cleanHTML function to safely set content
+              const cleanedContent = cleanHTML(formFields.description);
+              const safeParser = new DOMParser();
+              const safeDoc = safeParser.parseFromString(cleanedContent, 'text/html');
+              
+              // Copy safe nodes to editor
+              for (let child of Array.from(safeDoc.body.childNodes)) {
+                if (child.nodeType === Node.TEXT_NODE) {
+                  editor.appendChild(document.createTextNode(child.textContent || ''));
+                } else if (child.nodeType === Node.ELEMENT_NODE) {
+                  const elem = child as Element;
+                  const allowedTags = ['P', 'BR', 'STRONG', 'EM', 'U', 'H4', 'H5', 'H6', 'DIV', 'SPAN'];
+                  if (allowedTags.includes(elem.tagName)) {
+                    const newElem = document.createElement(elem.tagName.toLowerCase());
+                    newElem.textContent = elem.textContent;
+                    editor.appendChild(newElem);
+                  }
+                }
+              }
             }
           }, 200);
         }
@@ -988,19 +1062,43 @@ export default function EditBook() {
     // Only load book data if we didn't restore from sessionStorage
     console.log('Book loading check:', { book: !!book, hasRestoredFromStorage, shouldLoadBook: book && !hasRestoredFromStorage });
     if (book && !hasRestoredFromStorage) {
-      // Load description into WYSIWYG editor
+      // Load description into WYSIWYG editor safely
       if (book.description) {
         setDescriptionEditorContent(book.description);
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = book.description;
-        const textContent = tempDiv.innerText || tempDiv.textContent || '';
+        // Safely get text content length
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(book.description, 'text/html');
+        const textContent = doc.body.textContent || doc.body.innerText || '';
         setDescriptionCharacterCount(textContent.length);
         
-        // Set the editor content after a short delay to ensure the editor is rendered
+        // Set the editor content safely after a short delay
         setTimeout(() => {
           const editor = document.getElementById('description-editor') as HTMLDivElement;
           if (editor) {
-            editor.innerHTML = book.description || '';
+            // Clear editor first
+            while (editor.firstChild) {
+              editor.removeChild(editor.firstChild);
+            }
+            
+            // Use cleanHTML function to safely set content
+            const cleanedContent = cleanHTML(book.description);
+            const safeParser = new DOMParser();
+            const safeDoc = safeParser.parseFromString(cleanedContent, 'text/html');
+            
+            // Copy safe nodes to editor
+            for (let child of Array.from(safeDoc.body.childNodes)) {
+              if (child.nodeType === Node.TEXT_NODE) {
+                editor.appendChild(document.createTextNode(child.textContent || ''));
+              } else if (child.nodeType === Node.ELEMENT_NODE) {
+                const elem = child as Element;
+                const allowedTags = ['P', 'BR', 'STRONG', 'EM', 'U', 'H4', 'H5', 'H6', 'DIV', 'SPAN'];
+                if (allowedTags.includes(elem.tagName)) {
+                  const newElem = document.createElement(elem.tagName.toLowerCase());
+                  newElem.textContent = elem.textContent;
+                  editor.appendChild(newElem);
+                }
+              }
+            }
           }
         }, 100);
       }
@@ -1751,7 +1849,30 @@ export default function EditBook() {
                     setTimeout(() => {
                       const editor = document.getElementById('description-editor') as HTMLDivElement;
                       if (editor && descriptionEditorContent) {
-                        editor.innerHTML = descriptionEditorContent;
+                        // Clear editor first
+                        while (editor.firstChild) {
+                          editor.removeChild(editor.firstChild);
+                        }
+                        
+                        // Use cleanHTML function to safely set content
+                        const cleanedContent = cleanHTML(descriptionEditorContent);
+                        const safeParser = new DOMParser();
+                        const safeDoc = safeParser.parseFromString(cleanedContent, 'text/html');
+                        
+                        // Copy safe nodes to editor
+                        for (let child of Array.from(safeDoc.body.childNodes)) {
+                          if (child.nodeType === Node.TEXT_NODE) {
+                            editor.appendChild(document.createTextNode(child.textContent || ''));
+                          } else if (child.nodeType === Node.ELEMENT_NODE) {
+                            const elem = child as Element;
+                            const allowedTags = ['P', 'BR', 'STRONG', 'EM', 'U', 'H4', 'H5', 'H6', 'DIV', 'SPAN'];
+                            if (allowedTags.includes(elem.tagName)) {
+                              const newElem = document.createElement(elem.tagName.toLowerCase());
+                              newElem.textContent = elem.textContent;
+                              editor.appendChild(newElem);
+                            }
+                          }
+                        }
                       }
                     }, 50);
                   }

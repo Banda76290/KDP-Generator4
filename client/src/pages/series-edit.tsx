@@ -64,16 +64,40 @@ export default function SeriesEditPage() {
       
       if (existingSeries.description) {
         setEditorContent(existingSeries.description);
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = existingSeries.description;
-        const textContent = tempDiv.innerText || tempDiv.textContent || '';
+        // Safely get text content length
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(existingSeries.description, 'text/html');
+        const textContent = doc.body.textContent || doc.body.innerText || '';
         setCharacterCount(textContent.length);
         
-        // Set the editor content after a short delay to ensure the editor is rendered
+        // Set the editor content safely after a short delay
         setTimeout(() => {
           const editor = document.getElementById('description-editor') as HTMLDivElement;
           if (editor) {
-            editor.innerHTML = existingSeries.description;
+            // Clear editor first
+            while (editor.firstChild) {
+              editor.removeChild(editor.firstChild);
+            }
+            
+            // Use cleanHTML function to safely set content
+            const cleanedContent = cleanHTML(existingSeries.description);
+            const safeParser = new DOMParser();
+            const safeDoc = safeParser.parseFromString(cleanedContent, 'text/html');
+            
+            // Copy safe nodes to editor
+            for (let child of Array.from(safeDoc.body.childNodes)) {
+              if (child.nodeType === Node.TEXT_NODE) {
+                editor.appendChild(document.createTextNode(child.textContent || ''));
+              } else if (child.nodeType === Node.ELEMENT_NODE) {
+                const elem = child as Element;
+                const allowedTags = ['P', 'BR', 'STRONG', 'EM', 'U', 'H4', 'H5', 'H6', 'DIV', 'SPAN'];
+                if (allowedTags.includes(elem.tagName)) {
+                  const newElem = document.createElement(elem.tagName.toLowerCase());
+                  newElem.textContent = elem.textContent;
+                  editor.appendChild(newElem);
+                }
+              }
+            }
           }
         }, 100);
       }
@@ -178,9 +202,50 @@ export default function SeriesEditPage() {
 
   // Function to clean HTML and remove unnecessary styles
   const cleanHTML = (html: string): string => {
-    // Create a temporary div to parse the HTML
+    // Create a temporary div to parse the HTML safely
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
+    
+    // Create a DOMParser for safe HTML parsing
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    
+    // Only copy text nodes and safe elements
+    const allowedTags = ['P', 'BR', 'STRONG', 'EM', 'U', 'H4', 'H5', 'H6', 'DIV', 'SPAN', 'A'];
+    const copyNode = (source: Node, target: Element) => {
+      if (source.nodeType === Node.TEXT_NODE) {
+        target.appendChild(document.createTextNode(source.textContent || ''));
+      } else if (source.nodeType === Node.ELEMENT_NODE) {
+        const element = source as Element;
+        if (allowedTags.includes(element.tagName)) {
+          const newElement = document.createElement(element.tagName.toLowerCase());
+          
+          // Copy only safe attributes
+          if (element.tagName === 'A' && element.getAttribute('href')) {
+            const href = element.getAttribute('href');
+            if (href && (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('mailto:'))) {
+              newElement.setAttribute('href', href);
+            }
+          }
+          
+          target.appendChild(newElement);
+          
+          // Recursively copy child nodes
+          for (let child of Array.from(source.childNodes)) {
+            copyNode(child, newElement);
+          }
+        } else {
+          // For disallowed tags, copy only their text content
+          for (let child of Array.from(source.childNodes)) {
+            copyNode(child, target);
+          }
+        }
+      }
+    };
+    
+    // Copy body content to tempDiv safely
+    for (let child of Array.from(doc.body.childNodes)) {
+      copyNode(child, tempDiv);
+    }
     
     // Remove all style attributes that contain Tailwind CSS variables
     const allElements = tempDiv.querySelectorAll('*');

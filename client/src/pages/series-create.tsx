@@ -124,9 +124,50 @@ export default function SeriesCreatePage() {
 
   // Function to clean HTML and remove unnecessary styles
   const cleanHTML = (html: string): string => {
-    // Create a temporary div to parse the HTML
+    // Create a temporary div to parse the HTML safely
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
+    
+    // Create a DOMParser for safe HTML parsing
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    
+    // Only copy text nodes and safe elements
+    const allowedTags = ['P', 'BR', 'STRONG', 'EM', 'U', 'H4', 'H5', 'H6', 'DIV', 'SPAN', 'A'];
+    const copyNode = (source: Node, target: Element) => {
+      if (source.nodeType === Node.TEXT_NODE) {
+        target.appendChild(document.createTextNode(source.textContent || ''));
+      } else if (source.nodeType === Node.ELEMENT_NODE) {
+        const element = source as Element;
+        if (allowedTags.includes(element.tagName)) {
+          const newElement = document.createElement(element.tagName.toLowerCase());
+          
+          // Copy only safe attributes
+          if (element.tagName === 'A' && element.getAttribute('href')) {
+            const href = element.getAttribute('href');
+            if (href && (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('mailto:'))) {
+              newElement.setAttribute('href', href);
+            }
+          }
+          
+          target.appendChild(newElement);
+          
+          // Recursively copy child nodes
+          for (let child of Array.from(source.childNodes)) {
+            copyNode(child, newElement);
+          }
+        } else {
+          // For disallowed tags, copy only their text content
+          for (let child of Array.from(source.childNodes)) {
+            copyNode(child, target);
+          }
+        }
+      }
+    };
+    
+    // Copy body content to tempDiv safely
+    for (let child of Array.from(doc.body.childNodes)) {
+      copyNode(child, tempDiv);
+    }
     
     // Remove all style attributes that contain Tailwind CSS variables
     const allElements = tempDiv.querySelectorAll('*');
