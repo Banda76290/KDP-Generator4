@@ -119,6 +119,7 @@ export interface IStorage {
 
   // Marketplace Categories operations
   getMarketplaceCategories(marketplace: string): Promise<MarketplaceCategory[]>;
+  getMarketplaceCategoriesWithFormat(marketplace: string, format?: string): Promise<MarketplaceCategory[]>;
 
   // Blog operations
   getBlogCategories(): Promise<BlogCategory[]>;
@@ -1127,6 +1128,42 @@ export class DatabaseStorage implements IStorage {
         eq(marketplaceCategories.isActive, true)
       ))
       .orderBy(marketplaceCategories.level, marketplaceCategories.sortOrder, marketplaceCategories.displayName);
+  }
+
+  async getMarketplaceCategoriesWithFormat(marketplace: string, format?: string): Promise<MarketplaceCategory[]> {
+    // Map format to discriminant
+    const discriminant = format === 'ebook' ? 'kindle_ebook' : 
+                        (format === 'paperback' || format === 'hardcover') ? 'print_kdp_paperback' : 
+                        null;
+
+    let categories = await db
+      .select()
+      .from(marketplaceCategories)
+      .where(and(
+        eq(marketplaceCategories.marketplace, marketplace),
+        eq(marketplaceCategories.isActive, true)
+      ))
+      .orderBy(marketplaceCategories.level, marketplaceCategories.sortOrder, marketplaceCategories.displayName);
+
+    // If format is provided, filter categories based on discriminant
+    if (discriminant) {
+      categories = categories.filter(cat => {
+        // NEVER include the discriminants themselves as selectable categories
+        const isDiscriminant = cat.displayName === 'kindle_ebook' || cat.displayName === 'print_kdp_paperback';
+        
+        if (isDiscriminant) {
+          return false; // Exclude discriminants from selectable categories
+        }
+        
+        // Only include categories that belong to the correct format path
+        const belongsToPath = cat.categoryPath.includes(`> ${discriminant} >`) || 
+                             cat.categoryPath === `Books > ${discriminant}`;
+        
+        return belongsToPath;
+      });
+    }
+
+    return categories;
   }
 }
 

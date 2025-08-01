@@ -187,8 +187,9 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
   const maxDepth = useMemo(() => {
     if (marketplaceCategories.length === 0) return 3; // Default fallback
     const maxLevel = Math.max(...marketplaceCategories.map(cat => cat.level));
-    // We need one dropdown for each level except the final selectable level
-    return Math.max(maxLevel - 1, 1);
+    const minLevel = Math.min(...marketplaceCategories.map(cat => cat.level));
+    // We need one dropdown for each level from min to max-1
+    return Math.max(maxLevel - minLevel, 1);
   }, [marketplaceCategories]);
 
   // Dynamic state for navigation levels
@@ -274,14 +275,17 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
 
   // Get categories by level and parent (dynamic)
   const getCategoriesForLevel = (level: number, parentPath?: string) => {
-    if (level === 2) {
-      // Level 2 categories (main categories, children of "Books")
+    // Find the minimum level to start from
+    const minLevel = marketplaceCategories.length > 0 ? Math.min(...marketplaceCategories.map(cat => cat.level)) : 3;
+    
+    if (level === minLevel) {
+      // Root level categories (main categories, based on data structure)
       return marketplaceCategories
-        .filter(cat => cat.level === 2)
+        .filter(cat => cat.level === minLevel)
         .sort((a, b) => a.sortOrder - b.sortOrder);
     }
     
-    // For levels 3+, filter by parentPath
+    // For deeper levels, filter by parentPath
     return marketplaceCategories
       .filter(cat => cat.level === level && cat.parentPath === parentPath)
       .sort((a, b) => a.sortOrder - b.sortOrder);
@@ -337,7 +341,9 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
       <div className="space-y-4">
         {/* Generate dropdowns dynamically based on maxDepth */}
         {Array.from({ length: maxDepth }, (_, index) => {
-          const level = index + 2; // Levels start at 2 (main categories)
+          // Calculate the actual level based on the minimum level in our data
+          const minLevel = marketplaceCategories.length > 0 ? Math.min(...marketplaceCategories.map(cat => cat.level)) : 3;
+          const level = index + minLevel; // Levels start at the minimum level in our data
           const parentPath = index === 0 ? undefined : selectedLevels[index - 1];
           const shouldShow = index === 0 || (parentPath && parentPath !== "");
           
@@ -1312,6 +1318,14 @@ export default function EditBook() {
     }
   }, [form.watch("previouslyPublished")]);
 
+  // Reload categories when format changes
+  useEffect(() => {
+    const currentMarketplace = form.watch("primaryMarketplace");
+    if (currentMarketplace) {
+      loadMarketplaceCategories(currentMarketplace);
+    }
+  }, [form.watch("format")]);
+
   const addKeyword = (keyword: string) => {
     if (keyword.trim() && !keywords.includes(keyword.trim()) && keywords.length < 7) {
       setKeywords([...keywords, keyword.trim()]);
@@ -1338,7 +1352,9 @@ export default function EditBook() {
     
     setLoadingCategories(true);
     try {
-      const response = await apiRequest("GET", `/api/marketplace-categories/${encodeURIComponent(marketplace)}`);
+      const format = form.watch("format");
+      const formatParam = format ? `?format=${encodeURIComponent(format)}` : '';
+      const response = await apiRequest("GET", `/api/marketplace-categories/${encodeURIComponent(marketplace)}${formatParam}`);
       setMarketplaceCategories(response || []);
     } catch (error) {
       console.error("Error loading marketplace categories:", error);
@@ -1359,7 +1375,9 @@ export default function EditBook() {
     if (currentCategories.length === 0) return [];
     
     try {
-      const response = await apiRequest("GET", `/api/marketplace-categories/${encodeURIComponent(newMarketplace)}`);
+      const format = form.watch("format");
+      const formatParam = format ? `?format=${encodeURIComponent(format)}` : '';
+      const response = await apiRequest("GET", `/api/marketplace-categories/${encodeURIComponent(newMarketplace)}${formatParam}`);
       const newMarketplaceCategories: MarketplaceCategory[] = response || [];
       const validCategoryPaths = newMarketplaceCategories.map(cat => cat.categoryPath);
       
@@ -1375,7 +1393,7 @@ export default function EditBook() {
     // Check both form categories and local categories state
     const formCategories = form.getValues("categories") || [];
     const localCategories = categories || [];
-    const allCurrentCategories = [...new Set([...formCategories, ...localCategories])]; // Combine and deduplicate
+    const allCurrentCategories = Array.from(new Set([...formCategories, ...localCategories])); // Combine and deduplicate
     
     console.log("Marketplace change check:", { 
       newMarketplace, 
@@ -3394,6 +3412,8 @@ export default function EditBook() {
                 </div>
               )}
 
+
+
               {/* Category Selection Interface */}
               {!loadingCategories && marketplaceCategories.length > 0 && (
                 <div className="space-y-4">
@@ -3485,6 +3505,7 @@ export default function EditBook() {
                 <div className="text-center py-8">
                   <p className="text-gray-600">No categories available for the selected marketplace.</p>
                   <p className="text-sm text-gray-500 mt-2">Try selecting a different Primary Marketplace.</p>
+
                 </div>
               )}
 

@@ -24,13 +24,6 @@ const isAdmin = async (req: AuthenticatedRequest, res: Response, next: NextFunct
     if (!userId) {
       return res.status(401).json({ message: "User not authenticated" });
     }
-
-    // In development mode, allow development user admin access
-    if (process.env.NODE_ENV === 'development' && userId === 'dev-user-123') {
-      req.admin = { id: userId, role: 'superadmin' };
-      return next();
-    }
-
     const user = await storage.getUser(userId);
     
     if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
@@ -757,16 +750,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get marketplace categories
+  // Get marketplace categories with format filter
   app.get('/api/marketplace-categories/:marketplace', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { marketplace } = req.params;
+      const { format } = req.query;
       
       if (!marketplace) {
         return res.status(400).json({ message: "Marketplace parameter is required" });
       }
 
-      const categories = await storage.getMarketplaceCategories(marketplace);
+      const categories = await storage.getMarketplaceCategoriesWithFormat(marketplace, format as string);
       res.json(categories);
     } catch (error) {
       console.error("Error fetching marketplace categories:", error);
@@ -1303,7 +1297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const result = await aiConfigService.generateContent({
         functionType,
-        context: context || { userId: req.user?.claims?.sub },
+        context: context || { userId: req.user?.id },
         customPrompt,
         customModel
       });
@@ -1639,17 +1633,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/database/reset', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       await forceSeedDatabase();
-      
-      // Get updated category count
-      const { db } = await import('./db.js');
-      const { marketplaceCategories } = await import('@shared/schema');
-      const categoryCount = await db.select().from(marketplaceCategories);
-      
       res.json({ 
         message: 'Database reset and re-seeding completed successfully',
-        success: true,
-        categoriesCount: categoryCount.length,
-        timestamp: new Date().toISOString()
+        success: true 
       });
     } catch (error) {
       console.error("Error resetting database:", error);
@@ -1657,61 +1643,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Failed to reset database",
         error: error instanceof Error ? error.message : 'Unknown error',
         success: false 
-      });
-    }
-  });
-
-  // Simplified sync endpoint for production compatibility
-  app.post('/api/admin/sync-categories', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub || req.user?.id;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-
-      // Enhanced authentication check
-      let isAuthorized = false;
-      
-      // Development mode bypass
-      if (process.env.NODE_ENV === 'development' && userId === 'dev-user-123') {
-        isAuthorized = true;
-      } else {
-        // Production mode - check user role or email domain
-        const user = await storage.getUser(userId);
-        if (user && (user.role === 'admin' || user.role === 'superadmin')) {
-          isAuthorized = true;
-        }
-        // Additional check for specific email domains if needed
-        // if (user && user.email && user.email.endsWith('@yourdomain.com')) {
-        //   isAuthorized = true;
-        // }
-      }
-
-      if (!isAuthorized) {
-        return res.status(403).json({ message: "Admin access required for category synchronization" });
-      }
-
-      // Force reseed with corrected mapping
-      await forceSeedDatabase();
-      
-      // Get updated counts
-      const { db } = await import('./db.js');
-      const { marketplaceCategories } = await import('@shared/schema');
-      const categoryCount = await db.select().from(marketplaceCategories);
-      
-      res.json({ 
-        success: true,
-        message: 'Categories synchronized successfully with corrected level mapping', 
-        categoriesCount: categoryCount.length,
-        timestamp: new Date().toISOString(),
-        correctionApplied: true
-      });
-    } catch (error) {
-      console.error("Error synchronizing categories:", error);
-      res.status(500).json({ 
-        success: false,
-        message: "Failed to synchronize categories", 
-        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });

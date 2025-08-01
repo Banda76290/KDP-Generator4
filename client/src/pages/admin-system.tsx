@@ -82,23 +82,23 @@ export default function AdminSystem() {
     },
   });
 
-  // Production-compatible sync mutation  
-  const syncCategories = useMutation({
-    mutationFn: () => apiRequest("/api/admin/sync-categories", "POST"),
+  // Database reset mutation
+  const resetDatabase = useMutation({
+    mutationFn: () => apiRequest("/api/admin/database/reset", "POST"),
     onMutate: () => {
       setSeedingStatus('resetting');
     },
-    onSuccess: (data: any) => {
+    onSuccess: () => {
       toast({
-        title: "Synchronisation réussie",
-        description: `${data.categoriesCount} catégories synchronisées avec le mapping corrigé.`,
+        title: "Reset réussi",
+        description: "La base de données a été remise à zéro et re-synchronisée.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/system/health"] });
     },
     onError: (error: any) => {
       toast({
-        title: "Erreur de synchronisation",
-        description: error.message || "Impossible de synchroniser les catégories.",
+        title: "Erreur de reset",
+        description: error.message || "Impossible de remettre à zéro la base de données.",
         variant: "destructive",
       });
     },
@@ -114,8 +114,8 @@ export default function AdminSystem() {
   };
 
   const handleReset = () => {
-    if (confirm("ATTENTION: Cette action va synchroniser les catégories avec le mapping corrigé pour résoudre les problèmes de production. Continuer ?")) {
-      syncCategories.mutate();
+    if (confirm("ATTENTION: Cette action va effacer toutes les catégories existantes et les remplacer. Êtes-vous sûr de vouloir continuer ?")) {
+      resetDatabase.mutate();
     }
   };
 

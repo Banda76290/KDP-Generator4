@@ -36,50 +36,9 @@ export async function seedDatabase() {
       }
     }
     
-    console.log('🔧 Fixing category level mapping for frontend compatibility...');
-    
-    // Fix the level mapping issue: discriminants (kindle_ebook/print_kdp_paperback) should not offset levels
-    // The frontend expects main categories to start at level 2, but discriminants create an offset
-    
-    // Step 1: Reduce levels by 1 for all categories that come after discriminants
-    await db.execute(sql.raw(`
-      UPDATE marketplace_categories 
-      SET level = level - 1 
-      WHERE level > 2 
-      AND (category_path LIKE 'Books > kindle_ebook > %' OR category_path LIKE 'Books > print_kdp_paperback > %')
-    `));
-    
-    // Step 2: Update parent paths to remove the intermediate discriminant level
-    await db.execute(sql.raw(`
-      UPDATE marketplace_categories 
-      SET parent_path = CASE
-        WHEN parent_path = 'Books > kindle_ebook' THEN NULL
-        WHEN parent_path = 'Books > print_kdp_paperback' THEN NULL
-        WHEN parent_path LIKE 'Books > kindle_ebook > %' THEN 
-          SUBSTRING(parent_path FROM POSITION(' > ' IN SUBSTRING(parent_path FROM 18)) + 18)
-        WHEN parent_path LIKE 'Books > print_kdp_paperback > %' THEN 
-          SUBSTRING(parent_path FROM POSITION(' > ' IN SUBSTRING(parent_path FROM 24)) + 24)
-        ELSE parent_path
-      END
-      WHERE (category_path LIKE 'Books > kindle_ebook > %' OR category_path LIKE 'Books > print_kdp_paperback > %')
-    `));
-    
-    // Step 3: Update category paths to remove discriminant for actual categories
-    await db.execute(sql.raw(`
-      UPDATE marketplace_categories 
-      SET category_path = CASE
-        WHEN category_path LIKE 'Books > kindle_ebook > %' THEN 
-          'Books > ' || SUBSTRING(category_path FROM 18)
-        WHEN category_path LIKE 'Books > print_kdp_paperback > %' THEN 
-          'Books > ' || SUBSTRING(category_path FROM 24)
-        ELSE category_path
-      END
-      WHERE (category_path LIKE 'Books > kindle_ebook > %' OR category_path LIKE 'Books > print_kdp_paperback > %')
-    `));
-    
     // Verify seeding
     const categoryCount = await db.select().from(marketplaceCategories);
-    console.log(`✅ Successfully seeded ${categoryCount.length} marketplace categories with corrected level mapping`);
+    console.log(`✅ Successfully seeded ${categoryCount.length} marketplace categories`);
     
   } catch (error) {
     console.error('❌ Error seeding database:', error);
