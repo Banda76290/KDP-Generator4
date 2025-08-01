@@ -1212,7 +1212,7 @@ export default function EditBook() {
   });
 
   // Load existing authors
-  const { data: authors = [], isLoading: loadingAuthors } = useQuery({
+  const { data: authors = [], isLoading: loadingAuthors } = useQuery<any[]>({
     queryKey: ["/api/authors"],
   });
 
@@ -2423,36 +2423,7 @@ export default function EditBook() {
                       </div>
                     )}
 
-                    {!selectedAuthorId && (
-                      <div>
-                        <Label className="font-medium text-[14px]">Or enter author details manually</Label>
-                        <div className="grid grid-cols-5 gap-3 mt-2">
-                          <Input
-                            placeholder="Prefix"
-                            {...form.register("authorPrefix")}
-                          />
-                          <Input
-                            placeholder="First name"
-                            {...form.register("authorFirstName", { required: "First name is required" })}
-                          />
-                          <Input
-                            placeholder="Middle name"
-                            {...form.register("authorMiddleName")}
-                          />
-                          <Input
-                            placeholder="Last name"
-                            {...form.register("authorLastName", { required: "Last name is required" })}
-                          />
-                          <Input
-                            placeholder="Suffix"
-                            {...form.register("authorSuffix")}
-                          />
-                        </div>
-                        {(form.formState.errors.authorFirstName || form.formState.errors.authorLastName) && (
-                          <p className="text-sm text-red-600 mt-1">First name and last name are required</p>
-                        )}
-                      </div>
-                    )}
+
                   </div>
 
                   {/* Contributors Section */}

@@ -98,7 +98,7 @@ export default function CreateBook() {
   });
 
   // Load existing authors
-  const { data: authors = [], isLoading: loadingAuthors } = useQuery({
+  const { data: authors = [], isLoading: loadingAuthors } = useQuery<any[]>({
     queryKey: ["/api/authors"],
   });
 
@@ -464,52 +464,7 @@ export default function CreateBook() {
                           </div>
                         )}
 
-                        {!selectedAuthorId && (
-                          <div className="mt-4">
-                            <Label className="font-medium text-[14px]">Ou saisir les détails de l'auteur manuellement</Label>
-                            <div className="grid grid-cols-5 gap-2 mt-2">
-                              <div>
-                                <Label>Préfixe</Label>
-                                <Input
-                                  {...form.register("authorPrefix")}
-                                  placeholder="Dr."
-                                  className="mt-1"
-                                />
-                              </div>
-                              <div>
-                                <Label>Prénom</Label>
-                                <Input
-                                  {...form.register("authorFirstName")}
-                                  placeholder="Sébastien"
-                                  className="mt-1"
-                                />
-                              </div>
-                              <div>
-                                <Label>Deuxième Prénom</Label>
-                                <Input
-                                  {...form.register("authorMiddleName")}
-                                  className="mt-1"
-                                />
-                              </div>
-                              <div>
-                                <Label>Nom</Label>
-                                <Input
-                                  {...form.register("authorLastName")}
-                                  placeholder="JULLIARD-BESSON"
-                                  className="mt-1"
-                                />
-                              </div>
-                              <div>
-                                <Label>Suffixe</Label>
-                                <Input
-                                  {...form.register("authorSuffix")}
-                                  placeholder="PhD"
-                                  className="mt-1"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        )}
+
                       </CardContent>
                     </Card>
 
