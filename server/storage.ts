@@ -1315,11 +1315,14 @@ export class DatabaseStorage implements IStorage {
                         (format === 'paperback' || format === 'hardcover') ? 'print_kdp_paperback' : 
                         null;
 
+    // Normalize marketplace name to lowercase for database query
+    const normalizedMarketplace = marketplace.toLowerCase();
+
     let categories = await db
       .select()
       .from(marketplaceCategories)
       .where(and(
-        eq(marketplaceCategories.marketplace, marketplace),
+        eq(marketplaceCategories.marketplace, normalizedMarketplace),
         eq(marketplaceCategories.isActive, true)
       ))
       .orderBy(marketplaceCategories.level, marketplaceCategories.sortOrder, marketplaceCategories.displayName);
