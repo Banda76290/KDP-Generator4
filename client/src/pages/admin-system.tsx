@@ -775,9 +775,19 @@ export default function AdminSystem() {
           <CardContent className="space-y-4">
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
               <h4 className="font-medium text-orange-900 mb-2">⚠️ Attention</h4>
+              <div className="bg-red-50 border border-red-200 rounded p-3 mb-3">
+                <p className="text-sm text-red-800 mb-2">
+                  ⚠️ <strong>La synchronisation directe échouera probablement</strong> car elle nécessite :
+                </p>
+                <ul className="text-xs text-red-700 list-disc list-inside space-y-1 ml-2">
+                  <li>Une URL de production accessible et déployée</li>
+                  <li>L'authentification et les autorisations CORS configurées</li>
+                  <li>L'API /api/admin/categories/migrate active sur le serveur cible</li>
+                </ul>
+              </div>
               <p className="text-sm text-orange-800 mb-3">
-                Cette fonctionnalité permet de pousser les catégories de cet environnement de développement 
-                vers la base de données de production. Cette action remplacera toutes les catégories existantes en production.
+                <strong>Recommandation :</strong> Utilisez les méthodes manuelles ci-dessous (Copier SQL) qui fonctionnent toujours, 
+                même si la synchronisation directe échoue.
               </p>
               <div className="bg-orange-100 border border-orange-300 rounded p-3 space-y-3">
                 <p className="text-xs text-orange-700">
@@ -800,6 +810,12 @@ export default function AdminSystem() {
                       <li>Uploadez le fichier dans votre projet de production</li>
                       <li>Exécutez le fichier via la console Database</li>
                     </ol>
+                  </div>
+                  <div className="bg-green-50 border border-green-200 rounded p-2 mt-2">
+                    <p className="text-green-700 text-xs font-medium">
+                      ✅ <strong>Solution recommandée :</strong> Ces méthodes manuelles fonctionnent toujours, 
+                      même quand la synchronisation directe échoue (erreur 403/CORS).
+                    </p>
                   </div>
                   <div className="bg-yellow-50 border border-yellow-200 rounded p-2 mt-2">
                     <p className="text-yellow-700 text-xs">
@@ -872,11 +888,10 @@ export default function AdminSystem() {
                     <Button 
                       onClick={handleCopySQL}
                       disabled={seedingStatus !== 'idle'}
-                      variant="outline"
-                      className="flex-1"
+                      className="flex-1 bg-green-600 hover:bg-green-700"
                     >
                       <Copy className="h-4 w-4 mr-2" />
-                      Copier SQL
+                      ✅ Copier SQL (Recommandé)
                     </Button>
                     <Button 
                       onClick={handleExportSQL}

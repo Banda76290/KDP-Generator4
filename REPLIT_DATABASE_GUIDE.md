@@ -38,10 +38,20 @@ Si la méthode copier-coller ne fonctionne pas :
 
 ## 🔧 En cas de problème
 
-1. **Erreur de connexion** : Vérifiez que l'URL de production est correcte
-2. **Erreur 403/401** : Problème d'authentification ou de CORS
-3. **Erreur 404** : L'API de migration n'existe pas sur le serveur cible
-4. **Solution de secours** : Utilisez toujours la méthode manuelle (copier-coller)
+### Erreurs communes de synchronisation directe :
+- **Erreur 403 "Accès refusé"** : Normal ! Cela arrive quand :
+  - L'URL de production n'est pas accessible
+  - CORS bloque la requête cross-origin
+  - L'authentification est requise
+- **Erreur 404** : L'API n'existe pas sur le serveur cible
+- **"Invalid referrer"** : Problème de sécurité du navigateur
+
+### ✅ Solution qui fonctionne TOUJOURS :
+**Utilisez "Copier SQL" + l'onglet Database de Replit**
+1. Même si la synchronisation directe échoue
+2. Pas de problèmes CORS ou d'authentification 
+3. Fonctionne sur tous les projets Replit
+4. Plus simple et plus fiable
 
 ## 📊 Après la synchronisation
 
