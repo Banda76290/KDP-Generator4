@@ -423,55 +423,83 @@ export default function AdminSystem() {
     }
   };
 
+  const generateSQLContent = async () => {
+    const exportResult = await exportCategories.mutateAsync();
+    
+    if (exportResult.categories && exportResult.categories.length > 0) {
+      const categories = exportResult.categories;
+      let sqlContent = `-- Export SQL des catégories KDP Generator\n`;
+      sqlContent += `-- Généré le ${new Date().toLocaleString('fr-FR')}\n`;
+      sqlContent += `-- ${categories.length} catégories exportées\n\n`;
+      
+      sqlContent += `-- Vider et recréer la table\n`;
+      sqlContent += `TRUNCATE TABLE marketplace_categories CASCADE;\n\n`;
+      
+      categories.forEach((cat: any) => {
+        const values = [
+          `'${cat.marketplace.replace(/'/g, "''")}'`,
+          `'${cat.categoryPath.replace(/'/g, "''")}'`,
+          cat.parentPath ? `'${cat.parentPath.replace(/'/g, "''")}'` : 'NULL',
+          cat.level,
+          `'${cat.displayName.replace(/'/g, "''")}'`,
+          cat.isSelectable,
+          cat.sortOrder,
+          cat.isActive,
+          'NOW()',
+          'NOW()'
+        ];
+        
+        sqlContent += `INSERT INTO marketplace_categories (marketplace, category_path, parent_path, level, display_name, is_selectable, sort_order, is_active, created_at, updated_at) VALUES (${values.join(', ')});\n`;
+      });
+      
+      return { sqlContent, count: categories.length };
+    }
+    throw new Error('Aucune catégorie à exporter');
+  };
+
+  const handleCopySQL = async () => {
+    try {
+      addLog('📋 Copie du SQL dans le presse-papiers...', 'info');
+      const { sqlContent, count } = await generateSQLContent();
+      
+      await navigator.clipboard.writeText(sqlContent);
+      
+      addLog(`✅ SQL copié: ${count} catégories`, 'success');
+      toast({
+        title: "SQL copié",
+        description: `Le code SQL pour ${count} catégories a été copié dans le presse-papiers. Allez dans l'onglet Database de Replit et collez-le dans le SQL runner.`,
+      });
+    } catch (error: any) {
+      addLog(`❌ Erreur lors de la copie SQL: ${error.message}`, 'error');
+      toast({
+        title: "Erreur de copie",
+        description: error.message || "Impossible de copier le SQL.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleExportSQL = async () => {
     try {
       addLog('📤 Début de l\'export SQL...', 'info');
-      const exportResult = await exportCategories.mutateAsync();
+      const { sqlContent, count } = await generateSQLContent();
       
-      if (exportResult.categories && exportResult.categories.length > 0) {
-        // Generate SQL file content
-        const categories = exportResult.categories;
-        let sqlContent = `-- Export SQL des catégories KDP Generator\n`;
-        sqlContent += `-- Généré le ${new Date().toLocaleString('fr-FR')}\n`;
-        sqlContent += `-- ${categories.length} catégories exportées\n\n`;
-        
-        sqlContent += `-- Vider et recréer la table\n`;
-        sqlContent += `TRUNCATE TABLE marketplace_categories CASCADE;\n\n`;
-        
-        categories.forEach(cat => {
-          const values = [
-            `'${cat.marketplace.replace(/'/g, "''")}'`,
-            `'${cat.categoryPath.replace(/'/g, "''")}'`,
-            cat.parentPath ? `'${cat.parentPath.replace(/'/g, "''")}'` : 'NULL',
-            cat.level,
-            `'${cat.displayName.replace(/'/g, "''")}'`,
-            cat.isSelectable,
-            cat.sortOrder,
-            cat.isActive,
-            'NOW()',
-            'NOW()'
-          ];
-          
-          sqlContent += `INSERT INTO marketplace_categories (marketplace, category_path, parent_path, level, display_name, is_selectable, sort_order, is_active, created_at, updated_at) VALUES (${values.join(', ')});\n`;
-        });
-        
-        // Download file
-        const blob = new Blob([sqlContent], { type: 'text/sql' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `kdp-categories-export-${new Date().toISOString().split('T')[0]}.sql`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        addLog(`✅ Fichier SQL téléchargé: ${categories.length} catégories`, 'success');
-        toast({
-          title: "Export SQL réussi",
-          description: `${categories.length} catégories exportées vers un fichier SQL.`,
-        });
-      }
+      // Download file
+      const blob = new Blob([sqlContent], { type: 'text/sql' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `kdp-categories-export-${new Date().toISOString().split('T')[0]}.sql`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      addLog(`✅ Fichier SQL téléchargé: ${count} catégories`, 'success');
+      toast({
+        title: "Export SQL réussi",
+        description: `${count} catégories exportées vers un fichier SQL.`,
+      });
     } catch (error: any) {
       addLog(`❌ Erreur lors de l'export SQL: ${error.message}`, 'error');
       toast({
@@ -751,11 +779,19 @@ export default function AdminSystem() {
                 Cette fonctionnalité permet de pousser les catégories de cet environnement de développement 
                 vers la base de données de production. Cette action remplacera toutes les catégories existantes en production.
               </p>
-              <div className="bg-orange-100 border border-orange-300 rounded p-2">
+              <div className="bg-orange-100 border border-orange-300 rounded p-3 space-y-2">
                 <p className="text-xs text-orange-700">
-                  <strong>Alternative :</strong> Si la synchronisation directe échoue, vous pouvez exporter un fichier SQL 
-                  et l'importer manuellement sur votre serveur de production.
+                  <strong>Alternative :</strong> Si la synchronisation directe échoue, utilisez "Copier SQL" ou "Télécharger SQL".
                 </p>
+                <div className="text-xs text-orange-600 space-y-1">
+                  <p><strong>Étapes pour Replit :</strong></p>
+                  <ol className="list-decimal list-inside space-y-1 ml-2">
+                    <li>Cliquez sur "Copier SQL" pour copier le code</li>
+                    <li>Allez dans l'onglet "Database" de votre projet Replit</li>
+                    <li>Ouvrez le "SQL runner" dans l'interface Database</li>
+                    <li>Collez le code SQL et exécutez-le</li>
+                  </ol>
+                </div>
               </div>
             </div>
 
@@ -815,24 +851,35 @@ export default function AdminSystem() {
                   )}
                 </Button>
 
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={handleExportSQL}
-                    disabled={seedingStatus !== 'idle'}
-                    variant="outline"
-                    className="flex-1"
-                  >
-                    <Database className="h-4 w-4 mr-2" />
-                    Exporter SQL
-                  </Button>
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={handleCopySQL}
+                      disabled={seedingStatus !== 'idle'}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copier SQL
+                    </Button>
+                    <Button 
+                      onClick={handleExportSQL}
+                      disabled={seedingStatus !== 'idle'}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      <Database className="h-4 w-4 mr-2" />
+                      Télécharger SQL
+                    </Button>
+                  </div>
                   <Button 
                     onClick={handleExportJSON}
                     disabled={seedingStatus !== 'idle'}
                     variant="outline"
-                    className="flex-1"
+                    className="w-full"
                   >
                     <Copy className="h-4 w-4 mr-2" />
-                    Exporter JSON
+                    Télécharger JSON
                   </Button>
                 </div>
                 
@@ -1152,7 +1199,7 @@ export default function AdminSystem() {
               </div>
               <div>
                 {systemLogsData && typeof systemLogsData === 'object' && 'total' in systemLogsData && (
-                  <span>Total serveur: {String((systemLogsData as { total: number }).total)}</span>
+                  <span>Total serveur: {String((systemLogsData as any).total)}</span>
                 )}
               </div>
             </div>
