@@ -144,10 +144,27 @@ export default function AdminSystem() {
     setLogs(prev => [...prev, `[${timestamp}] ${prefix} ${message}`]);
   };
 
+  // Clear logs mutation
+  const clearLogsMutation = useMutation({
+    mutationFn: () => apiRequest('/api/admin/system/logs', { method: 'DELETE' }),
+    onSuccess: () => {
+      setLogs([]);
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/system/logs'] });
+      toast({
+        description: "Logs système effacés"
+      });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        description: "Erreur lors de l'effacement des logs"
+      });
+    }
+  });
+
   // Clear logs function
   const clearLogs = () => {
-    setLogs([]);
-    addLog('Logs effacés', 'info');
+    clearLogsMutation.mutate();
   };
 
   // Copy logs to clipboard
@@ -743,10 +760,14 @@ export default function AdminSystem() {
                   variant="outline" 
                   size="sm" 
                   onClick={clearLogs}
-                  disabled={logs.length === 0}
+                  disabled={logs.length === 0 || clearLogsMutation.isPending}
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Effacer
+                  {clearLogsMutation.isPending ? (
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4 mr-2" />
+                  )}
+                  {clearLogsMutation.isPending ? 'Effacement...' : 'Effacer'}
                 </Button>
                 <Button 
                   variant="outline" 

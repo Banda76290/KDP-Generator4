@@ -45,7 +45,11 @@ export const systemLog = (message: string, level: 'info' | 'warn' | 'error' | 'd
 };
 
 // Get logs function
-export const getSystemLogs = () => globalLogs;
+export const getSystemLogs = () => globalLogs
+
+const clearSystemLogs = () => {
+  globalLogs.length = 0; // Clear the array while keeping the reference
+};
 
 // Extend Express Request type to include authenticated user
 interface AuthenticatedRequest extends Request {
@@ -1129,6 +1133,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       systemLog(`Erreur lors de la récupération des logs: ${error}`, 'error', 'API');
       res.status(500).json({ message: "Failed to fetch system logs" });
+    }
+  });
+
+  // Clear system logs endpoint (admin only)
+  app.delete('/api/admin/system/logs', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const previousCount = getSystemLogs().length;
+      clearSystemLogs(); // Clear the logs array
+      
+      systemLog('📝 Logs système effacés par l\'administrateur', 'info', 'ADMIN');
+      
+      res.json({ 
+        message: 'System logs cleared successfully',
+        previousCount,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      systemLog(`Erreur lors de l'effacement des logs: ${error}`, 'error', 'API');
+      res.status(500).json({ message: 'Failed to clear system logs' });
     }
   });
 
