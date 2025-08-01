@@ -1321,14 +1321,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMarketplaceCategoriesWithFormat(marketplace: string, format?: string): Promise<MarketplaceCategory[]> {
+    const timestamp = new Date().toISOString();
+    const requestId = Math.random().toString(36).substring(7);
+    
+    console.log(`[${timestamp}] 🔍 [STORAGE-${requestId}] DÉBUT getMarketplaceCategoriesWithFormat`);
+    console.log(`[${timestamp}] 📋 [STORAGE-${requestId}] Paramètres: marketplace=${marketplace}, format=${format}`);
+    
     // Map format to discriminant
     const discriminant = format === 'ebook' ? 'kindle_ebook' : 
                         (format === 'paperback' || format === 'hardcover') ? 'print_kdp_paperback' : 
                         null;
 
+    console.log(`[${timestamp}] 🔄 [STORAGE-${requestId}] Discriminant calculé: ${discriminant || 'null'}`);
+
     // Normalize marketplace name to lowercase for database query
     const normalizedMarketplace = marketplace.toLowerCase();
+    console.log(`[${timestamp}] 🔄 [STORAGE-${requestId}] Marketplace normalisé: ${normalizedMarketplace}`);
 
+    console.log(`[${timestamp}] 🔍 [STORAGE-${requestId}] ÉTAPE 1: Requête base de données...`);
     let categories = await db
       .select()
       .from(marketplaceCategories)
@@ -1338,8 +1348,30 @@ export class DatabaseStorage implements IStorage {
       ))
       .orderBy(marketplaceCategories.level, marketplaceCategories.sortOrder, marketplaceCategories.displayName);
 
+    console.log(`[${timestamp}] 📊 [STORAGE-${requestId}] Catégories trouvées: ${categories.length}`);
+    
+    if (categories.length === 0) {
+      console.log(`[${timestamp}] ⚠️ [STORAGE-${requestId}] ATTENTION: Aucune catégorie trouvée pour ${normalizedMarketplace}!`);
+      
+      // Debug: vérifier toutes les marketplaces dans la base
+      const allMarketplaces = await db
+        .select({ marketplace: marketplaceCategories.marketplace })
+        .from(marketplaceCategories)
+        .groupBy(marketplaceCategories.marketplace);
+      
+      console.log(`[${timestamp}] 🔍 [STORAGE-${requestId}] Marketplaces disponibles dans la base:`);
+      for (const mp of allMarketplaces) {
+        console.log(`[${timestamp}] 📋 [STORAGE-${requestId}] - "${mp.marketplace}"`);
+      }
+    } else {
+      console.log(`[${timestamp}] ✅ [STORAGE-${requestId}] Catégories récupérées avec succès`);
+      console.log(`[${timestamp}] 📋 [STORAGE-${requestId}] Exemple: ${categories[0]?.displayName || 'N/A'} (${categories[0]?.categoryPath || 'N/A'})`);
+    }
+
     // If format is provided, try to filter categories based on discriminant
     if (discriminant) {
+      console.log(`[${timestamp}] 🔄 [STORAGE-${requestId}] ÉTAPE 2: Filtrage par format ${discriminant}...`);
+      
       const filteredCategories = categories.filter(cat => {
         // NEVER include the discriminants themselves as selectable categories
         const isDiscriminant = cat.displayName === 'kindle_ebook' || cat.displayName === 'print_kdp_paperback';
@@ -1355,18 +1387,21 @@ export class DatabaseStorage implements IStorage {
         return belongsToPath;
       });
       
-      console.log(`Found ${filteredCategories.length} categories for ${discriminant} in ${normalizedMarketplace}`);
+      console.log(`[${timestamp}] 📊 [STORAGE-${requestId}] Catégories filtrées: ${filteredCategories.length} pour ${discriminant} dans ${normalizedMarketplace}`);
       
       // RÉTROCOMPATIBILITÉ: Si aucune catégorie filtrée n'est trouvée, 
       // retourner toutes les catégories pour éviter de casser l'interface
       if (filteredCategories.length === 0) {
-        console.log(`[COMPAT] No format-specific categories found for ${discriminant}, returning all categories for backward compatibility`);
+        console.log(`[${timestamp}] ⚠️ [STORAGE-${requestId}] [COMPAT] Aucune catégorie format-spécifique trouvée pour ${discriminant}, retour de toutes les catégories pour rétrocompatibilité`);
+        console.log(`[${timestamp}] 🔍 [STORAGE-${requestId}] Retour de ${categories.length} catégories non filtrées`);
         return categories;
       }
       
+      console.log(`[${timestamp}] ✅ [STORAGE-${requestId}] Retour de ${filteredCategories.length} catégories filtrées`);
       return filteredCategories;
     }
 
+    console.log(`[${timestamp}] ✅ [STORAGE-${requestId}] FIN - Retour de ${categories.length} catégories sans filtrage`);
     return categories;
   }
 }

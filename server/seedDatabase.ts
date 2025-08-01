@@ -13,12 +13,16 @@ export async function seedDatabase() {
   try {
     console.log(`[${timestamp}] 🌱 [SEED-DB] Démarrage du seeding de la base de données...`);
     
-    // Check if categories already exist
+    // Check if categories already exist (mais seulement lors du seeding normal, pas force)
     console.log(`[${timestamp}] 🔍 [SEED-DB] Vérification des catégories existantes...`);
     const existingCategories = await db.select().from(marketplaceCategories).limit(1);
     
-    if (existingCategories.length > 0) {
-      console.log(`[${timestamp}] ✅ [SEED-DB] Base déjà peuplée, arrêt du seeding`);
+    // Dans forceSeedDatabase, on passe cette vérification puisque la table est déjà vidée
+    const isForceSeeding = existingCategories.length === 0;
+    
+    if (!isForceSeeding && existingCategories.length > 0) {
+      const totalCount = await db.select().from(marketplaceCategories);
+      console.log(`[${timestamp}] ✅ [SEED-DB] Base déjà peuplée avec ${totalCount.length} catégories, arrêt du seeding`);
       console.log(`[${timestamp}] 📊 [SEED-DB] Catégories trouvées, pas de modification nécessaire`);
       return;
     }
@@ -93,18 +97,116 @@ export async function forceSeedDatabase() {
     console.log(`[${timestamp}] 🔥 [FORCE-SEED] DÉBUT DU FORCE SEEDING (suppression complète)`);
     console.log(`[${timestamp}] ⚠️ [FORCE-SEED] ATTENTION: Toutes les catégories vont être supprimées`);
     
-    // Clear existing categories
-    console.log(`[${timestamp}] 🗑️ [FORCE-SEED] Suppression de toutes les catégories existantes...`);
-    const deleteResult = await db.delete(marketplaceCategories);
-    console.log(`[${timestamp}] ✅ [FORCE-SEED] Suppression terminée`);
-    console.log(`[${timestamp}] 📊 [FORCE-SEED] Toutes les données de catégories ont été effacées`);
+    // 1. Vérifier l'état initial de la base
+    console.log(`[${timestamp}] 🔍 [FORCE-SEED] ÉTAPE 1: Vérification de l'état initial...`);
+    const initialCount = await db.select().from(marketplaceCategories);
+    console.log(`[${timestamp}] 📊 [FORCE-SEED] État initial: ${initialCount.length} catégories existantes`);
     
-    // Re-seed
-    console.log(`[${timestamp}] 🔄 [FORCE-SEED] Lancement du seeding complet...`);
+    // 2. Vérifier la structure de la table
+    console.log(`[${timestamp}] 🏗️ [FORCE-SEED] ÉTAPE 2: Vérification de la structure de la table...`);
+    try {
+      const tableSchema = await db.execute(sql.raw(`
+        SELECT column_name, data_type, is_nullable, column_default
+        FROM information_schema.columns 
+        WHERE table_name = 'marketplace_categories' 
+        ORDER BY ordinal_position;
+      `));
+      console.log(`[${timestamp}] 📋 [FORCE-SEED] Structure de la table marketplace_categories:`);
+      const schemaRows = (tableSchema as any).rows || tableSchema;
+      for (const column of schemaRows) {
+        console.log(`[${timestamp}] 📋 [FORCE-SEED] - ${column.column_name}: ${column.data_type} (nullable: ${column.is_nullable})`);
+      }
+    } catch (schemaError) {
+      console.log(`[${timestamp}] ⚠️ [FORCE-SEED] Impossible de récupérer le schéma de la table:`, schemaError);
+    }
+    
+    // 3. Clear existing categories
+    console.log(`[${timestamp}] 🗑️ [FORCE-SEED] ÉTAPE 3: Suppression de toutes les catégories existantes...`);
+    const deleteResult = await db.delete(marketplaceCategories);
+    console.log(`[${timestamp}] ✅ [FORCE-SEED] Suppression terminée avec succès`);
+    
+    // 4. Vérifier que la suppression a fonctionné
+    console.log(`[${timestamp}] 🔍 [FORCE-SEED] ÉTAPE 4: Vérification de la suppression...`);
+    const afterDeleteCount = await db.select().from(marketplaceCategories);
+    console.log(`[${timestamp}] 📊 [FORCE-SEED] Après suppression: ${afterDeleteCount.length} catégories restantes`);
+    
+    if (afterDeleteCount.length > 0) {
+      console.log(`[${timestamp}] ⚠️ [FORCE-SEED] ATTENTION: ${afterDeleteCount.length} catégories non supprimées!`);
+    }
+    
+    // 5. Re-seed
+    console.log(`[${timestamp}] 🔄 [FORCE-SEED] ÉTAPE 5: Lancement du seeding complet...`);
     await seedDatabase();
     
+    // 6. Vérification finale complète
+    console.log(`[${timestamp}] 🔍 [FORCE-SEED] ÉTAPE 6: Vérification finale complète...`);
+    const finalCount = await db.select().from(marketplaceCategories);
+    console.log(`[${timestamp}] 📊 [FORCE-SEED] État final: ${finalCount.length} catégories dans la base`);
+    
+    // 7. Analyse détaillée des données insérées
+    console.log(`[${timestamp}] 🔍 [FORCE-SEED] ÉTAPE 7: Analyse des données insérées...`);
+    
+    const marketplaceStats = await db.execute(sql.raw(`
+      SELECT marketplace, COUNT(*) as count 
+      FROM marketplace_categories 
+      GROUP BY marketplace 
+      ORDER BY marketplace;
+    `));
+    
+    const levelStats = await db.execute(sql.raw(`
+      SELECT level, COUNT(*) as count 
+      FROM marketplace_categories 
+      GROUP BY level 
+      ORDER BY level;
+    `));
+    
+    const formatStats = await db.execute(sql.raw(`
+      SELECT 
+        CASE 
+          WHEN category_path LIKE '%kindle_ebook%' THEN 'kindle_ebook'
+          WHEN category_path LIKE '%paperback%' THEN 'paperback'
+          ELSE 'autres'
+        END as format,
+        COUNT(*) as count
+      FROM marketplace_categories 
+      GROUP BY format 
+      ORDER BY format;
+    `));
+    
+    console.log(`[${timestamp}] 📊 [FORCE-SEED] Répartition par marketplace:`);
+    const marketplaceRows = (marketplaceStats as any).rows || marketplaceStats;
+    for (const stat of marketplaceRows) {
+      console.log(`[${timestamp}] 📊 [FORCE-SEED] - ${stat.marketplace}: ${stat.count} catégories`);
+    }
+    
+    console.log(`[${timestamp}] 📊 [FORCE-SEED] Répartition par niveau:`);
+    const levelRows = (levelStats as any).rows || levelStats;
+    for (const stat of levelRows) {
+      console.log(`[${timestamp}] 📊 [FORCE-SEED] - Niveau ${stat.level}: ${stat.count} catégories`);
+    }
+    
+    console.log(`[${timestamp}] 📊 [FORCE-SEED] Répartition par format:`);
+    const formatRows = (formatStats as any).rows || formatStats;
+    for (const stat of formatRows) {
+      console.log(`[${timestamp}] 📊 [FORCE-SEED] - ${stat.format}: ${stat.count} catégories`);
+    }
+    
+    // 8. Test d'accès aux données
+    console.log(`[${timestamp}] 🧪 [FORCE-SEED] ÉTAPE 8: Test d'accès aux données...`);
+    const testCategory = await db.select().from(marketplaceCategories).limit(1);
+    if (testCategory.length > 0) {
+      console.log(`[${timestamp}] ✅ [FORCE-SEED] Test d'accès réussi - Exemple de catégorie:`);
+      console.log(`[${timestamp}] 📋 [FORCE-SEED] ID: ${testCategory[0].id}`);
+      console.log(`[${timestamp}] 📋 [FORCE-SEED] Marketplace: ${testCategory[0].marketplace}`);
+      console.log(`[${timestamp}] 📋 [FORCE-SEED] Chemin: ${testCategory[0].categoryPath}`);
+      console.log(`[${timestamp}] 📋 [FORCE-SEED] Niveau: ${testCategory[0].level}`);
+    } else {
+      console.log(`[${timestamp}] ❌ [FORCE-SEED] ÉCHEC: Aucune catégorie accessible après seeding!`);
+    }
+    
     console.log(`[${timestamp}] ✅ [FORCE-SEED] Force seeding terminé avec succès`);
-    console.log(`[${timestamp}] 🎯 [FORCE-SEED] Base de données complètement reconstruite`);
+    console.log(`[${timestamp}] 🎯 [FORCE-SEED] Base de données complètement reconstruite avec ${finalCount.length} catégories`);
+    
   } catch (error) {
     console.error(`[${timestamp}] ❌ [FORCE-SEED] Erreur critique lors du force seeding:`, error);
     console.error(`[${timestamp}] 🔍 [FORCE-SEED] Stack trace:`, error instanceof Error ? error.stack : 'Non disponible');

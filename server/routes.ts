@@ -752,18 +752,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get marketplace categories with format filter
   app.get('/api/marketplace-categories/:marketplace', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    const timestamp = new Date().toISOString();
+    const requestId = Math.random().toString(36).substring(7);
+    
     try {
       const { marketplace } = req.params;
       const { format } = req.query;
       
+      console.log(`[${timestamp}] 🔍 [API-CATEGORIES-${requestId}] DÉBUT - Demande de catégories`);
+      console.log(`[${timestamp}] 📋 [API-CATEGORIES-${requestId}] Paramètres: marketplace=${marketplace}, format=${format}`);
+      console.log(`[${timestamp}] 👤 [API-CATEGORIES-${requestId}] Utilisateur: ${req.user?.email || 'Inconnu'}`);
+      
       if (!marketplace) {
+        console.log(`[${timestamp}] ❌ [API-CATEGORIES-${requestId}] Erreur: Marketplace manquant`);
         return res.status(400).json({ message: "Marketplace parameter is required" });
       }
 
+      // Vérifier l'état de la base de données avant la requête
+      console.log(`[${timestamp}] 🔍 [API-CATEGORIES-${requestId}] ÉTAPE 1: Vérification de l'état de la base...`);
+      const { db } = await import('./db.js');
+      const { marketplaceCategories } = await import('@shared/schema');
+      const totalCategoriesInDb = await db.select().from(marketplaceCategories);
+      console.log(`[${timestamp}] 📊 [API-CATEGORIES-${requestId}] Total catégories dans la base: ${totalCategoriesInDb.length}`);
+      
+      // Statistiques par marketplace
+      const marketplaceCount = await db.select().from(marketplaceCategories).where(sql`marketplace = ${marketplace}`);
+      console.log(`[${timestamp}] 📊 [API-CATEGORIES-${requestId}] Catégories pour ${marketplace}: ${marketplaceCount.length}`);
+      
+      // Si format spécifié, compter avec format
+      if (format) {
+        const formatCount = await db.select().from(marketplaceCategories)
+          .where(sql`marketplace = ${marketplace} AND category_path LIKE ${`%${format}%`}`);
+        console.log(`[${timestamp}] 📊 [API-CATEGORIES-${requestId}] Catégories ${marketplace} + format ${format}: ${formatCount.length}`);
+      }
+
+      console.log(`[${timestamp}] 🔄 [API-CATEGORIES-${requestId}] ÉTAPE 2: Appel du storage...`);
       const categories = await storage.getMarketplaceCategoriesWithFormat(marketplace, format as string);
+      
+      console.log(`[${timestamp}] 📊 [API-CATEGORIES-${requestId}] ÉTAPE 3: Résultat du storage: ${categories.length} catégories`);
+      
+      if (categories.length === 0) {
+        console.log(`[${timestamp}] ⚠️ [API-CATEGORIES-${requestId}] ATTENTION: Aucune catégorie retournée par le storage!`);
+        console.log(`[${timestamp}] 🔍 [API-CATEGORIES-${requestId}] Debug: Tentative de requête directe...`);
+        
+        const directQuery = await db.select().from(marketplaceCategories)
+          .where(sql`marketplace = ${marketplace}`)
+          .limit(3);
+        
+        console.log(`[${timestamp}] 🔍 [API-CATEGORIES-${requestId}] Requête directe résultat: ${directQuery.length} catégories`);
+        if (directQuery.length > 0) {
+          console.log(`[${timestamp}] 📋 [API-CATEGORIES-${requestId}] Exemple catégorie directe:`);
+          console.log(`[${timestamp}] 📋 [API-CATEGORIES-${requestId}] - ID: ${directQuery[0].id}`);
+          console.log(`[${timestamp}] 📋 [API-CATEGORIES-${requestId}] - Marketplace: ${directQuery[0].marketplace}`);
+          console.log(`[${timestamp}] 📋 [API-CATEGORIES-${requestId}] - Chemin: ${directQuery[0].categoryPath}`);
+        }
+      } else {
+        console.log(`[${timestamp}] ✅ [API-CATEGORIES-${requestId}] Catégories récupérées avec succès`);
+        console.log(`[${timestamp}] 📋 [API-CATEGORIES-${requestId}] Première catégorie: ${categories[0]?.displayName || 'N/A'}`);
+      }
+      
+      console.log(`[${timestamp}] 🚀 [API-CATEGORIES-${requestId}] ÉTAPE 4: Envoi de la réponse...`);
       res.json(categories);
+      console.log(`[${timestamp}] ✅ [API-CATEGORIES-${requestId}] FIN - Réponse envoyée avec ${categories.length} catégories`);
+      
     } catch (error) {
-      console.error("Error fetching marketplace categories:", error);
+      console.error(`[${timestamp}] ❌ [API-CATEGORIES-${requestId}] Erreur critique:`, error);
+      console.error(`[${timestamp}] 🔍 [API-CATEGORIES-${requestId}] Stack trace:`, error instanceof Error ? error.stack : 'Non disponible');
       res.status(500).json({ message: "Failed to fetch marketplace categories" });
     }
   });
