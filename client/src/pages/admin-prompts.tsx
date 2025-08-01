@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/useAuth";
+import { useAdmin } from "@/hooks/useAdmin";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,14 +44,13 @@ import { AiPromptTemplate, InsertAiPromptTemplate } from "@shared/schema";
 interface PromptFormData {
   type: string;
   name: string;
-  description: string;
   systemPrompt: string;
   userPromptTemplate: string;
   isActive: boolean;
 }
 
 export default function AdminPrompts() {
-  const { user, isAdmin } = useAuth();
+  const { isAdmin, isLoading: adminLoading } = useAdmin();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -59,14 +58,13 @@ export default function AdminPrompts() {
   const [formData, setFormData] = useState<PromptFormData>({
     type: "",
     name: "",
-    description: "",
     systemPrompt: "",
     userPromptTemplate: "",
     isActive: true
   });
 
   // Fetch prompts
-  const { data: prompts = [], isLoading } = useQuery({
+  const { data: prompts = [], isLoading } = useQuery<AiPromptTemplate[]>({
     queryKey: ['/api/admin/prompts'],
     enabled: isAdmin,
   });
@@ -140,7 +138,6 @@ export default function AdminPrompts() {
     setFormData({
       type: "",
       name: "",
-      description: "",
       systemPrompt: "",
       userPromptTemplate: "",
       isActive: true
@@ -152,7 +149,6 @@ export default function AdminPrompts() {
     setFormData({
       type: prompt.type,
       name: prompt.name,
-      description: prompt.description || "",
       systemPrompt: prompt.systemPrompt,
       userPromptTemplate: prompt.userPromptTemplate,
       isActive: prompt.isActive ?? true
@@ -253,15 +249,6 @@ export default function AdminPrompts() {
                       placeholder="Nom du template"
                     />
                   </div>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium">Description</label>
-                  <Input
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Description du prompt"
-                  />
                 </div>
                 
                 <div>

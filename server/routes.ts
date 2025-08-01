@@ -1771,7 +1771,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/ai/generate", isAuthenticated, async (req, res) => {
     try {
       const { functionKey, bookId, projectId, customPrompt, customModel, customTemperature } = req.body;
-      const userId = req.user?.replit?.id;
+      const userId = req.user?.claims?.sub;
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
