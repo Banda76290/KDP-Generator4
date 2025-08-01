@@ -146,7 +146,7 @@ export default function AdminSystem() {
 
   // Clear logs mutation
   const clearLogsMutation = useMutation({
-    mutationFn: () => apiRequest('/api/admin/system/logs', 'DELETE'),
+    mutationFn: () => apiRequest('DELETE', '/api/admin/system/logs'),
     onSuccess: () => {
       setLogs([]);
       queryClient.invalidateQueries({ queryKey: ['/api/admin/system/logs'] });
