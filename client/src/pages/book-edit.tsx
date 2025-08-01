@@ -467,27 +467,8 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
         <Label className="text-sm font-medium">Placement</Label>
         <div className="bg-gray-50 rounded border p-4 h-fit">
           <div className="grid grid-cols-1 gap-3 max-h-80 overflow-y-auto">
-            {/* Display leaf categories for current path + this instance's selected category */}
-            {(() => {
-              const currentPathCategories = getLeafCategoriesForCurrentPath();
-              
-              // Find this instance's category in the tempUISelections
-              const instanceIndex = instanceId ? parseInt(instanceId.split('-')[1]) : 0;
-              const thisInstanceCategory = tempUISelections[instanceIndex];
-              
-              // Start with current path categories
-              const allCategories = [...currentPathCategories];
-              
-              // If this instance has a selected category that's not in current path, add it
-              if (thisInstanceCategory) {
-                const selectedCategoryObject = marketplaceCategories.find(cat => cat.categoryPath === thisInstanceCategory);
-                if (selectedCategoryObject && !allCategories.find(cat => cat.categoryPath === selectedCategoryObject.categoryPath)) {
-                  allCategories.push(selectedCategoryObject);
-                }
-              }
-              
-              return allCategories;
-            })().map((category) => {
+            {/* Display leaf categories for current path only */}
+            {getLeafCategoriesForCurrentPath().map((category) => {
               // Find this instance's category in the tempUISelections
               const instanceIndex = instanceId ? parseInt(instanceId.split('-')[1]) : 0;
               const thisInstanceCategory = tempUISelections[instanceIndex];
