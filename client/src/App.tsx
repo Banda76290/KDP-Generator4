@@ -22,6 +22,7 @@ import AdminAudit from "@/pages/admin-audit";
 import AdminBlogPosts from "@/pages/admin-blog-posts";
 import AdminBlogCategories from "@/pages/admin-blog-categories";
 import AdminSystem from "@/pages/admin-system";
+import AdminPrompts from "@/pages/admin-prompts";
 import AIConfig from "@/pages/admin/ai-config";
 import AIVariables from "@/pages/admin/ai-variables";
 import AIFunctions from "@/pages/ai-functions";
@@ -67,6 +68,7 @@ function Router() {
       <Route path="/admin/audit" component={AdminAudit} />
       <Route path="/admin/ai-config" component={AIConfig} />
       <Route path="/admin/system" component={AdminSystem} />
+      <Route path="/admin/prompts" component={AdminPrompts} />
       <Route path="/admin/blog-posts" component={AdminBlogPosts} />
       <Route path="/admin/blog-categories" component={AdminBlogCategories} />
       <Route path="/projects/create" component={ProjectCreate} />

@@ -15,6 +15,7 @@ import {
   authors,
   authorBiographies,
   contentRecommendations,
+  aiPromptTemplates,
   type User,
   type UpsertUser,
   type Project,
@@ -49,6 +50,8 @@ import {
   type InsertAuthorBiography,
   type ContentRecommendation,
   type InsertContentRecommendation,
+  type AiPromptTemplate,
+  type InsertAiPromptTemplate,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, sum, count, like, or } from "drizzle-orm";
@@ -154,6 +157,14 @@ export interface IStorage {
   createContentRecommendation(recommendation: InsertContentRecommendation): Promise<ContentRecommendation>;
   updateRecommendationFeedback(recommendationId: string, isUseful: boolean, isApplied?: boolean): Promise<ContentRecommendation>;
   deleteRecommendation(recommendationId: string, userId: string): Promise<void>;
+  
+  // AI Prompt Templates operations  
+  getAiPromptTemplates(): Promise<AiPromptTemplate[]>;
+  getAiPromptTemplate(id: string): Promise<AiPromptTemplate | undefined>;
+  createAiPromptTemplate(template: InsertAiPromptTemplate): Promise<AiPromptTemplate>;
+  updateAiPromptTemplate(id: string, updates: Partial<InsertAiPromptTemplate>): Promise<AiPromptTemplate>;
+  deleteAiPromptTemplate(id: string): Promise<void>;
+  getAiPromptTemplateByType(type: string): Promise<AiPromptTemplate | undefined>;
   
   // Blog operations
   getBlogCategories(): Promise<BlogCategory[]>;
@@ -1764,6 +1775,60 @@ export class DatabaseStorage implements IStorage {
           eq(contentRecommendations.userId, userId)
         )
       );
+  }
+
+  // AI Prompt Templates operations
+  async getAiPromptTemplates(): Promise<AiPromptTemplate[]> {
+    return await db
+      .select()
+      .from(aiPromptTemplates)
+      .orderBy(aiPromptTemplates.type, aiPromptTemplates.name);
+  }
+
+  async getAiPromptTemplate(id: string): Promise<AiPromptTemplate | undefined> {
+    const [template] = await db
+      .select()
+      .from(aiPromptTemplates)
+      .where(eq(aiPromptTemplates.id, id));
+    return template;
+  }
+
+  async createAiPromptTemplate(template: InsertAiPromptTemplate): Promise<AiPromptTemplate> {
+    const [newTemplate] = await db
+      .insert(aiPromptTemplates)
+      .values(template)
+      .returning();
+    return newTemplate;
+  }
+
+  async updateAiPromptTemplate(id: string, updates: Partial<InsertAiPromptTemplate>): Promise<AiPromptTemplate> {
+    const [updatedTemplate] = await db
+      .update(aiPromptTemplates)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(aiPromptTemplates.id, id))
+      .returning();
+    return updatedTemplate;
+  }
+
+  async deleteAiPromptTemplate(id: string): Promise<void> {
+    await db
+      .delete(aiPromptTemplates)
+      .where(eq(aiPromptTemplates.id, id));
+  }
+
+  async getAiPromptTemplateByType(type: string): Promise<AiPromptTemplate | undefined> {
+    const [template] = await db
+      .select()
+      .from(aiPromptTemplates)
+      .where(
+        and(
+          eq(aiPromptTemplates.type, type),
+          eq(aiPromptTemplates.isActive, true)
+        )
+      )
+      .orderBy(aiPromptTemplates.isDefault ? sql`1` : sql`2`, aiPromptTemplates.name)
+      .limit(1);
+    return template;
   }
 }
 

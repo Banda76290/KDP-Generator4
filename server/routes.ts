@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema, insertAuthorSchema, insertAuthorBiographySchema, insertContentRecommendationSchema } from "@shared/schema";
+import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema, insertAuthorSchema, insertAuthorBiographySchema, insertContentRecommendationSchema, insertAiPromptTemplateSchema } from "@shared/schema";
 import { aiService } from "./services/aiService";
 import { parseKDPReport } from "./services/kdpParser";
 import { generateUniqueIsbnPlaceholder, ensureIsbnPlaceholder } from "./utils/isbnGenerator";
@@ -1704,6 +1704,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching AI functions by category:", error);
       res.status(500).json({ message: "Failed to fetch AI functions" });
+    }
+  });
+
+  // AI Prompt Templates routes
+  app.get('/api/admin/prompts', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const prompts = await storage.getAiPromptTemplates();
+      res.json(prompts);
+    } catch (error) {
+      console.error("Error fetching prompts:", error);
+      res.status(500).json({ message: "Failed to fetch prompt templates" });
+    }
+  });
+
+  app.get('/api/admin/prompts/:id', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const prompt = await storage.getAiPromptTemplate(req.params.id);
+      if (!prompt) {
+        return res.status(404).json({ message: "Prompt template not found" });
+      }
+      res.json(prompt);
+    } catch (error) {
+      console.error("Error fetching prompt:", error);
+      res.status(500).json({ message: "Failed to fetch prompt template" });
+    }
+  });
+
+  app.post('/api/admin/prompts', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const validatedData = insertAiPromptTemplateSchema.parse(req.body);
+      const prompt = await storage.createAiPromptTemplate(validatedData);
+      res.status(201).json(prompt);
+    } catch (error) {
+      console.error("Error creating prompt:", error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to create prompt template" 
+      });
+    }
+  });
+
+  app.put('/api/admin/prompts/:id', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const updates = insertAiPromptTemplateSchema.partial().parse(req.body);
+      const prompt = await storage.updateAiPromptTemplate(req.params.id, updates);
+      res.json(prompt);
+    } catch (error) {
+      console.error("Error updating prompt:", error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to update prompt template" 
+      });
+    }
+  });
+
+  app.delete('/api/admin/prompts/:id', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      await storage.deleteAiPromptTemplate(req.params.id);
+      res.json({ message: "Prompt template deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting prompt:", error);
+      res.status(500).json({ message: "Failed to delete prompt template" });
     }
   });
 

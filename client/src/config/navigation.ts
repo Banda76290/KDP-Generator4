@@ -13,7 +13,8 @@ import {
   Variable,
   Tags,
   Server,
-  User
+  User,
+  MessageSquare
 } from "lucide-react";
 
 interface NavigationItem {
@@ -44,6 +45,7 @@ export const adminNavigation: NavigationItem[] = [
   { name: "Dashboard", href: "/admin", icon: Shield, badge: "ADMIN" },
   { name: "User Management", href: "/admin/users", icon: Settings },
   { name: "AI Configuration", href: "/admin/ai-config", icon: Bot },
+  { name: "Prompts IA", href: "/admin/prompts", icon: MessageSquare },
   { name: "Variables IA", href: "/admin/ai-variables", icon: Variable },
   { name: "Système", href: "/admin/system", icon: Server },
 ];
