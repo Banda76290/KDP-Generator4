@@ -453,12 +453,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
                 <SelectContent>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.categoryPath}>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{category.displayName}</span>
-                        <span className="text-xs text-gray-500 truncate max-w-xs">
-                          {category.categoryPath.replace(/^Books > /, '').replace(/kindle_ebook > |print_kdp_paperback > /, '')}
-                        </span>
-                      </div>
+                      <span className="text-left">{category.displayName}</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
