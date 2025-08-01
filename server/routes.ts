@@ -1339,14 +1339,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/ai/generate", isAuthenticated, async (req, res) => {
     try {
       const { functionKey, bookId, projectId, customPrompt, customModel, customTemperature } = req.body;
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
       
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+
 
       // Get the AI function configuration
       const { aiFunctionsService } = await import('./services/aiFunctionsService');
@@ -1525,17 +1523,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const memTotalMB = Math.round(memUsage.heapTotal / 1024 / 1024);
       const memPercentage = Math.round((memUsage.heapUsed / memUsage.heapTotal) * 100);
       
+      // Analyze category completeness
+      const expectedTotal = 249; // Expected complete categories across all marketplaces
+      const actualTotal = categoriesCount.length;
+      const completionPercentage = Math.round((actualTotal / expectedTotal) * 100);
+      
+      // Check for complete hierarchy (should have root level categories)
+      const rootCategories = categoriesCount.filter(cat => cat.level <= 2);
+      const hasCompleteHierarchy = rootCategories.length > 0;
+      
+      // Determine category status
+      let categoryStatus = 'empty';
+      if (actualTotal === expectedTotal && hasCompleteHierarchy) {
+        categoryStatus = 'complete';
+      } else if (actualTotal > 0) {
+        categoryStatus = 'partial';
+      }
+
       const health = {
         database: categoriesCount.length > 0 ? 'healthy' : 'warning',
-        categories: categoriesCount.length,
+        categories: categoryStatus,
+        totalCategories: actualTotal,
+        expectedCategories: expectedTotal,
+        completionPercentage,
+        hasCompleteHierarchy,
         totalUsers: usersCount.length,
         totalProjects: projectsCount.length,
         totalBooks: booksCount.length,
         lastSeeded: categoriesCount.length > 0 ? new Date().toISOString() : null,
         uptime: uptimeFormatted,
         memoryUsage: {
-          used: `${memUsedMB} MB`,
-          total: `${memTotalMB} MB`,
+          used: memUsedMB,
+          total: memTotalMB,
           percentage: memPercentage
         }
       };

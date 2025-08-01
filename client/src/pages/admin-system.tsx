@@ -12,7 +12,11 @@ import { apiRequest } from "@/lib/queryClient";
 
 interface SystemHealth {
   database: 'healthy' | 'warning' | 'error';
-  categories: number;
+  categories: 'complete' | 'partial' | 'empty';
+  totalCategories: number;
+  expectedCategories: number;
+  completionPercentage: number;
+  hasCompleteHierarchy: boolean;
   lastSeeded: string | null;
   totalUsers: number;
   totalProjects: number;
@@ -24,8 +28,8 @@ interface SystemHealth {
   };
   uptime: string;
   memoryUsage: {
-    used: string;
-    total: string;
+    used: number;
+    total: number;
     percentage: number;
   };
 }
@@ -301,7 +305,20 @@ export default function AdminSystem() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <span className="text-sm font-medium">Catégories:</span>
-                <Badge variant="secondary">{systemHealth?.categories || 0}</Badge>
+                <div className="flex flex-col items-end">
+                  <Badge variant={
+                    systemHealth?.categories === 'complete' ? 'default' :
+                    systemHealth?.categories === 'partial' ? 'secondary' : 'destructive'
+                  }>
+                    {systemHealth?.totalCategories || 0} / {systemHealth?.expectedCategories || 249}
+                  </Badge>
+                  {systemHealth?.completionPercentage && (
+                    <span className="text-xs text-muted-foreground mt-1">
+                      {systemHealth.completionPercentage}%
+                      {systemHealth?.categories === 'partial' && !systemHealth?.hasCompleteHierarchy && ' (incomplet)'}
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <span className="text-sm font-medium">Utilisateurs:</span>

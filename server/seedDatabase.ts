@@ -39,13 +39,34 @@ export async function seedDatabase() {
     console.log(`[${timestamp}] 🔢 [SEED-DB] ${statements.length} instructions SQL identifiées`);
     console.log(`[${timestamp}] ⚡ [SEED-DB] Exécution des instructions SQL...`);
     
+    let insertCount = 0;
+    let deleteCount = 0;
+    
     for (let i = 0; i < statements.length; i++) {
-      if (statements[i].trim()) {
-        await db.execute(sql.raw(statements[i]));
-        if (i === 0) console.log(`[${timestamp}] 🔄 [SEED-DB] Première instruction exécutée`);
-        if (i === statements.length - 1) console.log(`[${timestamp}] 🏁 [SEED-DB] Dernière instruction exécutée`);
+      const stmt = statements[i].trim();
+      if (stmt) {
+        try {
+          await db.execute(sql.raw(stmt));
+          
+          if (stmt.startsWith('DELETE')) {
+            deleteCount++;
+            if (deleteCount === 1) console.log(`[${timestamp}] 🗑️ [SEED-DB] Suppression des données existantes...`);
+          } else if (stmt.startsWith('INSERT')) {
+            insertCount++;
+            if (insertCount === 1) console.log(`[${timestamp}] 📝 [SEED-DB] Début des insertions...`);
+            if (insertCount % 50 === 0) console.log(`[${timestamp}] 📊 [SEED-DB] ${insertCount} catégories insérées...`);
+          }
+          
+          if (i === statements.length - 1) console.log(`[${timestamp}] 🏁 [SEED-DB] Dernière instruction exécutée`);
+        } catch (error) {
+          console.error(`[${timestamp}] ❌ [SEED-DB] Erreur instruction ${i + 1}: ${stmt.substring(0, 100)}...`);
+          console.error(`[${timestamp}] 🔍 [SEED-DB] Erreur détaillée:`, error);
+          throw error;
+        }
       }
     }
+    
+    console.log(`[${timestamp}] 📈 [SEED-DB] Statistiques: ${deleteCount} suppressions, ${insertCount} insertions`);
     
     // Verify seeding
     console.log(`[${timestamp}] 🔍 [SEED-DB] Vérification du résultat...`);
