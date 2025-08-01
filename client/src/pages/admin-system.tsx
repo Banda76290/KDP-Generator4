@@ -779,18 +779,34 @@ export default function AdminSystem() {
                 Cette fonctionnalité permet de pousser les catégories de cet environnement de développement 
                 vers la base de données de production. Cette action remplacera toutes les catégories existantes en production.
               </p>
-              <div className="bg-orange-100 border border-orange-300 rounded p-3 space-y-2">
+              <div className="bg-orange-100 border border-orange-300 rounded p-3 space-y-3">
                 <p className="text-xs text-orange-700">
-                  <strong>Alternative :</strong> Si la synchronisation directe échoue, utilisez "Copier SQL" ou "Télécharger SQL".
+                  <strong>🎯 Guide de synchronisation manuelle :</strong>
                 </p>
-                <div className="text-xs text-orange-600 space-y-1">
-                  <p><strong>Étapes pour Replit :</strong></p>
-                  <ol className="list-decimal list-inside space-y-1 ml-2">
-                    <li>Cliquez sur "Copier SQL" pour copier le code</li>
-                    <li>Allez dans l'onglet "Database" de votre projet Replit</li>
-                    <li>Ouvrez le "SQL runner" dans l'interface Database</li>
-                    <li>Collez le code SQL et exécutez-le</li>
-                  </ol>
+                <div className="text-xs text-orange-600 space-y-2">
+                  <div>
+                    <p className="font-semibold mb-1">📋 Option 1 : Copier-Coller (Recommandé)</p>
+                    <ol className="list-decimal list-inside space-y-1 ml-2">
+                      <li>Cliquez sur "Copier SQL" ci-dessous</li>
+                      <li>Ouvrez votre projet de PRODUCTION dans Replit</li>
+                      <li>Cliquez sur l'onglet "Database" (icône base de données)</li>
+                      <li>Dans la console, collez le SQL et appuyez sur Entrée</li>
+                    </ol>
+                  </div>
+                  <div>
+                    <p className="font-semibold mb-1">💾 Option 2 : Fichier SQL</p>
+                    <ol className="list-decimal list-inside space-y-1 ml-2">
+                      <li>Cliquez sur "Télécharger SQL"</li>
+                      <li>Uploadez le fichier dans votre projet de production</li>
+                      <li>Exécutez le fichier via la console Database</li>
+                    </ol>
+                  </div>
+                  <div className="bg-yellow-50 border border-yellow-200 rounded p-2 mt-2">
+                    <p className="text-yellow-700 text-xs">
+                      ⚠️ <strong>Important :</strong> Ces opérations remplaceront TOUTES les catégories en production. 
+                      Faites une sauvegarde si nécessaire.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1199,7 +1215,7 @@ export default function AdminSystem() {
               </div>
               <div>
                 {systemLogsData && typeof systemLogsData === 'object' && 'total' in systemLogsData && (
-                  <span>Total serveur: {String((systemLogsData as any).total)}</span>
+                  <span>Total serveur: {String((systemLogsData as { total: number }).total)}</span>
                 )}
               </div>
             </div>

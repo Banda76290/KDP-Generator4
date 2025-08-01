@@ -1405,33 +1405,49 @@ export class DatabaseStorage implements IStorage {
       const cleanUrl = productionUrl.replace(/\/$/, '');
       const endpoint = `${cleanUrl}/api/admin/categories/migrate`;
       
-      console.log(`[SYNC] Attempting to sync ${categories.length} categories to ${endpoint}`);
+      console.log(`[SYNC] 🚀 Début de la synchronisation`);
+      console.log(`[SYNC] 📊 ${categories.length} catégories à synchroniser`);
+      console.log(`[SYNC] 🎯 Endpoint cible: ${endpoint}`);
+      
+      // Prepare request payload
+      const payload = { categories };
+      const headers = {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json',
+        'User-Agent': 'KDP-Generator-DevSync/1.0',
+        'Origin': process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS}` : 'http://localhost:5000'
+      };
+      
+      console.log(`[SYNC] 📦 Headers préparés:`, JSON.stringify(headers, null, 2));
+      console.log(`[SYNC] 📄 Payload size: ${JSON.stringify(payload).length} caractères`);
       
       // Make the API call to production
+      console.log(`[SYNC] 🌐 Envoi de la requête POST...`);
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-          'Accept': 'application/json',
-          'User-Agent': 'KDP-Generator-DevSync/1.0'
-        },
-        body: JSON.stringify({ categories })
+        headers,
+        body: JSON.stringify(payload)
       });
+
+      console.log(`[SYNC] 📡 Réponse reçue - Status: ${response.status} ${response.statusText}`);
+      console.log(`[SYNC] 📋 Response headers:`, JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2));
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`[SYNC] Production API returned ${response.status}: ${errorText}`);
+        console.error(`[SYNC] ❌ Erreur de l'API de production (${response.status}): ${errorText}`);
         
         // Provide specific error messages for common issues
-        let errorMessage = `Production API error (${response.status}): ${errorText}`;
+        let errorMessage = `Erreur API Production (${response.status}): ${errorText}`;
         
         if (response.status === 403) {
-          errorMessage = `Accès refusé par la production. Vérifiez que:\n- L'URL est correcte\n- Le serveur de production accepte les requêtes cross-origin\n- Erreur: ${errorText}`;
+          errorMessage = `🚫 Accès refusé (403):\n- Vérifiez l'URL de production\n- Authentification requise sur le serveur cible\n- CORS policy peut bloquer la requête\n- Détails: ${errorText}`;
         } else if (response.status === 404) {
-          errorMessage = `Endpoint non trouvé. Vérifiez que l'URL de production est correcte et que l'API /api/admin/categories/migrate existe.`;
+          errorMessage = `🔍 Endpoint non trouvé (404):\n- URL: ${endpoint}\n- Vérifiez que l'API /api/admin/categories/migrate existe\n- Le serveur de production doit être déployé avec cette route`;
         } else if (response.status === 500) {
-          errorMessage = `Erreur serveur sur la production. Vérifiez les logs du serveur de production.`;
+          errorMessage = `💥 Erreur serveur de production (500):\n- Problème côté serveur de production\n- Vérifiez les logs du serveur cible\n- Détails: ${errorText}`;
+        } else if (response.status === 401) {
+          errorMessage = `🔐 Non autorisé (401):\n- Authentification requise\n- Token ou session invalide\n- Détails: ${errorText}`;
         }
         
         return {
@@ -1441,17 +1457,29 @@ export class DatabaseStorage implements IStorage {
       }
 
       const result = await response.json();
-      console.log(`[SYNC] Production sync successful:`, result);
+      console.log(`[SYNC] ✅ Synchronisation réussie:`, result);
       
       return {
         success: true,
-        syncedCount: result.categoriesCount || categories.length
+        syncedCount: result.categoriesCount || result.count || categories.length
       };
     } catch (error) {
-      console.error('[SYNC] Error syncing to production:', error);
+      console.error('[SYNC] 💥 Erreur critique lors de la synchronisation:', error);
+      
+      let errorMessage = 'Erreur de connexion inconnue';
+      if (error instanceof Error) {
+        if (error.message.includes('fetch')) {
+          errorMessage = `🌐 Erreur de connexion réseau:\n- Impossible de joindre ${productionUrl}\n- Vérifiez l'URL et la connectivité\n- Détails: ${error.message}`;
+        } else if (error.message.includes('CORS')) {
+          errorMessage = `🚫 Erreur CORS:\n- Le serveur de production bloque les requêtes cross-origin\n- Configurez CORS sur le serveur cible\n- Détails: ${error.message}`;
+        } else {
+          errorMessage = `❌ Erreur: ${error.message}`;
+        }
+      }
+      
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown sync error'
+        error: errorMessage
       };
     }
   }
