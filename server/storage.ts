@@ -43,6 +43,7 @@ import {
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, sum, count, like, or } from "drizzle-orm";
 import { generateUniqueIsbnPlaceholder } from "./utils/isbnGenerator";
+import { nanoid } from "nanoid";
 
 export interface IStorage {
   // User operations
@@ -937,35 +938,88 @@ export class DatabaseStorage implements IStorage {
 
   async migrateMarketplaceCategoriesWithFormats(newCategories: any[]): Promise<{success: boolean, errors: string[]}> {
     try {
-      // Step 1: Validate the new categories
-      const validation = await this.validateCategoryStructure(newCategories);
-      if (!validation.isValid) {
-        return { success: false, errors: validation.errors };
+      console.log(`[MIGRATION] Starting complete replacement with ${newCategories.length} categories`);
+      
+      // Step 1: Transform the raw data from spreadsheet format to our database structure
+      const transformedCategories = newCategories.map(cat => {
+        // Build the category path from the spreadsheet columns
+        const pathParts = [
+          'Books', // Always start with Books
+          cat.type_livre || cat['Type livre'] || '',  // kindle_ebook or print_kdp_paperback
+          cat.categorie_principale || cat['Catégorie principale'] || '',
+          cat.sous_categorie1 || cat['Sous-catégorie 1'] || '',
+          cat.sous_categorie2 || cat['Sous-catégorie 2'] || '',
+          cat.sous_categorie3 || cat['Sous-catégorie 3'] || '',
+          cat.sous_categorie4 || cat['Sous-catégorie 4'] || '',
+          cat.sous_categorie5 || cat['Sous-catégorie 5'] || '',
+          cat.sous_categorie6 || cat['Sous-catégorie 6'] || '',
+          cat.sous_categorie7 || cat['Sous-catégorie 7'] || '',
+          cat.sous_categorie8 || cat['Sous-catégorie 8'] || '',
+          cat.sous_categorie9 || cat['Sous-catégorie 9'] || '',
+          cat.sous_categorie10 || cat['Sous-catégorie 10'] || ''
+        ].filter(part => part && part.trim() !== '');
+        
+        const categoryPath = pathParts.join(' > ');
+        const level = Math.max(0, pathParts.length - 2); // Exclude 'Books' and type_livre from level
+        const displayName = pathParts[pathParts.length - 1] || '';
+        const marketplace = cat.marketplace || cat['Marketplace'] || '';
+        
+        return {
+          id: nanoid(),
+          marketplace: marketplace,
+          categoryCode: `${marketplace}_${displayName.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+          displayName: displayName,
+          categoryPath: categoryPath,
+          level: level,
+          parentPath: pathParts.slice(0, -1).join(' > ') || null,
+          sortOrder: 0,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+      });
+
+      // Step 2: Validate the transformed structure (basic checks)
+      console.log(`[MIGRATION] Validating ${transformedCategories.length} transformed categories`);
+      const invalidCategories = transformedCategories.filter(cat => 
+        !cat.marketplace || !cat.displayName || !cat.categoryPath
+      );
+      
+      if (invalidCategories.length > 0) {
+        return { 
+          success: false, 
+          errors: [`${invalidCategories.length} categories have missing required fields`] 
+        };
       }
 
-      // Step 2: Create backup
+      // Step 3: Create backup before making changes
       const backupSuccess = await this.backupMarketplaceCategories();
       if (!backupSuccess) {
         return { success: false, errors: ['Failed to create backup'] };
       }
 
-      // Step 3: Clear existing categories and insert new ones
-      await db.delete(marketplaceCategories);
-      
-      // Insert new categories in batches to avoid memory issues
-      const batchSize = 100;
-      for (let i = 0; i < newCategories.length; i += batchSize) {
-        const batch = newCategories.slice(i, i + batchSize);
-        await db.insert(marketplaceCategories).values(batch);
-      }
+      // Step 4: Perform the complete replacement in a transaction
+      await db.transaction(async (tx) => {
+        // Delete all existing categories
+        await tx.delete(marketplaceCategories);
+        console.log(`[MIGRATION] Deleted all existing categories`);
+        
+        // Insert new categories in batches
+        const batchSize = 100;
+        for (let i = 0; i < transformedCategories.length; i += batchSize) {
+          const batch = transformedCategories.slice(i, i + batchSize);
+          await tx.insert(marketplaceCategories).values(batch);
+          console.log(`[MIGRATION] Inserted batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(transformedCategories.length/batchSize)}`);
+        }
+      });
 
-      console.log(`[MIGRATION] Successfully migrated ${newCategories.length} categories`);
+      console.log(`[MIGRATION] Successfully replaced all categories with ${transformedCategories.length} new ones with format discriminants`);
       return { success: true, errors: [] };
     } catch (error) {
       console.error('[MIGRATION] Failed to migrate categories:', error);
       // Attempt rollback on failure
       await this.rollbackMarketplaceCategories();
-      return { success: false, errors: [`Migration failed: ${error.message}`] };
+      return { success: false, errors: [`Migration failed: ${error instanceof Error ? error.message : 'Unknown error'}`] };
     }
   }
 
