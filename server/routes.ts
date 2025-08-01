@@ -1687,7 +1687,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/ai/functions", isAuthenticated, async (req, res) => {
     try {
       const { aiFunctionsService } = await import('./services/aiFunctionsService');
-      const functions = aiFunctionsService.getAvailableFunctions();
+      const functions = await aiFunctionsService.getAvailableFunctions();
       res.json(functions);
     } catch (error) {
       console.error("Error fetching AI functions:", error);
@@ -1771,7 +1771,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/ai/generate", isAuthenticated, async (req, res) => {
     try {
       const { functionKey, bookId, projectId, customPrompt, customModel, customTemperature } = req.body;
-      const userId = req.user?.claims?.sub;
+      const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
@@ -1782,7 +1782,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get the AI function configuration
       const { aiFunctionsService } = await import('./services/aiFunctionsService');
-      const aiFunction = aiFunctionsService.getFunctionByKey(functionKey);
+      const aiFunction = await aiFunctionsService.getFunctionByKey(functionKey);
       
       if (!aiFunction) {
         return res.status(404).json({ message: "AI function not found" });

@@ -1,4 +1,7 @@
-// Service for managing AI functions dynamically based on existing site features
+import { storage } from '../storage';
+import type { AiPromptTemplate } from '@shared/schema';
+
+// Service for managing AI functions dynamically based on database templates
 export interface AIFunction {
   key: string;
   name: string;
@@ -14,10 +17,80 @@ export interface AIFunction {
   temperature: number;
   availableForTiers: string[];
   sortOrder: number;
+  // Add template connection
+  templateId?: string;
 }
 
 class AIFunctionsService {
-  // Define AI functions based on existing site features
+  // Get AI functions from database templates + static functions
+  async getAllFunctions(): Promise<AIFunction[]> {
+    try {
+      // Get templates from database
+      const templates = await storage.getAllAiPromptTemplates();
+      const databaseFunctions = templates
+        .filter(template => template.isActive)
+        .map(template => this.templateToFunction(template));
+      
+      // Get static functions
+      const staticFunctions = this.getStaticFunctions();
+      
+      // Combine and return (database templates take priority)
+      const allFunctions = [...databaseFunctions, ...staticFunctions];
+      
+      // Remove duplicates based on key (database takes priority)
+      const uniqueFunctions = allFunctions.reduce((acc, func) => {
+        if (!acc.some(existing => existing.key === func.key)) {
+          acc.push(func);
+        }
+        return acc;
+      }, [] as AIFunction[]);
+      
+      return uniqueFunctions;
+    } catch (error) {
+      console.error('Error fetching AI functions from database:', error);
+      // Fallback to static functions if database fails
+      return this.getStaticFunctions();
+    }
+  }
+
+  // Convert database template to AI function
+  private templateToFunction(template: AiPromptTemplate): AIFunction {
+    return {
+      key: template.type, // Use type as key
+      name: template.name,
+      description: `Génération ${template.type} avec l'IA`,
+      category: this.getCategoryFromType(template.type),
+      isActive: template.isActive ?? true,
+      requiresBookContext: true, // Most functions need book context
+      requiresProjectContext: false,
+      defaultModel: template.model || 'gpt-4o',
+      defaultSystemPrompt: template.systemPrompt,
+      defaultUserPromptTemplate: template.userPromptTemplate,
+      maxTokens: template.maxTokens || 2000,
+      temperature: parseFloat(template.temperature || '0.7'),
+      availableForTiers: ['free', 'premium'], // Default tiers
+      sortOrder: 1,
+      templateId: template.id
+    };
+  }
+
+  // Determine category from template type
+  private getCategoryFromType(type: string): string {
+    const typeToCategory: Record<string, string> = {
+      'description': 'marketing',
+      'marketing': 'marketing', 
+      'title': 'marketing',
+      'keywords': 'seo',
+      'categories': 'seo',
+      'structure': 'content',
+      'chapters': 'content',
+      'synopsis': 'content',
+      'blurb': 'marketing'
+    };
+    return typeToCategory[type] || 'content';
+  }
+
+  // Define AI functions based on existing site features (fallback)
   private getStaticFunctions(): AIFunction[] {
     return [
       {
@@ -119,14 +192,15 @@ class AIFunctionsService {
     ];
   }
 
-  // Get all available AI functions
-  getAvailableFunctions(): AIFunction[] {
-    return this.getStaticFunctions().filter(func => func.isActive);
+  // Get all available AI functions (async version)
+  async getAvailableFunctions(): Promise<AIFunction[]> {
+    const allFunctions = await this.getAllFunctions();
+    return allFunctions.filter(func => func.isActive);
   }
 
-  // Get functions by category
-  getFunctionsByCategory(): Record<string, AIFunction[]> {
-    const functions = this.getAvailableFunctions();
+  // Get functions by category (async version)
+  async getFunctionsByCategory(): Promise<Record<string, AIFunction[]>> {
+    const functions = await this.getAvailableFunctions();
     const categories: Record<string, AIFunction[]> = {};
 
     functions.forEach(func => {
@@ -144,14 +218,16 @@ class AIFunctionsService {
     return categories;
   }
 
-  // Get function by key
-  getFunctionByKey(key: string): AIFunction | undefined {
-    return this.getAvailableFunctions().find(func => func.key === key);
+  // Get function by key (async version)
+  async getFunctionByKey(key: string): Promise<AIFunction | undefined> {
+    const functions = await this.getAvailableFunctions();
+    return functions.find(func => func.key === key);
   }
 
-  // Get functions available for a specific subscription tier
-  getFunctionsForTier(tier: string): AIFunction[] {
-    return this.getAvailableFunctions().filter(func => 
+  // Get functions available for a specific subscription tier (async version)
+  async getFunctionsForTier(tier: string): Promise<AIFunction[]> {
+    const functions = await this.getAvailableFunctions();
+    return functions.filter(func => 
       func.availableForTiers.includes(tier)
     );
   }

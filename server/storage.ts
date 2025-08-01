@@ -160,6 +160,7 @@ export interface IStorage {
   
   // AI Prompt Templates operations  
   getAiPromptTemplates(): Promise<AiPromptTemplate[]>;
+  getAllAiPromptTemplates(): Promise<AiPromptTemplate[]>;
   getAiPromptTemplate(id: string): Promise<AiPromptTemplate | undefined>;
   createAiPromptTemplate(template: InsertAiPromptTemplate): Promise<AiPromptTemplate>;
   updateAiPromptTemplate(id: string, updates: Partial<InsertAiPromptTemplate>): Promise<AiPromptTemplate>;
@@ -1779,6 +1780,13 @@ export class DatabaseStorage implements IStorage {
 
   // AI Prompt Templates operations
   async getAiPromptTemplates(): Promise<AiPromptTemplate[]> {
+    return await db
+      .select()
+      .from(aiPromptTemplates)
+      .orderBy(aiPromptTemplates.type, aiPromptTemplates.name);
+  }
+
+  async getAllAiPromptTemplates(): Promise<AiPromptTemplate[]> {
     return await db
       .select()
       .from(aiPromptTemplates)
