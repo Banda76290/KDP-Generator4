@@ -316,6 +316,25 @@ export const marketplaceCategories = pgTable("marketplace_categories", {
 
 
 
+// Content Recommendations table - AI-powered recommendations for books
+export const contentRecommendations = pgTable("content_recommendations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  bookId: varchar("book_id").notNull().references(() => books.id, { onDelete: "cascade" }),
+  recommendationType: varchar("recommendation_type").notNull(), // "keywords", "categories", "title", "description", "marketing", "series", "pricing"
+  title: varchar("title").notNull(),
+  suggestion: text("suggestion").notNull(),
+  reasoning: text("reasoning"),
+  confidence: decimal("confidence", { precision: 3, scale: 2 }).default("0.5"), // 0-1 confidence score
+  isApplied: boolean("is_applied").default(false),
+  isUseful: boolean("is_useful"), // User feedback
+  metadata: jsonb("metadata"), // Additional data like original values, alternatives, etc.
+  aiModel: varchar("ai_model").default("gpt-4o"),
+  tokensUsed: integer("tokens_used").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // System configuration table for admin settings
 export const systemConfig = pgTable("system_config", {
   key: varchar("key").primaryKey(),
@@ -420,6 +439,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   blogComments: many(blogComments),
   series: many(series),
   authors: many(authors),
+  contentRecommendations: many(contentRecommendations),
 }));
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
@@ -443,6 +463,7 @@ export const booksRelations = relations(books, ({ one, many }) => ({
   contributors: many(contributors),
   salesData: many(salesData),
   aiGenerations: many(aiGenerations),
+  contentRecommendations: many(contentRecommendations),
 }));
 
 export const contributorsRelations = relations(contributors, ({ one }) => ({
@@ -548,6 +569,17 @@ export const seriesRelations = relations(series, ({ one }) => ({
   }),
 }));
 
+export const contentRecommendationsRelations = relations(contentRecommendations, ({ one }) => ({
+  user: one(users, {
+    fields: [contentRecommendations.userId],
+    references: [users.id],
+  }),
+  book: one(books, {
+    fields: [contentRecommendations.bookId],
+    references: [books.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -580,6 +612,12 @@ export const insertBookSchema = createInsertSchema(books).omit({
     lastName: z.string().optional(),
     suffix: z.string().optional(),
   })).optional(),
+});
+
+export const insertContentRecommendationSchema = createInsertSchema(contentRecommendations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertContributorSchema = createInsertSchema(contributors).omit({
@@ -641,6 +679,8 @@ export type InsertAiModel = z.infer<typeof insertAiModelSchema>;
 export type AiModel = typeof aiModels.$inferSelect;
 export type InsertAiUsageLimit = z.infer<typeof insertAiUsageLimitSchema>;
 export type AiUsageLimit = typeof aiUsageLimits.$inferSelect;
+export type InsertContentRecommendation = z.infer<typeof insertContentRecommendationSchema>;
+export type ContentRecommendation = typeof contentRecommendations.$inferSelect;
 export type InsertSystemConfig = z.infer<typeof insertSystemConfigSchema>;
 export type SystemConfig = typeof systemConfig.$inferSelect;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;

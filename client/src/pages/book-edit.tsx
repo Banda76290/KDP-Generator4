@@ -3,7 +3,7 @@ import { useLocation, useParams } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { X, Plus, Trash2, CheckCircle, ArrowLeft, BookOpen, Loader2, Link2 } from "lucide-react";
+import { X, Plus, Trash2, CheckCircle, ArrowLeft, BookOpen, Loader2, Link2, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,6 +20,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { insertBookSchema, type Book, type MarketplaceCategory } from "@shared/schema";
 import { z } from "zod";
 import Layout from "@/components/Layout";
+import ContentRecommendationSidebar from "@/components/ContentRecommendationSidebar";
 
 interface Contributor {
   id: string;
@@ -621,6 +622,9 @@ export default function EditBook() {
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
   const [descriptionEditorContent, setDescriptionEditorContent] = useState('');
+  
+  // AI Recommendation Sidebar state
+  const [showAISidebar, setShowAISidebar] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -1852,25 +1856,39 @@ export default function EditBook() {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto w-full">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              onClick={() => setLocation("/projects")}
-              className="flex items-center space-x-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back</span>
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{isCreating ? 'Create Book' : 'Edit Book'}</h1>
-              <p className="text-gray-600">{isCreating ? 'Set up your new book with all the details' : 'Update your book details and settings'}</p>
+      <div className="flex w-full h-[calc(100vh-80px)]">
+        {/* Main Content */}
+        <div className={`${showAISidebar ? 'flex-1' : 'w-full'} overflow-y-auto`}>
+          <div className="max-w-4xl mx-auto w-full p-4">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center space-x-4">
+                <Button
+                  variant="ghost"
+                  onClick={() => setLocation("/projects")}
+                  className="flex items-center space-x-2"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back</span>
+                </Button>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">{isCreating ? 'Create Book' : 'Edit Book'}</h1>
+                  <p className="text-gray-600">{isCreating ? 'Set up your new book with all the details' : 'Update your book details and settings'}</p>
+                </div>
+              </div>
+              
+              {/* AI Recommendations Toggle */}
+              {!isCreating && bookId && (
+                <Button
+                  variant={showAISidebar ? "default" : "outline"}
+                  onClick={() => setShowAISidebar(!showAISidebar)}
+                  className="flex items-center space-x-2"
+                >
+                  <Lightbulb className="w-4 h-4" />
+                  <span>AI Recommendations</span>
+                </Button>
+              )}
             </div>
-          </div>
-
-        </div>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {/* Tab Navigation */}
@@ -3637,7 +3655,19 @@ export default function EditBook() {
             </div>
           </div>
         </form>
+          </div>
+        </div>
+        
+        {/* AI Recommendations Sidebar */}
+        {!isCreating && bookId && (
+          <ContentRecommendationSidebar
+            bookId={bookId}
+            isVisible={showAISidebar}
+            onToggle={() => setShowAISidebar(!showAISidebar)}
+          />
+        )}
       </div>
+      
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>

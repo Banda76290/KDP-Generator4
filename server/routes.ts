@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema, insertAuthorSchema, insertAuthorBiographySchema } from "@shared/schema";
+import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema, insertAuthorSchema, insertAuthorBiographySchema, insertContentRecommendationSchema } from "@shared/schema";
 import { aiService } from "./services/aiService";
 import { parseKDPReport } from "./services/kdpParser";
 import { generateUniqueIsbnPlaceholder, ensureIsbnPlaceholder } from "./utils/isbnGenerator";
@@ -792,6 +792,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting series:", error);
       res.status(500).json({ message: "Failed to delete series" });
+    }
+  });
+
+  // Content Recommendations routes
+  app.get('/api/books/:bookId/recommendations', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const { bookId } = req.params;
+      
+      const recommendations = await storage.getBookRecommendations(bookId, userId);
+      res.json(recommendations);
+    } catch (error) {
+      console.error("Error fetching book recommendations:", error);
+      res.status(500).json({ message: "Failed to fetch recommendations" });
+    }
+  });
+
+  app.post('/api/books/:bookId/recommendations/generate', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const { bookId } = req.params;
+      
+      // Get the book data for analysis
+      const book = await storage.getBook(bookId, userId);
+      if (!book) {
+        return res.status(404).json({ message: "Book not found" });
+      }
+      
+      // Generate AI recommendations
+      const recommendations = await aiService.generateContentRecommendations(book, userId);
+      
+      res.json(recommendations);
+    } catch (error) {
+      console.error("Error generating recommendations:", error);
+      res.status(500).json({ message: "Failed to generate recommendations" });
+    }
+  });
+
+  app.put('/api/recommendations/:id/feedback', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const { id } = req.params;
+      const { isUseful, isApplied } = req.body;
+      
+      const updatedRecommendation = await storage.updateRecommendationFeedback(id, isUseful, isApplied);
+      res.json(updatedRecommendation);
+    } catch (error) {
+      console.error("Error updating recommendation feedback:", error);
+      res.status(500).json({ message: "Failed to update recommendation feedback" });
+    }
+  });
+
+  app.delete('/api/recommendations/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const { id } = req.params;
+      
+      await storage.deleteRecommendation(id, userId);
+      res.json({ message: "Recommendation deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting recommendation:", error);
+      res.status(500).json({ message: "Failed to delete recommendation" });
     }
   });
 

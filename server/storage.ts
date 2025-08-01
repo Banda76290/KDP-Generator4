@@ -14,6 +14,7 @@ import {
   marketplaceCategories,
   authors,
   authorBiographies,
+  contentRecommendations,
   type User,
   type UpsertUser,
   type Project,
@@ -46,6 +47,8 @@ import {
   type AuthorWithRelations,
   type AuthorBiography,
   type InsertAuthorBiography,
+  type ContentRecommendation,
+  type InsertContentRecommendation,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, sum, count, like, or } from "drizzle-orm";
@@ -146,6 +149,12 @@ export interface IStorage {
   rollbackMarketplaceCategories(): Promise<boolean>;
   migrateMarketplaceCategoriesWithFormats(newCategories: any[]): Promise<{success: boolean, errors: string[]}>;
 
+  // Content Recommendations operations
+  getBookRecommendations(bookId: string, userId: string): Promise<ContentRecommendation[]>;
+  createContentRecommendation(recommendation: InsertContentRecommendation): Promise<ContentRecommendation>;
+  updateRecommendationFeedback(recommendationId: string, isUseful: boolean, isApplied?: boolean): Promise<ContentRecommendation>;
+  deleteRecommendation(recommendationId: string, userId: string): Promise<void>;
+  
   // Blog operations
   getBlogCategories(): Promise<BlogCategory[]>;
   createBlogCategory(category: InsertBlogCategory): Promise<BlogCategory>;
@@ -1700,6 +1709,61 @@ export class DatabaseStorage implements IStorage {
     );
 
     return uniqueBooks;
+  }
+  // Content Recommendations operations implementation
+  async getBookRecommendations(bookId: string, userId: string): Promise<ContentRecommendation[]> {
+    return await db
+      .select()
+      .from(contentRecommendations)
+      .where(
+        and(
+          eq(contentRecommendations.bookId, bookId),
+          eq(contentRecommendations.userId, userId)
+        )
+      )
+      .orderBy(desc(contentRecommendations.createdAt));
+  }
+
+  async createContentRecommendation(recommendation: InsertContentRecommendation): Promise<ContentRecommendation> {
+    const [newRecommendation] = await db
+      .insert(contentRecommendations)
+      .values(recommendation)
+      .returning();
+    return newRecommendation;
+  }
+
+  async updateRecommendationFeedback(
+    recommendationId: string, 
+    isUseful: boolean, 
+    isApplied?: boolean
+  ): Promise<ContentRecommendation> {
+    const updateData: any = { 
+      isUseful, 
+      updatedAt: new Date() 
+    };
+    
+    if (isApplied !== undefined) {
+      updateData.isApplied = isApplied;
+    }
+
+    const [updatedRecommendation] = await db
+      .update(contentRecommendations)
+      .set(updateData)
+      .where(eq(contentRecommendations.id, recommendationId))
+      .returning();
+    
+    return updatedRecommendation;
+  }
+
+  async deleteRecommendation(recommendationId: string, userId: string): Promise<void> {
+    await db
+      .delete(contentRecommendations)
+      .where(
+        and(
+          eq(contentRecommendations.id, recommendationId),
+          eq(contentRecommendations.userId, userId)
+        )
+      );
   }
 }
 
