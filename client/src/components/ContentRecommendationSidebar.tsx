@@ -71,9 +71,7 @@ export default function ContentRecommendationSidebar({
   });
 
   const generateMutation = useMutation({
-    mutationFn: () => apiRequest(`/api/books/${bookId}/recommendations/generate`, {
-      method: 'POST'
-    }),
+    mutationFn: () => apiRequest('POST', `/api/books/${bookId}/recommendations/generate`),
     onSuccess: (newRecommendations) => {
       queryClient.setQueryData(['/api/books', bookId, 'recommendations'], newRecommendations);
       toast({
@@ -96,10 +94,7 @@ export default function ContentRecommendationSidebar({
       isUseful: boolean; 
       isApplied?: boolean; 
     }) => 
-      apiRequest(`/api/recommendations/${recommendationId}/feedback`, {
-        method: 'PUT',
-        body: JSON.stringify({ isUseful, isApplied })
-      }),
+      apiRequest('PUT', `/api/recommendations/${recommendationId}/feedback`, { isUseful, isApplied }),
     onSuccess: () => {
       queryClient.invalidateQueries({ 
         queryKey: ['/api/books', bookId, 'recommendations'] 
@@ -116,9 +111,7 @@ export default function ContentRecommendationSidebar({
 
   const deleteMutation = useMutation({
     mutationFn: (recommendationId: string) => 
-      apiRequest(`/api/recommendations/${recommendationId}`, {
-        method: 'DELETE'
-      }),
+      apiRequest('DELETE', `/api/recommendations/${recommendationId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ 
         queryKey: ['/api/books', bookId, 'recommendations'] 
@@ -153,14 +146,14 @@ export default function ContentRecommendationSidebar({
     feedbackMutation.mutate({
       recommendationId: recommendation.id,
       isUseful,
-      isApplied: recommendation.isApplied
+      isApplied: recommendation.isApplied ?? false
     });
   };
 
   const handleApply = (recommendation: ContentRecommendation) => {
     feedbackMutation.mutate({
       recommendationId: recommendation.id,
-      isUseful: recommendation.isUseful || true,
+      isUseful: recommendation.isUseful ?? true,
       isApplied: true
     });
   };
@@ -224,7 +217,7 @@ export default function ContentRecommendationSidebar({
           </Card>
         )}
 
-        {recommendations.length === 0 && !isLoading && !error && (
+        {(recommendations as ContentRecommendation[]).length === 0 && !isLoading && !error && (
           <Card className="border-blue-200 bg-blue-50">
             <CardContent className="p-4 text-center">
               <Lightbulb className="w-8 h-8 text-blue-600 mx-auto mb-2" />
@@ -238,7 +231,7 @@ export default function ContentRecommendationSidebar({
           </Card>
         )}
 
-        {recommendations.map((recommendation: ContentRecommendation) => (
+        {(recommendations as ContentRecommendation[]).map((recommendation: ContentRecommendation) => (
           <Card key={recommendation.id} className="border-gray-200">
             <Collapsible
               open={expandedItems.has(recommendation.id)}
@@ -258,10 +251,10 @@ export default function ContentRecommendationSidebar({
                         <div className="flex items-center gap-1 ml-2">
                           <Badge 
                             variant="outline" 
-                            className={`text-xs ${getConfidenceColor(recommendation.confidence || 0.7)}`}
+                            className={`text-xs ${getConfidenceColor(Number(recommendation.confidence) || 0.7)}`}
                           >
                             <Star className="w-3 h-3 mr-1" />
-                            {Math.round((recommendation.confidence || 0.7) * 100)}%
+                            {Math.round((Number(recommendation.confidence) || 0.7) * 100)}%
                           </Badge>
                           {expandedItems.has(recommendation.id) ? (
                             <ChevronDown className="w-4 h-4 text-gray-400" />
