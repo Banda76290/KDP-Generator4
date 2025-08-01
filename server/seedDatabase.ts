@@ -198,29 +198,38 @@ export async function forceSeedDatabase() {
     const categoryCount = await db.select().from(marketplaceCategories);
     console.log(`[${timestamp}] 📊 [FORCE-SEED] Nombre total de catégories insérées: ${categoryCount.length}`);
     
-    // Analyser par niveau
-    const levelCounts = await db.execute(sql.raw(`
-      SELECT level, COUNT(*) as count 
-      FROM marketplace_categories 
-      GROUP BY level 
-      ORDER BY level
-    `)) as any[];
-    console.log(`[${timestamp}] 📈 [FORCE-SEED] Répartition par niveau:`);
-    levelCounts.forEach((row: any) => {
-      console.log(`[${timestamp}] 📊 [FORCE-SEED] Niveau ${row.level}: ${row.count} catégories`);
-    });
+    // Analyser par niveau (utilisation d'ORM plutôt que SQL brut)
+    try {
+      console.log(`[${timestamp}] 📈 [FORCE-SEED] Répartition par niveau:`);
+      const level1Count = categoryCount.filter(c => c.level === 1).length;
+      const level2Count = categoryCount.filter(c => c.level === 2).length;
+      const level3Count = categoryCount.filter(c => c.level === 3).length;
+      const level4Count = categoryCount.filter(c => c.level === 4).length;
+      const level5Count = categoryCount.filter(c => c.level === 5).length;
+      const level6PlusCount = categoryCount.filter(c => c.level >= 6).length;
+      
+      console.log(`[${timestamp}] 📊 [FORCE-SEED] Niveau 1: ${level1Count} catégories`);
+      console.log(`[${timestamp}] 📊 [FORCE-SEED] Niveau 2: ${level2Count} catégories`);
+      console.log(`[${timestamp}] 📊 [FORCE-SEED] Niveau 3: ${level3Count} catégories`);
+      console.log(`[${timestamp}] 📊 [FORCE-SEED] Niveau 4: ${level4Count} catégories`);
+      console.log(`[${timestamp}] 📊 [FORCE-SEED] Niveau 5: ${level5Count} catégories`);
+      console.log(`[${timestamp}] 📊 [FORCE-SEED] Niveau 6+: ${level6PlusCount} catégories`);
+    } catch (levelError) {
+      console.error(`[${timestamp}] ⚠️ [FORCE-SEED] Erreur lors de l'analyse par niveau:`, levelError);
+    }
     
-    // Analyser par marketplace
-    const marketplaceCounts = await db.execute(sql.raw(`
-      SELECT marketplace, COUNT(*) as count 
-      FROM marketplace_categories 
-      GROUP BY marketplace 
-      ORDER BY marketplace
-    `)) as any[];
-    console.log(`[${timestamp}] 🌍 [FORCE-SEED] Répartition par marketplace:`);
-    marketplaceCounts.forEach((row: any) => {
-      console.log(`[${timestamp}] 📊 [FORCE-SEED] ${row.marketplace}: ${row.count} catégories`);
-    });
+    // Analyser par marketplace (utilisation d'ORM plutôt que SQL brut)
+    try {
+      console.log(`[${timestamp}] 🌍 [FORCE-SEED] Répartition par marketplace:`);
+      const marketplaces = [...new Set(categoryCount.map(c => c.marketplace))];
+      
+      marketplaces.forEach(marketplace => {
+        const count = categoryCount.filter(c => c.marketplace === marketplace).length;
+        console.log(`[${timestamp}] 📊 [FORCE-SEED] ${marketplace}: ${count} catégories`);
+      });
+    } catch (marketplaceError) {
+      console.error(`[${timestamp}] ⚠️ [FORCE-SEED] Erreur lors de l'analyse par marketplace:`, marketplaceError);
+    }
     
     // Vérifier l'intégrité des données
     console.log(`[${timestamp}] 🔍 [FORCE-SEED] Vérification de l'intégrité des données...`);
