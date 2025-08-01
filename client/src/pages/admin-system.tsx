@@ -110,7 +110,7 @@ export default function AdminSystem() {
       addLog('Envoi de la requête POST /api/admin/database/seed', 'info');
       
       try {
-        const result = await apiRequest("/api/admin/database/seed", "POST");
+        const result = await apiRequest("POST", "/api/admin/database/seed");
         addLog('Réponse reçue du serveur', 'success');
         addLog(`Résultat: ${JSON.stringify(result, null, 2)}`, 'info');
         return result;
@@ -157,7 +157,7 @@ export default function AdminSystem() {
       addLog('Envoi de la requête POST /api/admin/database/reset', 'info');
       
       try {
-        const result = await apiRequest("/api/admin/database/reset", "POST");
+        const result = await apiRequest("POST", "/api/admin/database/reset");
         addLog('Réponse reçue du serveur pour le reset', 'success');
         addLog(`Résultat du reset: ${JSON.stringify(result, null, 2)}`, 'info');
         return result;
