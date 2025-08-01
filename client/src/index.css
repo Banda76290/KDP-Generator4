@@ -39,11 +39,39 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 
-  h1 {
+  /* Global typography colors for consistency */
+  h1, h2, h3, h4, h5, h6 {
     color: #1a1a1a !important;
   }
 
-  .dark h1 {
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+    color: white !important;
+  }
+
+  /* Override specific text color classes */
+  .text-gray-900 {
+    color: #1a1a1a !important;
+  }
+
+  .dark .text-gray-900 {
+    color: white !important;
+  }
+
+  /* Ensure consistent card titles */
+  .card-title {
+    color: #1a1a1a !important;
+  }
+
+  .dark .card-title {
+    color: white !important;
+  }
+
+  /* Form labels */
+  label {
+    color: #1a1a1a !important;
+  }
+
+  .dark label {
     color: white !important;
   }
 }
@@ -94,6 +122,25 @@
 
 .kdp-text-orange {
   color: var(--kdp-secondary-orange);
+}
+
+/* Override primary button colors to use KDP colors */
+.bg-primary {
+  background-color: var(--kdp-primary-blue) !important;
+}
+
+.bg-primary:hover {
+  background-color: #2da5ee !important;
+}
+
+/* Ensure buttons use KDP styling */
+.btn-primary {
+  background-color: var(--kdp-primary-blue) !important;
+  color: white !important;
+}
+
+.btn-primary:hover {
+  background-color: #2da5ee !important;
 }
 
 /* Series description formatting in cards */
