@@ -266,18 +266,32 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
         return; // Already correctly set, don't reconstruct
       }
       
-      // Reconstruct the hierarchy using the same logic as manual selection
+      // Reconstruct the hierarchy using compatible logic for virtual hierarchy
       setTimeout(() => {
         const pathParts = categoryData.categoryPath.split(' > ');
         const newLevels = new Array(maxDepth).fill("");
         
-        // Build levels dynamically based on path depth
-        for (let i = 0; i < Math.min(pathParts.length - 1, maxDepth); i++) {
-          const levelPath = pathParts.slice(0, i + 2).join(' > ');
-          if (selectedLevels[i] !== levelPath) {
+        // Check if we're using virtual hierarchy (minLevel >= 4)
+        const minLevel = Math.min(...marketplaceCategories.map(cat => cat.level));
+        const isVirtualHierarchy = minLevel >= 4;
+        
+        if (isVirtualHierarchy) {
+          // For virtual hierarchy, start from level 2 (Books > discriminant > ...)
+          // Skip "Books" and discriminant, start from actual categories
+          const cleanPath = categoryData.categoryPath.replace(/^Books > /, '').replace(/kindle_ebook > |print_kdp_paperback > /, '');
+          const cleanSegments = cleanPath.split(' > ');
+          
+          // Build progressive paths starting from level 2
+          for (let i = 0; i < Math.min(cleanSegments.length, maxDepth); i++) {
+            const discriminant = categoryData.categoryPath.includes('kindle_ebook') ? 'kindle_ebook' : 'print_kdp_paperback';
+            const levelPath = 'Books > ' + discriminant + ' > ' + cleanSegments.slice(0, i + 1).join(' > ');
             newLevels[i] = levelPath;
-          } else {
-            newLevels[i] = selectedLevels[i]; // Keep existing if same
+          }
+        } else {
+          // Original logic for normal level-based categories
+          for (let i = 0; i < Math.min(pathParts.length - 1, maxDepth); i++) {
+            const levelPath = pathParts.slice(0, i + 2).join(' > ');
+            newLevels[i] = levelPath;
           }
         }
         
