@@ -55,18 +55,22 @@ export default function AdminSystem() {
 
   // Detect user interaction with logs container
   const handleLogsScroll = () => {
-    if (logsContainerRef.current) {
-      const container = logsContainerRef.current;
-      const isAtBottom = container.scrollHeight - container.scrollTop === container.clientHeight;
-      
-      // Re-enable auto-scroll only if user scrolled to bottom
-      if (isAtBottom && !autoScrollEnabled) {
-        setAutoScrollEnabled(true);
+    try {
+      if (logsContainerRef.current) {
+        const container = logsContainerRef.current;
+        const isAtBottom = Math.abs(container.scrollHeight - container.scrollTop - container.clientHeight) < 5;
+        
+        // Re-enable auto-scroll only if user scrolled to bottom
+        if (isAtBottom && !autoScrollEnabled) {
+          setAutoScrollEnabled(true);
+        }
+        // Disable auto-scroll if user scrolled up
+        else if (!isAtBottom && autoScrollEnabled) {
+          setAutoScrollEnabled(false);
+        }
       }
-      // Disable auto-scroll if user scrolled up
-      else if (!isAtBottom && autoScrollEnabled) {
-        setAutoScrollEnabled(false);
-      }
+    } catch (error) {
+      console.warn('Error in scroll handler:', error);
     }
   };
 
@@ -80,17 +84,21 @@ export default function AdminSystem() {
 
   // Update local logs when server logs change
   useEffect(() => {
-    if (systemLogsData && typeof systemLogsData === 'object' && 'logs' in systemLogsData) {
-      const logsData = systemLogsData as { logs: any[] };
-      if (Array.isArray(logsData.logs)) {
-        const formattedLogs = logsData.logs.map((log: any) => {
-          const timestamp = new Date(log.timestamp).toLocaleTimeString('fr-FR');
-          const prefix = log.level === 'error' ? '❌' : log.level === 'warn' ? '⚠️' : log.level === 'debug' ? '🔍' : 'ℹ️';
-          const category = log.category ? `[${log.category}] ` : '';
-          return `[${timestamp}] ${prefix} ${category}${log.message}`;
-        });
-        setLogs(formattedLogs);
+    try {
+      if (systemLogsData && typeof systemLogsData === 'object' && 'logs' in systemLogsData) {
+        const logsData = systemLogsData as { logs: any[] };
+        if (Array.isArray(logsData.logs)) {
+          const formattedLogs = logsData.logs.map((log: any) => {
+            const timestamp = new Date(log.timestamp).toLocaleTimeString('fr-FR');
+            const prefix = log.level === 'error' ? '❌' : log.level === 'warn' ? '⚠️' : log.level === 'debug' ? '🔍' : 'ℹ️';
+            const category = log.category ? `[${log.category}] ` : '';
+            return `[${timestamp}] ${prefix} ${category}${log.message}`;
+          });
+          setLogs(formattedLogs);
+        }
       }
+    } catch (error) {
+      console.warn('Error processing logs data:', error);
     }
   }, [systemLogsData]);
 
@@ -754,7 +762,7 @@ export default function AdminSystem() {
                     )}
                     {!autoScrollEnabled && !isPaused && (
                       <span className="text-blue-600"> • 📜 Défilement désactivé</span>
-                    )}
+                    ) as React.ReactNode}
                   </span>
                 )}
               </div>
