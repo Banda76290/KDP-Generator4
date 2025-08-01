@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -266,18 +267,19 @@ export default function AuthorsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Authors</h1>
-          <p className="text-gray-600 dark:text-gray-400">Manage your authors and their multilingual biographies</p>
+    <Layout>
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Authors</h1>
+            <p className="text-gray-600 dark:text-gray-400">Manage your authors and their multilingual biographies</p>
+          </div>
+          <Button onClick={() => setIsCreating(true)} className="bg-primary hover:bg-primary/90">
+            <Plus className="w-4 h-4 mr-2" />
+            Create Author
+          </Button>
         </div>
-        <Button onClick={() => setIsCreating(true)} className="bg-primary hover:bg-primary/90">
-          <Plus className="w-4 h-4 mr-2" />
-          Create Author
-        </Button>
-      </div>
 
       {/* Author Creation Dialog */}
       {isCreating && (
@@ -574,6 +576,7 @@ export default function AuthorsPage() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </Layout>
   );
 }
