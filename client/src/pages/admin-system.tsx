@@ -36,6 +36,7 @@ export default function AdminSystem() {
   const queryClient = useQueryClient();
   const [seedingStatus, setSeedingStatus] = useState<'idle' | 'seeding' | 'resetting'>('idle');
   const [logs, setLogs] = useState<string[]>([]);
+  const [autoRefreshLogs, setAutoRefreshLogs] = useState(true);
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll logs to bottom
@@ -46,6 +47,30 @@ export default function AdminSystem() {
   useEffect(() => {
     scrollToBottom();
   }, [logs]);
+
+  // Fetch system logs from server
+  const { data: systemLogsData, isLoading: logsLoading } = useQuery({
+    queryKey: ['/api/admin/system/logs'],
+    refetchInterval: autoRefreshLogs ? 2000 : false, // Refresh every 2 seconds if auto-refresh is enabled
+    refetchIntervalInBackground: true,
+    enabled: isAdmin, // Only fetch if user is admin
+  });
+
+  // Update local logs when server logs change
+  useEffect(() => {
+    if (systemLogsData && typeof systemLogsData === 'object' && 'logs' in systemLogsData) {
+      const logsData = systemLogsData as { logs: any[] };
+      if (Array.isArray(logsData.logs)) {
+        const formattedLogs = logsData.logs.map((log: any) => {
+          const timestamp = new Date(log.timestamp).toLocaleTimeString('fr-FR');
+          const prefix = log.level === 'error' ? '❌' : log.level === 'warn' ? '⚠️' : log.level === 'debug' ? '🔍' : 'ℹ️';
+          const category = log.category ? `[${log.category}] ` : '';
+          return `[${timestamp}] ${prefix} ${category}${log.message}`;
+        });
+        setLogs(formattedLogs);
+      }
+    }
+  }, [systemLogsData]);
 
   // Add log function
   const addLog = (message: string, type: 'info' | 'success' | 'error' | 'warning' = 'info') => {
@@ -606,6 +631,14 @@ export default function AdminSystem() {
               </div>
               <div className="flex space-x-2">
                 <Button 
+                  variant={autoRefreshLogs ? "default" : "outline"} 
+                  size="sm" 
+                  onClick={() => setAutoRefreshLogs(!autoRefreshLogs)}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${autoRefreshLogs ? 'animate-spin' : ''}`} />
+                  {autoRefreshLogs ? 'Auto' : 'Manuel'}
+                </Button>
+                <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={copyLogs}
@@ -623,23 +656,60 @@ export default function AdminSystem() {
                   <Trash2 className="h-4 w-4 mr-2" />
                   Effacer
                 </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/admin/system/logs'] })}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Actualiser
+                </Button>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <div className="bg-black text-green-400 p-4 rounded-lg font-mono text-sm overflow-auto max-h-96 border">
               {logs.length === 0 ? (
-                <div className="text-gray-500">Aucun log disponible. Effectuez une opération pour voir les logs...</div>
+                <div className="text-gray-500">
+                  {logsLoading ? (
+                    <div className="flex items-center space-x-2">
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                      <span>Chargement des logs système...</span>
+                    </div>
+                  ) : (
+                    "Aucun log disponible. Effectuez une opération pour voir les logs..."
+                  )}
+                </div>
               ) : (
                 <div className="space-y-1">
                   {logs.map((log, index) => (
-                    <div key={index} className="break-all">
+                    <div key={index} className="break-all hover:bg-gray-800 px-1 rounded">
                       {log}
                     </div>
                   ))}
                   <div ref={logsEndRef} />
                 </div>
               )}
+            </div>
+            
+            <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+              <div>
+                {logs.length > 0 && (
+                  <span>
+                    {logs.length} entrées • 
+                    {autoRefreshLogs ? (
+                      <span className="text-green-600"> Auto-actualisation active</span>
+                    ) : (
+                      <span className="text-orange-600"> Mode manuel</span>
+                    )}
+                  </span>
+                )}
+              </div>
+              <div>
+                {systemLogsData && typeof systemLogsData === 'object' && 'total' in systemLogsData && (
+                  <span>Total serveur: {(systemLogsData as any).total}</span>
+                )}
+              </div>
             </div>
             
             <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-2 text-xs">

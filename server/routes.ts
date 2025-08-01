@@ -11,6 +11,42 @@ import { seedDatabase, forceSeedDatabase } from "./seedDatabase.js";
 import { z } from "zod";
 import OpenAI from "openai";
 
+// Global logs storage for persistent logging
+interface LogEntry {
+  timestamp: string;
+  level: 'info' | 'warn' | 'error' | 'debug';
+  message: string;
+  category?: string;
+}
+
+const globalLogs: LogEntry[] = [];
+const MAX_LOGS = 1000; // Keep last 1000 logs
+
+// Enhanced logging function
+export const systemLog = (message: string, level: 'info' | 'warn' | 'error' | 'debug' = 'info', category?: string) => {
+  const logEntry: LogEntry = {
+    timestamp: new Date().toISOString(),
+    level,
+    message,
+    category
+  };
+  
+  globalLogs.push(logEntry);
+  
+  // Keep only last MAX_LOGS entries
+  if (globalLogs.length > MAX_LOGS) {
+    globalLogs.splice(0, globalLogs.length - MAX_LOGS);
+  }
+  
+  // Also log to console with timestamp
+  const timestamp = new Date().toLocaleTimeString('fr-FR');
+  const prefix = level === 'error' ? '❌' : level === 'warn' ? '⚠️' : level === 'debug' ? '🔍' : 'ℹ️';
+  console.log(`[${timestamp}] ${prefix} ${category ? `[${category}] ` : ''}${message}`);
+};
+
+// Get logs function
+export const getSystemLogs = () => globalLogs;
+
 // Extend Express Request type to include authenticated user
 interface AuthenticatedRequest extends Request {
   user?: any; // Simplified to avoid type conflicts
@@ -57,8 +93,13 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize system logs
+  systemLog('🚀 Démarrage du serveur KDP Generator', 'info', 'SYSTEM');
+  systemLog('🔧 Configuration des routes API...', 'info', 'SYSTEM');
+  
   // Setup authentication
   await setupAuth(app);
+  systemLog('🔐 Authentification configurée', 'info', 'AUTH');
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
@@ -1068,6 +1109,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // System logs endpoint (admin only)
+  app.get('/api/admin/system/logs', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { limit = 100 } = req.query;
+      const limitNum = parseInt(limit as string);
+      const logs = getSystemLogs();
+      
+      // Return last N logs, most recent first
+      const recentLogs = logs.slice(-limitNum).reverse();
+      
+      systemLog(`Logs récupérés: ${recentLogs.length} entrées`, 'info', 'API');
+      
+      res.json({
+        logs: recentLogs,
+        total: logs.length,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      systemLog(`Erreur lors de la récupération des logs: ${error}`, 'error', 'API');
+      res.status(500).json({ message: "Failed to fetch system logs" });
+    }
+  });
+
+  // System health endpoint with enhanced logging
+  app.get('/api/admin/system/health', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      systemLog('Vérification de la santé du système demandée', 'info', 'HEALTH');
+      
+      const { db } = await import('./db.js');
+      const { marketplaceCategories, users, projects, books } = await import('@shared/schema');
+      
+      const [categoriesCount, usersCount, projectsCount, booksCount] = await Promise.all([
+        db.select().from(marketplaceCategories),
+        db.select().from(users),
+        db.select().from(projects),
+        db.select().from(books)
+      ]);
+
+      const uptime = process.uptime();
+      const memoryUsage = process.memoryUsage();
+
+      const health = {
+        database: categoriesCount.length > 0 ? 'healthy' : 'error',
+        categories: categoriesCount.length,
+        totalUsers: usersCount.length,
+        totalProjects: projectsCount.length,
+        totalBooks: booksCount.length,
+        uptime: `${Math.floor(uptime / 3600)}h ${Math.floor((uptime % 3600) / 60)}m`,
+        memoryUsage: {
+          used: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB`,
+          total: `${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`,
+          percentage: Math.round((memoryUsage.heapUsed / memoryUsage.heapTotal) * 100)
+        },
+        lastSeeded: new Date().toISOString(),
+        timestamp: new Date().toISOString()
+      };
+
+      systemLog(`Santé système: ${health.database}, ${health.categories} catégories, ${health.totalUsers} utilisateurs`, 'info', 'HEALTH');
+      
+      res.json(health);
+    } catch (error) {
+      systemLog(`Erreur lors de la vérification de santé: ${error}`, 'error', 'HEALTH');
+      res.status(500).json({ message: "Failed to check system health" });
+    }
+  });
+
   // Blog admin routes
   app.get('/api/admin/blog/categories', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -1615,37 +1722,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Database seeding endpoints (admin only)
   app.post('/api/admin/database/seed', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     const startTime = Date.now();
-    const timestamp = new Date().toISOString();
     
     try {
-      console.log(`[${timestamp}] 🚀 [SEED] Début de la synchronisation de la base de données`);
-      console.log(`[${timestamp}] 👤 [SEED] Demande initiée par l'utilisateur: ${req.user?.email || 'Inconnu'}`);
-      console.log(`[${timestamp}] 🔍 [SEED] Vérification des catégories existantes...`);
+      systemLog('🚀 Début de la synchronisation de la base de données', 'info', 'SEED');
+      systemLog(`👤 Demande initiée par l'utilisateur: ${req.user?.email || 'Inconnu'}`, 'info', 'SEED');
+      systemLog('🔍 Vérification des catégories existantes...', 'info', 'SEED');
       
       await seedDatabase();
       
       const duration = Date.now() - startTime;
-      console.log(`[${timestamp}] ✅ [SEED] Synchronisation terminée avec succès en ${duration}ms`);
-      console.log(`[${timestamp}] 📊 [SEED] Opération complète, retour de la réponse positive`);
+      systemLog(`✅ Synchronisation terminée avec succès en ${duration}ms`, 'info', 'SEED');
+      systemLog('📊 Opération complète, retour de la réponse positive', 'info', 'SEED');
       
       res.json({ 
         message: 'Database seeding completed successfully',
         success: true,
         duration: `${duration}ms`,
-        timestamp: timestamp
+        timestamp: new Date().toISOString()
       });
     } catch (error) {
       const duration = Date.now() - startTime;
-      console.error(`[${timestamp}] ❌ [SEED] Erreur lors de la synchronisation:`, error);
-      console.error(`[${timestamp}] 🔍 [SEED] Stack trace:`, error instanceof Error ? error.stack : 'Non disponible');
-      console.error(`[${timestamp}] ⏱️ [SEED] Échec après ${duration}ms`);
+      systemLog(`❌ Erreur lors de la synchronisation: ${error}`, 'error', 'SEED');
+      systemLog(`🔍 Stack trace: ${error instanceof Error ? error.stack : 'Non disponible'}`, 'error', 'SEED');
+      systemLog(`⏱️ Échec après ${duration}ms`, 'error', 'SEED');
       
       res.status(500).json({ 
         message: "Failed to seed database",
         error: error instanceof Error ? error.message : 'Unknown error',
         success: false,
         duration: `${duration}ms`,
-        timestamp: timestamp
+        timestamp: new Date().toISOString()
       });
     }
   });
@@ -1727,16 +1833,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const timestamp = new Date().toISOString();
     
     try {
-      console.log(`[${timestamp}] ⚠️ [RESET] DÉBUT DU RESET COMPLET DE LA BASE DE DONNÉES`);
-      console.log(`[${timestamp}] 👤 [RESET] Demande initiée par l'utilisateur: ${req.user?.email || 'Inconnu'}`);
-      console.log(`[${timestamp}] 🔥 [RESET] ATTENTION: Toutes les catégories vont être supprimées`);
-      console.log(`[${timestamp}] 🔍 [RESET] Lancement de forceSeedDatabase()...`);
+      systemLog('⚠️ DÉBUT DU RESET COMPLET DE LA BASE DE DONNÉES', 'warn', 'RESET');
+      systemLog(`👤 Demande initiée par l'utilisateur: ${req.user?.email || 'Inconnu'}`, 'info', 'RESET');
+      systemLog('🔥 ATTENTION: Toutes les catégories vont être supprimées', 'warn', 'RESET');
+      systemLog('🔍 Lancement de forceSeedDatabase()...', 'info', 'RESET');
       
       await forceSeedDatabase();
       
       const duration = Date.now() - startTime;
-      console.log(`[${timestamp}] ✅ [RESET] Reset et re-synchronisation terminés avec succès en ${duration}ms`);
-      console.log(`[${timestamp}] 📊 [RESET] Toutes les données ont été remplacées, retour de la réponse positive`);
+      systemLog(`✅ Reset et re-synchronisation terminés avec succès en ${duration}ms`, 'info', 'RESET');
+      systemLog('📊 Toutes les données ont été remplacées, retour de la réponse positive', 'info', 'RESET');
       
       res.json({ 
         message: 'Database reset and re-seeding completed successfully',
@@ -1746,10 +1852,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       const duration = Date.now() - startTime;
-      console.error(`[${timestamp}] ❌ [RESET] Erreur critique lors du reset:`, error);
-      console.error(`[${timestamp}] 🔍 [RESET] Stack trace:`, error instanceof Error ? error.stack : 'Non disponible');
-      console.error(`[${timestamp}] ⏱️ [RESET] Échec après ${duration}ms`);
-      console.error(`[${timestamp}] 🚨 [RESET] ÉTAT DE LA BASE INCERTAIN - VÉRIFICATION REQUISE`);
+      systemLog(`❌ Erreur critique lors du reset: ${error}`, 'error', 'RESET');
+      systemLog(`🔍 Stack trace: ${error instanceof Error ? error.stack : 'Non disponible'}`, 'error', 'RESET');
+      systemLog(`⏱️ Échec après ${duration}ms`, 'error', 'RESET');
+      systemLog('🚨 ÉTAT DE LA BASE INCERTAIN - VÉRIFICATION REQUISE', 'error', 'RESET');
       
       res.status(500).json({ 
         message: "Failed to reset database",
