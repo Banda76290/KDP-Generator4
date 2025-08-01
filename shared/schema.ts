@@ -385,6 +385,31 @@ export const blogComments = pgTable("blog_comments", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Authors table for managing author profiles and multilingual biographies
+export const authors = pgTable("authors", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  prefix: varchar("prefix"),
+  firstName: varchar("first_name").notNull(),
+  middleName: varchar("middle_name"),
+  lastName: varchar("last_name").notNull(),
+  suffix: varchar("suffix"),
+  fullName: varchar("full_name").notNull(), // Computed field for easy searching
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Author biographies table for multilingual content
+export const authorBiographies = pgTable("author_biographies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  authorId: varchar("author_id").notNull().references(() => authors.id, { onDelete: "cascade" }),
+  language: varchar("language").notNull(), // English, Spanish, German, French, Italian, Portuguese, Japanese
+  biography: text("biography"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   projects: many(projects),
@@ -394,6 +419,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   blogPosts: many(blogPosts),
   blogComments: many(blogComments),
   series: many(series),
+  authors: many(authors),
 }));
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
@@ -495,6 +521,29 @@ export const systemConfigRelations = relations(systemConfig, ({ one }) => ({
 export const adminAuditLogRelations = relations(adminAuditLog, ({ one }) => ({
   user: one(users, {
     fields: [adminAuditLog.userId],
+    references: [users.id],
+  }),
+}));
+
+// Author relations
+export const authorsRelations = relations(authors, ({ one, many }) => ({
+  user: one(users, {
+    fields: [authors.userId],
+    references: [users.id],
+  }),
+  biographies: many(authorBiographies),
+}));
+
+export const authorBiographiesRelations = relations(authorBiographies, ({ one }) => ({
+  author: one(authors, {
+    fields: [authorBiographies.authorId],
+    references: [authors.id],
+  }),
+}));
+
+export const seriesRelations = relations(series, ({ one }) => ({
+  user: one(users, {
+    fields: [series.userId],
     references: [users.id],
   }),
 }));
@@ -619,13 +668,6 @@ export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
 export type BlogComment = typeof blogComments.$inferSelect;
 export type InsertBlogComment = z.infer<typeof insertBlogCommentSchema>;
 
-export const seriesRelations = relations(series, ({ one }) => ({
-  user: one(users, {
-    fields: [series.userId],
-    references: [users.id],
-  }),
-}));
-
 export const insertSeriesSchema = createInsertSchema(series).omit({
   id: true,
   createdAt: true,
@@ -633,6 +675,29 @@ export const insertSeriesSchema = createInsertSchema(series).omit({
 });
 export type Series = typeof series.$inferSelect;
 export type InsertSeries = z.infer<typeof insertSeriesSchema>;
+
+// Author Zod schemas
+export const insertAuthorSchema = createInsertSchema(authors).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type Author = typeof authors.$inferSelect;
+export type InsertAuthor = z.infer<typeof insertAuthorSchema>;
+
+export const insertAuthorBiographySchema = createInsertSchema(authorBiographies).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type AuthorBiography = typeof authorBiographies.$inferSelect;
+export type InsertAuthorBiography = z.infer<typeof insertAuthorBiographySchema>;
+
+// Author with relations type
+export type AuthorWithRelations = Author & {
+  user: User;
+  biographies: AuthorBiography[];
+};
 
 export const insertMarketplaceCategorySchema = createInsertSchema(marketplaceCategories).omit({
   id: true,

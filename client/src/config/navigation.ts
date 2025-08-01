@@ -12,7 +12,8 @@ import {
   Zap,
   Variable,
   Tags,
-  Server
+  Server,
+  User
 } from "lucide-react";
 
 interface NavigationItem {
@@ -26,6 +27,7 @@ export const navigation: NavigationItem[] = [
   { name: "Dashboard", href: "/", icon: BarChart3 },
   { name: "Projects", href: "/projects", icon: FolderOpen },
   { name: "Books", href: "/books", icon: FileText },
+  { name: "Authors", href: "/authors", icon: User },
   { name: "Manage Series", href: "/manage-series", icon: Tags },
   { name: "Sales Analytics", href: "/analytics", icon: TrendingUp },
   { name: "KDP Reports", href: "/kdp-reports", icon: Upload },

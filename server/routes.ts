@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema } from "@shared/schema";
+import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema, insertAuthorSchema, insertAuthorBiographySchema } from "@shared/schema";
 import { aiService } from "./services/aiService";
 import { parseKDPReport } from "./services/kdpParser";
 import { generateUniqueIsbnPlaceholder, ensureIsbnPlaceholder } from "./utils/isbnGenerator";
@@ -1408,6 +1408,176 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting blog post:", error);
       res.status(500).json({ message: "Failed to delete blog post" });
+    }
+  });
+
+  // Author routes
+  app.get('/api/authors', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const authors = await storage.getUserAuthors(userId);
+      res.json(authors);
+    } catch (error) {
+      console.error("Error fetching authors:", error);
+      res.status(500).json({ message: "Failed to fetch authors" });
+    }
+  });
+
+  app.get('/api/authors/:authorId', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { authorId } = req.params;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const author = await storage.getAuthor(authorId, userId);
+      if (!author) {
+        return res.status(404).json({ message: "Author not found" });
+      }
+
+      res.json(author);
+    } catch (error) {
+      console.error("Error fetching author:", error);
+      res.status(500).json({ message: "Failed to fetch author" });
+    }
+  });
+
+  app.post('/api/authors', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const authorData = insertAuthorSchema.parse({ ...req.body, userId });
+      const author = await storage.createAuthor(authorData);
+      res.json(author);
+    } catch (error) {
+      console.error("Error creating author:", error);
+      res.status(500).json({ message: "Failed to create author" });
+    }
+  });
+
+  app.put('/api/authors/:authorId', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { authorId } = req.params;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const updates = insertAuthorSchema.partial().parse(req.body);
+      const author = await storage.updateAuthor(authorId, userId, updates);
+      res.json(author);
+    } catch (error) {
+      console.error("Error updating author:", error);
+      res.status(500).json({ message: "Failed to update author" });
+    }
+  });
+
+  app.delete('/api/authors/:authorId', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { authorId } = req.params;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      await storage.deleteAuthor(authorId, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting author:", error);
+      res.status(500).json({ message: "Failed to delete author" });
+    }
+  });
+
+  app.get('/api/authors/:authorId/biography/:language', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { authorId, language } = req.params;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      // Verify user owns the author
+      const author = await storage.getAuthor(authorId, userId);
+      if (!author) {
+        return res.status(404).json({ message: "Author not found" });
+      }
+
+      const biography = await storage.getAuthorBiography(authorId, language);
+      res.json(biography || { authorId, language, biography: '' });
+    } catch (error) {
+      console.error("Error fetching author biography:", error);
+      res.status(500).json({ message: "Failed to fetch author biography" });
+    }
+  });
+
+  app.put('/api/authors/:authorId/biography/:language', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { authorId, language } = req.params;
+      const { biography } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      // Verify user owns the author
+      const author = await storage.getAuthor(authorId, userId);
+      if (!author) {
+        return res.status(404).json({ message: "Author not found" });
+      }
+
+      const biographyData = insertAuthorBiographySchema.parse({ authorId, language, biography });
+      const savedBiography = await storage.upsertAuthorBiography(biographyData);
+      res.json(savedBiography);
+    } catch (error) {
+      console.error("Error saving author biography:", error);
+      res.status(500).json({ message: "Failed to save author biography" });
+    }
+  });
+
+  app.get('/api/authors/:authorId/projects', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { authorId } = req.params;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const projects = await storage.getAuthorProjects(authorId, userId);
+      res.json(projects);
+    } catch (error) {
+      console.error("Error fetching author projects:", error);
+      res.status(500).json({ message: "Failed to fetch author projects" });
+    }
+  });
+
+  app.get('/api/authors/:authorId/books', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { authorId } = req.params;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const books = await storage.getAuthorBooks(authorId, userId);
+      res.json(books);
+    } catch (error) {
+      console.error("Error fetching author books:", error);
+      res.status(500).json({ message: "Failed to fetch author books" });
     }
   });
 

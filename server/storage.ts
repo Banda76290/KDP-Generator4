@@ -12,6 +12,8 @@ import {
   blogComments,
   series,
   marketplaceCategories,
+  authors,
+  authorBiographies,
   type User,
   type UpsertUser,
   type Project,
@@ -39,6 +41,11 @@ import {
   type Series,
   type InsertSeries,
   type MarketplaceCategory,
+  type Author,
+  type InsertAuthor,
+  type AuthorWithRelations,
+  type AuthorBiography,
+  type InsertAuthorBiography,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, sum, count, like, or } from "drizzle-orm";
@@ -117,6 +124,17 @@ export interface IStorage {
   createSeries(series: InsertSeries): Promise<Series>;
   updateSeries(seriesId: string, userId: string, updates: Partial<InsertSeries>): Promise<Series>;
   deleteSeries(seriesId: string, userId: string): Promise<void>;
+
+  // Author operations
+  getUserAuthors(userId: string): Promise<AuthorWithRelations[]>;
+  getAuthor(authorId: string, userId: string): Promise<AuthorWithRelations | undefined>;
+  createAuthor(author: InsertAuthor): Promise<Author>;
+  updateAuthor(authorId: string, userId: string, updates: Partial<InsertAuthor>): Promise<Author>;
+  deleteAuthor(authorId: string, userId: string): Promise<void>;
+  getAuthorBiography(authorId: string, language: string): Promise<AuthorBiography | undefined>;
+  upsertAuthorBiography(biography: InsertAuthorBiography): Promise<AuthorBiography>;
+  getAuthorProjects(authorId: string, userId: string): Promise<ProjectWithRelations[]>;
+  getAuthorBooks(authorId: string, userId: string): Promise<Book[]>;
 
   // Marketplace Categories operations
   getMarketplaceCategories(marketplace: string): Promise<MarketplaceCategory[]>;
@@ -1482,6 +1500,218 @@ export class DatabaseStorage implements IStorage {
         error: errorMessage
       };
     }
+  }
+
+  // Author operations implementation
+  async getUserAuthors(userId: string): Promise<AuthorWithRelations[]> {
+    const userAuthors = await db
+      .select({
+        id: authors.id,
+        userId: authors.userId,
+        prefix: authors.prefix,
+        firstName: authors.firstName,
+        middleName: authors.middleName,
+        lastName: authors.lastName,
+        suffix: authors.suffix,
+        fullName: authors.fullName,
+        isActive: authors.isActive,
+        createdAt: authors.createdAt,
+        updatedAt: authors.updatedAt,
+      })
+      .from(authors)
+      .where(and(eq(authors.userId, userId), eq(authors.isActive, true)));
+
+    return await Promise.all(userAuthors.map(async (author) => {
+      const [user] = await db.select().from(users).where(eq(users.id, author.userId));
+      const biographies = await db.select().from(authorBiographies).where(eq(authorBiographies.authorId, author.id));
+      
+      return {
+        ...author,
+        user,
+        biographies,
+      };
+    }));
+  }
+
+  async getAuthor(authorId: string, userId: string): Promise<AuthorWithRelations | undefined> {
+    const [author] = await db
+      .select()
+      .from(authors)
+      .where(and(eq(authors.id, authorId), eq(authors.userId, userId), eq(authors.isActive, true)));
+
+    if (!author) return undefined;
+
+    const [user] = await db.select().from(users).where(eq(users.id, author.userId));
+    const biographies = await db.select().from(authorBiographies).where(eq(authorBiographies.authorId, author.id));
+
+    return {
+      ...author,
+      user,
+      biographies,
+    };
+  }
+
+  async createAuthor(author: InsertAuthor): Promise<Author> {
+    const fullName = `${author.prefix || ''} ${author.firstName} ${author.middleName || ''} ${author.lastName} ${author.suffix || ''}`.replace(/\s+/g, ' ').trim();
+    
+    const [newAuthor] = await db
+      .insert(authors)
+      .values({
+        ...author,
+        fullName,
+      })
+      .returning();
+    return newAuthor;
+  }
+
+  async updateAuthor(authorId: string, userId: string, updates: Partial<InsertAuthor>): Promise<Author> {
+    const updateData = { ...updates };
+    
+    if (updates.prefix || updates.firstName || updates.middleName || updates.lastName || updates.suffix) {
+      const currentAuthor = await this.getAuthor(authorId, userId);
+      if (currentAuthor) {
+        const fullName = `${updates.prefix || currentAuthor.prefix || ''} ${updates.firstName || currentAuthor.firstName} ${updates.middleName || currentAuthor.middleName || ''} ${updates.lastName || currentAuthor.lastName} ${updates.suffix || currentAuthor.suffix || ''}`.replace(/\s+/g, ' ').trim();
+        updateData.fullName = fullName;
+      }
+    }
+
+    const [updatedAuthor] = await db
+      .update(authors)
+      .set({
+        ...updateData,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(authors.id, authorId), eq(authors.userId, userId)))
+      .returning();
+    return updatedAuthor;
+  }
+
+  async deleteAuthor(authorId: string, userId: string): Promise<void> {
+    await db
+      .update(authors)
+      .set({ 
+        isActive: false,
+        updatedAt: new Date() 
+      })
+      .where(and(eq(authors.id, authorId), eq(authors.userId, userId)));
+  }
+
+  async getAuthorBiography(authorId: string, language: string): Promise<AuthorBiography | undefined> {
+    const [biography] = await db
+      .select()
+      .from(authorBiographies)
+      .where(and(eq(authorBiographies.authorId, authorId), eq(authorBiographies.language, language)));
+    return biography;
+  }
+
+  async upsertAuthorBiography(biography: InsertAuthorBiography): Promise<AuthorBiography> {
+    const [upsertedBiography] = await db
+      .insert(authorBiographies)
+      .values(biography)
+      .onConflictDoUpdate({
+        target: [authorBiographies.authorId, authorBiographies.language],
+        set: {
+          biography: biography.biography,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return upsertedBiography;
+  }
+
+  async getAuthorProjects(authorId: string, userId: string): Promise<ProjectWithRelations[]> {
+    // Get all projects where the author appears in books as main author or contributor
+    const authorData = await this.getAuthor(authorId, userId);
+    if (!authorData) return [];
+
+    const authorFullName = authorData.fullName;
+
+    // Find books where this author is listed as main author or contributor
+    const bookAuthors = await db
+      .select()
+      .from(books)
+      .where(and(
+        eq(books.userId, userId),
+        or(
+          sql`TRIM(CONCAT(COALESCE(${books.authorPrefix}, ''), ' ', ${books.authorFirstName}, ' ', COALESCE(${books.authorMiddleName}, ''), ' ', ${books.authorLastName}, ' ', COALESCE(${books.authorSuffix}, ''))) = ${authorFullName}`,
+        )
+      ));
+
+    const bookContributors = await db
+      .select({ bookId: contributors.bookId })
+      .from(contributors)
+      .where(eq(contributors.name, authorFullName));
+
+    const authorBookIds = new Set([
+      ...bookAuthors.map(book => book.id),
+      ...bookContributors.map(contrib => contrib.bookId).filter(Boolean)
+    ]);
+
+    if (authorBookIds.size === 0) return [];
+
+    // Get unique project IDs from these books
+    const authorProjectIds = new Set(
+      bookAuthors
+        .filter(book => authorBookIds.has(book.id))
+        .map(book => book.projectId)
+        .filter(Boolean)
+    );
+
+    if (authorProjectIds.size === 0) return [];
+
+    // Get projects and their books
+    const authorProjects = await Promise.all(
+      Array.from(authorProjectIds).map(async (projectId) => {
+        const project = await this.getProject(projectId!, userId);
+        if (project) {
+          // Filter books to only include those where the author is involved
+          project.books = project.books.filter(book => authorBookIds.has(book.id));
+        }
+        return project;
+      })
+    );
+
+    return authorProjects.filter(Boolean) as ProjectWithRelations[];
+  }
+
+  async getAuthorBooks(authorId: string, userId: string): Promise<Book[]> {
+    const authorData = await this.getAuthor(authorId, userId);
+    if (!authorData) return [];
+
+    const authorFullName = authorData.fullName;
+
+    // Find books where this author is the main author
+    const mainAuthorBooks = await db
+      .select()
+      .from(books)
+      .where(and(
+        eq(books.userId, userId),
+        sql`TRIM(CONCAT(COALESCE(${books.authorPrefix}, ''), ' ', ${books.authorFirstName}, ' ', COALESCE(${books.authorMiddleName}, ''), ' ', ${books.authorLastName}, ' ', COALESCE(${books.authorSuffix}, ''))) = ${authorFullName}`
+      ));
+
+    // Find books where this author is a contributor
+    const contributorBookIds = await db
+      .select({ bookId: contributors.bookId })
+      .from(contributors)
+      .where(eq(contributors.name, authorFullName));
+
+    const contributorBooks = await Promise.all(
+      contributorBookIds
+        .map(contrib => contrib.bookId)
+        .filter(Boolean)
+        .map(async (bookId) => {
+          const [book] = await db.select().from(books).where(and(eq(books.id, bookId!), eq(books.userId, userId)));
+          return book;
+        })
+    );
+
+    // Combine and deduplicate
+    const allBooks = [...mainAuthorBooks, ...contributorBooks.filter(Boolean)];
+    const uniqueBooks = Array.from(
+      new Map(allBooks.map(book => [book.id, book])).values()
+    );
+
+    return uniqueBooks;
   }
 }
 

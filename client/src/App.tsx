@@ -33,6 +33,7 @@ import ManageSeries from "@/pages/manage-series";
 import SeriesEdit from "@/pages/series-edit";
 import SeriesCreate from "@/pages/series-create";
 import SeriesSetup from "@/pages/series-setup";
+import Authors from "@/pages/authors";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -43,6 +44,7 @@ function Router() {
       <Route path="/" component={isLoading || !isAuthenticated ? Landing : Dashboard} />
       <Route path="/projects" component={Projects} />
       <Route path="/books" component={Books} />
+      <Route path="/authors" component={Authors} />
       <Route path="/manage-series" component={ManageSeries} />
       <Route path="/series-create" component={SeriesCreate} />
       <Route path="/series-setup" component={SeriesSetup} />
