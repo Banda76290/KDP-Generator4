@@ -170,23 +170,27 @@ export default function AuthorsPage() {
   // Fetch authors
   const { data: authors = [], isLoading: authorsLoading } = useQuery({
     queryKey: ["/api/authors"],
+    queryFn: () => apiRequest("GET", "/api/authors"),
   });
 
   // Fetch biography for selected author and language
   const { data: biographyData, isLoading: biographyLoading } = useQuery({
     queryKey: ["/api/authors", selectedAuthor?.id, "biography", selectedLanguage],
+    queryFn: () => apiRequest("GET", `/api/authors/${selectedAuthor?.id}/biography/${selectedLanguage}`),
     enabled: !!selectedAuthor?.id,
   });
 
   // Fetch author projects
   const { data: authorProjects = [] } = useQuery({
     queryKey: ["/api/authors", selectedAuthor?.id, "projects"],
+    queryFn: () => apiRequest("GET", `/api/authors/${selectedAuthor?.id}/projects`),
     enabled: !!selectedAuthor?.id,
   });
 
   // Fetch author books  
   const { data: authorBooks = [] } = useQuery({
     queryKey: ["/api/authors", selectedAuthor?.id, "books"],
+    queryFn: () => apiRequest("GET", `/api/authors/${selectedAuthor?.id}/books`),
     enabled: !!selectedAuthor?.id,
   });
 
@@ -199,7 +203,7 @@ export default function AuthorsPage() {
 
   // Create author mutation
   const createAuthorMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("/api/authors", "POST", data),
+    mutationFn: (data: any) => apiRequest("POST", "/api/authors", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors"] });
       setIsCreating(false);
@@ -214,7 +218,7 @@ export default function AuthorsPage() {
   // Update biography mutation
   const updateBiographyMutation = useMutation({
     mutationFn: ({ authorId, language, biography }: { authorId: string; language: string; biography: string }) =>
-      apiRequest(`/api/authors/${authorId}/biography/${language}`, "PUT", { biography }),
+      apiRequest("PUT", `/api/authors/${authorId}/biography/${language}`, { biography }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors", selectedAuthor?.id, "biography", selectedLanguage] });
       setIsEditing(false);
@@ -227,7 +231,7 @@ export default function AuthorsPage() {
 
   // Delete author mutation
   const deleteAuthorMutation = useMutation({
-    mutationFn: (authorId: string) => apiRequest(`/api/authors/${authorId}`, "DELETE"),
+    mutationFn: (authorId: string) => apiRequest("DELETE", `/api/authors/${authorId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors"] });
       setSelectedAuthor(null);
