@@ -284,7 +284,7 @@ export default function AuthorViewPage() {
               Back to Authors
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-[#1a1a1a] dark:text-white">{author.fullName}</h1>
+              <h1 className="text-3xl font-bold">{author.fullName}</h1>
               <p className="text-gray-600 dark:text-gray-400">Author profile and multilingual biographies</p>
             </div>
           </div>

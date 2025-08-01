@@ -23,7 +23,7 @@ export default function AuthorsListPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-[#1a1a1a] dark:text-white">Authors</h1>
+            <h1 className="text-3xl font-bold">Authors</h1>
             <p className="text-gray-600 dark:text-gray-400">Manage your publishing authors</p>
           </div>
           <Button onClick={() => setLocation("/authors/create")} className="kdp-btn-primary">

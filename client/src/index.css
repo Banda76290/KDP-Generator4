@@ -38,6 +38,14 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
+
+  h1 {
+    color: #1a1a1a !important;
+  }
+
+  .dark h1 {
+    color: white !important;
+  }
 }
 
 /* Custom utility classes for KDP Generator */

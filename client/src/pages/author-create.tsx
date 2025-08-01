@@ -58,7 +58,7 @@ export default function AuthorCreatePage() {
             Back to Authors
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-[#1a1a1a] dark:text-white">Create New Author</h1>
+            <h1 className="text-3xl font-bold">Create New Author</h1>
             <p className="text-gray-600 dark:text-gray-400">Add a new author to your publishing portfolio</p>
           </div>
         </div>
