@@ -393,7 +393,7 @@ function BooksContent() {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <CardTitle 
-                          className="text-lg truncate cursor-pointer hover:text-primary transition-colors"
+                          className="text-lg text-gray-900 truncate cursor-pointer hover:text-primary transition-colors"
                           onClick={() => setLocation(`/books/edit/${book.id}`)}
                         >
                           {book.title}
