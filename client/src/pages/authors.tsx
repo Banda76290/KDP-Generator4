@@ -24,132 +24,7 @@ const LANGUAGES = [
   { value: "Japanese", label: "Japanese" },
 ];
 
-// Safe WYSIWYG Editor Component
-const WysiwygEditor = ({ 
-  value, 
-  onChange, 
-  placeholder = "Enter biography...", 
-  className = "" 
-}: { 
-  value: string; 
-  onChange: (value: string) => void; 
-  placeholder?: string; 
-  className?: string; 
-}) => {
-  const editorRef = useRef<HTMLDivElement>(null);
-  const [isEditing, setIsEditing] = useState(false);
 
-  const formatText = (command: string, value?: string) => {
-    document.execCommand(command, false, value);
-    const editor = editorRef.current;
-    if (editor) {
-      onChange(editor.innerHTML);
-    }
-  };
-
-  const handleInput = () => {
-    const editor = editorRef.current;
-    if (editor) {
-      onChange(editor.innerHTML);
-    }
-  };
-
-  const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const text = e.clipboardData.getData('text/plain');
-    const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      range.deleteContents();
-      const textNode = document.createTextNode(text);
-      range.insertNode(textNode);
-      range.setStartAfter(textNode);
-      range.setEndAfter(textNode);
-      selection.removeAllRanges();
-      selection.addRange(range);
-      handleInput();
-    }
-  };
-
-  return (
-    <div className="border rounded-md">
-      {/* Toolbar */}
-      <div className="flex flex-wrap gap-1 p-2 border-b bg-gray-50 dark:bg-gray-800">
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => formatText('bold')}
-          className="h-8 px-2"
-        >
-          <strong>B</strong>
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => formatText('italic')}
-          className="h-8 px-2"
-        >
-          <em>I</em>
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => formatText('underline')}
-          className="h-8 px-2"
-        >
-          <u>U</u>
-        </Button>
-        <div className="w-px h-6 bg-gray-300 mx-1 self-center" />
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => formatText('insertUnorderedList')}
-          className="h-8 px-2"
-        >
-          • List
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => formatText('insertOrderedList')}
-          className="h-8 px-2"
-        >
-          1. List
-        </Button>
-      </div>
-      
-      {/* Editor */}
-      <div
-        ref={editorRef}
-        contentEditable
-        onInput={handleInput}
-        onPaste={handlePaste}
-        onFocus={() => setIsEditing(true)}
-        onBlur={() => setIsEditing(false)}
-        className={`min-h-[150px] p-3 focus:outline-none focus:ring-2 focus:ring-primary/20 ${className}`}
-        style={{ whiteSpace: 'pre-wrap' }}
-        suppressContentEditableWarning={true}
-        dangerouslySetInnerHTML={{ __html: value || '' }}
-      />
-      
-      {!value && !isEditing && (
-        <div className="absolute inset-0 p-3 text-gray-400 pointer-events-none top-[60px]">
-          {placeholder}
-        </div>
-      )}
-    </div>
-  );
-};
 
 export default function AuthorsPage() {
   const { toast } = useToast();
@@ -166,6 +41,130 @@ export default function AuthorsPage() {
     lastName: "",
     suffix: "",
   });
+
+  // Biography WYSIWYG functions (matching Book Description editor)
+  const applyBiographyFormatting = (command: string, value?: string) => {
+    try {
+      const editor = document.getElementById('biography-editor') as HTMLDivElement;
+      if (!editor) {
+        console.error('Biography editor not found');
+        return;
+      }
+
+      // Focus the editor before applying command
+      editor.focus();
+      
+      // Check if execCommand is supported
+      if (typeof document.execCommand !== 'function') {
+        console.error('execCommand is not supported in this browser');
+        toast({ title: "Erreur", description: "Cette fonctionnalité n'est pas supportée dans votre navigateur", variant: "destructive" });
+        return;
+      }
+
+      // Apply the formatting command
+      const success = document.execCommand(command, false, value);
+      if (!success) {
+        console.warn(`execCommand failed for command: ${command}`);
+      }
+      
+      updateBiographyFromHTML();
+    } catch (error) {
+      console.error('Error applying biography formatting:', error);
+      toast({ title: "Erreur", description: "Erreur lors de l'application du formatage", variant: "destructive" });
+    }
+  };
+
+  const handleBiographyFormatChange = (value: string) => {
+    switch (value) {
+      case "normal":
+        applyBiographyFormatting("formatBlock", "div");
+        break;
+      case "heading4":
+        applyBiographyFormatting("formatBlock", "h4");
+        break;
+      case "heading5":
+        applyBiographyFormatting("formatBlock", "h5");
+        break;
+      case "heading6":
+        applyBiographyFormatting("formatBlock", "h6");
+        break;
+    }
+  };
+
+  const updateBiographyFromHTML = () => {
+    const editor = document.getElementById('biography-editor') as HTMLDivElement;
+    if (editor) {
+      setBiography(editor.innerHTML);
+    }
+  };
+
+  // Function to clean HTML content securely (matching Book Description)
+  const cleanHTML = (html: string): string => {
+    if (!html) return '';
+    
+    // Create temporary element
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    
+    // Remove script tags and other dangerous elements
+    const scripts = temp.querySelectorAll('script, iframe, object, embed');
+    scripts.forEach(script => script.remove());
+    
+    // Sanitize attributes
+    const allElements = temp.querySelectorAll('*');
+    allElements.forEach(element => {
+      // Keep only safe attributes
+      const safeAttributes = ['href', 'title', 'alt', 'class'];
+      const attributesToRemove: string[] = [];
+      
+      for (let i = 0; i < element.attributes.length; i++) {
+        const attr = element.attributes[i];
+        if (!safeAttributes.includes(attr.name) && !attr.name.startsWith('data-')) {
+          attributesToRemove.push(attr.name);
+        }
+      }
+      
+      attributesToRemove.forEach(attrName => {
+        element.removeAttribute(attrName);
+      });
+      
+      // Remove javascript: URLs
+      if (element.getAttribute('href')?.startsWith('javascript:')) {
+        element.removeAttribute('href');
+      }
+    });
+    
+    return temp.innerHTML;
+  };
+
+  // Add CSS for the biography editor (matching Book Description)
+  React.useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      #biography-editor:empty:before {
+        content: attr(data-placeholder);
+        color: #9ca3af;
+        pointer-events: none;
+      }
+      #biography-editor h4 { font-size: 1.25rem; font-weight: bold; margin: 0.5rem 0; }
+      #biography-editor h5 { font-size: 1.125rem; font-weight: bold; margin: 0.5rem 0; }
+      #biography-editor h6 { font-size: 1rem; font-weight: bold; margin: 0.5rem 0; }
+      #biography-editor ul { list-style-type: disc; margin-left: 1.5rem; }
+      #biography-editor ol { list-style-type: decimal; margin-left: 1.5rem; }
+      #biography-editor li { margin: 0.25rem 0; }
+      #biography-editor a { color: #3b82f6; text-decoration: underline; }
+      #biography-editor p { margin: 0.5rem 0; }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      if (document.head.contains(style)) {
+        document.head.removeChild(style);
+      }
+    };
+  }, []);
+
+
 
   // Fetch authors
   const { data: authors = [], isLoading: authorsLoading } = useQuery({
@@ -194,12 +193,47 @@ export default function AuthorsPage() {
     enabled: !!selectedAuthor?.id,
   });
 
-  // Update biography when data changes
+  // Update biography state when data changes
   React.useEffect(() => {
     if (biographyData?.biography !== undefined) {
       setBiography(biographyData.biography || "");
     }
   }, [biographyData]);
+
+  // Load biography content into editor when data changes
+  React.useEffect(() => {
+    if (selectedAuthor && biographyData !== undefined) {
+      const editor = document.getElementById('biography-editor') as HTMLDivElement;
+      if (editor) {
+        // Clear editor first
+        while (editor.firstChild) {
+          editor.removeChild(editor.firstChild);
+        }
+        
+        // Set content safely
+        if (biographyData?.biography) {
+          const cleanedContent = cleanHTML(biographyData.biography);
+          const safeParser = new DOMParser();
+          const safeDoc = safeParser.parseFromString(cleanedContent, 'text/html');
+          
+          // Copy safe nodes to editor
+          for (let child of Array.from(safeDoc.body.childNodes)) {
+            if (child.nodeType === Node.TEXT_NODE) {
+              editor.appendChild(document.createTextNode(child.textContent || ''));
+            } else if (child.nodeType === Node.ELEMENT_NODE) {
+              const elem = child as Element;
+              const allowedTags = ['P', 'BR', 'STRONG', 'EM', 'U', 'H4', 'H5', 'H6', 'DIV', 'SPAN'];
+              if (allowedTags.includes(elem.tagName)) {
+                const newElem = document.createElement(elem.tagName.toLowerCase());
+                newElem.textContent = elem.textContent;
+                editor.appendChild(newElem);
+              }
+            }
+          }
+        }
+      }
+    }
+  }, [selectedAuthor, biographyData, selectedLanguage]);
 
   // Create author mutation
   const createAuthorMutation = useMutation({
@@ -451,12 +485,100 @@ export default function AuthorsPage() {
                   {biographyLoading ? (
                     <div className="text-center py-8">Loading biography...</div>
                   ) : (
-                    <div className="relative">
-                      <WysiwygEditor
-                        value={biography}
-                        onChange={setBiography}
-                        placeholder={`Enter ${selectedAuthor.fullName}'s biography in ${selectedLanguage}...`}
-                      />
+                    <div className="space-y-4">
+                      {/* Formatting Toolbar (exact copy from Book Description) */}
+                      <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border">
+                        <Select onValueChange={handleBiographyFormatChange}>
+                          <SelectTrigger className="w-32">
+                            <SelectValue placeholder="Format" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="normal">Normal</SelectItem>
+                            <SelectItem value="heading4">Heading 4</SelectItem>
+                            <SelectItem value="heading5">Heading 5</SelectItem>
+                            <SelectItem value="heading6">Heading 6</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => applyBiographyFormatting('bold')}
+                        >
+                          <strong>B</strong>
+                        </Button>
+                        
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => applyBiographyFormatting('italic')}
+                        >
+                          <em>I</em>
+                        </Button>
+                        
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => applyBiographyFormatting('underline')}
+                        >
+                          <u>U</u>
+                        </Button>
+                        
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => applyBiographyFormatting('insertUnorderedList')}
+                        >
+                          • List
+                        </Button>
+                        
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => applyBiographyFormatting('insertOrderedList')}
+                        >
+                          1. List
+                        </Button>
+                        
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => applyBiographyFormatting('createLink', prompt('Enter URL:') || undefined)}
+                        >
+                          🔗 Link
+                        </Button>
+                      </div>
+
+                      {/* Rich Text Editor (exact copy from Book Description) */}
+                      <div className="space-y-2">
+                        <div
+                          id="biography-editor"
+                          contentEditable
+                          className="min-h-[200px] p-3 border border-gray-300 rounded-md resize-y overflow-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                          style={{ 
+                            minHeight: '200px',
+                            maxHeight: '500px',
+                            fontSize: '14px',
+                            lineHeight: '1.5',
+                            direction: 'ltr'
+                          }}
+                          onInput={updateBiographyFromHTML}
+                          onBlur={updateBiographyFromHTML}
+                          data-placeholder={`Enter ${selectedAuthor.fullName}'s biography in ${selectedLanguage}...`}
+                          suppressContentEditableWarning={true}
+                        />
+                        <div className="flex justify-end">
+                          <span className="text-sm text-gray-500">
+                            {biography?.length || 0} characters
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
