@@ -59,6 +59,7 @@ export default function CreateBook() {
   const [contributors, setContributors] = useState<Contributor[]>([]);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [selectedAuthorId, setSelectedAuthorId] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -94,6 +95,11 @@ export default function CreateBook() {
   // Fetch projects for selection
   const { data: projects = [] } = useQuery({
     queryKey: ["/api/projects"],
+  });
+
+  // Load existing authors
+  const { data: authors = [], isLoading: loadingAuthors } = useQuery({
+    queryKey: ["/api/authors"],
   });
 
   const createBook = useMutation({
@@ -160,6 +166,32 @@ export default function CreateBook() {
 
   const removeContributor = (id: string) => {
     setContributors(contributors.filter(c => c.id !== id));
+  };
+
+  // Function to handle author selection from dropdown
+  const handleAuthorSelection = (authorId: string) => {
+    if (authorId === "create-new") {
+      setLocation('/authors/create');
+    } else if (authorId && authorId !== "none") {
+      const selectedAuthor = authors.find(author => author.id === authorId);
+      if (selectedAuthor) {
+        // Populate form fields with selected author data
+        form.setValue("authorPrefix", selectedAuthor.prefix || "");
+        form.setValue("authorFirstName", selectedAuthor.firstName || "");
+        form.setValue("authorMiddleName", selectedAuthor.middleName || "");
+        form.setValue("authorLastName", selectedAuthor.lastName || "");
+        form.setValue("authorSuffix", selectedAuthor.suffix || "");
+        setSelectedAuthorId(authorId);
+      }
+    } else {
+      // Clear author fields when no author selected
+      form.setValue("authorPrefix", "");
+      form.setValue("authorFirstName", "");
+      form.setValue("authorMiddleName", "");
+      form.setValue("authorLastName", "");
+      form.setValue("authorSuffix", "");
+      setSelectedAuthorId("");
+    }
   };
 
   const addKeyword = (keyword: string) => {
@@ -350,47 +382,134 @@ export default function CreateBook() {
                         <CardTitle>Auteur Principal</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="grid grid-cols-5 gap-2">
-                          <div>
-                            <Label>Préfixe</Label>
-                            <Input
-                              {...form.register("authorPrefix")}
-                              placeholder="Dr."
-                              className="mt-1"
-                            />
-                          </div>
-                          <div>
-                            <Label>Prénom</Label>
-                            <Input
-                              {...form.register("authorFirstName")}
-                              placeholder="Sébastien"
-                              className="mt-1"
-                            />
-                          </div>
-                          <div>
-                            <Label>Deuxième Prénom</Label>
-                            <Input
-                              {...form.register("authorMiddleName")}
-                              className="mt-1"
-                            />
-                          </div>
-                          <div>
-                            <Label>Nom</Label>
-                            <Input
-                              {...form.register("authorLastName")}
-                              placeholder="JULLIARD-BESSON"
-                              className="mt-1"
-                            />
-                          </div>
-                          <div>
-                            <Label>Suffixe</Label>
-                            <Input
-                              {...form.register("authorSuffix")}
-                              placeholder="PhD"
-                              className="mt-1"
-                            />
+                        <div>
+                          <Label className="font-medium text-[14px]">Sélectionner un auteur existant</Label>
+                          <div className="flex gap-3 mt-2">
+                            <Select value={selectedAuthorId} onValueChange={handleAuthorSelection}>
+                              <SelectTrigger className="flex-1">
+                                <SelectValue placeholder="Choisir un auteur..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">Aucun auteur sélectionné</SelectItem>
+                                {authors.map((author) => (
+                                  <SelectItem key={author.id} value={author.id}>
+                                    {author.fullName}
+                                  </SelectItem>
+                                ))}
+                                <SelectItem value="create-new">+ Créer un nouvel auteur</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => setLocation('/authors/create')}
+                            >
+                              Créer un Auteur
+                            </Button>
                           </div>
                         </div>
+
+                        {selectedAuthorId && (
+                          <div className="mt-4">
+                            <Label className="font-medium text-[14px]">Détails de l'auteur (depuis l'auteur sélectionné)</Label>
+                            <div className="grid grid-cols-5 gap-2 mt-2">
+                              <div>
+                                <Label>Préfixe</Label>
+                                <Input
+                                  {...form.register("authorPrefix")}
+                                  placeholder="Dr."
+                                  className="mt-1 bg-gray-50"
+                                  readOnly
+                                />
+                              </div>
+                              <div>
+                                <Label>Prénom</Label>
+                                <Input
+                                  {...form.register("authorFirstName")}
+                                  placeholder="Sébastien"
+                                  className="mt-1 bg-gray-50"
+                                  readOnly
+                                />
+                              </div>
+                              <div>
+                                <Label>Deuxième Prénom</Label>
+                                <Input
+                                  {...form.register("authorMiddleName")}
+                                  className="mt-1 bg-gray-50"
+                                  readOnly
+                                />
+                              </div>
+                              <div>
+                                <Label>Nom</Label>
+                                <Input
+                                  {...form.register("authorLastName")}
+                                  placeholder="JULLIARD-BESSON"
+                                  className="mt-1 bg-gray-50"
+                                  readOnly
+                                />
+                              </div>
+                              <div>
+                                <Label>Suffixe</Label>
+                                <Input
+                                  {...form.register("authorSuffix")}
+                                  placeholder="PhD"
+                                  className="mt-1 bg-gray-50"
+                                  readOnly
+                                />
+                              </div>
+                            </div>
+                            <p className="text-sm text-gray-600 mt-1">
+                              Les détails de l'auteur sont remplis depuis le profil de l'auteur sélectionné.
+                            </p>
+                          </div>
+                        )}
+
+                        {!selectedAuthorId && (
+                          <div className="mt-4">
+                            <Label className="font-medium text-[14px]">Ou saisir les détails de l'auteur manuellement</Label>
+                            <div className="grid grid-cols-5 gap-2 mt-2">
+                              <div>
+                                <Label>Préfixe</Label>
+                                <Input
+                                  {...form.register("authorPrefix")}
+                                  placeholder="Dr."
+                                  className="mt-1"
+                                />
+                              </div>
+                              <div>
+                                <Label>Prénom</Label>
+                                <Input
+                                  {...form.register("authorFirstName")}
+                                  placeholder="Sébastien"
+                                  className="mt-1"
+                                />
+                              </div>
+                              <div>
+                                <Label>Deuxième Prénom</Label>
+                                <Input
+                                  {...form.register("authorMiddleName")}
+                                  className="mt-1"
+                                />
+                              </div>
+                              <div>
+                                <Label>Nom</Label>
+                                <Input
+                                  {...form.register("authorLastName")}
+                                  placeholder="JULLIARD-BESSON"
+                                  className="mt-1"
+                                />
+                              </div>
+                              <div>
+                                <Label>Suffixe</Label>
+                                <Input
+                                  {...form.register("authorSuffix")}
+                                  placeholder="PhD"
+                                  className="mt-1"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
 

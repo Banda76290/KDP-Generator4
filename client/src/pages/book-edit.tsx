@@ -594,6 +594,7 @@ export default function EditBook() {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [isPartOfSeries, setIsPartOfSeries] = useState(false);
   const [hasRestoredFromStorage, setHasRestoredFromStorage] = useState(false);
+  const [selectedAuthorId, setSelectedAuthorId] = useState<string>("");
   const [marketplaceCategories, setMarketplaceCategories] = useState<MarketplaceCategory[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [resetTriggers, setResetTriggers] = useState<{ [key: number]: number }>({});
@@ -1210,6 +1211,11 @@ export default function EditBook() {
     queryKey: ["/api/series"],
   });
 
+  // Load existing authors
+  const { data: authors = [], isLoading: loadingAuthors } = useQuery({
+    queryKey: ["/api/authors"],
+  });
+
   const saveBook = useMutation({
     mutationFn: async (data: { bookData: BookFormData; shouldNavigate?: boolean; nextTab?: string }) => {
       const formattedData = {
@@ -1378,6 +1384,35 @@ export default function EditBook() {
 
   const removeContributor = (id: string) => {
     setContributors(contributors.filter(c => c.id !== id));
+  };
+
+  // Function to handle author selection from dropdown
+  const handleAuthorSelection = (authorId: string) => {
+    if (authorId === "create-new") {
+      // Save current form data before navigating to author creation
+      saveFormDataToSession();
+      sessionStorage.setItem('returnToBookEdit', bookId || 'new');
+      setLocation('/authors/create');
+    } else if (authorId && authorId !== "none") {
+      const selectedAuthor = authors.find(author => author.id === authorId);
+      if (selectedAuthor) {
+        // Populate form fields with selected author data
+        form.setValue("authorPrefix", selectedAuthor.prefix || "");
+        form.setValue("authorFirstName", selectedAuthor.firstName || "");
+        form.setValue("authorMiddleName", selectedAuthor.middleName || "");
+        form.setValue("authorLastName", selectedAuthor.lastName || "");
+        form.setValue("authorSuffix", selectedAuthor.suffix || "");
+        setSelectedAuthorId(authorId);
+      }
+    } else {
+      // Clear author fields when no author selected
+      form.setValue("authorPrefix", "");
+      form.setValue("authorFirstName", "");
+      form.setValue("authorMiddleName", "");
+      form.setValue("authorLastName", "");
+      form.setValue("authorSuffix", "");
+      setSelectedAuthorId("");
+    }
   };
 
   // ISBN validation function
@@ -2317,33 +2352,107 @@ export default function EditBook() {
                     </div>
                 
                     <div>
-                      <Label className="font-medium text-[14px]">Primary Author or Contributor</Label>
-                      <div className="grid grid-cols-5 gap-3 mt-2">
-                        <Input
-                          placeholder="Prefix"
-                          {...form.register("authorPrefix")}
-                        />
-                        <Input
-                          placeholder="First name"
-                          {...form.register("authorFirstName", { required: "First name is required" })}
-                        />
-                        <Input
-                          placeholder="Middle name"
-                          {...form.register("authorMiddleName")}
-                        />
-                        <Input
-                          placeholder="Last name"
-                          {...form.register("authorLastName", { required: "Last name is required" })}
-                        />
-                        <Input
-                          placeholder="Suffix"
-                          {...form.register("authorSuffix")}
-                        />
+                      <Label className="font-medium text-[14px]">Select existing author</Label>
+                      <div className="flex gap-3 mt-2">
+                        <Select value={selectedAuthorId} onValueChange={handleAuthorSelection}>
+                          <SelectTrigger className="flex-1">
+                            <SelectValue placeholder="Choose an author..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">No author selected</SelectItem>
+                            {authors.map((author) => (
+                              <SelectItem key={author.id} value={author.id}>
+                                {author.fullName}
+                              </SelectItem>
+                            ))}
+                            <SelectItem value="create-new">+ Create new author</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            saveFormDataToSession();
+                            sessionStorage.setItem('returnToBookEdit', bookId || 'new');
+                            setLocation('/authors/create');
+                          }}
+                        >
+                          Create Author
+                        </Button>
                       </div>
-                      {(form.formState.errors.authorFirstName || form.formState.errors.authorLastName) && (
-                        <p className="text-sm text-red-600 mt-1">First name and last name are required</p>
-                      )}
                     </div>
+
+                    {selectedAuthorId && (
+                      <div>
+                        <Label className="font-medium text-[14px]">Author Details (from selected author)</Label>
+                        <div className="grid grid-cols-5 gap-3 mt-2">
+                          <Input
+                            placeholder="Prefix"
+                            {...form.register("authorPrefix")}
+                            readOnly
+                            className="bg-gray-50"
+                          />
+                          <Input
+                            placeholder="First name"
+                            {...form.register("authorFirstName", { required: "First name is required" })}
+                            readOnly
+                            className="bg-gray-50"
+                          />
+                          <Input
+                            placeholder="Middle name"
+                            {...form.register("authorMiddleName")}
+                            readOnly
+                            className="bg-gray-50"
+                          />
+                          <Input
+                            placeholder="Last name"
+                            {...form.register("authorLastName", { required: "Last name is required" })}
+                            readOnly
+                            className="bg-gray-50"
+                          />
+                          <Input
+                            placeholder="Suffix"
+                            {...form.register("authorSuffix")}
+                            readOnly
+                            className="bg-gray-50"
+                          />
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Author details are populated from the selected author profile.
+                        </p>
+                      </div>
+                    )}
+
+                    {!selectedAuthorId && (
+                      <div>
+                        <Label className="font-medium text-[14px]">Or enter author details manually</Label>
+                        <div className="grid grid-cols-5 gap-3 mt-2">
+                          <Input
+                            placeholder="Prefix"
+                            {...form.register("authorPrefix")}
+                          />
+                          <Input
+                            placeholder="First name"
+                            {...form.register("authorFirstName", { required: "First name is required" })}
+                          />
+                          <Input
+                            placeholder="Middle name"
+                            {...form.register("authorMiddleName")}
+                          />
+                          <Input
+                            placeholder="Last name"
+                            {...form.register("authorLastName", { required: "Last name is required" })}
+                          />
+                          <Input
+                            placeholder="Suffix"
+                            {...form.register("authorSuffix")}
+                          />
+                        </div>
+                        {(form.formState.errors.authorFirstName || form.formState.errors.authorLastName) && (
+                          <p className="text-sm text-red-600 mt-1">First name and last name are required</p>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Contributors Section */}
