@@ -39,19 +39,54 @@ export default function AdminSystem() {
   const [autoRefreshLogs, setAutoRefreshLogs] = useState(true);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
+  const [userIsInteracting, setUserIsInteracting] = useState(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
   const logsContainerRef = useRef<HTMLDivElement>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
+  const interactionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Auto-scroll logs to bottom
+  // Track user interaction on the page
+  useEffect(() => {
+    const handleUserActivity = () => {
+      setUserIsInteracting(true);
+      
+      // Clear existing timeout
+      if (interactionTimeoutRef.current) {
+        clearTimeout(interactionTimeoutRef.current);
+      }
+      
+      // Set timeout to reset interaction after 3 seconds of inactivity
+      interactionTimeoutRef.current = setTimeout(() => {
+        setUserIsInteracting(false);
+      }, 3000);
+    };
+
+    // Add event listeners for user activity
+    const events = ['click', 'scroll', 'keydown', 'mousemove', 'touchstart'];
+    events.forEach(event => {
+      document.addEventListener(event, handleUserActivity);
+    });
+
+    return () => {
+      events.forEach(event => {
+        document.removeEventListener(event, handleUserActivity);
+      });
+      if (interactionTimeoutRef.current) {
+        clearTimeout(interactionTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Auto-scroll logs to bottom only if user is not actively using the page
   const scrollToBottom = () => {
-    if (autoScrollEnabled && !isPaused) {
+    if (autoScrollEnabled && !isPaused && !userIsInteracting) {
       logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [logs, autoScrollEnabled, isPaused]);
+  }, [logs, autoScrollEnabled, isPaused, userIsInteracting]);
 
   // Detect user interaction with logs container
   const handleLogsScroll = () => {
@@ -687,6 +722,15 @@ export default function AdminSystem() {
                   {autoRefreshLogs ? 'Auto' : 'Manuel'}
                 </Button>
                 <Button 
+                  variant={autoScrollEnabled ? "default" : "destructive"} 
+                  size="sm" 
+                  onClick={() => setAutoScrollEnabled(!autoScrollEnabled)}
+                  title={autoScrollEnabled ? "Désactiver le défilement automatique" : "Activer le défilement automatique"}
+                >
+                  <Terminal className="h-4 w-4 mr-2" />
+                  {autoScrollEnabled ? 'Scroll ON' : 'Scroll OFF'}
+                </Button>
+                <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={copyLogs}
@@ -760,9 +804,12 @@ export default function AdminSystem() {
                     ) : (
                       <span className="text-orange-600"> ✋ Mode manuel</span>
                     )}
+                    {userIsInteracting && (
+                      <span className="text-blue-600"> • 👤 Utilisateur actif</span>
+                    )}
                     {!autoScrollEnabled && !isPaused && (
-                      <span className="text-blue-600"> • 📜 Défilement désactivé</span>
-                    ) as React.ReactNode}
+                      <span className="text-purple-600"> • 📜 Défilement désactivé</span>
+                    )}
                   </span>
                 )}
               </div>
