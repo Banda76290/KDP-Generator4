@@ -1388,12 +1388,7 @@ export default function EditBook() {
 
   // Function to handle author selection from dropdown
   const handleAuthorSelection = (authorId: string) => {
-    if (authorId === "create-new") {
-      // Save current form data before navigating to author creation
-      saveFormDataToSession();
-      sessionStorage.setItem('returnToBookEdit', bookId || 'new');
-      setLocation('/authors/create');
-    } else if (authorId && authorId !== "none") {
+    if (authorId && authorId !== "none") {
       const selectedAuthor = authors.find(author => author.id === authorId);
       if (selectedAuthor) {
         // Populate form fields with selected author data
@@ -2365,7 +2360,6 @@ export default function EditBook() {
                                 {author.fullName}
                               </SelectItem>
                             ))}
-                            <SelectItem value="create-new">+ Create new author</SelectItem>
                           </SelectContent>
                         </Select>
                         <Button

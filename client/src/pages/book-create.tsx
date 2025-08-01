@@ -170,9 +170,7 @@ export default function CreateBook() {
 
   // Function to handle author selection from dropdown
   const handleAuthorSelection = (authorId: string) => {
-    if (authorId === "create-new") {
-      setLocation('/authors/create');
-    } else if (authorId && authorId !== "none") {
+    if (authorId && authorId !== "none") {
       const selectedAuthor = authors.find(author => author.id === authorId);
       if (selectedAuthor) {
         // Populate form fields with selected author data
@@ -396,7 +394,6 @@ export default function CreateBook() {
                                     {author.fullName}
                                   </SelectItem>
                                 ))}
-                                <SelectItem value="create-new">+ Créer un nouvel auteur</SelectItem>
                               </SelectContent>
                             </Select>
                             <Button
