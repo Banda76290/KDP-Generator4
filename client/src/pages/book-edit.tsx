@@ -186,9 +186,25 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
   // Calculate maximum depth dynamically from marketplace categories
   const maxDepth = useMemo(() => {
     if (marketplaceCategories.length === 0) return 3; // Default fallback
-    const maxLevel = Math.max(...marketplaceCategories.map(cat => cat.level));
+    
     const minLevel = Math.min(...marketplaceCategories.map(cat => cat.level));
-    // We need one dropdown for each level from min to max-1
+    
+    // For deep-level categories (4+), we build a virtual hierarchy starting from level 2
+    if (minLevel >= 4) {
+      // Count unique path depth levels by analyzing category paths
+      const pathDepths = new Set<number>();
+      marketplaceCategories.forEach(cat => {
+        const cleanPath = cat.categoryPath.replace(/^Books > /, '').replace(/kindle_ebook > |print_kdp_paperback > /, '');
+        const segments = cleanPath.split(' > ');
+        for (let i = 1; i <= segments.length; i++) {
+          pathDepths.add(i + 1); // +1 because we start from level 2 (after Books > discriminant)
+        }
+      });
+      return Math.max(...pathDepths) - 1; // Convert to dropdown count
+    }
+    
+    // Original logic for normal categories
+    const maxLevel = Math.max(...marketplaceCategories.map(cat => cat.level));
     return Math.max(maxLevel - minLevel, 1);
   }, [marketplaceCategories]);
 
@@ -275,17 +291,63 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
 
   // Get categories by level and parent (dynamic)
   const getCategoriesForLevel = (level: number, parentPath?: string) => {
-    // Find the minimum level to start from
+    // For marketplace categories that are all deep-level (4+), we need to build a virtual hierarchy
+    // from the category paths instead of relying on level-based filtering
+    
     const minLevel = marketplaceCategories.length > 0 ? Math.min(...marketplaceCategories.map(cat => cat.level)) : 3;
     
+    // If all our categories are deep-level (4+), we need special handling
+    if (minLevel >= 4) {
+      // Extract unique path segments to build a virtual hierarchy
+      const pathSegments = new Set<string>();
+      
+      marketplaceCategories.forEach(cat => {
+        const cleanPath = cat.categoryPath.replace(/^Books > /, '').replace(/kindle_ebook > |print_kdp_paperback > /, '');
+        const segments = cleanPath.split(' > ');
+        
+        // Add each progressive path segment
+        for (let i = 1; i <= segments.length; i++) {
+          const partialPath = 'Books > ' + (cat.categoryPath.includes('kindle_ebook') ? 'kindle_ebook > ' : 'print_kdp_paperback > ') + segments.slice(0, i).join(' > ');
+          pathSegments.add(partialPath);
+        }
+      });
+      
+      // Convert to array and filter by the requested level and parent
+      const allVirtualCategories = Array.from(pathSegments).map(path => {
+        const segments = path.split(' > ');
+        const displayName = segments[segments.length - 1];
+        const parentPath = segments.slice(0, -1).join(' > ');
+        
+        return {
+          id: path,
+          categoryPath: path,
+          displayName: displayName,
+          level: segments.length - 1,
+          parentPath: parentPath,
+          isSelectable: marketplaceCategories.some(cat => cat.categoryPath === path),
+          sortOrder: 0
+        };
+      });
+      
+      // Filter by level and parent
+      if (level === 2) { // Root level for virtual hierarchy
+        return allVirtualCategories
+          .filter(cat => cat.level === 2)
+          .sort((a, b) => a.displayName.localeCompare(b.displayName));
+      } else {
+        return allVirtualCategories
+          .filter(cat => cat.level === level && cat.parentPath === parentPath)
+          .sort((a, b) => a.displayName.localeCompare(b.displayName));
+      }
+    }
+    
+    // Original logic for normal level-based categories
     if (level === minLevel) {
-      // Root level categories (main categories, based on data structure)
       return marketplaceCategories
         .filter(cat => cat.level === minLevel)
         .sort((a, b) => a.sortOrder - b.sortOrder);
     }
     
-    // For deeper levels, filter by parentPath
     return marketplaceCategories
       .filter(cat => cat.level === level && cat.parentPath === parentPath)
       .sort((a, b) => a.sortOrder - b.sortOrder);
@@ -341,9 +403,9 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
       <div className="space-y-4">
         {/* Generate dropdowns dynamically based on maxDepth */}
         {Array.from({ length: maxDepth }, (_, index) => {
-          // Calculate the actual level based on the minimum level in our data
+          // Calculate the actual level based on whether we're using virtual hierarchy or real levels
           const minLevel = marketplaceCategories.length > 0 ? Math.min(...marketplaceCategories.map(cat => cat.level)) : 3;
-          const level = index + minLevel; // Levels start at the minimum level in our data
+          const level = minLevel >= 4 ? index + 2 : index + minLevel; // Start from level 2 for virtual hierarchy, or minLevel for real
           const parentPath = index === 0 ? undefined : selectedLevels[index - 1];
           const shouldShow = index === 0 || (parentPath && parentPath !== "");
           
