@@ -886,7 +886,8 @@ export default function EditBook() {
       keywords,
       categories,
       contributors,
-      isPartOfSeries
+      isPartOfSeries,
+      selectedAuthorId
     };
     
     const storageKey = `bookFormData_${bookId || 'new'}`;
@@ -976,7 +977,7 @@ export default function EditBook() {
         console.log('Form data being restored:', formData);
         
         // Restore all form fields automatically (future-proof)
-        const { keywords: savedKeywords, categories: savedCategories, contributors: savedContributors, isPartOfSeries: savedIsPartOfSeries, ...formFields } = formData;
+        const { keywords: savedKeywords, categories: savedCategories, contributors: savedContributors, isPartOfSeries: savedIsPartOfSeries, selectedAuthorId: savedSelectedAuthorId, ...formFields } = formData;
         
         // Store series data as original if it exists
         if (formFields.seriesTitle) {
@@ -1001,6 +1002,9 @@ export default function EditBook() {
         }
         if (typeof savedIsPartOfSeries === 'boolean') {
           setIsPartOfSeries(savedIsPartOfSeries);
+        }
+        if (savedSelectedAuthorId) {
+          setSelectedAuthorId(savedSelectedAuthorId);
         }
         
         // Restore description in WYSIWYG editor safely
@@ -1215,6 +1219,26 @@ export default function EditBook() {
   const { data: authors = [], isLoading: loadingAuthors } = useQuery<any[]>({
     queryKey: ["/api/authors"],
   });
+
+  // Auto-detect author from book data when authors and book are loaded
+  useEffect(() => {
+    if (authors.length > 0 && book && !hasRestoredFromStorage && !selectedAuthorId) {
+      // Try to find matching author based on book's author fields
+      const bookAuthorName = `${book.authorPrefix || ''} ${book.authorFirstName || ''} ${book.authorMiddleName || ''} ${book.authorLastName || ''} ${book.authorSuffix || ''}`.trim();
+      
+      if (bookAuthorName && bookAuthorName !== '') {
+        const matchingAuthor = authors.find(author => {
+          const authorFullName = `${author.prefix || ''} ${author.firstName || ''} ${author.middleName || ''} ${author.lastName || ''} ${author.suffix || ''}`.trim();
+          return authorFullName === bookAuthorName;
+        });
+        
+        if (matchingAuthor) {
+          console.log('Auto-detected matching author:', matchingAuthor);
+          setSelectedAuthorId(matchingAuthor.id);
+        }
+      }
+    }
+  }, [authors, book, hasRestoredFromStorage, selectedAuthorId]);
 
   const saveBook = useMutation({
     mutationFn: async (data: { bookData: BookFormData; shouldNavigate?: boolean; nextTab?: string }) => {
