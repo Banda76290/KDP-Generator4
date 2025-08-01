@@ -146,7 +146,7 @@ export default function AdminSystem() {
 
   // Clear logs mutation
   const clearLogsMutation = useMutation({
-    mutationFn: () => apiRequest('/api/admin/system/logs', { method: 'DELETE' }),
+    mutationFn: () => apiRequest('/api/admin/system/logs', 'DELETE'),
     onSuccess: () => {
       setLogs([]);
       queryClient.invalidateQueries({ queryKey: ['/api/admin/system/logs'] });
@@ -836,7 +836,7 @@ export default function AdminSystem() {
               </div>
               <div>
                 {systemLogsData && typeof systemLogsData === 'object' && 'total' in systemLogsData && (
-                  <span>Total serveur: {(systemLogsData as any).total}</span>
+                  <span>Total serveur: {String((systemLogsData as { total: number }).total)}</span>
                 )}
               </div>
             </div>
