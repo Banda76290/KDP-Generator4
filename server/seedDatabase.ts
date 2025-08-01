@@ -99,9 +99,60 @@ export async function forceSeedDatabase() {
     console.log(`[${timestamp}] ✅ [FORCE-SEED] Suppression terminée`);
     console.log(`[${timestamp}] 📊 [FORCE-SEED] Toutes les données de catégories ont été effacées`);
     
-    // Re-seed
+    // Re-seed without checking for existing data
     console.log(`[${timestamp}] 🔄 [FORCE-SEED] Lancement du seeding complet...`);
-    await seedDatabase();
+    console.log(`[${timestamp}] 📖 [FORCE-SEED] Lecture du fichier complete-categories.sql...`);
+    
+    // Read and execute the SQL file directly (bypass existing data check)
+    const sqlContent = readFileSync('./complete-categories.sql', 'utf-8');
+    console.log(`[${timestamp}] 📏 [FORCE-SEED] Fichier SQL lu: ${sqlContent.length} caractères`);
+    
+    // Split SQL into individual statements and execute them (skip DELETE statements since we already cleared)
+    const statements = sqlContent
+      .split(';')
+      .map(stmt => stmt.trim())
+      .filter(stmt => stmt.length > 0 && !stmt.startsWith('--') && !stmt.startsWith('DELETE'));
+    
+    console.log(`[${timestamp}] 🔢 [FORCE-SEED] ${statements.length} instructions SQL identifiées (DELETE ignorées car déjà supprimé)`);
+    console.log(`[${timestamp}] ⚡ [FORCE-SEED] Exécution des instructions SQL...`);
+    
+    let insertCount = 0;
+    let deleteCount = 0;
+    
+    for (let i = 0; i < statements.length; i++) {
+      const stmt = statements[i].trim();
+      if (stmt) {
+        try {
+          await db.execute(sql.raw(stmt));
+          
+          if (stmt.startsWith('DELETE')) {
+            deleteCount++;
+            if (deleteCount === 1) console.log(`[${timestamp}] 🗑️ [FORCE-SEED] Suppression des données existantes...`);
+          } else if (stmt.startsWith('INSERT')) {
+            insertCount++;
+            if (insertCount === 1) console.log(`[${timestamp}] 📝 [FORCE-SEED] Début des insertions...`);
+            if (insertCount % 50 === 0) console.log(`[${timestamp}] 📊 [FORCE-SEED] ${insertCount} catégories insérées...`);
+          }
+          
+          if (i === statements.length - 1) console.log(`[${timestamp}] 🏁 [FORCE-SEED] Dernière instruction exécutée`);
+        } catch (error) {
+          console.error(`[${timestamp}] ❌ [FORCE-SEED] Erreur instruction ${i + 1}: ${stmt.substring(0, 100)}...`);
+          console.error(`[${timestamp}] 🔍 [FORCE-SEED] Erreur détaillée:`, error);
+          throw error;
+        }
+      }
+    }
+    
+    console.log(`[${timestamp}] 📈 [FORCE-SEED] Statistiques: ${deleteCount} suppressions, ${insertCount} insertions`);
+    
+    // Verify seeding
+    console.log(`[${timestamp}] 🔍 [FORCE-SEED] Vérification du résultat final...`);
+    const categoryCount = await db.select().from(marketplaceCategories);
+    console.log(`[${timestamp}] ✅ [FORCE-SEED] Succès! ${categoryCount.length} catégories marketplace insérées`);
+    
+    if (categoryCount.length !== 249) {
+      console.error(`[${timestamp}] ⚠️ [FORCE-SEED] ATTENTION: ${categoryCount.length} catégories au lieu de 249 attendues`);
+    }
     
     console.log(`[${timestamp}] ✅ [FORCE-SEED] Force seeding terminé avec succès`);
     console.log(`[${timestamp}] 🎯 [FORCE-SEED] Base de données complètement reconstruite`);
