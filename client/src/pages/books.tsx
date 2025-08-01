@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -72,6 +72,7 @@ export default function BooksPage() {
 }
 
 function BooksContent() {
+  const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterFormat, setFilterFormat] = useState<string>("all");
@@ -391,7 +392,12 @@ function BooksContent() {
                   <div className="flex-1 min-w-0">
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <CardTitle className="text-lg truncate cursor-help">{book.title}</CardTitle>
+                        <CardTitle 
+                          className="text-lg truncate cursor-pointer hover:text-primary transition-colors"
+                          onClick={() => setLocation(`/books/edit/${book.id}`)}
+                        >
+                          {book.title}
+                        </CardTitle>
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>{book.title}</p>

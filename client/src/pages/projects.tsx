@@ -430,7 +430,12 @@ export default function Projects() {
                                 <div className="flex-1 min-w-0">
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <h4 className="text-sm font-medium text-gray-900 leading-tight break-words cursor-help">{book.title}</h4>
+                                      <h4 
+                                        className="text-sm font-medium text-gray-900 leading-tight break-words cursor-pointer hover:text-primary transition-colors"
+                                        onClick={() => setLocation(`/books/edit/${book.id}`)}
+                                      >
+                                        {book.title}
+                                      </h4>
                                     </TooltipTrigger>
                                     <TooltipContent>
                                       <p>{book.title}</p>
