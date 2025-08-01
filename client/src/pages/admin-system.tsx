@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Database, RefreshCw, AlertTriangle, CheckCircle, Server, Terminal, Trash2, Copy } from "lucide-react";
+import { ArrowLeft, Database, RefreshCw, AlertTriangle, CheckCircle, Server, Terminal, Trash2, Copy, Play, Pause } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface SystemHealth {
@@ -37,21 +37,43 @@ export default function AdminSystem() {
   const [seedingStatus, setSeedingStatus] = useState<'idle' | 'seeding' | 'resetting'>('idle');
   const [logs, setLogs] = useState<string[]>([]);
   const [autoRefreshLogs, setAutoRefreshLogs] = useState(true);
+  const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
+  const logsContainerRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll logs to bottom
   const scrollToBottom = () => {
-    logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (autoScrollEnabled && !isPaused) {
+      logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [logs]);
+  }, [logs, autoScrollEnabled, isPaused]);
+
+  // Detect user interaction with logs container
+  const handleLogsScroll = () => {
+    if (logsContainerRef.current) {
+      const container = logsContainerRef.current;
+      const isAtBottom = container.scrollHeight - container.scrollTop === container.clientHeight;
+      
+      // Re-enable auto-scroll only if user scrolled to bottom
+      if (isAtBottom && !autoScrollEnabled) {
+        setAutoScrollEnabled(true);
+      }
+      // Disable auto-scroll if user scrolled up
+      else if (!isAtBottom && autoScrollEnabled) {
+        setAutoScrollEnabled(false);
+      }
+    }
+  };
 
   // Fetch system logs from server
   const { data: systemLogsData, isLoading: logsLoading } = useQuery({
     queryKey: ['/api/admin/system/logs'],
-    refetchInterval: autoRefreshLogs ? 2000 : false, // Refresh every 2 seconds if auto-refresh is enabled
+    refetchInterval: (autoRefreshLogs && !isPaused) ? 2000 : false, // Only refresh if not paused
     refetchIntervalInBackground: true,
     enabled: isAdmin, // Only fetch if user is admin
   });
@@ -631,11 +653,29 @@ export default function AdminSystem() {
               </div>
               <div className="flex space-x-2">
                 <Button 
+                  variant={isPaused ? "destructive" : "outline"} 
+                  size="sm" 
+                  onClick={() => setIsPaused(!isPaused)}
+                >
+                  {isPaused ? (
+                    <>
+                      <Play className="h-4 w-4 mr-2" />
+                      Reprendre
+                    </>
+                  ) : (
+                    <>
+                      <Pause className="h-4 w-4 mr-2" />
+                      Pause
+                    </>
+                  )}
+                </Button>
+                <Button 
                   variant={autoRefreshLogs ? "default" : "outline"} 
                   size="sm" 
                   onClick={() => setAutoRefreshLogs(!autoRefreshLogs)}
+                  disabled={isPaused}
                 >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${autoRefreshLogs ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`h-4 w-4 mr-2 ${autoRefreshLogs && !isPaused ? 'animate-spin' : ''}`} />
                   {autoRefreshLogs ? 'Auto' : 'Manuel'}
                 </Button>
                 <Button 
@@ -659,7 +699,11 @@ export default function AdminSystem() {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/admin/system/logs'] })}
+                  onClick={() => {
+                    queryClient.invalidateQueries({ queryKey: ['/api/admin/system/logs'] });
+                    setAutoScrollEnabled(true);
+                  }}
+                  disabled={isPaused}
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Actualiser
@@ -668,7 +712,11 @@ export default function AdminSystem() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="bg-black text-green-400 p-4 rounded-lg font-mono text-sm overflow-auto max-h-96 border">
+            <div 
+              ref={logsContainerRef}
+              className="bg-black text-green-400 p-4 rounded-lg font-mono text-sm overflow-auto max-h-96 border"
+              onScroll={handleLogsScroll}
+            >
               {logs.length === 0 ? (
                 <div className="text-gray-500">
                   {logsLoading ? (
@@ -697,10 +745,15 @@ export default function AdminSystem() {
                 {logs.length > 0 && (
                   <span>
                     {logs.length} entrées • 
-                    {autoRefreshLogs ? (
-                      <span className="text-green-600"> Auto-actualisation active</span>
+                    {isPaused ? (
+                      <span className="text-red-600"> ⏸️ En pause</span>
+                    ) : autoRefreshLogs ? (
+                      <span className="text-green-600"> 🔄 Auto-actualisation active</span>
                     ) : (
-                      <span className="text-orange-600"> Mode manuel</span>
+                      <span className="text-orange-600"> ✋ Mode manuel</span>
+                    )}
+                    {!autoScrollEnabled && !isPaused && (
+                      <span className="text-blue-600"> • 📜 Défilement désactivé</span>
                     )}
                   </span>
                 )}
