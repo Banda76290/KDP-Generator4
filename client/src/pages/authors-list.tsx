@@ -23,7 +23,7 @@ export default function AuthorsListPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold dark:text-white text-[#1a1a1a]">Authors</h1>
+            <h1 className="text-3xl font-bold text-[#1a1a1a] dark:text-white">Authors</h1>
             <p className="text-gray-600 dark:text-gray-400">Manage your publishing authors</p>
           </div>
           <Button onClick={() => setLocation("/authors/create")} className="kdp-btn-primary">
@@ -39,7 +39,7 @@ export default function AuthorsListPage() {
           ) : authors.length === 0 ? (
             <div className="col-span-full text-center py-12">
               <User className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No authors yet</h3>
+              <h3 className="text-lg font-medium text-[#1a1a1a] dark:text-white mb-2">No authors yet</h3>
               <p className="text-gray-500 dark:text-gray-400 mb-4">
                 Get started by creating your first author
               </p>

@@ -284,7 +284,7 @@ export default function AuthorViewPage() {
               Back to Authors
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{author.fullName}</h1>
+              <h1 className="text-3xl font-bold text-[#1a1a1a] dark:text-white">{author.fullName}</h1>
               <p className="text-gray-600 dark:text-gray-400">Author profile and multilingual biographies</p>
             </div>
           </div>
@@ -322,7 +322,7 @@ export default function AuthorViewPage() {
             <Card className="border-2" style={{ borderColor: 'var(--kdp-secondary-orange)', backgroundColor: '#fff9f0' }}>
               <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Biography - {author.fullName}</h3>
+                <h3 className="text-lg font-semibold text-[#1a1a1a]">Biography - {author.fullName}</h3>
                 <Select value={selectedLanguage} onValueChange={handleLanguageChange}>
                   <SelectTrigger className="w-48">
                     <SelectValue />
