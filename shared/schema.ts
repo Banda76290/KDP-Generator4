@@ -679,6 +679,7 @@ export type InsertSeries = z.infer<typeof insertSeriesSchema>;
 // Author Zod schemas
 export const insertAuthorSchema = createInsertSchema(authors).omit({
   id: true,
+  fullName: true,
   createdAt: true,
   updatedAt: true,
 });

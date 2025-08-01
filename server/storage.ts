@@ -1505,19 +1505,7 @@ export class DatabaseStorage implements IStorage {
   // Author operations implementation
   async getUserAuthors(userId: string): Promise<AuthorWithRelations[]> {
     const userAuthors = await db
-      .select({
-        id: authors.id,
-        userId: authors.userId,
-        prefix: authors.prefix,
-        firstName: authors.firstName,
-        middleName: authors.middleName,
-        lastName: authors.lastName,
-        suffix: authors.suffix,
-        fullName: authors.fullName,
-        isActive: authors.isActive,
-        createdAt: authors.createdAt,
-        updatedAt: authors.updatedAt,
-      })
+      .select()
       .from(authors)
       .where(and(eq(authors.userId, userId), eq(authors.isActive, true)));
 
