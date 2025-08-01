@@ -431,7 +431,7 @@ export default function Projects() {
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <h4 
-                                        className="text-sm font-medium text-gray-900 leading-tight break-words cursor-pointer hover:text-primary transition-colors"
+                                        className="text-sm font-medium text-gray-900 leading-tight break-words cursor-pointer hover:text-blue-600 transition-colors"
                                         onClick={() => setLocation(`/books/edit/${book.id}`)}
                                       >
                                         {book.title}
