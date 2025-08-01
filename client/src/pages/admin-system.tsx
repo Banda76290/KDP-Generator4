@@ -12,11 +12,7 @@ import { apiRequest } from "@/lib/queryClient";
 
 interface SystemHealth {
   database: 'healthy' | 'warning' | 'error';
-  categories: 'complete' | 'partial' | 'empty';
-  totalCategories: number;
-  expectedCategories: number;
-  completionPercentage: number;
-  hasCompleteHierarchy: boolean;
+  categories: number;
   lastSeeded: string | null;
   totalUsers: number;
   totalProjects: number;
@@ -28,8 +24,8 @@ interface SystemHealth {
   };
   uptime: string;
   memoryUsage: {
-    used: number;
-    total: number;
+    used: string;
+    total: string;
     percentage: number;
   };
 }
@@ -110,7 +106,7 @@ export default function AdminSystem() {
       addLog('Envoi de la requête POST /api/admin/database/seed', 'info');
       
       try {
-        const result = await apiRequest("POST", "/api/admin/database/seed");
+        const result = await apiRequest("/api/admin/database/seed", "POST");
         addLog('Réponse reçue du serveur', 'success');
         addLog(`Résultat: ${JSON.stringify(result, null, 2)}`, 'info');
         return result;
@@ -157,7 +153,7 @@ export default function AdminSystem() {
       addLog('Envoi de la requête POST /api/admin/database/reset', 'info');
       
       try {
-        const result = await apiRequest("POST", "/api/admin/database/reset");
+        const result = await apiRequest("/api/admin/database/reset", "POST");
         addLog('Réponse reçue du serveur pour le reset', 'success');
         addLog(`Résultat du reset: ${JSON.stringify(result, null, 2)}`, 'info');
         return result;
@@ -305,20 +301,7 @@ export default function AdminSystem() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <span className="text-sm font-medium">Catégories:</span>
-                <div className="flex flex-col items-end">
-                  <Badge variant={
-                    systemHealth?.categories === 'complete' ? 'default' :
-                    systemHealth?.categories === 'partial' ? 'secondary' : 'destructive'
-                  }>
-                    {systemHealth?.totalCategories || 0} / {systemHealth?.expectedCategories || 249}
-                  </Badge>
-                  {systemHealth?.completionPercentage && (
-                    <span className="text-xs text-muted-foreground mt-1">
-                      {systemHealth.completionPercentage}%
-                      {systemHealth?.categories === 'partial' && !systemHealth?.hasCompleteHierarchy && ' (incomplet)'}
-                    </span>
-                  )}
-                </div>
+                <Badge variant="secondary">{systemHealth?.categories || 0}</Badge>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <span className="text-sm font-medium">Utilisateurs:</span>
