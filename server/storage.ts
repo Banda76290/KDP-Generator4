@@ -898,8 +898,14 @@ export class DatabaseStorage implements IStorage {
         errors.push(`Category ${i}: Invalid displayName`);
       }
       
-      if (typeof cat.level !== 'number' || cat.level < 1) {
-        errors.push(`Category ${i}: Invalid level`);
+      // FIXED: Update validation for proper level range 
+      if (typeof cat.level !== 'number' || cat.level < 2) {
+        errors.push(`Category ${i}: Invalid level (must be >= 2)`);
+      }
+      
+      // FIXED: Validate required fields for virtual hierarchy
+      if (typeof cat.isSelectable !== 'boolean') {
+        errors.push(`Category ${i}: Missing isSelectable field`);
       }
     }
 
@@ -960,18 +966,23 @@ export class DatabaseStorage implements IStorage {
         ].filter(part => part && part.trim() !== '');
         
         const categoryPath = pathParts.join(' > ');
-        const level = Math.max(0, pathParts.length - 2); // Exclude 'Books' and type_livre from level
+        
+        // FIXED: Calculate level correctly for virtual hierarchy
+        // Level = actual depth in the path (Books=1, discriminant=2, category1=3, etc.)
+        // But we store the actual level for database consistency
+        const level = pathParts.length;
+        
         const displayName = pathParts[pathParts.length - 1] || '';
         const marketplace = cat.marketplace || cat['Marketplace'] || '';
         
         return {
           id: nanoid(),
-          marketplace: marketplace,
-          categoryCode: `${marketplace}_${displayName.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+          marketplace: marketplace.toLowerCase(), // Normalize marketplace name
           displayName: displayName,
           categoryPath: categoryPath,
           level: level,
           parentPath: pathParts.slice(0, -1).join(' > ') || null,
+          isSelectable: true, // FIXED: Add missing isSelectable field (all categories selectable)
           sortOrder: 0,
           isActive: true,
           createdAt: new Date(),
