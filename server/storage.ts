@@ -1326,12 +1326,14 @@ export class DatabaseStorage implements IStorage {
                         (format === 'paperback' || format === 'hardcover') ? 'print_kdp_paperback' : 
                         null;
 
-    // Keep marketplace name as-is since it's stored with proper casing (Amazon.fr, Amazon.de, etc.)
+    // Normalize marketplace name to lowercase for database query
+    const normalizedMarketplace = marketplace.toLowerCase();
+
     let categories = await db
       .select()
       .from(marketplaceCategories)
       .where(and(
-        eq(marketplaceCategories.marketplace, marketplace),
+        eq(marketplaceCategories.marketplace, normalizedMarketplace),
         eq(marketplaceCategories.isActive, true)
       ))
       .orderBy(marketplaceCategories.level, marketplaceCategories.sortOrder, marketplaceCategories.displayName);
@@ -1353,7 +1355,7 @@ export class DatabaseStorage implements IStorage {
         return belongsToPath;
       });
       
-      console.log(`Found ${filteredCategories.length} categories for ${discriminant} in ${marketplace}`);
+      console.log(`Found ${filteredCategories.length} categories for ${discriminant} in ${normalizedMarketplace}`);
       
       // RÉTROCOMPATIBILITÉ: Si aucune catégorie filtrée n'est trouvée, 
       // retourner toutes les catégories pour éviter de casser l'interface
