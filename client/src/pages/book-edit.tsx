@@ -558,7 +558,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
                     <div className="flex flex-col">
                       <span className="font-medium">{category.displayName}</span>
                       <span className="text-xs text-gray-500 mt-0.5">
-                        {category.categoryPath.replace(/^Books > /, '')}
+                        {category.categoryPath.replace(/^Books > /, '').replace(/kindle_ebook > |print_kdp_paperback > /, '')}
                       </span>
                     </div>
                   </Label>
