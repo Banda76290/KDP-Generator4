@@ -5,7 +5,7 @@ import { sql } from 'drizzle-orm';
 
 /**
  * Seeds the database with initial data required for the application
- * This runs automatically during deployment and on first startup
+ * This is now MANUAL-ONLY via Admin System page - no longer runs automatically
  */
 export async function seedDatabase() {
   const timestamp = new Date().toISOString();

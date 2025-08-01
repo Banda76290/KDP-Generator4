@@ -39,8 +39,8 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Seed database with initial data (categories, etc.)
-  await seedDatabase();
+  // Database seeding is now manual-only via Admin System page
+  // await seedDatabase(); // Disabled automatic seeding - use Admin System page for manual control
   
   const server = await registerRoutes(app);
 

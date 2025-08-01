@@ -4,10 +4,10 @@ Ce système assure que votre base de données de production aura toutes les donn
 
 ## Comment ça fonctionne
 
-### 🚀 Déploiement automatique
-- **Au démarrage** : Le serveur vérifie automatiquement si les catégories existent
-- **Si vide** : Importe automatiquement toutes les catégories depuis `complete-categories.sql`
-- **Si déjà présent** : Ignore l'import pour éviter les doublons
+### 🚀 Système Manuel Uniquement
+- **Plus de seeding automatique** : Le seeding ne se fait plus au démarrage du serveur
+- **Contrôle administrateur** : Seuls les administrateurs peuvent déclencher le seeding via la page "Système"
+- **Sécurité renforcée** : Évite les mises à jour non désirées lors des rafraîchissements de page
 
 ### 📁 Fichiers importants
 - `server/seedDatabase.ts` : Logique principale de seeding
@@ -17,10 +17,10 @@ Ce système assure que votre base de données de production aura toutes les donn
 
 ## 🛠️ Utilisation
 
-### Seeding automatique (Production)
+### Seeding en production
 ```bash
-# Aucune action requise - se fait automatiquement au démarrage
-npm run start
+# Plus de seeding automatique - utilisez l'interface admin
+# Connectez-vous en tant qu'administrateur et utilisez la page "Système"
 ```
 
 ### Seeding manuel (Développement)
