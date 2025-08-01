@@ -1601,12 +1601,9 @@ export default function EditBook() {
     setSelectedCategories([...categories]);
     setTempUISelections([...categories]); // Initialize temp selections with current categories
     
-    // Load categories for current marketplace - prioritize book data over form data
-    const currentMarketplace = book?.primaryMarketplace || form.watch("primaryMarketplace") || "Amazon.com";
-    console.log("Loading categories for marketplace:", currentMarketplace, { 
-      fromBook: book?.primaryMarketplace, 
-      fromForm: form.watch("primaryMarketplace") 
-    });
+    // Load categories for current marketplace
+    const currentMarketplace = form.watch("primaryMarketplace") || "Amazon.com";
+    console.log("Loading categories for marketplace:", currentMarketplace);
     await loadMarketplaceCategories(currentMarketplace);
     
     setShowCategoriesModal(true);
