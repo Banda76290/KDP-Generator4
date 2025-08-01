@@ -39,7 +39,24 @@ export default function AdminSystem() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [seedingStatus, setSeedingStatus] = useState<'idle' | 'seeding' | 'resetting'>('idle');
-  const [logs, setLogs] = useState<string[]>([]);
+  // Logs persistants dans sessionStorage
+  const [logs, setLogs] = useState<string[]>(() => {
+    try {
+      const savedLogs = sessionStorage.getItem('admin-system-logs');
+      return savedLogs ? JSON.parse(savedLogs) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Sauvegarder les logs dans sessionStorage à chaque modification
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('admin-system-logs', JSON.stringify(logs));
+    } catch (error) {
+      console.warn('Impossible de sauvegarder les logs:', error);
+    }
+  }, [logs]);
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll logs to bottom
@@ -61,7 +78,15 @@ export default function AdminSystem() {
   // Clear logs function
   const clearLogs = () => {
     setLogs([]);
-    addLog('Logs effacés', 'info');
+    try {
+      sessionStorage.removeItem('admin-system-logs');
+    } catch (error) {
+      console.warn('Impossible de nettoyer les logs du storage:', error);
+    }
+    // Ajouter le message après avoir vidé les logs
+    setTimeout(() => {
+      addLog('Logs effacés', 'info');
+    }, 100);
   };
 
   // Copy logs to clipboard
@@ -216,13 +241,24 @@ export default function AdminSystem() {
     }
   };
 
-  // Initialize with welcome log
+  // Initialize with welcome log (seulement si les logs sont vraiment vides)
   useEffect(() => {
     if (isAdmin && logs.length === 0) {
       addLog('🚀 Interface d\'administration système chargée', 'success');
       addLog(`👤 Utilisateur administrateur connecté: ${systemHealth?.totalUsers || 0} utilisateurs au total`, 'info');
     }
   }, [isAdmin, systemHealth]);
+
+  // Ajouter un log de retour sur la page si des logs existent déjà
+  useEffect(() => {
+    if (isAdmin && logs.length > 0) {
+      // Vérifier si le dernier log n'est pas déjà un retour sur la page
+      const lastLog = logs[logs.length - 1];
+      if (!lastLog?.includes('Retour sur la page Système') && !lastLog?.includes('Interface d\'administration système chargée')) {
+        addLog(`🔄 Retour sur la page Système - ${logs.length} logs précédents conservés`, 'info');
+      }
+    }
+  }, [isAdmin]);
 
   if (isLoading || healthLoading) {
     return (
