@@ -1915,6 +1915,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Auto-translate book to new language
+  app.post("/api/books/:id/translate", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const bookId = req.params.id;
+      const { targetLanguage } = req.body;
+      const userId = req.user?.claims?.sub;
+
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      if (!targetLanguage) {
+        return res.status(400).json({ message: "Target language is required" });
+      }
+
+      // Get the original book
+      const originalBook = await storage.getBook(bookId, userId);
+      if (!originalBook || originalBook.userId !== userId) {
+        return res.status(404).json({ message: "Book not found" });
+      }
+
+      // Initialize OpenAI
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      // Translate book fields using AI
+      const fieldsToTranslate = {
+        title: originalBook.title,
+        subtitle: originalBook.subtitle || '',
+        description: originalBook.description || '',
+        seriesTitle: originalBook.seriesTitle || '',
+        keywords: originalBook.keywords || []
+      };
+
+      const translationPrompt = `
+Please translate the following book information from ${originalBook.language || 'the original language'} to ${targetLanguage}. 
+Maintain the tone and style appropriate for book publishing. Return the translation in JSON format with the same structure.
+
+Original book information:
+${JSON.stringify(fieldsToTranslate, null, 2)}
+
+Please respond with only a JSON object containing the translated fields. For keywords, translate each keyword individually and keep them as an array.
+      `;
+
+      // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a professional translator specializing in book publishing. Provide accurate translations that maintain the marketing appeal and readability of book titles, descriptions, and metadata. Always respond with valid JSON."
+          },
+          {
+            role: "user",
+            content: translationPrompt
+          }
+        ],
+        max_tokens: 2000,
+        temperature: 0.3,
+        response_format: { type: "json_object" }
+      });
+
+      const translatedContent = JSON.parse(completion.choices[0]?.message?.content || '{}');
+
+      // Create the translated book
+      const translatedBookData = {
+        ...originalBook,
+        title: translatedContent.title || originalBook.title,
+        subtitle: translatedContent.subtitle || originalBook.subtitle,
+        description: translatedContent.description || originalBook.description,
+        language: targetLanguage,
+        seriesTitle: translatedContent.seriesTitle || originalBook.seriesTitle,
+        keywords: translatedContent.keywords && Array.isArray(translatedContent.keywords) 
+          ? translatedContent.keywords 
+          : originalBook.keywords,
+        // Remove ID and set status as draft for the new translated book
+        id: undefined,
+        status: 'draft',
+        isbn: null,
+        isbnPlaceholder: null,
+        createdAt: undefined,
+        updatedAt: undefined,
+        userId: userId
+      };
+
+      // Remove undefined fields and create the book
+      const cleanBookData = Object.fromEntries(
+        Object.entries(translatedBookData).filter(([_, value]) => value !== undefined)
+      );
+
+      const newBook = await storage.createBook(cleanBookData as any);
+
+      res.json({ 
+        message: "Book translated successfully",
+        originalBook: originalBook,
+        translatedBook: newBook,
+        targetLanguage: targetLanguage
+      });
+
+    } catch (error) {
+      console.error("Error translating book:", error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to translate book" 
+      });
+    }
+  });
+
   // Get database fields for AI prompts (Admin only)
   app.get("/api/ai/database-fields", isAuthenticated, isAdmin, async (req, res) => {
     try {

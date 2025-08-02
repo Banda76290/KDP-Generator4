@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -29,7 +30,8 @@ import {
   Globe,
   TrendingUp,
   DollarSign,
-  Library
+  Library,
+  Languages
 } from "lucide-react";
 import type { Book, Project } from "@shared/schema";
 
@@ -71,12 +73,20 @@ export default function BooksPage() {
   );
 }
 
+// Available languages for translation
+const languages = [
+  "English", "Spanish", "French", "German", "Italian", "Portuguese", "Japanese", "Chinese (Simplified)", 
+  "Chinese (Traditional)", "Korean", "Arabic", "Hindi", "Russian", "Dutch", "Swedish", "Norwegian"
+];
+
 function BooksContent() {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterFormat, setFilterFormat] = useState<string>("all");
   const [filterAssignment, setFilterAssignment] = useState<string>("all");
+  const [bookToTranslate, setBookToTranslate] = useState<Book | null>(null);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   const [sortBy, setSortBy] = useState<SortOption>("title-asc");
   const [bookToDelete, setBookToDelete] = useState<Book | null>(null);
   const { toast } = useToast();
@@ -155,6 +165,37 @@ function BooksContent() {
       });
     },
   });
+
+  // Mutation for translating book
+  const translateBookMutation = useMutation({
+    mutationFn: async ({ bookId, targetLanguage }: { bookId: string; targetLanguage: string }) => {
+      return apiRequest("POST", `/api/books/${bookId}/translate`, { targetLanguage });
+    },
+    onSuccess: (data: any) => {
+      toast.success({
+        title: "Translation Complete",
+        description: `Book successfully translated to ${data.targetLanguage}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
+      setBookToTranslate(null);
+      setSelectedLanguage("");
+    },
+    onError: (error: Error) => {
+      toast.error({
+        title: "Translation Failed",
+        description: error.message,
+      });
+    },
+  });
+
+  const handleTranslateBook = () => {
+    if (bookToTranslate && selectedLanguage) {
+      translateBookMutation.mutate({
+        bookId: bookToTranslate.id,
+        targetLanguage: selectedLanguage
+      });
+    }
+  };
 
   // Filter and sort books
   const filteredAndSortedBooks = books
@@ -434,6 +475,16 @@ function BooksContent() {
                         <Copy className="h-4 w-4 mr-2" />
                         Duplicate
                       </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setBookToTranslate(book);
+                          setSelectedLanguage("");
+                        }}
+                        disabled={translateBookMutation.isPending}
+                      >
+                        <Languages className="h-4 w-4 mr-2" />
+                        Auto-Translate
+                      </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => setBookToDelete(book)}
@@ -588,6 +639,77 @@ function BooksContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Auto-Translation Dialog */}
+      <Dialog open={!!bookToTranslate} onOpenChange={() => {
+        setBookToTranslate(null);
+        setSelectedLanguage("");
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Auto-Translate Book</DialogTitle>
+            <DialogDescription>
+              Create a fully translated version of "{bookToTranslate?.title}" using AI. 
+              All book information (title, subtitle, description, keywords, etc.) will be automatically translated.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Current Language</label>
+              <div className="text-sm text-muted-foreground bg-gray-50 p-2 rounded">
+                {bookToTranslate?.language || 'Not specified'}
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Target Language</label>
+              <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select target language..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {languages
+                    .filter(lang => lang !== bookToTranslate?.language)
+                    .map((language) => (
+                      <SelectItem key={language} value={language}>
+                        {language}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setBookToTranslate(null);
+                setSelectedLanguage("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleTranslateBook}
+              disabled={!selectedLanguage || translateBookMutation.isPending}
+            >
+              {translateBookMutation.isPending ? (
+                <>
+                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                  Translating...
+                </>
+              ) : (
+                <>
+                  <Languages className="h-4 w-4 mr-2" />
+                  Translate Book
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       </div>
     </TooltipProvider>
   );
