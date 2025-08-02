@@ -53,7 +53,10 @@ export default function ExchangeRates() {
   const rates = Array.isArray(exchangeRates) ? exchangeRates : [];
   // Add USD with rate 1.0 since it's our base currency and filter out duplicate
   const usdRate = { currency: 'USD', rate: '1.00000000', updatedAt: new Date().toISOString() };
-  const filteredRates = rates.filter((rate: any) => rate.currency !== 'USD');
+  const filteredRates = rates.filter((rate: any) => rate.currency !== 'USD').map((rate: any) => ({
+    ...rate,
+    updatedAt: rate.updatedAt || new Date().toISOString() // Add current timestamp if missing
+  }));
   const allRates = [usdRate, ...filteredRates];
   const majorRates = allRates.filter((rate: any) => majorCurrencies.includes(rate.currency));
   const otherRates = filteredRates.filter((rate: any) => !majorCurrencies.includes(rate.currency));
@@ -135,7 +138,7 @@ export default function ExchangeRates() {
                           <div>
                             <p className="font-semibold text-lg">{rate.currency}</p>
                             <p className="text-sm text-muted-foreground">
-                              1 EUR = {parseFloat(rate.rate).toFixed(4)} {rate.currency}
+                              1 USD = {parseFloat(rate.rate).toFixed(4)} {rate.currency}
                             </p>
                           </div>
                         </div>

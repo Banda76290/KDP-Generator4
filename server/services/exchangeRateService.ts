@@ -184,22 +184,26 @@ export class ExchangeRateService {
   /**
    * Get all supported currencies with latest rates
    */
-  async getSupportedCurrencies(): Promise<Array<{currency: string, rate: number, date: string}>> {
+  async getSupportedCurrencies(): Promise<Array<{currency: string, rate: string, updatedAt: string}>> {
     const rates = await db
       .select({
         currency: exchangeRates.toCurrency,
         rate: exchangeRates.rate,
-        date: exchangeRates.date
+        updatedAt: exchangeRates.updatedAt
       })
       .from(exchangeRates)
       .where(eq(exchangeRates.fromCurrency, 'USD'))
-      .orderBy(desc(exchangeRates.date), exchangeRates.toCurrency);
+      .orderBy(desc(exchangeRates.updatedAt), exchangeRates.toCurrency);
 
     // Group by currency and take the latest rate
     const latestRates = new Map();
     for (const rate of rates) {
       if (!latestRates.has(rate.currency)) {
-        latestRates.set(rate.currency, rate);
+        latestRates.set(rate.currency, {
+          currency: rate.currency,
+          rate: rate.rate,
+          updatedAt: rate.updatedAt?.toISOString() || new Date().toISOString()
+        });
       }
     }
 
