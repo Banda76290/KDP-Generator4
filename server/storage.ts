@@ -2035,7 +2035,7 @@ export class DatabaseStorage implements IStorage {
       totalImports: totalImports[0]?.count || 0,
       totalRecords: totalRecords[0]?.count || 0,
       royaltiesByCurrency: royaltiesByCurrency.map(r => ({
-        currency: r.currency || 'UNKNOWN',
+        currency: r.currency || 'EUR', // Default to EUR instead of UNKNOWN
         amount: Number(r.sum),
         transactions: Number(r.count)
       })),
@@ -2102,8 +2102,8 @@ export class DatabaseStorage implements IStorage {
     return topBooks.map(book => ({
       title: book.title,
       asin: book.asin,
-      currency: book.currency || 'UNKNOWN',
-      marketplace: book.marketplace || 'UNKNOWN',
+      currency: book.currency || 'EUR', // Default to EUR instead of UNKNOWN
+      marketplace: book.marketplace || 'N/A',
       totalSales: Number(book.totalSales),
       totalRoyalty: Number(book.totalRoyalty),
       totalUnits: 0, // Units data not reliable in current dataset
@@ -2133,7 +2133,7 @@ export class DatabaseStorage implements IStorage {
 
     return marketplaceData.map(item => ({
       marketplace: item.marketplace,
-      currency: item.currency || 'UNKNOWN',
+      currency: item.currency || 'EUR', // Default to EUR instead of UNKNOWN
       totalSales: Number(item.totalSales),
       totalRoyalty: Number(item.totalRoyalty),
       totalUnits: 0, // Not reliable data

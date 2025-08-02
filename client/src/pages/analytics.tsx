@@ -133,11 +133,21 @@ export default function Analytics() {
   }
 
   const formatCurrency = (amount: number, currency: string = 'EUR') => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 2,
-    }).format(amount);
+    // Handle invalid or unknown currencies
+    const validCurrency = ['EUR', 'USD', 'JPY', 'GBP', 'CAD', 'INR', 'AUD', 'BRL', 'MXN'].includes(currency) 
+      ? currency 
+      : 'EUR';
+    
+    try {
+      return new Intl.NumberFormat('fr-FR', {
+        style: 'currency',
+        currency: validCurrency,
+        minimumFractionDigits: validCurrency === 'JPY' ? 0 : 2,
+      }).format(amount);
+    } catch (error) {
+      // Fallback for any formatting errors
+      return `${amount.toFixed(2)} ${currency}`;
+    }
   };
 
   // Get main revenue info for display
