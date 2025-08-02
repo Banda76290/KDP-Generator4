@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Upload, FileSpreadsheet, Trash2, Eye, AlertCircle, CheckCircle, Clock, X } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { format } from 'date-fns';
+import Layout from '@/components/Layout';
 import type { KdpImportWithRelations } from '@shared/schema';
 
 interface ImportProgress {
@@ -207,8 +208,9 @@ export default function ImportManagement() {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
-      <div className="mb-8">
+    <Layout>
+      <div className="container mx-auto p-6 max-w-6xl">
+        <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           KDP Import Management
         </h1>
@@ -444,6 +446,7 @@ export default function ImportManagement() {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </Layout>
   );
 }
