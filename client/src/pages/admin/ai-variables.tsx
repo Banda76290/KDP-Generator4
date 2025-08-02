@@ -37,10 +37,10 @@ const categoryIcons = {
 };
 
 const categoryColors = {
-  'Livre': 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800',
-  'Projet': 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800',
-  'Auteur': 'bg-purple-50 dark:bg-purple-950 border-purple-200 dark:border-purple-800',
-  'Système': 'bg-orange-50 dark:bg-orange-950 border-orange-200 dark:border-orange-800'
+  'Livre': 'bg-blue-50 border-blue-200',
+  'Projet': 'bg-green-50 border-green-200',
+  'Auteur': 'bg-purple-50 border-purple-200',
+  'Système': 'bg-orange-50 border-orange-200'
 };
 
 export default function AIVariables() {
@@ -127,28 +127,28 @@ export default function AIVariables() {
       <div className="container mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Variables IA</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Variables IA</h1>
+          <p className="text-gray-600">
             Documentation complète des variables dynamiques disponibles pour vos prompts IA
           </p>
         </div>
 
         {/* Guide d'usage */}
-        <Card className="mb-8 border-blue-200 dark:border-blue-800">
+        <Card className="mb-8 border-blue-200 bg-white">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Info className="w-5 h-5 text-blue-600" />
+            <CardTitle className="flex items-center gap-2 text-gray-900">
+              <Info className="w-5 h-5 text-[#38b6ff]" />
               Guide d'utilisation des variables
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg">
-              <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+              <h4 className="font-semibold text-gray-900 mb-2">
                 Comment utiliser les variables dans vos prompts :
               </h4>
-              <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-                <li>• Utilisez la syntaxe <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">{"{nom_variable}"}</code> dans vos templates</li>
-                <li>• Exemple : <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">"Génère une description pour le livre {"{title}"} en {"{language}"}"</code></li>
+              <ul className="text-sm text-gray-700 space-y-1">
+                <li>• Utilisez la syntaxe <code className="bg-blue-100 text-[#146eb4] px-1 rounded font-mono">{"{nom_variable}"}</code> dans vos templates</li>
+                <li>• Exemple : <code className="bg-blue-100 text-[#146eb4] px-1 rounded font-mono">"Génère une description pour le livre {"{title}"} en {"{language}"}"</code></li>
                 <li>• Les variables sont automatiquement remplacées par les vraies valeurs lors de la génération</li>
                 <li>• Cliquez sur une variable pour la copier dans le presse-papiers</li>
               </ul>
@@ -164,12 +164,12 @@ export default function AIVariables() {
           if (fields.length === 0) return null;
 
           return (
-            <Card key={category} className={`mb-6 ${colorClass}`}>
+            <Card key={category} className={`mb-6 ${colorClass} bg-white`}>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <IconComponent className="w-5 h-5" />
+                <CardTitle className="flex items-center gap-2 text-gray-900">
+                  <IconComponent className="w-5 h-5 text-[#38b6ff]" />
                   Variables {category}
-                  <Badge variant="secondary" className="ml-2">
+                  <Badge variant="secondary" className="ml-2 bg-gray-100 text-gray-700">
                     {fields.length} variable{fields.length > 1 ? 's' : ''}
                   </Badge>
                 </CardTitle>
@@ -179,13 +179,13 @@ export default function AIVariables() {
                   {fields.map((field) => (
                     <div 
                       key={`${field.table}-${field.field}`}
-                      className="bg-white dark:bg-gray-800 p-4 rounded-lg border shadow-sm hover:shadow-md transition-shadow"
+                      className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <code 
-                              className="text-sm font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                              className="text-sm font-mono bg-gray-100 text-gray-800 px-2 py-1 rounded cursor-pointer hover:bg-blue-100 transition-colors"
                               onClick={() => copyToClipboard(field.field)}
                             >
                               {"{"}
@@ -195,20 +195,20 @@ export default function AIVariables() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="h-6 w-6 p-0"
+                              className="h-6 w-6 p-0 hover:bg-blue-50"
                               onClick={() => copyToClipboard(field.field)}
                             >
                               {copiedField === field.field ? (
                                 <CheckCircle className="w-3 h-3 text-green-600" />
                               ) : (
-                                <Copy className="w-3 h-3" />
+                                <Copy className="w-3 h-3 text-gray-600" />
                               )}
                             </Button>
                           </div>
-                          <h4 className="font-semibold text-sm text-foreground mb-1">
+                          <h4 className="font-semibold text-sm text-gray-900 mb-1">
                             {field.displayName}
                           </h4>
-                          <p className="text-xs text-muted-foreground mb-2">
+                          <p className="text-xs text-gray-600 mb-2">
                             {field.description}
                           </p>
                         </div>
@@ -217,14 +217,14 @@ export default function AIVariables() {
                       <div className="flex items-center gap-2">
                         <Badge 
                           variant="outline" 
-                          className="text-xs"
+                          className="text-xs border-gray-300 text-gray-700"
                         >
                           {field.type}
                         </Badge>
                         {field.options && (
                           <Badge 
                             variant="secondary" 
-                            className="text-xs"
+                            className="text-xs bg-[#38b6ff]/10 text-[#38b6ff] border-[#38b6ff]/20"
                           >
                             {field.options.length} options
                           </Badge>
@@ -232,19 +232,19 @@ export default function AIVariables() {
                       </div>
                       
                       {field.options && (
-                        <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                          <p className="text-xs text-muted-foreground mb-1">Options disponibles :</p>
+                        <div className="mt-2 pt-2 border-t border-gray-200">
+                          <p className="text-xs text-gray-600 mb-1">Options disponibles :</p>
                           <div className="flex flex-wrap gap-1">
                             {field.options.slice(0, 3).map((option) => (
                               <span 
                                 key={option}
-                                className="text-xs bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded"
+                                className="text-xs bg-gray-100 text-gray-700 px-1 py-0.5 rounded"
                               >
                                 {option}
                               </span>
                             ))}
                             {field.options.length > 3 && (
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-xs text-gray-600">
                                 +{field.options.length - 3}
                               </span>
                             )}
@@ -260,9 +260,9 @@ export default function AIVariables() {
         })}
 
         {(!categorizedFields || Object.keys(categorizedFields).length === 0) && (
-          <Card>
+          <Card className="bg-white">
             <CardContent className="py-8">
-              <div className="text-center text-muted-foreground">
+              <div className="text-center text-gray-600">
                 <Settings className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p>Aucune variable trouvée</p>
                 <p className="text-sm">Vérifiez la configuration de la base de données</p>
