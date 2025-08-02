@@ -1995,7 +1995,7 @@ export class DatabaseStorage implements IStorage {
       .delete(kdpImportData)
       .where(eq(kdpImportData.importId, importId));
   }
-  // KDP Analytics methods - using real imported data
+  // KDP Analytics methods - using real imported data with currency handling
   async getAnalyticsOverview(userId: string): Promise<any> {
     const totalImports = await db.select({
       count: sql<number>`count(*)`
@@ -2007,16 +2007,19 @@ export class DatabaseStorage implements IStorage {
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
     .where(eq(kdpImports.userId, userId));
 
-    // Only sum royalty where it's not null and > 0
-    const totalRoyalty = await db.select({
-      sum: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`
+    // Get royalty by currency to avoid mixing currencies
+    const royaltiesByCurrency = await db.select({
+      currency: kdpImportData.currency,
+      sum: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`,
+      count: sql<number>`count(*)`
     }).from(kdpImportData)
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
       isNotNull(kdpImportData.royalty),
       sql`${kdpImportData.royalty} > 0`
-    ));
+    ))
+    .groupBy(kdpImportData.currency);
 
     const uniqueBooks = await db.select({
       count: sql<number>`count(distinct ${kdpImportData.asin})`
@@ -2031,7 +2034,11 @@ export class DatabaseStorage implements IStorage {
     return {
       totalImports: totalImports[0]?.count || 0,
       totalRecords: totalRecords[0]?.count || 0,
-      totalRoyalty: Number(totalRoyalty[0]?.sum || 0),
+      royaltiesByCurrency: royaltiesByCurrency.map(r => ({
+        currency: r.currency || 'UNKNOWN',
+        amount: Number(r.sum),
+        transactions: Number(r.count)
+      })),
       uniqueBooks: uniqueBooks[0]?.count || 0
     };
   }
@@ -2070,13 +2077,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTopPerformers(userId: string, limit: number): Promise<any[]> {
+    // Get top performers with currency information to avoid mixing currencies
     const topBooks = await db.select({
       title: kdpImportData.title,
       asin: kdpImportData.asin,
+      currency: kdpImportData.currency,  
+      marketplace: kdpImportData.marketplace,
       totalSales: sql<number>`count(*)`,
       totalRoyalty: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`,
-      totalUnits: sql<number>`coalesce(sum(${kdpImportData.netUnitsSold}), 0)`,
-      avgRoyaltyRate: sql<number>`coalesce(avg(${kdpImportData.royalty}), 0)`
+      avgRoyalty: sql<number>`coalesce(avg(${kdpImportData.royalty}), 0)`
     })
     .from(kdpImportData)
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
@@ -2086,26 +2095,29 @@ export class DatabaseStorage implements IStorage {
       isNotNull(kdpImportData.title),
       sql`${kdpImportData.royalty} > 0`
     ))
-    .groupBy(kdpImportData.asin, kdpImportData.title)
+    .groupBy(kdpImportData.asin, kdpImportData.title, kdpImportData.currency, kdpImportData.marketplace)
     .orderBy(sql`coalesce(sum(${kdpImportData.royalty}), 0) desc`)
     .limit(limit);
 
     return topBooks.map(book => ({
       title: book.title,
       asin: book.asin,
+      currency: book.currency || 'UNKNOWN',
+      marketplace: book.marketplace || 'UNKNOWN',
       totalSales: Number(book.totalSales),
       totalRoyalty: Number(book.totalRoyalty),
-      totalUnits: Number(book.totalUnits),
-      avgRoyaltyRate: Number(book.avgRoyaltyRate)
+      totalUnits: 0, // Units data not reliable in current dataset
+      avgRoyaltyRate: Number(book.avgRoyalty)
     }));
   }
 
   async getMarketplaceBreakdown(userId: string): Promise<any[]> {
+    // Group by marketplace AND currency to avoid mixing currencies
     const marketplaceData = await db.select({
       marketplace: kdpImportData.marketplace,
+      currency: kdpImportData.currency,
       totalSales: sql<number>`count(*)`,
       totalRoyalty: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`,
-      totalUnits: sql<number>`coalesce(sum(${kdpImportData.netUnitsSold}), 0)`,
       uniqueBooks: sql<number>`count(distinct ${kdpImportData.asin})`
     })
     .from(kdpImportData)
@@ -2113,16 +2125,18 @@ export class DatabaseStorage implements IStorage {
     .where(and(
       eq(kdpImports.userId, userId),
       isNotNull(kdpImportData.marketplace),
-      sql`${kdpImportData.marketplace} != ''`
+      sql`${kdpImportData.marketplace} != ''`,
+      sql`${kdpImportData.royalty} > 0`
     ))
-    .groupBy(kdpImportData.marketplace)
+    .groupBy(kdpImportData.marketplace, kdpImportData.currency)
     .orderBy(sql`coalesce(sum(${kdpImportData.royalty}), 0) desc`);
 
     return marketplaceData.map(item => ({
       marketplace: item.marketplace,
+      currency: item.currency || 'UNKNOWN',
       totalSales: Number(item.totalSales),
       totalRoyalty: Number(item.totalRoyalty),
-      totalUnits: Number(item.totalUnits),
+      totalUnits: 0, // Not reliable data
       uniqueBooks: Number(item.uniqueBooks)
     }));
   }

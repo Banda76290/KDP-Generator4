@@ -36,7 +36,11 @@ import {
 interface AnalyticsOverview {
   totalImports: number;
   totalRecords: number;
-  totalRoyalty: number;
+  royaltiesByCurrency: Array<{
+    currency: string;
+    amount: number;
+    transactions: number;
+  }>;
   uniqueBooks: number;
 }
 
@@ -50,6 +54,8 @@ interface SalesTrend {
 interface TopPerformer {
   title: string;
   asin: string;
+  currency: string;
+  marketplace: string;
   totalSales: number;
   totalRoyalty: number;
   totalUnits: number;
@@ -58,6 +64,7 @@ interface TopPerformer {
 
 interface MarketplaceData {
   marketplace: string;
+  currency: string;
   totalSales: number;
   totalRoyalty: number;
   totalUnits: number;
@@ -125,13 +132,18 @@ export default function Analytics() {
     return null;
   }
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number, currency: string = 'EUR') => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
+      currency: currency,
       minimumFractionDigits: 2,
     }).format(amount);
   };
+
+  // Get main revenue info for display
+  const royaltiesByCurrency = overview?.royaltiesByCurrency || [];
+  const totalCurrencies = royaltiesByCurrency.length;
+  const mainCurrency = royaltiesByCurrency.length > 0 ? royaltiesByCurrency[0] : null;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -206,7 +218,7 @@ export default function Analytics() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Revenus Totaux</CardTitle>
+            <CardTitle className="text-sm font-medium">Revenus Principaux</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -214,11 +226,11 @@ export default function Analytics() {
               {overviewLoading ? (
                 <div className="w-20 h-6 bg-gray-200 animate-pulse rounded" />
               ) : (
-                formatCurrency(overview?.totalRoyalty || 0)
+                mainCurrency ? formatCurrency(mainCurrency.amount, mainCurrency.currency) : '0 €'
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              Royautés cumulées
+              {totalCurrencies > 1 ? `${totalCurrencies} devises différentes` : 'Royautés cumulées'}
             </p>
           </CardContent>
         </Card>
@@ -244,8 +256,9 @@ export default function Analytics() {
       </div>
 
       <Tabs defaultValue="trends" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="trends">Tendances</TabsTrigger>
+          <TabsTrigger value="currencies">Devises</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="marketplace">Marketplaces</TabsTrigger>
           <TabsTrigger value="books">Top Livres</TabsTrigger>
@@ -305,6 +318,52 @@ export default function Analytics() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="currencies" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                Revenus par Devise
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {overviewLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="w-full h-16 bg-gray-200 animate-pulse rounded" />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {royaltiesByCurrency?.map((currency) => (
+                    <div key={currency.currency} className="p-4 border rounded-lg bg-gradient-to-r from-blue-50 to-orange-50">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-lg">{currency.currency}</h4>
+                        <Badge variant="secondary">
+                          {currency.transactions} transactions
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="text-2xl font-bold text-secondary">
+                          {formatCurrency(currency.amount, currency.currency)}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          Moyenne: {formatCurrency(currency.amount / currency.transactions, currency.currency)}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {royaltiesByCurrency.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      Aucune donnée de revenus disponible
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="performance" className="space-y-6">
           <Card>
             <CardHeader>
@@ -343,15 +402,15 @@ export default function Analytics() {
                           </h4>
                           <p className="text-sm text-gray-500">ASIN: {book.asin}</p>
                           <div className="flex items-center gap-4 mt-1 text-xs text-gray-400">
-                            <span>{book.totalUnits} unités</span>
+                            <span>{book.marketplace || 'N/A'}</span>
                             <span>{book.totalSales} transactions</span>
-                            <span>{(book.avgRoyaltyRate * 100).toFixed(1)}% royautés</span>
+                            <span>{book.currency}</span>
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-bold text-secondary">
-                          {formatCurrency(book.totalRoyalty)}
+                          {formatCurrency(book.totalRoyalty, book.currency)}
                         </div>
                       </div>
                     </div>
@@ -420,24 +479,21 @@ export default function Analytics() {
                 ) : (
                   <div className="space-y-4">
                     {marketplaceData?.map((marketplace) => (
-                      <div key={marketplace.marketplace} className="p-4 border rounded-lg">
+                      <div key={`${marketplace.marketplace}-${marketplace.currency}`} className="p-4 border rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <h4 className="font-medium">{marketplace.marketplace}</h4>
-                          <Badge style={{ backgroundColor: MARKETPLACE_COLORS[marketplace.marketplace as keyof typeof MARKETPLACE_COLORS] || '#8884d8' }}>
-                            {marketplace.uniqueBooks} livres
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">{marketplace.currency}</Badge>
+                            <Badge style={{ backgroundColor: MARKETPLACE_COLORS[marketplace.marketplace as keyof typeof MARKETPLACE_COLORS] || '#8884d8' }}>
+                              {marketplace.uniqueBooks} livres
+                            </Badge>
+                          </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
                             <span className="text-gray-500">Revenus:</span>
                             <div className="font-medium text-secondary">
-                              {formatCurrency(marketplace.totalRoyalty)}
-                            </div>
-                          </div>
-                          <div>
-                            <span className="text-gray-500">Unités:</span>
-                            <div className="font-medium">
-                              {marketplace.totalUnits.toLocaleString('fr-FR')}
+                              {formatCurrency(marketplace.totalRoyalty, marketplace.currency)}
                             </div>
                           </div>
                           <div>
