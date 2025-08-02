@@ -1939,12 +1939,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Initialize OpenAI
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-      // Translate book fields using AI
+      // Translate book fields using AI (excluding series information)
       const fieldsToTranslate = {
         title: originalBook.title,
         subtitle: originalBook.subtitle || '',
         description: originalBook.description || '',
-        seriesTitle: originalBook.seriesTitle || '',
         keywords: originalBook.keywords || []
       };
 
@@ -1978,17 +1977,19 @@ Please respond with only a JSON object containing the translated fields. For key
 
       const translatedContent = JSON.parse(completion.choices[0]?.message?.content || '{}');
 
-      // Create the translated book
+      // Create the translated book (without series information)
       const translatedBookData = {
         ...originalBook,
         title: translatedContent.title || originalBook.title,
         subtitle: translatedContent.subtitle || originalBook.subtitle,
         description: translatedContent.description || originalBook.description,
         language: targetLanguage,
-        seriesTitle: translatedContent.seriesTitle || originalBook.seriesTitle,
         keywords: translatedContent.keywords && Array.isArray(translatedContent.keywords) 
           ? translatedContent.keywords 
           : originalBook.keywords,
+        // Remove series information from translated book
+        seriesTitle: null,
+        seriesNumber: null,
         // Remove ID and set status as draft for the new translated book
         id: undefined,
         status: 'draft',
