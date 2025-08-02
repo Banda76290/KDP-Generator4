@@ -54,7 +54,7 @@ import {
   type InsertAiPromptTemplate,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, gte, lte, sql, sum, count, like, or } from "drizzle-orm";
+import { eq, desc, and, gte, lte, sql, sum, count, like, or, isNotNull } from "drizzle-orm";
 import { generateUniqueIsbnPlaceholder } from "./utils/isbnGenerator";
 import { nanoid } from "nanoid";
 
@@ -1565,16 +1565,18 @@ export class DatabaseStorage implements IStorage {
           eq(books.authorSuffix, author.suffix || '')
         ));
 
-      // Count projects for this author (through contributors table)
+      // Count projects for this author (through books table since books contain author info)
       const authorProjects = await db
-        .select({ count: sql<number>`count(distinct ${contributors.projectId})` })
-        .from(contributors)
+        .select({ count: sql<number>`count(distinct ${books.projectId})` })
+        .from(books)
         .where(and(
-          eq(contributors.prefix, author.prefix || ''),
-          eq(contributors.firstName, author.firstName),
-          eq(contributors.middleName, author.middleName || ''),
-          eq(contributors.lastName, author.lastName),
-          eq(contributors.suffix, author.suffix || '')
+          eq(books.userId, userId),
+          sql`COALESCE(${books.authorPrefix}, '') = ${author.prefix || ''}`,
+          eq(books.authorFirstName, author.firstName),
+          sql`COALESCE(${books.authorMiddleName}, '') = ${author.middleName || ''}`,
+          eq(books.authorLastName, author.lastName),
+          sql`COALESCE(${books.authorSuffix}, '') = ${author.suffix || ''}`,
+          isNotNull(books.projectId)
         ));
       
       return {
