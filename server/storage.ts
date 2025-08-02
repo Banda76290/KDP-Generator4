@@ -16,6 +16,8 @@ import {
   authorBiographies,
   contentRecommendations,
   aiPromptTemplates,
+  kdpImports,
+  kdpImportData,
   type User,
   type UpsertUser,
   type Project,
@@ -52,6 +54,11 @@ import {
   type InsertContentRecommendation,
   type AiPromptTemplate,
   type InsertAiPromptTemplate,
+  type KdpImport,
+  type InsertKdpImport,
+  type KdpImportData,
+  type InsertKdpImportData,
+  type KdpImportWithRelations,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, sum, count, like, or, isNotNull } from "drizzle-orm";
@@ -185,6 +192,17 @@ export interface IStorage {
   updateBlogPost(id: string, post: Partial<InsertBlogPost>): Promise<BlogPost>;
   deleteBlogPost(id: string): Promise<void>;
   updateBlogPostStatus(id: string, status: string): Promise<BlogPost>;
+
+  // KDP Import operations
+  getUserKdpImports(userId: string): Promise<KdpImportWithRelations[]>;
+  getKdpImport(importId: string, userId: string): Promise<KdpImportWithRelations | undefined>;
+  createKdpImport(importData: InsertKdpImport): Promise<KdpImport>;
+  updateKdpImport(importId: string, updates: Partial<InsertKdpImport>): Promise<KdpImport>;
+  deleteKdpImport(importId: string, userId: string): Promise<void>;
+  
+  createKdpImportData(data: InsertKdpImportData[]): Promise<KdpImportData[]>;
+  getKdpImportData(importId: string): Promise<KdpImportData[]>;
+  deleteKdpImportData(importId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1884,6 +1902,98 @@ export class DatabaseStorage implements IStorage {
       .orderBy(aiPromptTemplates.isDefault ? sql`1` : sql`2`, aiPromptTemplates.name)
       .limit(1);
     return template;
+  }
+
+  // KDP Import operations
+  async getUserKdpImports(userId: string): Promise<KdpImportWithRelations[]> {
+    const userImports = await db
+      .select()
+      .from(kdpImports)
+      .where(eq(kdpImports.userId, userId))
+      .orderBy(desc(kdpImports.createdAt));
+
+    return await Promise.all(userImports.map(async (importRecord) => {
+      const [user] = await db.select().from(users).where(eq(users.id, importRecord.userId));
+      const importData = await db.select().from(kdpImportData).where(eq(kdpImportData.importId, importRecord.id));
+      
+      return {
+        ...importRecord,
+        user,
+        importData,
+      };
+    }));
+  }
+
+  async getKdpImport(importId: string, userId: string): Promise<KdpImportWithRelations | undefined> {
+    const [importRecord] = await db
+      .select()
+      .from(kdpImports)
+      .where(and(eq(kdpImports.id, importId), eq(kdpImports.userId, userId)));
+
+    if (!importRecord) return undefined;
+
+    const [user] = await db.select().from(users).where(eq(users.id, importRecord.userId));
+    const importData = await db.select().from(kdpImportData).where(eq(kdpImportData.importId, importRecord.id));
+
+    return {
+      ...importRecord,
+      user,
+      importData,
+    };
+  }
+
+  async createKdpImport(importData: InsertKdpImport): Promise<KdpImport> {
+    const [newImport] = await db
+      .insert(kdpImports)
+      .values(importData)
+      .returning();
+    return newImport;
+  }
+
+  async updateKdpImport(importId: string, updates: Partial<InsertKdpImport>): Promise<KdpImport> {
+    const [updatedImport] = await db
+      .update(kdpImports)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(kdpImports.id, importId))
+      .returning();
+    return updatedImport;
+  }
+
+  async deleteKdpImport(importId: string, userId: string): Promise<void> {
+    // Delete related import data first
+    await db.delete(kdpImportData).where(eq(kdpImportData.importId, importId));
+    
+    // Delete the main import record
+    await db
+      .delete(kdpImports)
+      .where(and(eq(kdpImports.id, importId), eq(kdpImports.userId, userId)));
+  }
+
+  async createKdpImportData(data: InsertKdpImportData[]): Promise<KdpImportData[]> {
+    if (data.length === 0) return [];
+    
+    const insertedData = await db
+      .insert(kdpImportData)
+      .values(data)
+      .returning();
+    return insertedData;
+  }
+
+  async getKdpImportData(importId: string): Promise<KdpImportData[]> {
+    return await db
+      .select()
+      .from(kdpImportData)
+      .where(eq(kdpImportData.importId, importId))
+      .orderBy(kdpImportData.rowIndex);
+  }
+
+  async deleteKdpImportData(importId: string): Promise<void> {
+    await db
+      .delete(kdpImportData)
+      .where(eq(kdpImportData.importId, importId));
   }
 }
 

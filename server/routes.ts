@@ -3,9 +3,11 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema, insertAuthorSchema, insertAuthorBiographySchema, insertContentRecommendationSchema, insertAiPromptTemplateSchema } from "@shared/schema";
+import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema, insertAuthorSchema, insertAuthorBiographySchema, insertContentRecommendationSchema, insertAiPromptTemplateSchema, insertKdpImportSchema, insertKdpImportDataSchema } from "@shared/schema";
 import { aiService } from "./services/aiService";
 import { parseKDPReport } from "./services/kdpParser";
+import { KdpImportService, type ParsedKdpData } from "./services/kdpImportService";
+import { KdpImportProcessor } from "./services/kdpImportProcessor";
 import { generateUniqueIsbnPlaceholder, ensureIsbnPlaceholder } from "./utils/isbnGenerator";
 import { seedDatabase, forceSeedDatabase } from "./seedDatabase.js";
 import { z } from "zod";
@@ -2402,6 +2404,208 @@ Please respond with only a JSON object containing the translated fields. For key
         duration: `${duration}ms`,
         timestamp: timestamp
       });
+    }
+  });
+
+  // KDP Import Management Routes
+  app.get('/api/kdp-imports', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const imports = await storage.getUserKdpImports(userId);
+      res.json(imports);
+    } catch (error) {
+      console.error("Error fetching KDP imports:", error);
+      res.status(500).json({ message: "Failed to fetch KDP imports" });
+    }
+  });
+
+  app.get('/api/kdp-imports/:importId', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const { importId } = req.params;
+      const importRecord = await storage.getKdpImport(importId, userId);
+      
+      if (!importRecord) {
+        return res.status(404).json({ message: "Import not found" });
+      }
+
+      res.json(importRecord);
+    } catch (error) {
+      console.error("Error fetching KDP import:", error);
+      res.status(500).json({ message: "Failed to fetch KDP import" });
+    }
+  });
+
+  // KDP File Upload and Processing
+  app.post('/api/kdp-imports/upload', isAuthenticated, upload.single('file'), async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Validate file type
+      const allowedMimeTypes = [
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+        'application/vnd.ms-excel', // .xls
+        'text/csv' // .csv
+      ];
+
+      if (!allowedMimeTypes.includes(req.file.mimetype)) {
+        return res.status(400).json({ 
+          message: "Invalid file type. Please upload an Excel (.xlsx, .xls) or CSV file." 
+        });
+      }
+
+      // Parse the KDP file
+      let parsedData: ParsedKdpData;
+      try {
+        parsedData = KdpImportService.parseKdpFile(req.file.buffer, req.file.originalname);
+      } catch (parseError) {
+        console.error("Error parsing KDP file:", parseError);
+        return res.status(400).json({ 
+          message: "Failed to parse file. Please ensure it's a valid KDP export file." 
+        });
+      }
+
+      // Create import record
+      const importData = {
+        userId,
+        fileName: req.file.originalname,
+        fileType: req.file.mimetype,
+        fileSize: req.file.size,
+        detectedType: parsedData.detectedType as any,
+        status: 'pending' as const,
+        totalRecords: parsedData.summary.estimatedRecords,
+      };
+
+      const newImport = await storage.createKdpImport(importData);
+
+      // Process the import asynchronously
+      const processor = new KdpImportProcessor(newImport.id, userId);
+      
+      // Start processing in background (don't wait for completion)
+      processor.processImport(parsedData).catch(error => {
+        console.error(`Import processing failed for ${newImport.id}:`, error);
+      });
+
+      res.json({
+        import: newImport,
+        parsedData: {
+          detectedType: parsedData.detectedType,
+          summary: parsedData.summary
+        }
+      });
+
+    } catch (error) {
+      console.error("Error uploading KDP file:", error);
+      res.status(500).json({ message: "Failed to upload KDP file" });
+    }
+  });
+
+  app.delete('/api/kdp-imports/:importId', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const { importId } = req.params;
+      
+      // Verify import exists and belongs to user
+      const importRecord = await storage.getKdpImport(importId, userId);
+      if (!importRecord) {
+        return res.status(404).json({ message: "Import not found" });
+      }
+
+      await storage.deleteKdpImport(importId, userId);
+      res.json({ success: true });
+
+    } catch (error) {
+      console.error("Error deleting KDP import:", error);
+      res.status(500).json({ message: "Failed to delete KDP import" });
+    }
+  });
+
+  // Get import data for analysis
+  app.get('/api/kdp-imports/:importId/data', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const { importId } = req.params;
+      const { limit = 100, offset = 0 } = req.query;
+      
+      // Verify import exists and belongs to user
+      const importRecord = await storage.getKdpImport(importId, userId);
+      if (!importRecord) {
+        return res.status(404).json({ message: "Import not found" });
+      }
+
+      const importData = await storage.getKdpImportData(importId);
+      
+      // Apply pagination
+      const paginatedData = importData.slice(
+        parseInt(offset as string),
+        parseInt(offset as string) + parseInt(limit as string)
+      );
+
+      res.json({
+        data: paginatedData,
+        total: importData.length,
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string)
+      });
+
+    } catch (error) {
+      console.error("Error fetching KDP import data:", error);
+      res.status(500).json({ message: "Failed to fetch KDP import data" });
+    }
+  });
+
+  // Get import progress/status
+  app.get('/api/kdp-imports/:importId/progress', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const { importId } = req.params;
+      const importRecord = await storage.getKdpImport(importId, userId);
+      
+      if (!importRecord) {
+        return res.status(404).json({ message: "Import not found" });
+      }
+
+      res.json({
+        status: importRecord.status,
+        progress: importRecord.progress,
+        processedRecords: importRecord.processedRecords,
+        totalRecords: importRecord.totalRecords,
+        errorRecords: importRecord.errorRecords,
+        duplicateRecords: importRecord.duplicateRecords,
+        errorLog: importRecord.errorLog,
+        summary: importRecord.summary
+      });
+
+    } catch (error) {
+      console.error("Error fetching KDP import progress:", error);
+      res.status(500).json({ message: "Failed to fetch KDP import progress" });
     }
   });
 

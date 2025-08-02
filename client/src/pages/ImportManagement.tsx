@@ -1,0 +1,449 @@
+import { useState, useRef } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { Upload, FileSpreadsheet, Trash2, Eye, AlertCircle, CheckCircle, Clock, X } from 'lucide-react';
+import { apiRequest } from '@/lib/queryClient';
+import { format } from 'date-fns';
+import type { KdpImportWithRelations } from '@shared/schema';
+
+interface ImportProgress {
+  status: string;
+  progress: number;
+  processedRecords: number;
+  totalRecords: number;
+  errorRecords: number;
+  duplicateRecords: number;
+  errorLog: string[];
+  summary: any;
+}
+
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+const getStatusBadge = (status: string) => {
+  switch (status) {
+    case 'completed':
+      return <Badge className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100"><CheckCircle className="w-3 h-3 mr-1" />Completed</Badge>;
+    case 'processing':
+      return <Badge className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100"><Clock className="w-3 h-3 mr-1" />Processing</Badge>;
+    case 'failed':
+      return <Badge className="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100"><AlertCircle className="w-3 h-3 mr-1" />Failed</Badge>;
+    case 'pending':
+      return <Badge className="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
+    default:
+      return <Badge variant="secondary">{status}</Badge>;
+  }
+};
+
+const getDetectedTypeDescription = (detectedType: string) => {
+  switch (detectedType) {
+    case 'orders':
+      return 'KDP Orders Report - Book sales and transactions';
+    case 'payments':
+      return 'KDP Payments Report - Royalty payments received';
+    case 'royalties_estimator':
+      return 'KDP Royalties Estimator - Revenue projections';
+    case 'prior_month_royalties':
+      return 'KDP Prior Month Royalties - Previous month earnings';
+    case 'kenp_read':
+      return 'KDP KENP Read Report - Kindle Edition Normalized Pages read';
+    case 'dashboard':
+      return 'KDP Dashboard Export - General performance data';
+    default:
+      return `KDP Report (${detectedType})`;
+  }
+};
+
+export default function ImportManagement() {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [expandedImport, setExpandedImport] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Fetch user imports
+  const { data: imports = [], isLoading } = useQuery<KdpImportWithRelations[]>({
+    queryKey: ['/api/kdp-imports'],
+  });
+
+  // Upload mutation
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      return apiRequest('/api/kdp-imports/upload', {
+        method: 'POST',
+        body: formData,
+      });
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "File uploaded successfully",
+        description: `Detected: ${getDetectedTypeDescription(data.parsedData.detectedType)}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
+      setSelectedFile(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Upload failed",
+        description: error.message || "Failed to upload file",
+        variant: "destructive",
+      });
+      setSelectedFile(null);
+    },
+  });
+
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (importId: string) => {
+      return apiRequest(`/api/kdp-imports/${importId}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Import deleted",
+        description: "Import and all associated data have been removed.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Delete failed",
+        description: error.message || "Failed to delete import",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Fetch import progress
+  const { data: importProgress } = useQuery<ImportProgress>({
+    queryKey: ['/api/kdp-imports', expandedImport, 'progress'],
+    enabled: !!expandedImport,
+    refetchInterval: (data) => {
+      // Stop polling if completed or failed
+      if (data?.status === 'completed' || data?.status === 'failed') {
+        return false;
+      }
+      return 2000; // Poll every 2 seconds
+    },
+  });
+
+  const handleFileSelect = (files: File[]) => {
+    const file = files[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel',
+      'text/csv'
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an Excel (.xlsx, .xls) or CSV file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Maximum file size is 10MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSelectedFile(file);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer.files);
+    handleFileSelect(files);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleUpload = () => {
+    if (selectedFile) {
+      uploadMutation.mutate(selectedFile);
+    }
+  };
+
+  const handleDelete = (importId: string) => {
+    if (confirm('Are you sure you want to delete this import? This action cannot be undone.')) {
+      deleteMutation.mutate(importId);
+    }
+  };
+
+  const toggleExpandImport = (importId: string) => {
+    setExpandedImport(expandedImport === importId ? null : importId);
+  };
+
+  return (
+    <div className="container mx-auto p-6 max-w-6xl">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          KDP Import Management
+        </h1>
+        <p className="text-gray-600 dark:text-gray-300">
+          Upload and manage your Amazon KDP reports for analysis and data integration.
+        </p>
+      </div>
+
+      {/* Upload Section */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Upload className="w-5 h-5" />
+            Upload KDP Report
+          </CardTitle>
+          <CardDescription>
+            Select or drag & drop your KDP export files (.xlsx, .xls, .csv)
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div
+            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+              isDragging
+                ? 'border-blue-400 bg-blue-50 dark:bg-blue-950'
+                : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+            }`}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}  
+          >
+            {selectedFile ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-center gap-2">
+                  <FileSpreadsheet className="w-8 h-8 text-green-600" />
+                  <div className="text-left">
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {selectedFile.name}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {formatFileSize(selectedFile.size)}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedFile(null)}
+                    className="ml-2"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="flex gap-2 justify-center">
+                  <Button 
+                    onClick={handleUpload}
+                    disabled={uploadMutation.isPending}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    {uploadMutation.isPending ? 'Uploading...' : 'Upload & Process'}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setSelectedFile(null)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <div className="space-y-2">
+                  <p className="text-lg font-medium text-gray-900 dark:text-white">
+                    Drop your KDP files here
+                  </p>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    Or click to browse and select files
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mt-4"
+                  >
+                    Select Files
+                  </Button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    accept=".xlsx,.xls,.csv"
+                    onChange={(e) => handleFileSelect(Array.from(e.target.files || []))}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Import History */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Import History</CardTitle>
+          <CardDescription>
+            View and manage your previously uploaded KDP reports
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-2 text-gray-500 dark:text-gray-400">Loading imports...</p>
+            </div>
+          ) : imports.length === 0 ? (
+            <div className="text-center py-8">
+              <FileSpreadsheet className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                No imports yet
+              </p>
+              <p className="text-gray-500 dark:text-gray-400">
+                Upload your first KDP report to get started
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {imports.map((importRecord) => (
+                <div key={importRecord.id} className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <FileSpreadsheet className="w-5 h-5 text-blue-600" />
+                        <div>
+                          <h3 className="font-medium text-gray-900 dark:text-white">
+                            {importRecord.fileName}
+                          </h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {getDetectedTypeDescription(importRecord.detectedType)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mt-2 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                        <span>{formatFileSize(importRecord.fileSize)}</span>
+                        <span>
+                          {format(new Date(importRecord.createdAt), 'MMM dd, yyyy HH:mm')}
+                        </span>
+                        {importRecord.totalRecords > 0 && (
+                          <span>{importRecord.totalRecords} records</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {getStatusBadge(importRecord.status)}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleExpandImport(importRecord.id)}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(importRecord.id)}
+                        disabled={deleteMutation.isPending}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Expanded Details */}
+                  {expandedImport === importRecord.id && importProgress && (
+                    <div className="mt-4 pt-4 border-t space-y-4">
+                      {/* Progress Bar */}
+                      {importProgress.status === 'processing' && (
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span>Processing...</span>
+                            <span>{importProgress.progress}%</span>
+                          </div>
+                          <Progress value={importProgress.progress} className="w-full" />
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {importProgress.processedRecords} of {importProgress.totalRecords} records processed
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Summary Stats */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                            {importProgress.processedRecords || 0}
+                          </div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Processed</div>
+                        </div>
+                        <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                            {importProgress.totalRecords || 0}
+                          </div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Total</div>
+                        </div>
+                        <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                          <div className="text-2xl font-bold text-red-600">
+                            {importProgress.errorRecords || 0}
+                          </div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Errors</div>
+                        </div>
+                        <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                          <div className="text-2xl font-bold text-yellow-600">
+                            {importProgress.duplicateRecords || 0}
+                          </div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Duplicates</div>
+                        </div>
+                      </div>
+
+                      {/* Error Log */}
+                      {importProgress.errorLog && importProgress.errorLog.length > 0 && (
+                        <div className="space-y-2">
+                          <h4 className="font-medium text-red-600">Error Log</h4>
+                          <div className="bg-red-50 dark:bg-red-950 p-3 rounded text-sm max-h-40 overflow-y-auto">
+                            {importProgress.errorLog.map((error, index) => (
+                              <div key={index} className="mb-1 text-red-700 dark:text-red-300">
+                                {error}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

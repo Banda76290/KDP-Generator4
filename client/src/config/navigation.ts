@@ -4,6 +4,7 @@ import {
   FolderOpen, 
   TrendingUp, 
   Upload, 
+  Download,
   Bot, 
   Crown, 
   Settings,
@@ -32,6 +33,7 @@ export const navigation: NavigationItem[] = [
   { name: "Series", href: "/manage-series", icon: Tags },
   { name: "Sales Analytics", href: "/analytics", icon: TrendingUp },
   { name: "KDP Reports", href: "/kdp-reports", icon: Upload },
+  { name: "Import Management", href: "/import-management", icon: Download, badge: "NEW" },
   { name: "AI Assistant", href: "/ai-assistant", icon: Bot, badge: "PRO" },
   { name: "AI Functions", href: "/ai-functions", icon: Zap, badge: "NEW" },
 ];
