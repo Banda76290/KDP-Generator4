@@ -51,12 +51,14 @@ export default function ExchangeRates() {
   // Group currencies by major/minor for better organization
   const majorCurrencies = ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'CHF', 'CAD', 'AUD'];
   const rates = Array.isArray(exchangeRates) ? exchangeRates : [];
+  
+  // Get the most recent update time from the rates
+  const lastUpdated = rates.length > 0 && rates[0]?.updatedAt ? 
+    new Date(rates[0].updatedAt) : new Date();
+  
   // Add USD with rate 1.0 since it's our base currency and filter out duplicate
-  const usdRate = { currency: 'USD', rate: '1.00000000', updatedAt: new Date().toISOString() };
-  const filteredRates = rates.filter((rate: any) => rate.currency !== 'USD').map((rate: any) => ({
-    ...rate,
-    updatedAt: rate.updatedAt || new Date().toISOString() // Add current timestamp if missing
-  }));
+  const usdRate = { currency: 'USD', rate: '1.00000000', updatedAt: lastUpdated.toISOString() };
+  const filteredRates = rates.filter((rate: any) => rate.currency !== 'USD');
   const allRates = [usdRate, ...filteredRates];
   const majorRates = allRates.filter((rate: any) => majorCurrencies.includes(rate.currency));
   const otherRates = filteredRates.filter((rate: any) => !majorCurrencies.includes(rate.currency));
@@ -118,10 +120,21 @@ export default function ExchangeRates() {
           <div className="space-y-8">
             {/* Major Currencies */}
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <TrendingUp className="h-5 w-5" />
-                <h2 className="text-xl font-semibold">Major Currencies</h2>
-                <Badge variant="secondary">{majorRates.length}</Badge>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  <h2 className="text-xl font-semibold">Major Currencies</h2>
+                  <Badge variant="secondary">{majorRates.length}</Badge>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Clock className="h-4 w-4" />
+                  <span>Last updated: {lastUpdated.toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}</span>
+                </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -151,20 +164,7 @@ export default function ExchangeRates() {
                             {parseFloat(rate.rate).toFixed(4)}
                           </span>
                         </div>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            Updated:
-                          </span>
-                          <span className="text-muted-foreground">
-                            {new Date(rate.updatedAt).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </span>
-                        </div>
+
                       </div>
                     </CardContent>
                   </Card>
@@ -175,10 +175,21 @@ export default function ExchangeRates() {
             {/* Other Currencies */}
             {otherRates.length > 0 && (
               <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <Globe className="h-5 w-5" />
-                  <h2 className="text-xl font-semibold">Other Currencies</h2>
-                  <Badge variant="secondary">{otherRates.length}</Badge>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-5 w-5" />
+                    <h2 className="text-xl font-semibold">Other Currencies</h2>
+                    <Badge variant="secondary">{otherRates.length}</Badge>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Clock className="h-4 w-4" />
+                    <span>Last updated: {lastUpdated.toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}</span>
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -191,9 +202,7 @@ export default function ExchangeRates() {
                             {parseFloat(rate.rate).toFixed(4)}
                           </Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          Updated: {new Date(rate.updatedAt).toLocaleDateString('en-US')}
-                        </p>
+
                       </CardContent>
                     </Card>
                   ))}
