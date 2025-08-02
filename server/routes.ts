@@ -2693,6 +2693,82 @@ Please respond with only a JSON object containing the translated fields. For key
     }
   });
 
+  // Admin Cron Management Routes
+  app.get('/api/admin/cron/jobs', isAuthenticated, async (req, res) => {
+    try {
+      // Mock cron jobs data - in a real implementation, this would fetch from a cron manager
+      const cronJobs = [
+        {
+          id: 'exchange-rates-update',
+          name: 'Exchange Rates Update',
+          description: 'Updates currency exchange rates from external API',
+          schedule: '0 0 * * *', // Daily at midnight
+          enabled: true,
+          lastRun: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+          nextRun: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          status: 'running'
+        }
+      ];
+      res.json(cronJobs);
+    } catch (error) {
+      console.error('Error fetching cron jobs:', error);
+      res.status(500).json({ message: 'Failed to fetch cron jobs' });
+    }
+  });
+
+  app.get('/api/admin/cron/logs', isAuthenticated, async (req, res) => {
+    try {
+      // Mock cron logs - in a real implementation, this would fetch from log storage
+      const logs = [
+        {
+          job: 'Exchange Rates Update',
+          level: 'info',
+          message: 'Successfully updated 163 exchange rates',
+          timestamp: new Date().toISOString()
+        }
+      ];
+      res.json(logs);
+    } catch (error) {
+      console.error('Error fetching cron logs:', error);
+      res.status(500).json({ message: 'Failed to fetch cron logs' });
+    }
+  });
+
+  app.post('/api/admin/cron/jobs/:jobId/toggle', isAuthenticated, async (req, res) => {
+    try {
+      const { jobId } = req.params;
+      const { enabled } = req.body;
+      
+      // Mock toggle functionality
+      console.log(`[CRON] Job ${jobId} ${enabled ? 'enabled' : 'disabled'}`);
+      
+      res.json({ message: `Job ${enabled ? 'enabled' : 'disabled'} successfully` });
+    } catch (error) {
+      console.error('Error toggling cron job:', error);
+      res.status(500).json({ message: 'Failed to toggle cron job' });
+    }
+  });
+
+  app.post('/api/admin/cron/jobs/:jobId/run', isAuthenticated, async (req, res) => {
+    try {
+      const { jobId } = req.params;
+      
+      // Run specific job manually
+      if (jobId === 'exchange-rates-update') {
+        console.log('[CRON] Manual exchange rate update requested');
+        await cronService.forceUpdate();
+        
+        systemLog('Exchange rates updated manually', 'info', 'EXCHANGE');
+        res.json({ message: 'Exchange rates updated successfully' });
+      } else {
+        res.status(404).json({ message: 'Job not found' });
+      }
+    } catch (error) {
+      console.error('Error running cron job:', error);
+      res.status(500).json({ message: 'Failed to run cron job' });
+    }
+  });
+
   app.post("/api/convert-currency", isAuthenticated, async (req, res) => {
     try {
       const { amount, fromCurrency, toCurrency } = req.body;

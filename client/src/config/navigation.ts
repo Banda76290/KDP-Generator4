@@ -51,6 +51,7 @@ export const adminNavigation: NavigationItem[] = [
   { name: "AI Configuration", href: "/admin/ai-config", icon: Bot },
   { name: "Prompts IA", href: "/admin/prompts", icon: MessageSquare },
   { name: "Variables IA", href: "/admin/ai-variables", icon: Variable },
+  { name: "Cron Jobs", href: "/admin/cron", icon: Bot },
   { name: "Système", href: "/admin/system", icon: Server },
 ];
 

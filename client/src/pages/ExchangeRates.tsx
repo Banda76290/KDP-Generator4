@@ -49,10 +49,14 @@ export default function ExchangeRates() {
   };
 
   // Group currencies by major/minor for better organization
-  const majorCurrencies = ['USD', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF'];
+  const majorCurrencies = ['EUR', 'USD', 'GBP', 'JPY', 'CNY', 'CHF', 'CAD', 'AUD'];
   const rates = Array.isArray(exchangeRates) ? exchangeRates : [];
-  const majorRates = rates.filter((rate: any) => majorCurrencies.includes(rate.currency));
-  const otherRates = rates.filter((rate: any) => !majorCurrencies.includes(rate.currency));
+  // Add EUR with rate 1.0 since it's our base currency and filter out duplicate
+  const eurRate = { currency: 'EUR', rate: '1.00000000', updatedAt: new Date().toISOString() };
+  const filteredRates = rates.filter((rate: any) => rate.currency !== 'EUR');
+  const allRates = [eurRate, ...filteredRates];
+  const majorRates = allRates.filter((rate: any) => majorCurrencies.includes(rate.currency));
+  const otherRates = filteredRates.filter((rate: any) => !majorCurrencies.includes(rate.currency));
 
   if (error) {
     return (
