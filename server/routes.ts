@@ -2678,6 +2678,24 @@ Please respond with only a JSON object containing the translated fields. For key
     }
   });
 
+  // NEW: Detailed analytics using correct method (per-sheet extraction)
+  app.get('/api/analytics/detailed', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const { analyticsDetailedService } = await import('./services/analyticsDetailedService');
+      const overview = await analyticsDetailedService.getDetailedAnalyticsOverview(userId);
+      
+      res.json(overview);
+    } catch (error: any) {
+      console.error('Error fetching detailed analytics:', error);
+      res.status(500).json({ error: 'Failed to fetch detailed analytics', details: error.message });
+    }
+  });
+
   app.get('/api/analytics/sales-trends', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.user?.claims?.sub;

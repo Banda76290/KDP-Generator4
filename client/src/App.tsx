@@ -12,6 +12,7 @@ import Projects from "@/pages/projects";
 import Books from "@/pages/books";
 import Analytics from "@/pages/analytics";
 import AnalyticsComparison from "@/pages/analytics-comparison";
+import AnalyticsDetailed from "@/pages/analytics-detailed";
 import KDPReports from "@/pages/kdp-reports";
 import AIAssistant from "@/pages/ai-assistant";
 import Subscription from "@/pages/subscription";
@@ -61,6 +62,7 @@ function Router() {
       <Route path="/series-edit/:seriesId" component={SeriesEdit} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/analytics-comparison" component={AnalyticsComparison} />
+      <Route path="/analytics-detailed" component={AnalyticsDetailed} />
       <Route path="/exchange-rates" component={ExchangeRates} />
       <Route path="/kdp-reports" component={KDPReports} />
       <Route path="/import-management" component={ImportManagement} />
