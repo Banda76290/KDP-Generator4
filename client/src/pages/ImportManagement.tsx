@@ -99,8 +99,12 @@ export default function ImportManagement() {
       const importId = data.import?.id;
       if (importId) {
         setExpandedImport(importId);
-        // Wait a moment for the UI to update, then start monitoring
-        setTimeout(() => monitorImportProgress(importId), 500);
+        // Start monitoring immediately after expansion
+        setTimeout(() => {
+          // Force refresh the progress query first, then start monitoring
+          queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports', importId, 'progress'] });
+          monitorImportProgress(importId);
+        }, 1000);
       }
     },
     onError: (error: any) => {
@@ -219,25 +223,32 @@ export default function ImportManagement() {
   const monitorImportProgress = async (importId: string) => {
     const checkProgress = async () => {
       try {
-        // Refresh progress data
-        const result = await refetchProgress();
-        const progress = result.data;
+        // Refresh progress data manually for the specific import
+        const progressResult = await queryClient.fetchQuery({
+          queryKey: ['/api/kdp-imports', importId, 'progress'],
+          queryFn: () => apiRequest(`/api/kdp-imports/${importId}/progress`),
+        });
         
         // If still processing, schedule next check
-        if (progress && progress.status === 'processing') {
-          // Wait 3 seconds before next check
-          setTimeout(checkProgress, 3000);
-        } else if (progress && (progress.status === 'completed' || progress.status === 'failed')) {
+        if (progressResult && progressResult.status === 'processing') {
+          // Wait 3 seconds before next check, but only if still expanded
+          setTimeout(() => {
+            if (expandedImport === importId) {
+              checkProgress();
+            }
+          }, 3000);
+        } else if (progressResult && (progressResult.status === 'completed' || progressResult.status === 'failed')) {
           // Import finished, refresh the import list to show final status
           queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports', importId, 'progress'] });
           
           // Show completion notification
-          if (progress.status === 'completed') {
+          if (progressResult.status === 'completed') {
             toast({
               title: "Import completed",
-              description: `Successfully processed ${progress.processedRecords} records`,
+              description: `Successfully processed ${progressResult.processedRecords} records`,
             });
-          } else if (progress.status === 'failed') {
+          } else if (progressResult.status === 'failed') {
             toast({
               title: "Import failed",
               description: "Check the error log for details",
@@ -250,10 +261,8 @@ export default function ImportManagement() {
       }
     };
 
-    // Start monitoring only if the import is still expanded
-    if (expandedImport === importId) {
-      await checkProgress();
-    }
+    // Start monitoring immediately
+    await checkProgress();
   };
 
   return (
