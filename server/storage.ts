@@ -1995,6 +1995,16 @@ export class DatabaseStorage implements IStorage {
       .delete(kdpImportData)
       .where(eq(kdpImportData.importId, importId));
   }
+
+  async getAllKdpImportDataForUser(userId: string): Promise<KdpImportData[]> {
+    return await db
+      .select()
+      .from(kdpImportData)
+      .where(and(
+        eq(kdpImportData.userId, userId),
+        eq(kdpImportData.isDuplicate, false)
+      ));
+  }
   // KDP Analytics methods - using real imported data with currency handling
   async getAnalyticsOverview(userId: string): Promise<any> {
     const totalImports = await db.select({
@@ -2016,6 +2026,7 @@ export class DatabaseStorage implements IStorage {
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
+      eq(kdpImportData.isDuplicate, false),
       isNotNull(kdpImportData.royalty),
       sql`${kdpImportData.royalty} > 0`
     ))
@@ -2055,6 +2066,7 @@ export class DatabaseStorage implements IStorage {
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
+      eq(kdpImportData.isDuplicate, false),
       sql`${kdpImports.createdAt} >= current_date - interval '${days} days'`,
       isNotNull(kdpImports.createdAt)
     ))
@@ -2091,6 +2103,7 @@ export class DatabaseStorage implements IStorage {
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
+      eq(kdpImportData.isDuplicate, false),
       isNotNull(kdpImportData.asin),
       isNotNull(kdpImportData.title),
       sql`${kdpImportData.royalty} > 0`
@@ -2124,6 +2137,7 @@ export class DatabaseStorage implements IStorage {
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
+      eq(kdpImportData.isDuplicate, false),
       isNotNull(kdpImportData.marketplace),
       sql`${kdpImportData.marketplace} != ''`,
       sql`${kdpImportData.royalty} > 0`

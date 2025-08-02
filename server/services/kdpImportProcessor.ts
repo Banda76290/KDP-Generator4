@@ -88,16 +88,23 @@ export class KdpImportProcessor {
 
       await this.updateProgress('Checking for duplicates...', 75, processedRecords, parsedData.summary.estimatedRecords);
 
-      // Check for duplicates and mark them
-      const duplicates = this.findDuplicates(allImportData);
+      // Check for duplicates against existing data and within current import
+      const duplicates = await this.findDuplicatesInDatabase(allImportData);
       duplicates.forEach(index => {
         allImportData[index].isDuplicate = true;
       });
 
       await this.updateProgress('Saving import data...', 85, processedRecords, parsedData.summary.estimatedRecords);
 
-      // Batch insert the import data
-      const savedData = await storage.createKdpImportData(allImportData);
+      // Only insert non-duplicate records
+      const nonDuplicateData = allImportData.filter(record => !record.isDuplicate);
+      const savedData = await storage.createKdpImportData(nonDuplicateData);
+      
+      // Log duplicate information
+      const duplicateCount = allImportData.length - nonDuplicateData.length;
+      if (duplicateCount > 0) {
+        console.log(`[IMPORT ${this.importId.slice(0, 8)}] Skipped ${duplicateCount} duplicate records`);
+      }
 
       await this.updateProgress('Finalizing import...', 95, processedRecords, parsedData.summary.estimatedRecords);
 
@@ -109,7 +116,7 @@ export class KdpImportProcessor {
         errorRecords: errors.length,
         duplicateRecords: duplicates.length,
         errorLog: errors,
-        completedAt: new Date(),
+        // completedAt: new Date(), // This field doesn't exist in the schema
         mappingConfig: Object.values(parsedData.sheets).map(sheet => ({
           sheetName: sheet.headers,
           mapping: KdpImportService.createColumnMapping(sheet.headers)
@@ -132,12 +139,34 @@ export class KdpImportProcessor {
   }
 
   /**
-   * Find duplicate records based on ASIN/ISBN and sales date
+   * Find duplicate records by checking against existing database data
    */
-  private findDuplicates(importData: InsertKdpImportData[]): number[] {
+  private async findDuplicatesInDatabase(importData: InsertKdpImportData[]): Promise<number[]> {
     const duplicateIndexes: number[] = [];
     const seen = new Set<string>();
 
+    // Get all existing records for this user to check for duplicates
+    const existingRecords = await storage.getAllKdpImportDataForUser(this.userId);
+    
+    // Create a set of existing unique keys
+    const existingKeys = new Set<string>();
+    existingRecords.forEach(record => {
+      const identifiers = [
+        record.asin,
+        record.isbn,
+        record.title,
+        record.marketplace,
+        record.salesDate?.toString(),
+        record.format
+      ].filter(Boolean);
+      
+      if (identifiers.length > 0) {
+        const uniqueKey = identifiers.join('|').toLowerCase();
+        existingKeys.add(uniqueKey);
+      }
+    });
+
+    // Check each import record for duplicates
     importData.forEach((record, index) => {
       // Create unique key based on identifiers
       const identifiers = [
@@ -145,7 +174,7 @@ export class KdpImportProcessor {
         record.isbn,
         record.title,
         record.marketplace,
-        record.salesDate,
+        record.salesDate?.toString(),
         record.format
       ].filter(Boolean);
 
@@ -153,13 +182,21 @@ export class KdpImportProcessor {
 
       const uniqueKey = identifiers.join('|').toLowerCase();
 
-      if (seen.has(uniqueKey)) {
+      // Check against existing data in database
+      if (existingKeys.has(uniqueKey)) {
         duplicateIndexes.push(index);
+        console.log(`[IMPORT ${this.importId.slice(0, 8)}] Found duplicate record at index ${index}: ${uniqueKey}`);
+      }
+      // Check against already processed records in current import
+      else if (seen.has(uniqueKey)) {
+        duplicateIndexes.push(index);
+        console.log(`[IMPORT ${this.importId.slice(0, 8)}] Found duplicate within import at index ${index}: ${uniqueKey}`);
       } else {
         seen.add(uniqueKey);
       }
     });
 
+    console.log(`[IMPORT ${this.importId.slice(0, 8)}] Found ${duplicateIndexes.length} duplicate records out of ${importData.length} total records`);
     return duplicateIndexes;
   }
 
@@ -210,7 +247,7 @@ export class KdpImportProcessor {
         errors.push(`Row ${index + 1}: Missing title, ASIN, and ISBN - at least one identifier is required`);
       }
 
-      if (record.royalty && record.royalty < 0) {
+      if (record.royalty && Number(record.royalty) < 0) {
         warnings.push(`Row ${index + 1}: Negative royalty amount (${record.royalty})`);
       }
 
