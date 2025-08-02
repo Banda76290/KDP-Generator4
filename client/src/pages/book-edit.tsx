@@ -2430,20 +2430,42 @@ export default function EditBook() {
                             >
                               Edit author details
                             </Button>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                // Clear author selection and form fields
-                                setSelectedAuthorId("");
-                                form.setValue("authorPrefix", "");
-                                form.setValue("authorFirstName", "");
-                                form.setValue("authorMiddleName", "");
-                                form.setValue("authorLastName", "");
-                                form.setValue("authorSuffix", "");
-                              }}
-                            >Remove from author</Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                >
+                                  Remove from author
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Remove author from book</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to remove this author from the book? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => {
+                                      // Clear author selection and form fields
+                                      setSelectedAuthorId("");
+                                      form.setValue("authorPrefix", "");
+                                      form.setValue("authorFirstName", "");
+                                      form.setValue("authorMiddleName", "");
+                                      form.setValue("authorLastName", "");
+                                      form.setValue("authorSuffix", "");
+                                    }}
+                                    className="bg-destructive hover:bg-destructive/90"
+                                  >
+                                    Remove from author
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </div>
                         </div>
                       </div>)
