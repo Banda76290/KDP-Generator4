@@ -2451,13 +2451,15 @@ export default function EditBook() {
                                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                                   <AlertDialogAction
                                     onClick={() => {
-                                      // Clear author selection and form fields
+                                      // Clear author selection and form fields to return to selection interface
                                       setSelectedAuthorId("");
                                       form.setValue("authorPrefix", "");
                                       form.setValue("authorFirstName", "");
                                       form.setValue("authorMiddleName", "");
                                       form.setValue("authorLastName", "");
                                       form.setValue("authorSuffix", "");
+                                      // This will automatically switch back to the author selection interface
+                                      // because selectedAuthorId is now empty, triggering the conditional rendering
                                     }}
                                     className="bg-destructive hover:bg-destructive/90"
                                   >
