@@ -30,6 +30,7 @@ export default function Projects() {
   const [deleteAssociatedBooks, setDeleteAssociatedBooks] = useState(false);
   const [bookToTranslate, setBookToTranslate] = useState<any | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
 
   // Language options for translation
   const LANGUAGE_OPTIONS = [
@@ -295,6 +296,18 @@ export default function Projects() {
     }
   };
 
+  const toggleProjectExpansion = (projectId: string) => {
+    setExpandedProjects(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(projectId)) {
+        newSet.delete(projectId);
+      } else {
+        newSet.add(projectId);
+      }
+      return newSet;
+    });
+  };
+
   return (
     <Layout>
       <TooltipProvider>
@@ -475,7 +488,9 @@ export default function Projects() {
                             <BookOpen className="w-4 h-4" />
                             Books ({project.books.length})
                           </div>
-                          {project.books.map((book: any) => (
+                          {project.books
+                            .slice(0, expandedProjects.has(project.id) ? project.books.length : 3)
+                            .map((book: any) => (
                             <div key={book.id} className="border rounded-lg p-3 bg-gray-50 space-y-2">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
@@ -561,6 +576,18 @@ export default function Projects() {
                               </div>
                             </div>
                           ))}
+                          
+                          {/* See More / Show Less Button */}
+                          {project.books.length > 3 && (
+                            <div className="text-center pt-2">
+                              <button
+                                onClick={() => toggleProjectExpansion(project.id)}
+                                className="text-sm text-gray-600 hover:text-blue-600 transition-colors cursor-pointer"
+                              >
+                                {expandedProjects.has(project.id) ? 'Show Less' : 'See More'}
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <div className="text-center py-4 text-gray-500">
