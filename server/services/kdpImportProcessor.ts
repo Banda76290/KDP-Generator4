@@ -151,17 +151,17 @@ export class KdpImportProcessor {
     // Create a set of existing unique keys
     const existingKeys = new Set<string>();
     existingRecords.forEach(record => {
-      const identifiers = [
+      // Use same logic: only core identifiers, not date
+      const coreIdentifiers = [
         record.asin,
         record.isbn,
         record.title,
         record.marketplace,
-        record.salesDate?.toString(),
         record.format
       ].filter(Boolean);
       
-      if (identifiers.length > 0) {
-        const uniqueKey = identifiers.join('|').toLowerCase();
+      if (coreIdentifiers.length > 0) {
+        const uniqueKey = coreIdentifiers.join('|').toLowerCase();
         existingKeys.add(uniqueKey);
       }
     });
@@ -169,18 +169,20 @@ export class KdpImportProcessor {
     // Check each import record for duplicates
     importData.forEach((record, index) => {
       // Create unique key based on identifiers
-      const identifiers = [
+      // Only include salesDate if it exists, otherwise use core identifiers only
+      const coreIdentifiers = [
         record.asin,
         record.isbn,
         record.title,
         record.marketplace,
-        record.salesDate?.toString(),
         record.format
       ].filter(Boolean);
 
-      if (identifiers.length === 0) return;
+      const uniqueKey = coreIdentifiers.length > 0 
+        ? coreIdentifiers.join('|').toLowerCase()
+        : null;
 
-      const uniqueKey = identifiers.join('|').toLowerCase();
+      if (!uniqueKey) return;
 
       // Check against existing data in database
       if (existingKeys.has(uniqueKey)) {
