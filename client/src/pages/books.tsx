@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -23,7 +23,7 @@ import {
   BookOpen, 
   Edit, 
   Copy, 
-  MoreVertical, 
+ 
   AlertTriangle,
   Plus,
   Trash2,
@@ -491,47 +491,50 @@ function BooksContent() {
                       </Tooltip>
                     )}
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link href={`/books/edit/${book.id}`} className="flex items-center">
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => duplicateBookMutation.mutate(book.id)}
-                        disabled={duplicateBookMutation.isPending}
-                      >
-                        <Copy className="h-4 w-4 mr-2" />
-                        Duplicate
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setBookToTranslate(book);
-                          setSelectedLanguage("");
-                        }}
-                        disabled={translateBookMutation.isPending}
-                      >
-                        <Languages className="h-4 w-4 mr-2" />
-                        Auto-Translate
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => setBookToDelete(book)}
-                        className="text-destructive focus:text-destructive"
-                        disabled={deleteBookMutation.isPending}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <div className="flex flex-col gap-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-7 px-2 text-xs"
+                      onClick={() => setLocation(`/books/edit/${book.id}`)}
+                    >
+                      <Edit className="h-3 w-3 mr-1" />
+                      Edit
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-7 px-2 text-xs"
+                      onClick={() => duplicateBookMutation.mutate(book.id)}
+                      disabled={duplicateBookMutation.isPending}
+                    >
+                      <Copy className="h-3 w-3 mr-1" />
+                      Duplicate
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-7 px-2 text-xs"
+                      onClick={() => {
+                        setBookToTranslate(book);
+                        setSelectedLanguage("");
+                      }}
+                      disabled={translateBookMutation.isPending}
+                    >
+                      <Languages className="h-3 w-3 mr-1" />
+                      Translate
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      size="sm" 
+                      className="h-7 px-2 text-xs"
+                      onClick={() => setBookToDelete(book)}
+                      disabled={deleteBookMutation.isPending}
+                    >
+                      <Trash2 className="h-3 w-3 mr-1" />
+                      Delete
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
