@@ -43,6 +43,7 @@ The application follows a modern full-stack architecture with clear separation b
 - **Persistent Logging System**: Server-side log collection with real-time display, intelligent user interaction detection, pause/resume controls, scroll management, and permanent log clearing functionality with optimized performance.
 - **Development-to-Production Sync**: Comprehensive synchronization system with multiple export options (direct sync, SQL copy-paste, SQL file download, JSON export) for transferring marketplace categories from development to production environments with detailed logging and error handling. Manual "Copier SQL" method confirmed working as reliable alternative when direct sync fails due to CORS/authentication issues.
 - **AI Prompt Integration System**: Complete integration between AI prompt administration and execution systems. Database-configured prompts automatically appear in AI Functions interface and are used for content generation. Hybrid system combines database templates with static fallback functions, with database templates taking priority.
+- **Security Enhancements**: XSS vulnerability patched in author biography editor (August 2025). Replaced unsafe innerHTML assignment with DOMParser for secure HTML sanitization without script execution risk.
 
 ## External Dependencies
 

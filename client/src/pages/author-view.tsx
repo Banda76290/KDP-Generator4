@@ -126,13 +126,15 @@ export default function AuthorViewPage() {
   const cleanHTML = (html: string): string => {
     if (!html) return '';
     
-    const temp = document.createElement('div');
-    temp.innerHTML = html;
+    // Use DOMParser to safely parse HTML without executing scripts
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
     
-    const scripts = temp.querySelectorAll('script, iframe, object, embed');
+    // Remove dangerous elements
+    const scripts = doc.querySelectorAll('script, iframe, object, embed');
     scripts.forEach(script => script.remove());
     
-    const allElements = temp.querySelectorAll('*');
+    const allElements = doc.querySelectorAll('*');
     allElements.forEach(element => {
       const safeAttributes = ['href', 'title', 'alt', 'class'];
       const attributesToRemove: string[] = [];
@@ -153,7 +155,7 @@ export default function AuthorViewPage() {
       }
     });
     
-    return temp.innerHTML;
+    return doc.body.innerHTML;
   };
 
   // Add CSS for the biography editor
