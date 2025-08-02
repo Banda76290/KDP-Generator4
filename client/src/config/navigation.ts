@@ -29,7 +29,7 @@ export const navigation: NavigationItem[] = [
   { name: "Projects", href: "/projects", icon: FolderOpen },
   { name: "Books", href: "/books", icon: FileText },
   { name: "Authors", href: "/authors", icon: User },
-  { name: "Manage Series", href: "/manage-series", icon: Tags },
+  { name: "Series", href: "/manage-series", icon: Tags },
   { name: "Sales Analytics", href: "/analytics", icon: TrendingUp },
   { name: "KDP Reports", href: "/kdp-reports", icon: Upload },
   { name: "AI Assistant", href: "/ai-assistant", icon: Bot, badge: "PRO" },
