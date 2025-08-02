@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { exchangeRateService } from "./services/exchangeRateService";
+import { cronService } from "./services/cronService";
 import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema, insertAuthorSchema, insertAuthorBiographySchema, insertContentRecommendationSchema, insertAiPromptTemplateSchema, insertKdpImportSchema, insertKdpImportDataSchema } from "@shared/schema";
 import { aiService } from "./services/aiService";
 import { parseKDPReport } from "./services/kdpParser";
@@ -2665,6 +2667,56 @@ Please respond with only a JSON object containing the translated fields. For key
     } catch (error: any) {
       console.error('Error getting marketplace breakdown:', error);
       res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Exchange rate endpoints
+  app.get("/api/exchange-rates", isAuthenticated, async (req, res) => {
+    try {
+      const currencies = await exchangeRateService.getSupportedCurrencies();
+      res.json(currencies);
+    } catch (error) {
+      console.error("Error fetching exchange rates:", error);
+      res.status(500).json({ message: "Failed to fetch exchange rates" });
+    }
+  });
+
+  app.post("/api/exchange-rates/update", isAuthenticated, async (req, res) => {
+    try {
+      await cronService.forceUpdate();
+      systemLog('Exchange rates updated manually', 'info', 'EXCHANGE');
+      res.json({ message: "Exchange rates updated successfully" });
+    } catch (error) {
+      console.error("Error updating exchange rates:", error);
+      systemLog(`Exchange rate update failed: ${error}`, 'error', 'EXCHANGE');
+      res.status(500).json({ message: "Failed to update exchange rates" });
+    }
+  });
+
+  app.post("/api/convert-currency", isAuthenticated, async (req, res) => {
+    try {
+      const { amount, fromCurrency, toCurrency } = req.body;
+      
+      if (!amount || !fromCurrency || !toCurrency) {
+        return res.status(400).json({ message: "Missing required fields: amount, fromCurrency, toCurrency" });
+      }
+
+      const convertedAmount = await exchangeRateService.convertCurrency(
+        parseFloat(amount),
+        fromCurrency,
+        toCurrency
+      );
+      
+      res.json({ 
+        originalAmount: parseFloat(amount),
+        fromCurrency,
+        toCurrency,
+        convertedAmount,
+        rate: convertedAmount / parseFloat(amount)
+      });
+    } catch (error) {
+      console.error("Error converting currency:", error);
+      res.status(500).json({ message: "Failed to convert currency" });
     }
   });
 

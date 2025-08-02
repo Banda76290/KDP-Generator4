@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -83,6 +83,7 @@ const MARKETPLACE_COLORS = {
 export default function Analytics() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
+  const queryClient = useQueryClient();
   const [selectedPeriod, setSelectedPeriod] = useState("30");
 
   // Analytics data queries
@@ -103,6 +104,12 @@ export default function Analytics() {
 
   const { data: marketplaceData, isLoading: marketplaceLoading } = useQuery<MarketplaceData[]>({
     queryKey: ['/api/analytics/marketplace-breakdown'],
+    enabled: isAuthenticated,
+  });
+
+  // Exchange rates data and management
+  const { data: exchangeRates, isLoading: ratesLoading } = useQuery({
+    queryKey: ["/api/exchange-rates"],
     enabled: isAuthenticated,
   });
 
@@ -147,6 +154,38 @@ export default function Analytics() {
     } catch (error) {
       // Fallback for any formatting errors
       return `${amount.toFixed(2)} ${currency}`;
+    }
+  };
+
+  // Format currency converted to EUR for unified display  
+  const formatConvertedCurrency = (amount: number): string => {
+    return formatCurrency(amount, 'EUR');
+  };
+
+  // Function to update exchange rates manually
+  const updateExchangeRates = async () => {
+    try {
+      const response = await fetch('/api/exchange-rates/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        toast({
+          title: "Taux de change mis à jour",
+          description: "Les taux de change ont été actualisés avec succès.",
+        });
+        // Refetch exchange rates data
+        queryClient.invalidateQueries({ queryKey: ["/api/exchange-rates"] });
+      } else {
+        throw new Error('Failed to update exchange rates');
+      }
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour les taux de change.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -266,12 +305,13 @@ export default function Analytics() {
       </div>
 
       <Tabs defaultValue="trends" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="trends">Tendances</TabsTrigger>
           <TabsTrigger value="currencies">Devises</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="marketplace">Marketplaces</TabsTrigger>
           <TabsTrigger value="books">Top Livres</TabsTrigger>
+          <TabsTrigger value="exchange">Taux de Change</TabsTrigger>
         </TabsList>
 
         <TabsContent value="trends" className="space-y-6">
@@ -557,6 +597,129 @@ export default function Analytics() {
                   </BarChart>
                 </ResponsiveContainer>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Exchange Rates Tab */}
+        <TabsContent value="exchange" className="space-y-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  Taux de Change
+                </CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Gestion des taux de conversion monétaire pour les analytics unifiés
+                </p>
+              </div>
+              <Button 
+                onClick={updateExchangeRates}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Actualiser
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {ratesLoading ? (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">Chargement des taux de change...</p>
+                  </div>
+                ) : exchangeRates && exchangeRates.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {exchangeRates.map((rate: any) => (
+                      <Card key={rate.currency} className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">{rate.currency}</p>
+                            <p className="text-sm text-muted-foreground">
+                              Dernière mise à jour: {new Date(rate.date).toLocaleDateString('fr-FR')}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-lg">
+                              {parseFloat(rate.rate).toFixed(4)}
+                            </p>
+                            <p className="text-xs text-muted-foreground">EUR → {rate.currency}</p>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">
+                      Aucun taux de change disponible. Cliquez sur "Actualiser" pour charger les données.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Currency Converter Tool */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                Convertisseur de Devises
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div>
+                  <label className="text-sm font-medium">Montant</label>
+                  <input 
+                    type="number" 
+                    placeholder="100.00"
+                    className="w-full mt-1 px-3 py-2 border rounded-md"
+                    id="convert-amount"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">De</label>
+                  <Select>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="EUR" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {exchangeRates?.map((rate: any) => (
+                        <SelectItem key={rate.currency} value={rate.currency}>
+                          {rate.currency}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Vers</label>
+                  <Select>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="USD" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {exchangeRates?.map((rate: any) => (
+                        <SelectItem key={rate.currency} value={rate.currency}>
+                          {rate.currency}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button className="w-full">
+                  Convertir
+                </Button>
+              </div>
+              <div className="mt-4 p-4 bg-muted rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  Résultat de la conversion s'affichera ici
+                </p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
