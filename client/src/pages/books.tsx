@@ -121,6 +121,7 @@ function BooksContent() {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterFormat, setFilterFormat] = useState<string>("all");
   const [filterAssignment, setFilterAssignment] = useState<string>("all");
+  const [filterLanguage, setFilterLanguage] = useState<string>("all");
   const [bookToTranslate, setBookToTranslate] = useState<Book | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   const [sortBy, setSortBy] = useState<SortOption>("title-asc");
@@ -246,8 +247,9 @@ function BooksContent() {
       const matchesAssignment = filterAssignment === "all" ||
                                (filterAssignment === "assigned" && book.projectId) ||
                                (filterAssignment === "unassigned" && !book.projectId);
+      const matchesLanguage = filterLanguage === "all" || book.language === filterLanguage;
       
-      return matchesSearch && matchesStatus && matchesFormat && matchesAssignment;
+      return matchesSearch && matchesStatus && matchesFormat && matchesAssignment && matchesLanguage;
     })
     .sort((a: Book, b: Book) => {
       const getLastModifiedDate = (book: Book) => {
@@ -349,7 +351,7 @@ function BooksContent() {
       </div>
 
       {/* Filters and Search */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
@@ -393,6 +395,20 @@ function BooksContent() {
             <SelectItem value="all">All Books</SelectItem>
             <SelectItem value="assigned">Assigned to Project</SelectItem>
             <SelectItem value="unassigned">Unassigned</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={filterLanguage} onValueChange={setFilterLanguage}>
+          <SelectTrigger>
+            <SelectValue placeholder="Filter by language" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Languages</SelectItem>
+            {languages.map((language) => (
+              <SelectItem key={language} value={language}>
+                {language}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
