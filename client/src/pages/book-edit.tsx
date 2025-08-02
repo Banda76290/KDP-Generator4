@@ -2424,7 +2424,7 @@ export default function EditBook() {
                                 if (selectedAuthor) {
                                   sessionStorage.setItem('returnToBookEdit', bookId || 'new');
                                   saveFormDataToSession();
-                                  window.location.href = `/authors/edit/${selectedAuthor.id}`;
+                                  setLocation(`/authors/${selectedAuthor.id}`);
                                 }
                               }}
                             >

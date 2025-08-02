@@ -36,7 +36,6 @@ import SeriesCreate from "@/pages/series-create";
 import SeriesSetup from "@/pages/series-setup";
 import AuthorsListPage from "@/pages/authors-list";
 import AuthorCreatePage from "@/pages/author-create";
-import AuthorEditPage from "@/pages/author-edit";
 import AuthorViewPage from "@/pages/author-view";
 
 function Router() {
@@ -50,7 +49,6 @@ function Router() {
       <Route path="/books" component={Books} />
       <Route path="/authors" component={AuthorsListPage} />
       <Route path="/authors/create" component={AuthorCreatePage} />
-      <Route path="/authors/edit/:authorId" component={AuthorEditPage} />
       <Route path="/authors/:authorId" component={AuthorViewPage} />
       <Route path="/manage-series" component={ManageSeries} />
       <Route path="/series-create" component={SeriesCreate} />
