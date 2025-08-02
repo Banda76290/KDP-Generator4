@@ -596,6 +596,7 @@ export default function EditBook() {
   const [isPartOfSeries, setIsPartOfSeries] = useState(false);
   const [hasRestoredFromStorage, setHasRestoredFromStorage] = useState(false);
   const [selectedAuthorId, setSelectedAuthorId] = useState<string>("");
+  const [authorExplicitlyRemoved, setAuthorExplicitlyRemoved] = useState<boolean>(false);
   const [marketplaceCategories, setMarketplaceCategories] = useState<MarketplaceCategory[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [resetTriggers, setResetTriggers] = useState<{ [key: number]: number }>({});
@@ -1251,7 +1252,7 @@ export default function EditBook() {
 
   // Auto-detect author from book data when authors and book are loaded
   useEffect(() => {
-    if (authors.length > 0 && book && !hasRestoredFromStorage && !selectedAuthorId) {
+    if (authors.length > 0 && book && !hasRestoredFromStorage && !selectedAuthorId && !authorExplicitlyRemoved) {
       // Try to find matching author based on book's author fields
       const bookAuthorName = `${book.authorPrefix || ''} ${book.authorFirstName || ''} ${book.authorMiddleName || ''} ${book.authorLastName || ''} ${book.authorSuffix || ''}`.trim();
       
@@ -1264,10 +1265,12 @@ export default function EditBook() {
         if (matchingAuthor) {
           console.log('Auto-detected matching author:', matchingAuthor);
           setSelectedAuthorId(matchingAuthor.id);
+        } else {
+          console.log('No matching author found, keeping form fields');
         }
       }
     }
-  }, [authors, book, hasRestoredFromStorage, selectedAuthorId]);
+  }, [authors, book, hasRestoredFromStorage, selectedAuthorId, authorExplicitlyRemoved]);
 
   const saveBook = useMutation({
     mutationFn: async (data: { bookData: BookFormData; shouldNavigate?: boolean; nextTab?: string }) => {
@@ -1444,6 +1447,8 @@ export default function EditBook() {
     if (authorId) {
       const selectedAuthor = authors.find(author => author.id === authorId);
       if (selectedAuthor) {
+        // Reset the explicitly removed flag to allow future auto-detection
+        setAuthorExplicitlyRemoved(false);
         // Populate form fields with selected author data
         form.setValue("authorPrefix", selectedAuthor.prefix || "");
         form.setValue("authorFirstName", selectedAuthor.firstName || "");
@@ -2451,6 +2456,8 @@ export default function EditBook() {
                                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                                   <AlertDialogAction
                                     onClick={() => {
+                                      // Mark that the author was explicitly removed to prevent auto-detection
+                                      setAuthorExplicitlyRemoved(true);
                                       // Clear author selection and form fields to return to selection interface
                                       setSelectedAuthorId("");
                                       form.setValue("authorPrefix", "");
