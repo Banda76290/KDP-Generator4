@@ -2007,13 +2007,15 @@ export class DatabaseStorage implements IStorage {
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
     .where(eq(kdpImports.userId, userId));
 
+    // Only sum royalty where it's not null and > 0
     const totalRoyalty = await db.select({
       sum: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`
     }).from(kdpImportData)
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
-      isNotNull(kdpImportData.royalty)
+      isNotNull(kdpImportData.royalty),
+      sql`${kdpImportData.royalty} > 0`
     ));
 
     const uniqueBooks = await db.select({
@@ -2022,7 +2024,8 @@ export class DatabaseStorage implements IStorage {
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
-      isNotNull(kdpImportData.asin)
+      isNotNull(kdpImportData.asin),
+      sql`${kdpImportData.asin} != ''`
     ));
 
     return {
@@ -2034,28 +2037,36 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSalesTrends(userId: string, days: number): Promise<any[]> {
+    // Group by import type and date to understand data better
     const salesData = await db.select({
-      date: sql<string>`date(${kdpImportData.reportingDate})`,
+      date: sql<string>`date(${kdpImports.createdAt})`,
+      importType: kdpImports.detectedType,
       sales: sql<number>`count(*)`,
-      royalty: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`,
-      units: sql<number>`coalesce(sum(${kdpImportData.unitsOrdered}), 0)`
+      royalty: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`
     })
     .from(kdpImportData)
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
-      sql`${kdpImportData.reportingDate} >= current_date - interval '${days} days'`,
-      isNotNull(kdpImportData.reportingDate)
+      sql`${kdpImports.createdAt} >= current_date - interval '${days} days'`,
+      isNotNull(kdpImports.createdAt)
     ))
-    .groupBy(sql`date(${kdpImportData.reportingDate})`)
-    .orderBy(sql`date(${kdpImportData.reportingDate})`);
+    .groupBy(sql`date(${kdpImports.createdAt})`, kdpImports.detectedType)
+    .orderBy(sql`date(${kdpImports.createdAt})`);
 
-    return salesData.map(item => ({
-      date: item.date,
-      sales: Number(item.sales),
-      royalty: Number(item.royalty),
-      units: Number(item.units)
-    }));
+    // Aggregate by date (combine all import types per day)
+    const dateMap = new Map();
+    salesData.forEach(item => {
+      const date = item.date;
+      if (!dateMap.has(date)) {
+        dateMap.set(date, { date, sales: 0, royalty: 0, units: 0 });
+      }
+      const existing = dateMap.get(date);
+      existing.sales += Number(item.sales);
+      existing.royalty += Number(item.royalty);
+    });
+
+    return Array.from(dateMap.values()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }
 
   async getTopPerformers(userId: string, limit: number): Promise<any[]> {
@@ -2064,15 +2075,16 @@ export class DatabaseStorage implements IStorage {
       asin: kdpImportData.asin,
       totalSales: sql<number>`count(*)`,
       totalRoyalty: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`,
-      totalUnits: sql<number>`coalesce(sum(${kdpImportData.unitsOrdered}), 0)`,
-      avgRoyaltyRate: sql<number>`coalesce(avg(${kdpImportData.royaltyRate}), 0)`
+      totalUnits: sql<number>`coalesce(sum(${kdpImportData.netUnitsSold}), 0)`,
+      avgRoyaltyRate: sql<number>`coalesce(avg(${kdpImportData.royalty}), 0)`
     })
     .from(kdpImportData)
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
       isNotNull(kdpImportData.asin),
-      isNotNull(kdpImportData.title)
+      isNotNull(kdpImportData.title),
+      sql`${kdpImportData.royalty} > 0`
     ))
     .groupBy(kdpImportData.asin, kdpImportData.title)
     .orderBy(sql`coalesce(sum(${kdpImportData.royalty}), 0) desc`)
@@ -2093,14 +2105,15 @@ export class DatabaseStorage implements IStorage {
       marketplace: kdpImportData.marketplace,
       totalSales: sql<number>`count(*)`,
       totalRoyalty: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`,
-      totalUnits: sql<number>`coalesce(sum(${kdpImportData.unitsOrdered}), 0)`,
+      totalUnits: sql<number>`coalesce(sum(${kdpImportData.netUnitsSold}), 0)`,
       uniqueBooks: sql<number>`count(distinct ${kdpImportData.asin})`
     })
     .from(kdpImportData)
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
-      isNotNull(kdpImportData.marketplace)
+      isNotNull(kdpImportData.marketplace),
+      sql`${kdpImportData.marketplace} != ''`
     ))
     .groupBy(kdpImportData.marketplace)
     .orderBy(sql`coalesce(sum(${kdpImportData.royalty}), 0) desc`);
