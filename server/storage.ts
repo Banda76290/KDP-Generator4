@@ -1542,6 +1542,51 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
+  async getUserAuthorsWithCounts(userId: string): Promise<(AuthorWithRelations & { bookCount: number; projectCount: number })[]> {
+    const userAuthors = await db
+      .select()
+      .from(authors)
+      .where(and(eq(authors.userId, userId), eq(authors.isActive, true)));
+
+    return await Promise.all(userAuthors.map(async (author) => {
+      const [user] = await db.select().from(users).where(eq(users.id, author.userId));
+      const biographies = await db.select().from(authorBiographies).where(eq(authorBiographies.authorId, author.id));
+      
+      // Count books for this author
+      const authorBooks = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(books)
+        .where(and(
+          eq(books.userId, userId),
+          eq(books.authorPrefix, author.prefix || ''),
+          eq(books.authorFirstName, author.firstName),
+          eq(books.authorMiddleName, author.middleName || ''),
+          eq(books.authorLastName, author.lastName),
+          eq(books.authorSuffix, author.suffix || '')
+        ));
+
+      // Count projects for this author (through contributors table)
+      const authorProjects = await db
+        .select({ count: sql<number>`count(distinct ${contributors.projectId})` })
+        .from(contributors)
+        .where(and(
+          eq(contributors.prefix, author.prefix || ''),
+          eq(contributors.firstName, author.firstName),
+          eq(contributors.middleName, author.middleName || ''),
+          eq(contributors.lastName, author.lastName),
+          eq(contributors.suffix, author.suffix || '')
+        ));
+      
+      return {
+        ...author,
+        user,
+        biographies,
+        bookCount: Number(authorBooks[0]?.count || 0),
+        projectCount: Number(authorProjects[0]?.count || 0),
+      };
+    }));
+  }
+
   async getAuthor(authorId: string, userId: string): Promise<AuthorWithRelations | undefined> {
     const [author] = await db
       .select()

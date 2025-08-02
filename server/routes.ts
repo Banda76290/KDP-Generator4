@@ -1510,8 +1510,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "User not authenticated" });
       }
 
-      const authors = await storage.getUserAuthors(userId);
-      res.json(authors);
+      const withCounts = req.query.withCounts === 'true';
+      
+      if (withCounts) {
+        const authors = await storage.getUserAuthorsWithCounts(userId);
+        res.json(authors);
+      } else {
+        const authors = await storage.getUserAuthors(userId);
+        res.json(authors);
+      }
     } catch (error) {
       console.error("Error fetching authors:", error);
       res.status(500).json({ message: "Failed to fetch authors" });
