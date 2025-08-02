@@ -15,7 +15,8 @@ import {
   Tags,
   Server,
   User,
-  MessageSquare
+  MessageSquare,
+  DollarSign
 } from "lucide-react";
 
 interface NavigationItem {
@@ -32,6 +33,7 @@ export const navigation: NavigationItem[] = [
   { name: "Authors", href: "/authors", icon: User },
   { name: "Series", href: "/manage-series", icon: Tags },
   { name: "Sales Analytics", href: "/analytics", icon: TrendingUp },
+  { name: "Exchange Rates", href: "/exchange-rates", icon: DollarSign },
   { name: "KDP Reports", href: "/kdp-reports", icon: Upload },
   { name: "Import Management", href: "/import-management", icon: Download, badge: "NEW" },
   { name: "AI Assistant", href: "/ai-assistant", icon: Bot, badge: "PRO" },
