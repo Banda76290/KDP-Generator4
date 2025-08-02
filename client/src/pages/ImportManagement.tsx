@@ -33,13 +33,13 @@ const formatFileSize = (bytes: number): string => {
 const getStatusBadge = (status: string) => {
   switch (status) {
     case 'completed':
-      return <Badge className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100"><CheckCircle className="w-3 h-3 mr-1" />Completed</Badge>;
+      return <Badge className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800"><CheckCircle className="w-3 h-3 mr-1" />Completed</Badge>;
     case 'processing':
-      return <Badge className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100"><Clock className="w-3 h-3 mr-1" />Processing</Badge>;
+      return <Badge className="bg-primary/10 dark:bg-primary/20 text-primary border-primary/20"><Clock className="w-3 h-3 mr-1" />Processing</Badge>;
     case 'failed':
-      return <Badge className="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100"><AlertCircle className="w-3 h-3 mr-1" />Failed</Badge>;
+      return <Badge className="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800"><AlertCircle className="w-3 h-3 mr-1" />Failed</Badge>;
     case 'pending':
-      return <Badge className="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
+      return <Badge className="bg-secondary/10 dark:bg-secondary/20 text-secondary border-secondary/20"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
     default:
       return <Badge variant="secondary">{status}</Badge>;
   }
@@ -234,8 +234,8 @@ export default function ImportManagement() {
           <div
             className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
               isDragging
-                ? 'border-blue-400 bg-blue-50 dark:bg-blue-950'
-                : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                ? 'border-primary bg-primary/5 dark:bg-primary/10'
+                : 'border-gray-300 dark:border-gray-600 hover:border-primary/50 dark:hover:border-primary/50'
             }`}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
@@ -244,7 +244,7 @@ export default function ImportManagement() {
             {selectedFile ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-center gap-2">
-                  <FileSpreadsheet className="w-8 h-8 text-green-600" />
+                  <FileSpreadsheet className="w-8 h-8 text-primary" />
                   <div className="text-left">
                     <p className="font-medium text-gray-900 dark:text-white">
                       {selectedFile.name}
@@ -266,7 +266,7 @@ export default function ImportManagement() {
                   <Button 
                     onClick={handleUpload}
                     disabled={uploadMutation.isPending}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    className="bg-primary hover:bg-primary/90 text-white"
                   >
                     {uploadMutation.isPending ? 'Uploading...' : 'Upload & Process'}
                   </Button>
@@ -320,7 +320,7 @@ export default function ImportManagement() {
         <CardContent>
           {isLoading ? (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
               <p className="mt-2 text-gray-500 dark:text-gray-400">Loading imports...</p>
             </div>
           ) : imports.length === 0 ? (
@@ -340,7 +340,7 @@ export default function ImportManagement() {
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
-                        <FileSpreadsheet className="w-5 h-5 text-blue-600" />
+                        <FileSpreadsheet className="w-5 h-5 text-primary" />
                         <div>
                           <h3 className="font-medium text-gray-900 dark:text-white">
                             {importRecord.fileName}
@@ -399,29 +399,29 @@ export default function ImportManagement() {
 
                       {/* Summary Stats */}
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded">
-                          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                        <div className="text-center p-4 bg-primary/10 dark:bg-primary/20 rounded-lg border border-primary/20">
+                          <div className="text-2xl font-bold text-primary">
                             {importProgress.processedRecords || 0}
                           </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Processed</div>
+                          <div className="text-sm text-primary/70 font-medium">Processed</div>
                         </div>
-                        <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded">
-                          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                        <div className="text-center p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                          <div className="text-2xl font-bold text-slate-700 dark:text-slate-300">
                             {importProgress.totalRecords || 0}
                           </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Total</div>
+                          <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">Total</div>
                         </div>
-                        <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded">
-                          <div className="text-2xl font-bold text-red-600">
+                        <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div className="text-2xl font-bold text-red-600 dark:text-red-400">
                             {importProgress.errorRecords || 0}
                           </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Errors</div>
+                          <div className="text-sm text-red-600/70 dark:text-red-400/70 font-medium">Errors</div>
                         </div>
-                        <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded">
-                          <div className="text-2xl font-bold text-yellow-600">
+                        <div className="text-center p-4 bg-secondary/10 dark:bg-secondary/20 rounded-lg border border-secondary/20">
+                          <div className="text-2xl font-bold text-secondary dark:text-secondary">
                             {importProgress.duplicateRecords || 0}
                           </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Duplicates</div>
+                          <div className="text-sm text-secondary/70 font-medium">Duplicates</div>
                         </div>
                       </div>
 
