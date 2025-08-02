@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, BarChart3, BookOpen, Globe, DollarSign, TrendingUp, ArrowUpDown, Copy } from "lucide-react";
+import { Plus, Search, Filter, Settings, Edit, Trash2, BarChart3, BookOpen, Globe, DollarSign, TrendingUp, ArrowUpDown, Copy } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -387,8 +387,8 @@ export default function Projects() {
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
-                            <MoreHorizontal className="w-4 h-4" />
+                          <Button variant="ghost" size="sm" className="w-8 h-8 p-0 hover:bg-gray-100">
+                            <Settings className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -467,8 +467,8 @@ export default function Projects() {
                                   </Badge>
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                                        <MoreHorizontal className="w-3 h-3" />
+                                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-gray-100">
+                                        <Settings className="w-3 h-3" />
                                       </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">

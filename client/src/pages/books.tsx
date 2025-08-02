@@ -23,7 +23,7 @@ import {
   BookOpen, 
   Edit, 
   Copy, 
-  MoreVertical, 
+  Settings, 
   AlertTriangle,
   Plus,
   Trash2,
@@ -493,8 +493,8 @@ function BooksContent() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="h-4 w-4" />
+                      <Button variant="ghost" size="sm" className="hover:bg-gray-100">
+                        <Settings className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
