@@ -2609,6 +2609,65 @@ Please respond with only a JSON object containing the translated fields. For key
     }
   });
 
+  // Analytics endpoints - using real KDP data
+  app.get('/api/analytics/overview', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const analytics = await storage.getAnalyticsOverview(userId);
+      res.json(analytics);
+    } catch (error: any) {
+      console.error('Error getting analytics overview:', error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get('/api/analytics/sales-trends', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const { period = '30' } = req.query;
+      const salesTrends = await storage.getSalesTrends(userId, parseInt(period as string));
+      res.json(salesTrends);
+    } catch (error: any) {
+      console.error('Error getting sales trends:', error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get('/api/analytics/top-performers', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const { limit = '10' } = req.query;
+      const topPerformers = await storage.getTopPerformers(userId, parseInt(limit as string));
+      res.json(topPerformers);
+    } catch (error: any) {
+      console.error('Error getting top performers:', error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get('/api/analytics/marketplace-breakdown', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const marketplaceData = await storage.getMarketplaceBreakdown(userId);
+      res.json(marketplaceData);
+    } catch (error: any) {
+      console.error('Error getting marketplace breakdown:', error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
