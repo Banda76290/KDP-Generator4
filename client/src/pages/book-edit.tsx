@@ -2408,7 +2408,7 @@ export default function EditBook() {
                     {/* Author selection or display */}
                     {selectedAuthorId ? (
                       // Show selected author with edit/remove buttons (like Series)
-                      <div className="bg-green-50 p-4 rounded-md border border-green-200">
+                      (<div className="bg-green-50 p-4 rounded-md border border-green-200">
                         <div className="space-y-3">
                           <Label className="font-medium text-[16px] text-gray-700">Author</Label>
                           <div className="text-lg font-medium text-gray-900">
@@ -2443,15 +2443,13 @@ export default function EditBook() {
                                 form.setValue("authorLastName", "");
                                 form.setValue("authorSuffix", "");
                               }}
-                            >
-                              Remove from authors
-                            </Button>
+                            >Remove from author</Button>
                           </div>
                         </div>
-                      </div>
+                      </div>)
                     ) : (
                       // Show author selection dropdown (when no author selected)
-                      <div className="space-y-4">
+                      (<div className="space-y-4">
                         <div className="flex gap-2">
                           <div className="flex-1">
                             <Label className="font-medium text-[16px]">Select existing author</Label>
@@ -2492,7 +2490,7 @@ export default function EditBook() {
                             </Button>
                           </div>
                         </div>
-                      </div>
+                      </div>)
                     )}
                   </div>
 
@@ -3217,7 +3215,7 @@ export default function EditBook() {
                   </p>
                   {book?.isbn ? (
                     // Show only Official ISBN field in read-only mode when applied
-                    <div className="space-y-2">
+                    (<div className="space-y-2">
                       <Label htmlFor="officialIsbnContentApplied" className="text-sm font-medium">Official ISBN/ASIN</Label>
                       <Input
                         id="officialIsbnContentApplied"
@@ -3228,10 +3226,10 @@ export default function EditBook() {
                       <p className="text-sm text-green-600">
                         ✓ Official ISBN/ASIN applied successfully. This ISBN/ASIN is now active for your book.
                       </p>
-                    </div>
+                    </div>)
                   ) : (
                     // Show both fields when no official ISBN is applied
-                    <div className="space-y-4">
+                    (<div className="space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor="isbnPlaceholderContent" className="text-sm font-medium">ISBN/ASIN Placeholder</Label>
                         <Input
@@ -3283,7 +3281,7 @@ export default function EditBook() {
                         </div>
                         <p className="text-sm text-gray-500">Enter your own ISBN/ASIN number if you have purchased one or get one from Amazon</p>
                       </div>
-                    </div>
+                    </div>)
                   )}
                 </div>
               </div>
@@ -3749,7 +3747,6 @@ export default function EditBook() {
           />
         )}
       </div>
-      
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
@@ -4121,7 +4118,6 @@ export default function EditBook() {
           </div>
         </DialogContent>
       </Dialog>
-      
       {/* ISBN Apply Confirmation Dialog */}
       <AlertDialog open={showIsbnContentApplyDialog} onOpenChange={setShowIsbnContentApplyDialog}>
         <AlertDialogContent>
