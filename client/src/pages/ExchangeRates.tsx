@@ -49,12 +49,12 @@ export default function ExchangeRates() {
   };
 
   // Group currencies by major/minor for better organization
-  const majorCurrencies = ['EUR', 'USD', 'GBP', 'JPY', 'CNY', 'CHF', 'CAD', 'AUD'];
+  const majorCurrencies = ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'CHF', 'CAD', 'AUD'];
   const rates = Array.isArray(exchangeRates) ? exchangeRates : [];
-  // Add EUR with rate 1.0 since it's our base currency and filter out duplicate
-  const eurRate = { currency: 'EUR', rate: '1.00000000', updatedAt: new Date().toISOString() };
-  const filteredRates = rates.filter((rate: any) => rate.currency !== 'EUR');
-  const allRates = [eurRate, ...filteredRates];
+  // Add USD with rate 1.0 since it's our base currency and filter out duplicate
+  const usdRate = { currency: 'USD', rate: '1.00000000', updatedAt: new Date().toISOString() };
+  const filteredRates = rates.filter((rate: any) => rate.currency !== 'USD');
+  const allRates = [usdRate, ...filteredRates];
   const majorRates = allRates.filter((rate: any) => majorCurrencies.includes(rate.currency));
   const otherRates = filteredRates.filter((rate: any) => !majorCurrencies.includes(rate.currency));
 
@@ -86,7 +86,7 @@ export default function ExchangeRates() {
           <div>
             <h1 className="text-3xl font-bold mb-2">Exchange Rates</h1>
             <p className="text-muted-foreground">
-              Real-time currency exchange rates for accurate financial calculations
+              Real-time currency exchange rates with USD as base currency
             </p>
           </div>
           <Button 

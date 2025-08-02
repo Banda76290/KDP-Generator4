@@ -7,8 +7,8 @@ export class ExchangeRateService {
   
   // Fallback exchange rates (approximate values as of 2025)
   private readonly FALLBACK_RATES = {
-    'EUR': 1.0,
-    'USD': 1.05,
+    'USD': 1.0,
+    'EUR': 0.95,
     'JPY': 160.0,
     'GBP': 0.83,
     'CAD': 1.45,
@@ -21,7 +21,7 @@ export class ExchangeRateService {
   /**
    * Fetch current exchange rates from exchangerate.host API
    */
-  async fetchExchangeRates(baseCurrency: string = 'EUR'): Promise<Record<string, number>> {
+  async fetchExchangeRates(baseCurrency: string = 'USD'): Promise<Record<string, number>> {
     try {
       // Try multiple APIs in sequence
       const apis = [
@@ -82,7 +82,7 @@ export class ExchangeRateService {
   /**
    * Store exchange rates in database
    */
-  async storeExchangeRates(rates: Record<string, number>, baseCurrency: string = 'EUR'): Promise<void> {
+  async storeExchangeRates(rates: Record<string, number>, baseCurrency: string = 'USD'): Promise<void> {
     const today = new Date().toISOString().split('T')[0];
     
     for (const [currency, rate] of Object.entries(rates)) {
@@ -146,9 +146,9 @@ export class ExchangeRateService {
   }
 
   /**
-   * Convert all amounts to base currency (EUR by default)
+   * Convert all amounts to base currency (USD by default)
    */
-  async convertToBaseCurrency(amounts: Array<{amount: number, currency: string}>, baseCurrency: string = 'EUR'): Promise<number> {
+  async convertToBaseCurrency(amounts: Array<{amount: number, currency: string}>, baseCurrency: string = 'USD'): Promise<number> {
     let total = 0;
     
     for (const item of amounts) {
@@ -171,8 +171,8 @@ export class ExchangeRateService {
     console.log('[EXCHANGE] Updating exchange rates...');
     
     try {
-      const rates = await this.fetchExchangeRates('EUR');
-      await this.storeExchangeRates(rates, 'EUR');
+      const rates = await this.fetchExchangeRates('USD');
+      await this.storeExchangeRates(rates, 'USD');
       
       console.log(`[EXCHANGE] Successfully updated ${Object.keys(rates).length} exchange rates`);
     } catch (error) {
@@ -192,7 +192,7 @@ export class ExchangeRateService {
         date: exchangeRates.date
       })
       .from(exchangeRates)
-      .where(eq(exchangeRates.fromCurrency, 'EUR'))
+      .where(eq(exchangeRates.fromCurrency, 'USD'))
       .orderBy(desc(exchangeRates.date), exchangeRates.toCurrency);
 
     // Group by currency and take the latest rate
