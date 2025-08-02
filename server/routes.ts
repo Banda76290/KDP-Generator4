@@ -53,14 +53,25 @@ const clearSystemLogs = () => {
 
 // Extend Express Request type to include authenticated user
 interface AuthenticatedRequest extends Request {
-  user?: any; // Simplified to avoid type conflicts
+  user?: {
+    claims?: {
+      sub: string;
+      email: string;
+      first_name: string;
+      last_name: string;
+      profile_image_url?: string;
+    };
+    expires_at?: number;
+    access_token?: string;
+    refresh_token?: string;
+  };
   admin?: any;
 }
 
 // Admin middleware to check if user has admin or superadmin role
 const isAdmin = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const userId = req.user?.claims?.sub || req.user?.id;
+    const userId = req.user?.claims?.sub;
     if (!userId) {
       return res.status(401).json({ message: "User not authenticated" });
     }
@@ -257,7 +268,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // New route for duplicating projects with all books
   app.post('/api/projects/:id/duplicate', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user?.claims?.sub || req.user?.id || "test-user-id";
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const projectId = req.params.id;
       
       console.log(`Duplicating project ${projectId} for user ${userId}`);
@@ -488,7 +502,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // New route for duplicating books
   app.post('/api/books/:id/duplicate', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user?.claims?.sub || req.user?.id || "test-user-id";
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const bookId = req.params.id;
       
       console.log(`Duplicating book ${bookId} for user ${userId}`);
@@ -1488,7 +1505,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Author routes
   app.get('/api/authors', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.user?.claims?.sub;
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
@@ -1503,7 +1520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/authors/:authorId', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.user?.claims?.sub;
       const { authorId } = req.params;
       
       if (!userId) {
@@ -1524,7 +1541,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/authors', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.user?.claims?.sub;
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
@@ -1540,7 +1557,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/authors/:authorId', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.user?.claims?.sub;
       const { authorId } = req.params;
       
       if (!userId) {
@@ -1558,7 +1575,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/authors/:authorId', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.user?.claims?.sub;
       const { authorId } = req.params;
       
       if (!userId) {
@@ -1575,7 +1592,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/authors/:authorId/biography/:language', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.user?.claims?.sub;
       const { authorId, language } = req.params;
       
       if (!userId) {
@@ -1598,7 +1615,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/authors/:authorId/biography/:language', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.user?.claims?.sub;
       const { authorId, language } = req.params;
       const { biography } = req.body;
       
@@ -1623,7 +1640,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/authors/:authorId/projects', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.user?.claims?.sub;
       const { authorId } = req.params;
       
       if (!userId) {
@@ -1640,7 +1657,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/authors/:authorId/books', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.user?.claims?.sub;
       const { authorId } = req.params;
       
       if (!userId) {
@@ -1669,7 +1686,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const result = await aiConfigService.generateContent({
         functionType,
-        context: context || { userId: req.user?.id },
+        context: context || { userId: req.user?.claims?.sub },
         customPrompt,
         customModel
       });
@@ -1768,10 +1785,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Generate AI content using configured functions
-  app.post("/api/ai/generate", isAuthenticated, async (req, res) => {
+  app.post("/api/ai/generate", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { functionKey, bookId, projectId, customPrompt, customModel, customTemperature } = req.body;
-      const userId = req.user?.id;
+      const userId = req.user?.claims?.sub;
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
@@ -2050,7 +2067,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       systemLog('🚀 Début de la synchronisation de la base de données', 'info', 'SEED');
-      systemLog(`👤 Demande initiée par l'utilisateur: ${req.user?.email || 'Inconnu'}`, 'info', 'SEED');
+      systemLog(`👤 Demande initiée par l'utilisateur: ${req.user?.claims?.email || 'Inconnu'}`, 'info', 'SEED');
       systemLog('🔍 Vérification des catégories existantes...', 'info', 'SEED');
       
       await seedDatabase();
@@ -2157,7 +2174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/categories/export', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
       systemLog('📤 Export des catégories demandé', 'info', 'EXPORT');
-      systemLog(`👤 Demande initiée par: ${req.user?.email || 'Inconnu'}`, 'info', 'EXPORT');
+      systemLog(`👤 Demande initiée par: ${req.user?.claims?.email || 'Inconnu'}`, 'info', 'EXPORT');
       
       const categories = await storage.exportAllMarketplaceCategories();
       systemLog(`📊 ${categories.length} catégories exportées`, 'info', 'EXPORT');
@@ -2194,7 +2211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       systemLog('🔄 Début de la synchronisation Dev → Production', 'info', 'SYNC');
-      systemLog(`👤 Demande initiée par: ${req.user?.email || 'Inconnu'}`, 'info', 'SYNC');
+      systemLog(`👤 Demande initiée par: ${req.user?.claims?.email || 'Inconnu'}`, 'info', 'SYNC');
       systemLog(`🎯 URL de production: ${productionUrl}`, 'info', 'SYNC');
       systemLog(`📊 ${categories.length} catégories à synchroniser`, 'info', 'SYNC');
 
@@ -2241,7 +2258,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       systemLog('⚠️ DÉBUT DU RESET COMPLET DE LA BASE DE DONNÉES', 'warn', 'RESET');
-      systemLog(`👤 Demande initiée par l'utilisateur: ${req.user?.email || 'Inconnu'}`, 'info', 'RESET');
+      systemLog(`👤 Demande initiée par l'utilisateur: ${req.user?.claims?.email || 'Inconnu'}`, 'info', 'RESET');
       systemLog('🔥 ATTENTION: Toutes les catégories vont être supprimées', 'warn', 'RESET');
       systemLog('🔍 Lancement de forceSeedDatabase()...', 'info', 'RESET');
       

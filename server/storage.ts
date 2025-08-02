@@ -1574,7 +1574,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateAuthor(authorId: string, userId: string, updates: Partial<InsertAuthor>): Promise<Author> {
-    const updateData = { ...updates };
+    const updateData: any = { ...updates };
     
     if (updates.prefix || updates.firstName || updates.middleName || updates.lastName || updates.suffix) {
       const currentAuthor = await this.getAuthor(authorId, userId);
