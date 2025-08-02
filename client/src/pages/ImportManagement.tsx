@@ -87,13 +87,21 @@ export default function ImportManagement() {
         body: formData,
       });
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast({
         title: "File uploaded successfully",
         description: `Detected: ${getDetectedTypeDescription(data.parsedData.detectedType)}`,
       });
       queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
       setSelectedFile(null);
+      
+      // Auto-expand and monitor the newly uploaded import
+      const importId = data.import?.id;
+      if (importId) {
+        setExpandedImport(importId);
+        // Wait a moment for the UI to update, then start monitoring
+        setTimeout(() => monitorImportProgress(importId), 500);
+      }
     },
     onError: (error: any) => {
       toast({
@@ -128,17 +136,11 @@ export default function ImportManagement() {
     },
   });
 
-  // Fetch import progress
-  const { data: importProgress } = useQuery<ImportProgress>({
+  // Fetch import progress (no polling - only manual refresh)
+  const { data: importProgress, refetch: refetchProgress } = useQuery<ImportProgress>({
     queryKey: ['/api/kdp-imports', expandedImport, 'progress'],
     enabled: !!expandedImport,
-    refetchInterval: (data) => {
-      // Stop polling if completed or failed
-      if (data?.status === 'completed' || data?.status === 'failed') {
-        return false;
-      }
-      return 2000; // Poll every 2 seconds
-    },
+    refetchInterval: false, // Disable polling completely
   });
 
   const handleFileSelect = (files: File[]) => {
@@ -203,8 +205,55 @@ export default function ImportManagement() {
     }
   };
 
-  const toggleExpandImport = (importId: string) => {
-    setExpandedImport(expandedImport === importId ? null : importId);
+  const toggleExpandImport = async (importId: string) => {
+    const newExpandedImport = expandedImport === importId ? null : importId;
+    setExpandedImport(newExpandedImport);
+    
+    // If expanding an import, start monitoring its progress
+    if (newExpandedImport) {
+      await monitorImportProgress(newExpandedImport);
+    }
+  };
+
+  // Monitor import progress with intelligent refresh
+  const monitorImportProgress = async (importId: string) => {
+    const checkProgress = async () => {
+      try {
+        // Refresh progress data
+        const result = await refetchProgress();
+        const progress = result.data;
+        
+        // If still processing, schedule next check
+        if (progress && progress.status === 'processing') {
+          // Wait 3 seconds before next check
+          setTimeout(checkProgress, 3000);
+        } else if (progress && (progress.status === 'completed' || progress.status === 'failed')) {
+          // Import finished, refresh the import list to show final status
+          queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
+          
+          // Show completion notification
+          if (progress.status === 'completed') {
+            toast({
+              title: "Import completed",
+              description: `Successfully processed ${progress.processedRecords} records`,
+            });
+          } else if (progress.status === 'failed') {
+            toast({
+              title: "Import failed",
+              description: "Check the error log for details",
+              variant: "destructive",
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error checking import progress:', error);
+      }
+    };
+
+    // Start monitoring only if the import is still expanded
+    if (expandedImport === importId) {
+      await checkProgress();
+    }
   };
 
   return (
