@@ -2015,7 +2015,11 @@ export class DatabaseStorage implements IStorage {
       count: sql<number>`count(*)`
     }).from(kdpImportData)
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
-    .where(eq(kdpImports.userId, userId));
+    .where(and(
+      eq(kdpImports.userId, userId),
+      eq(kdpImportData.isDuplicate, false),
+      sql`${kdpImports.detectedType} != 'payments'`
+    ));
 
     // Get royalty by currency to avoid mixing currencies
     const royaltiesByCurrency = await db.select({
@@ -2027,6 +2031,8 @@ export class DatabaseStorage implements IStorage {
     .where(and(
       eq(kdpImports.userId, userId),
       eq(kdpImportData.isDuplicate, false),
+      // Exclure les fichiers "payments" qui contiennent des données cumulées historiques
+      sql`${kdpImports.detectedType} != 'payments'`,
       isNotNull(kdpImportData.royalty),
       sql`${kdpImportData.royalty} > 0`
     ))
@@ -2038,6 +2044,8 @@ export class DatabaseStorage implements IStorage {
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
+      eq(kdpImportData.isDuplicate, false),
+      sql`${kdpImports.detectedType} != 'payments'`,
       isNotNull(kdpImportData.asin),
       sql`${kdpImportData.asin} != ''`
     ));
@@ -2067,6 +2075,7 @@ export class DatabaseStorage implements IStorage {
     .where(and(
       eq(kdpImports.userId, userId),
       eq(kdpImportData.isDuplicate, false),
+      sql`${kdpImports.detectedType} != 'payments'`,
       sql`${kdpImports.createdAt} >= current_date - interval '${days} days'`,
       isNotNull(kdpImports.createdAt)
     ))
@@ -2104,6 +2113,7 @@ export class DatabaseStorage implements IStorage {
     .where(and(
       eq(kdpImports.userId, userId),
       eq(kdpImportData.isDuplicate, false),
+      sql`${kdpImports.detectedType} != 'payments'`,
       isNotNull(kdpImportData.asin),
       isNotNull(kdpImportData.title),
       sql`${kdpImportData.royalty} > 0`
@@ -2138,6 +2148,7 @@ export class DatabaseStorage implements IStorage {
     .where(and(
       eq(kdpImports.userId, userId),
       eq(kdpImportData.isDuplicate, false),
+      sql`${kdpImports.detectedType} != 'payments'`,
       isNotNull(kdpImportData.marketplace),
       sql`${kdpImportData.marketplace} != ''`,
       sql`${kdpImportData.royalty} > 0`
