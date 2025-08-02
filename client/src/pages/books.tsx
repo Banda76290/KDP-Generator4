@@ -519,7 +519,7 @@ function BooksContent() {
                         disabled={translateBookMutation.isPending}
                       >
                         <Languages className="h-4 w-4 mr-2" />
-                        Créer version traduite
+                        Create Translated Copy
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
