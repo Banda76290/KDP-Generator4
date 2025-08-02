@@ -116,7 +116,8 @@ export class ExchangeRateService {
       return 1;
     }
 
-    const rate = await db
+    // First, try direct rate (from -> to)
+    let rate = await db
       .select()
       .from(exchangeRates)
       .where(and(
@@ -126,7 +127,37 @@ export class ExchangeRateService {
       .orderBy(desc(exchangeRates.date))
       .limit(1);
 
-    return rate[0] ? parseFloat(rate[0].rate) : null;
+    if (rate[0]) {
+      return parseFloat(rate[0].rate);
+    }
+
+    // If not found, try inverse rate (to -> from) and calculate 1/rate
+    rate = await db
+      .select()
+      .from(exchangeRates)
+      .where(and(
+        eq(exchangeRates.fromCurrency, toCurrency),
+        eq(exchangeRates.toCurrency, fromCurrency)
+      ))
+      .orderBy(desc(exchangeRates.date))
+      .limit(1);
+
+    if (rate[0]) {
+      const inverseRate = parseFloat(rate[0].rate);
+      return inverseRate > 0 ? 1 / inverseRate : null;
+    }
+
+    // If neither direct nor inverse found, check if we have USD as intermediate
+    if (fromCurrency !== 'USD' && toCurrency !== 'USD') {
+      const fromUsdRate = await this.getExchangeRate('USD', fromCurrency);
+      const toUsdRate = await this.getExchangeRate('USD', toCurrency);
+      
+      if (fromUsdRate && toUsdRate && fromUsdRate > 0) {
+        return toUsdRate / fromUsdRate;
+      }
+    }
+
+    return null;
   }
 
   /**

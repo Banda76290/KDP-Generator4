@@ -2035,7 +2035,7 @@ export class DatabaseStorage implements IStorage {
       totalImports: totalImports[0]?.count || 0,
       totalRecords: totalRecords[0]?.count || 0,
       royaltiesByCurrency: royaltiesByCurrency.map(r => ({
-        currency: r.currency || 'EUR', // Default to EUR instead of UNKNOWN
+        currency: r.currency || 'USD', // Default to USD instead of UNKNOWN
         amount: Number(r.sum),
         transactions: Number(r.count)
       })),
@@ -2102,7 +2102,7 @@ export class DatabaseStorage implements IStorage {
     return topBooks.map(book => ({
       title: book.title,
       asin: book.asin,
-      currency: book.currency || 'EUR', // Default to EUR instead of UNKNOWN
+      currency: book.currency || 'USD', // Default to USD instead of UNKNOWN
       marketplace: book.marketplace || 'N/A',
       totalSales: Number(book.totalSales),
       totalRoyalty: Number(book.totalRoyalty),
@@ -2133,12 +2133,142 @@ export class DatabaseStorage implements IStorage {
 
     return marketplaceData.map(item => ({
       marketplace: item.marketplace,
-      currency: item.currency || 'EUR', // Default to EUR instead of UNKNOWN
+      currency: item.currency || 'USD', // Default to USD instead of UNKNOWN
       totalSales: Number(item.totalSales),
       totalRoyalty: Number(item.totalRoyalty),
       totalUnits: 0, // Not reliable data
       uniqueBooks: Number(item.uniqueBooks)
     }));
+  }
+
+  // Enhanced analytics methods with real USD currency conversion
+  async getAnalyticsOverviewUSD(userId: string, exchangeRateService?: any): Promise<any> {
+    const basicOverview = await this.getAnalyticsOverview(userId);
+    
+    if (!exchangeRateService) {
+      return basicOverview;
+    }
+
+    // Convert all currency amounts to USD
+    const convertedRoyalties = await Promise.all(
+      basicOverview.royaltiesByCurrency.map(async (item: any) => {
+        try {
+          const convertedAmount = await exchangeRateService.convertCurrency(
+            item.amount,
+            item.currency,
+            'USD'
+          );
+          return {
+            ...item,
+            amountUSD: convertedAmount,
+            originalAmount: item.amount,
+            originalCurrency: item.currency
+          };
+        } catch (error) {
+          console.warn(`Failed to convert ${item.currency} to USD:`, error);
+          return {
+            ...item,
+            amountUSD: item.currency === 'USD' ? item.amount : 0,
+            originalAmount: item.amount,
+            originalCurrency: item.currency
+          };
+        }
+      })
+    );
+
+    return {
+      ...basicOverview,
+      royaltiesByCurrency: convertedRoyalties,
+      totalRoyaltiesUSD: convertedRoyalties.reduce((sum, item) => sum + item.amountUSD, 0)
+    };
+  }
+
+  async getTopPerformersUSD(userId: string, limit: number = 10, exchangeRateService?: any): Promise<any[]> {
+    const basicPerformers = await this.getTopPerformers(userId, limit);
+    
+    if (!exchangeRateService) {
+      return basicPerformers;
+    }
+
+    // Convert all performer royalties to USD
+    const convertedPerformers = await Promise.all(
+      basicPerformers.map(async (performer: any) => {
+        try {
+          const convertedRoyalty = await exchangeRateService.convertCurrency(
+            performer.totalRoyalty,
+            performer.currency,
+            'USD'
+          );
+          return {
+            ...performer,
+            totalRoyaltyUSD: convertedRoyalty,
+            originalRoyalty: performer.totalRoyalty,
+            originalCurrency: performer.currency
+          };
+        } catch (error) {
+          console.warn(`Failed to convert ${performer.currency} to USD:`, error);
+          return {
+            ...performer,
+            totalRoyaltyUSD: performer.currency === 'USD' ? performer.totalRoyalty : 0,
+            originalRoyalty: performer.totalRoyalty,
+            originalCurrency: performer.currency
+          };
+        }
+      })
+    );
+
+    // Sort by USD royalty amount
+    return convertedPerformers.sort((a, b) => b.totalRoyaltyUSD - a.totalRoyaltyUSD);
+  }
+
+  async getMarketplaceBreakdownUSD(userId: string, exchangeRateService?: any): Promise<any[]> {
+    const basicBreakdown = await this.getMarketplaceBreakdown(userId);
+    
+    if (!exchangeRateService) {
+      return basicBreakdown;
+    }
+
+    // Convert all marketplace royalties to USD
+    const convertedBreakdown = await Promise.all(
+      basicBreakdown.map(async (marketplace: any) => {
+        try {
+          const convertedRoyalty = await exchangeRateService.convertCurrency(
+            marketplace.totalRoyalty,
+            marketplace.currency,
+            'USD'
+          );
+          return {
+            ...marketplace,
+            totalRoyaltyUSD: convertedRoyalty,
+            originalRoyalty: marketplace.totalRoyalty,
+            originalCurrency: marketplace.currency
+          };
+        } catch (error) {
+          console.warn(`Failed to convert ${marketplace.currency} to USD:`, error);
+          return {
+            ...marketplace,
+            totalRoyaltyUSD: marketplace.currency === 'USD' ? marketplace.totalRoyalty : 0,
+            originalRoyalty: marketplace.totalRoyalty,
+            originalCurrency: marketplace.currency
+          };
+        }
+      })
+    );
+
+    return convertedBreakdown.sort((a, b) => b.totalRoyaltyUSD - a.totalRoyaltyUSD);
+  }
+
+  async getSalesTrendsUSD(userId: string, days: number, exchangeRateService?: any): Promise<any[]> {
+    const basicTrends = await this.getSalesTrends(userId, days);
+    
+    if (!exchangeRateService) {
+      return basicTrends;
+    }
+
+    // For trends, we'll use a default currency conversion approach
+    // Since trends don't have currency info, we'll assume they're in the user's primary currency
+    // and convert to USD. For now, we'll return the basic trends as-is since they're aggregated.
+    return basicTrends;
   }
 }
 

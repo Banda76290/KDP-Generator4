@@ -139,11 +139,11 @@ export default function Analytics() {
     return null;
   }
 
-  const formatCurrency = (amount: number, currency: string = 'EUR') => {
+  const formatCurrency = (amount: number, currency: string = 'USD') => {
     // Handle invalid or unknown currencies
-    const validCurrency = ['EUR', 'USD', 'JPY', 'GBP', 'CAD', 'INR', 'AUD', 'BRL', 'MXN'].includes(currency) 
+    const validCurrency = ['USD', 'EUR', 'JPY', 'GBP', 'CAD', 'INR', 'AUD', 'BRL', 'MXN'].includes(currency) 
       ? currency 
-      : 'EUR';
+      : 'USD';
     
     try {
       return new Intl.NumberFormat('fr-FR', {
@@ -157,9 +157,9 @@ export default function Analytics() {
     }
   };
 
-  // Format currency converted to EUR for unified display  
+  // Format currency converted to USD for unified display  
   const formatConvertedCurrency = (amount: number): string => {
-    return formatCurrency(amount, 'EUR');
+    return formatCurrency(amount, 'USD');
   };
 
   // Function to update exchange rates manually
@@ -267,7 +267,7 @@ export default function Analytics() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Revenus Principaux</CardTitle>
+            <CardTitle className="text-sm font-medium">Revenus Totaux (USD)</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -275,11 +275,11 @@ export default function Analytics() {
               {overviewLoading ? (
                 <div className="w-20 h-6 bg-gray-200 animate-pulse rounded" />
               ) : (
-                mainCurrency ? formatCurrency(mainCurrency.amount, mainCurrency.currency) : '0 €'
+                overview?.totalRoyaltiesUSD ? formatCurrency(overview.totalRoyaltiesUSD, 'USD') : (mainCurrency ? formatCurrency(mainCurrency.amount, mainCurrency.currency) : '0 $')
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              {totalCurrencies > 1 ? `${totalCurrencies} devises différentes` : 'Royautés cumulées'}
+              {overview?.totalRoyaltiesUSD ? `Converti automatiquement en USD` : (totalCurrencies > 1 ? `${totalCurrencies} devises différentes` : 'Royautés cumulées')}
             </p>
           </CardContent>
         </Card>
@@ -394,11 +394,21 @@ export default function Analytics() {
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
-                        <div className="text-2xl font-bold text-secondary">
-                          {formatCurrency(currency.amount, currency.currency)}
+                        <div>
+                          <div className="text-2xl font-bold text-secondary">
+                            {formatCurrency(currency.amount, currency.currency)}
+                          </div>
+                          {currency.amountUSD && currency.currency !== 'USD' && (
+                            <div className="text-sm text-gray-600 mt-1">
+                              ≈ {formatCurrency(currency.amountUSD, 'USD')}
+                            </div>
+                          )}
                         </div>
-                        <div className="text-sm text-gray-600">
-                          Moyenne: {formatCurrency(currency.amount / currency.transactions, currency.currency)}
+                        <div className="text-sm text-gray-600 text-right">
+                          <div>Moyenne: {formatCurrency(currency.amount / currency.transactions, currency.currency)}</div>
+                          {currency.amountUSD && currency.currency !== 'USD' && (
+                            <div className="mt-1">≈ {formatCurrency(currency.amountUSD / currency.transactions, 'USD')}</div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -460,7 +470,7 @@ export default function Analytics() {
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-bold text-secondary">
-                          {formatCurrency(book.totalRoyalty, book.currency)}
+                          {book.totalRoyaltyUSD ? formatCurrency(book.totalRoyaltyUSD, 'USD') : formatCurrency(book.totalRoyalty, book.currency)}
                         </div>
                       </div>
                     </div>
@@ -490,7 +500,7 @@ export default function Analytics() {
                     <PieChart>
                       <Pie
                         data={marketplaceData}
-                        dataKey="totalRoyalty"
+                        dataKey="totalRoyaltyUSD"
                         nameKey="marketplace"
                         cx="50%"
                         cy="50%"
@@ -507,7 +517,7 @@ export default function Analytics() {
                         ))}
                       </Pie>
                       <Tooltip 
-                        formatter={(value) => [formatCurrency(Number(value)), 'Royautés']}
+                        formatter={(value) => [formatCurrency(Number(value), 'USD'), 'Royautés']}
                       />
                     </PieChart>
                   </ResponsiveContainer>
@@ -543,7 +553,7 @@ export default function Analytics() {
                           <div>
                             <span className="text-gray-500">Revenus:</span>
                             <div className="font-medium text-secondary">
-                              {formatCurrency(marketplace.totalRoyalty, marketplace.currency)}
+                              {marketplace.totalRoyaltyUSD ? formatCurrency(marketplace.totalRoyaltyUSD, 'USD') : formatCurrency(marketplace.totalRoyalty, marketplace.currency)}
                             </div>
                           </div>
                           <div>

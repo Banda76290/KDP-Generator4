@@ -2618,7 +2618,7 @@ Please respond with only a JSON object containing the translated fields. For key
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
-      const analytics = await storage.getAnalyticsOverview(userId);
+      const analytics = await storage.getAnalyticsOverviewUSD(userId, exchangeRateService);
       res.json(analytics);
     } catch (error: any) {
       console.error('Error getting analytics overview:', error);
@@ -2633,7 +2633,7 @@ Please respond with only a JSON object containing the translated fields. For key
         return res.status(401).json({ message: "User not authenticated" });
       }
       const { period = '30' } = req.query;
-      const salesTrends = await storage.getSalesTrends(userId, parseInt(period as string));
+      const salesTrends = await storage.getSalesTrendsUSD(userId, parseInt(period as string), exchangeRateService);
       res.json(salesTrends);
     } catch (error: any) {
       console.error('Error getting sales trends:', error);
@@ -2648,7 +2648,7 @@ Please respond with only a JSON object containing the translated fields. For key
         return res.status(401).json({ message: "User not authenticated" });
       }
       const { limit = '10' } = req.query;
-      const topPerformers = await storage.getTopPerformers(userId, parseInt(limit as string));
+      const topPerformers = await storage.getTopPerformersUSD(userId, parseInt(limit as string), exchangeRateService);
       res.json(topPerformers);
     } catch (error: any) {
       console.error('Error getting top performers:', error);
@@ -2662,7 +2662,7 @@ Please respond with only a JSON object containing the translated fields. For key
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
-      const marketplaceData = await storage.getMarketplaceBreakdown(userId);
+      const marketplaceData = await storage.getMarketplaceBreakdownUSD(userId, exchangeRateService);
       res.json(marketplaceData);
     } catch (error: any) {
       console.error('Error getting marketplace breakdown:', error);
