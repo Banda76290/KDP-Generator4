@@ -387,8 +387,8 @@ export default function Projects() {
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="w-8 h-8 p-0 hover:bg-gray-100">
-                            <Settings className="w-4 h-4" />
+                          <Button variant="ghost" size="sm" className="w-8 h-8 p-0 hover:bg-blue-50">
+                            <Settings className="w-4 h-4 text-[#38b6ff]" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -467,8 +467,8 @@ export default function Projects() {
                                   </Badge>
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-gray-100">
-                                        <Settings className="w-3 h-3" />
+                                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                                        <Settings className="w-3 h-3 text-[#38b6ff]" />
                                       </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">

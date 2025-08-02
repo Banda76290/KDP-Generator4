@@ -493,8 +493,8 @@ function BooksContent() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="hover:bg-gray-100">
-                        <Settings className="h-4 w-4" />
+                      <Button variant="ghost" size="sm" className="hover:bg-blue-50">
+                        <Settings className="h-4 w-4 text-[#38b6ff]" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -519,7 +519,7 @@ function BooksContent() {
                         disabled={translateBookMutation.isPending}
                       >
                         <Languages className="h-4 w-4 mr-2" />
-                        Auto-Translate
+                        Créer version traduite
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
