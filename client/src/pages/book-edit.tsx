@@ -596,7 +596,6 @@ export default function EditBook() {
   const [isPartOfSeries, setIsPartOfSeries] = useState(false);
   const [hasRestoredFromStorage, setHasRestoredFromStorage] = useState(false);
   const [selectedAuthorId, setSelectedAuthorId] = useState<string>("");
-  const [isCustomAuthor, setIsCustomAuthor] = useState(false);
   const [marketplaceCategories, setMarketplaceCategories] = useState<MarketplaceCategory[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [resetTriggers, setResetTriggers] = useState<{ [key: number]: number }>({});
@@ -610,14 +609,7 @@ export default function EditBook() {
     seriesTitle: string;
     seriesNumber: number | null;
   } | null>(null);
-  // Store original author data to restore when checkbox is unchecked
-  const [originalAuthorData, setOriginalAuthorData] = useState<{
-    authorPrefix: string;
-    authorFirstName: string;
-    authorMiddleName: string;
-    authorLastName: string;
-    authorSuffix: string;
-  } | null>(null);
+
   
   // ISBN Apply functionality states
   const [officialIsbnContentValue, setOfficialIsbnContentValue] = useState("");
@@ -900,8 +892,7 @@ export default function EditBook() {
       categories,
       contributors,
       isPartOfSeries,
-      selectedAuthorId,
-      isCustomAuthor
+      selectedAuthorId
     };
     
     const storageKey = `bookFormData_${bookId || 'new'}`;
@@ -936,7 +927,7 @@ export default function EditBook() {
       clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
-  }, [form, keywords, categories, contributors, isPartOfSeries, isCustomAuthor, selectedAuthorId, bookId]);
+  }, [form, keywords, categories, contributors, isPartOfSeries, selectedAuthorId, bookId]);
 
   // Clean up auto-saved data when leaving the page normally (not via series creation)
   useEffect(() => {
@@ -1020,9 +1011,7 @@ export default function EditBook() {
         if (savedSelectedAuthorId) {
           setSelectedAuthorId(savedSelectedAuthorId);
         }
-        if (typeof formData.isCustomAuthor === 'boolean') {
-          setIsCustomAuthor(formData.isCustomAuthor);
-        }
+
         
         // Restore description in WYSIWYG editor safely
         if (formFields.description) {
@@ -1180,23 +1169,12 @@ export default function EditBook() {
         
         if (matchingAuthor) {
           setSelectedAuthorId(matchingAuthor.id);
-          setIsCustomAuthor(false);
           console.log('Auto-detected matching author:', matchingAuthor);
         } else {
-          setIsCustomAuthor(true);
           setSelectedAuthorId("");
-          // Store original author data
-          setOriginalAuthorData({
-            authorPrefix: book.authorPrefix || "",
-            authorFirstName: book.authorFirstName || "",
-            authorMiddleName: book.authorMiddleName || "",
-            authorLastName: book.authorLastName || "",
-            authorSuffix: book.authorSuffix || ""
-          });
-          console.log('Custom author detected, storing original data');
+          console.log('No matching author found, keeping form fields');
         }
       } else {
-        setIsCustomAuthor(false);
         setSelectedAuthorId("");
       }
 
@@ -1466,17 +1444,6 @@ export default function EditBook() {
     if (authorId) {
       const selectedAuthor = authors.find(author => author.id === authorId);
       if (selectedAuthor) {
-        // Store current custom author data before overwriting
-        if (isCustomAuthor) {
-          setOriginalAuthorData({
-            authorPrefix: form.watch("authorPrefix") || "",
-            authorFirstName: form.watch("authorFirstName") || "",
-            authorMiddleName: form.watch("authorMiddleName") || "",
-            authorLastName: form.watch("authorLastName") || "",
-            authorSuffix: form.watch("authorSuffix") || ""
-          });
-        }
-        
         // Populate form fields with selected author data
         form.setValue("authorPrefix", selectedAuthor.prefix || "");
         form.setValue("authorFirstName", selectedAuthor.firstName || "");
@@ -1484,7 +1451,6 @@ export default function EditBook() {
         form.setValue("authorLastName", selectedAuthor.lastName || "");
         form.setValue("authorSuffix", selectedAuthor.suffix || "");
         setSelectedAuthorId(authorId);
-        setIsCustomAuthor(false);
       }
     }
   };
@@ -2439,112 +2405,52 @@ export default function EditBook() {
                       </p>
                     </div>
 
-                    {/* Checkbox to enable custom author */}
-                    <div className="flex items-start space-x-3">
-                      <Checkbox 
-                        id="isCustomAuthor"
-                        checked={isCustomAuthor}
-                        onCheckedChange={(checked) => {
-                          setIsCustomAuthor(!!checked);
-                          if (!checked) {
-                            // Store current custom author data before clearing
-                            const currentAuthorData = {
-                              authorPrefix: form.watch("authorPrefix") || "",
-                              authorFirstName: form.watch("authorFirstName") || "",
-                              authorMiddleName: form.watch("authorMiddleName") || "",
-                              authorLastName: form.watch("authorLastName") || "",
-                              authorSuffix: form.watch("authorSuffix") || ""
-                            };
-                            if (currentAuthorData.authorFirstName || currentAuthorData.authorLastName) {
-                              setOriginalAuthorData(currentAuthorData);
-                            }
-                            
-                            // Clear author fields
-                            form.setValue("authorPrefix", "");
-                            form.setValue("authorFirstName", "");
-                            form.setValue("authorMiddleName", "");
-                            form.setValue("authorLastName", "");
-                            form.setValue("authorSuffix", "");
-                            setSelectedAuthorId("");
-                          } else {
-                            // Restore original author data if available
-                            if (originalAuthorData) {
-                              form.setValue("authorPrefix", originalAuthorData.authorPrefix);
-                              form.setValue("authorFirstName", originalAuthorData.authorFirstName);
-                              form.setValue("authorMiddleName", originalAuthorData.authorMiddleName);
-                              form.setValue("authorLastName", originalAuthorData.authorLastName);
-                              form.setValue("authorSuffix", originalAuthorData.authorSuffix);
-                            }
-                            setSelectedAuthorId("");
-                          }
-                        }}
-                        className="mt-1"
-                      />
-                      <div className="flex-1">
-                        <Label htmlFor="isCustomAuthor" className="peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-medium text-[14px]">
-                          Use custom author (enter details manually)
-                        </Label>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Check this to enter author details manually instead of selecting from existing authors
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Author details - shown when custom author is enabled */}
-                    {isCustomAuthor && (
-                      <div className="bg-gray-50 p-4 rounded-md border space-y-4">
-                        <div className="space-y-2">
-                          <Label className="font-medium text-[16px] text-gray-700">Author Details</Label>
-                          <p className="text-sm text-gray-600">Enter the author's name components</p>
-                        </div>
-                        
-                        <div className="grid grid-cols-5 gap-3">
-                          <div className="space-y-2">
-                            <Label htmlFor="authorPrefix" className="text-sm font-medium">Prefix</Label>
-                            <Input
-                              id="authorPrefix"
-                              placeholder="Dr."
-                              {...form.register("authorPrefix")}
-                            />
+                    {/* Author selection or display */}
+                    {selectedAuthorId ? (
+                      // Show selected author with edit/remove buttons (like Series)
+                      <div className="bg-green-50 p-4 rounded-md border border-green-200">
+                        <div className="space-y-3">
+                          <Label className="font-medium text-[16px] text-gray-700">Author</Label>
+                          <div className="text-lg font-medium text-gray-900">
+                            {authors.find(a => a.id === selectedAuthorId)?.fullName || "Unknown Author"}
                           </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="authorFirstName" className="text-sm font-medium">First Name *</Label>
-                            <Input
-                              id="authorFirstName"
-                              placeholder="John"
-                              {...form.register("authorFirstName")}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="authorMiddleName" className="text-sm font-medium">Middle Name</Label>
-                            <Input
-                              id="authorMiddleName"
-                              placeholder="William"
-                              {...form.register("authorMiddleName")}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="authorLastName" className="text-sm font-medium">Last Name *</Label>
-                            <Input
-                              id="authorLastName"
-                              placeholder="Smith"
-                              {...form.register("authorLastName")}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="authorSuffix" className="text-sm font-medium">Suffix</Label>
-                            <Input
-                              id="authorSuffix"
-                              placeholder="Jr."
-                              {...form.register("authorSuffix")}
-                            />
+                          <div className="flex gap-3">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const selectedAuthor = authors.find(a => a.id === selectedAuthorId);
+                                if (selectedAuthor) {
+                                  sessionStorage.setItem('returnToBookEdit', bookId || 'new');
+                                  saveFormDataToSession();
+                                  window.location.href = `/authors/edit/${selectedAuthor.id}`;
+                                }
+                              }}
+                            >
+                              Edit author details
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                // Clear author selection and form fields
+                                setSelectedAuthorId("");
+                                form.setValue("authorPrefix", "");
+                                form.setValue("authorFirstName", "");
+                                form.setValue("authorMiddleName", "");
+                                form.setValue("authorLastName", "");
+                                form.setValue("authorSuffix", "");
+                              }}
+                            >
+                              Remove from authors
+                            </Button>
                           </div>
                         </div>
                       </div>
-                    )}
-
-                    {/* Author selection - shown when custom author is disabled */}
-                    {!isCustomAuthor && (
+                    ) : (
+                      // Show author selection dropdown (when no author selected)
                       <div className="space-y-4">
                         <div className="flex gap-2">
                           <div className="flex-1">
@@ -2577,26 +2483,12 @@ export default function EditBook() {
                               variant="outline" 
                               size="sm"
                               onClick={() => {
-                                const currentAuthorId = selectedAuthorId;
-                                if (currentAuthorId) {
-                                  // If an author is selected, edit that author
-                                  const selectedAuthor = authors.find(a => a.id === currentAuthorId);
-                                  if (selectedAuthor) {
-                                    sessionStorage.setItem('returnToBookEdit', bookId || 'new');
-                                    saveFormDataToSession();
-                                    window.location.href = `/authors/edit/${selectedAuthor.id}`;
-                                  } else {
-                                    window.location.href = '/authors';
-                                  }
-                                } else {
-                                  // No author selected - create a new author
-                                  sessionStorage.setItem('returnToBookEdit', bookId || 'new');
-                                  saveFormDataToSession();
-                                  window.location.href = '/authors/create';
-                                }
+                                sessionStorage.setItem('returnToBookEdit', bookId || 'new');
+                                saveFormDataToSession();
+                                window.location.href = '/authors/create';
                               }}
                             >
-                              {selectedAuthorId ? "Edit author" : "Create author"}
+                              Create author
                             </Button>
                           </div>
                         </div>
