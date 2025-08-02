@@ -2408,7 +2408,7 @@ export default function EditBook() {
                     {/* Author selection or display */}
                     {selectedAuthorId ? (
                       // Show selected author with edit/remove buttons (like Series)
-                      (<div className="bg-green-50 p-4 rounded-md border border-green-200">
+                      (<div className="p-4 rounded-md border border-green-200 bg-[#f9fafb]">
                         <div className="space-y-3">
                           <Label className="font-medium text-[16px] text-gray-700">Author</Label>
                           <div className="text-lg font-medium text-gray-900">
