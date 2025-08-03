@@ -5,6 +5,7 @@
 ✅ Configuration de port (forcé à 5000)  
 ✅ Fichiers statiques préparés automatiquement  
 ✅ Script de préparation de déploiement créé  
+✅ Domaine de déploiement ajouté à l'authentification (kdpgen-dw.replit.app)  
 
 ## Si le Déploiement Échoue Encore
 
