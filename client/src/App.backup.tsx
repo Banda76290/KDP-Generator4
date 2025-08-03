@@ -91,59 +91,12 @@ function Router() {
   );
 }
 
-function SimpleRouter() {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  return (
-    <Switch>
-      <Route path="/" component={isLoading || !isAuthenticated ? Landing : Dashboard} />
-      <Route path="/projects" component={Projects} />
-      <Route path="/books" component={Books} />
-      <Route path="/analytics" component={Analytics} />
-      <Route path="/analytics-comparison" component={AnalyticsComparison} />
-      <Route path="/analytics-detailed" component={AnalyticsDetailed} />
-      <Route path="/kdp-reports" component={KDPReports} />
-      <Route path="/ai-assistant" component={AIAssistant} />
-      <Route path="/subscription" component={Subscription} />
-      <Route path="/settings" component={Settings} />
-      <Route path="/admin" component={AdminDashboard} />
-      <Route path="/admin/users" component={AdminUsers} />
-      <Route path="/admin/config" component={AdminConfig} />
-      <Route path="/admin/audit" component={AdminAudit} />
-      <Route path="/admin/blog-posts" component={AdminBlogPosts} />
-      <Route path="/admin/blog-categories" component={AdminBlogCategories} />
-      <Route path="/admin/system" component={AdminSystem} />
-      <Route path="/admin/prompts" component={AdminPrompts} />
-      <Route path="/admin/cron" component={AdminCron} />
-      <Route path="/admin/ai-config" component={AIConfig} />
-      <Route path="/admin/ai-variables" component={AIVariables} />
-      <Route path="/ai-functions" component={AIFunctions} />
-      <Route path="/projects/create" component={ProjectCreate} />
-      <Route path="/project-create-simple" component={ProjectCreate} />
-      <Route path="/projects/edit/:id" component={ProjectEdit} />
-      <Route path="/books/create" component={BookEdit} />
-      <Route path="/books/edit/:bookId" component={BookEdit} />
-      <Route path="/authors" component={AuthorsListPage} />
-      <Route path="/authors/create" component={AuthorCreatePage} />
-      <Route path="/authors/:authorId" component={AuthorViewPage} />
-      <Route path="/manage-series" component={ManageSeries} />
-      <Route path="/series-create" component={SeriesCreate} />
-      <Route path="/series-setup" component={SeriesSetup} />
-      <Route path="/series-setup/:seriesId" component={SeriesSetup} />
-      <Route path="/series-edit/:seriesId" component={SeriesEdit} />
-      <Route path="/exchange-rates" component={ExchangeRates} />
-      <Route path="/import-management" component={ImportManagement} />
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
-
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
-        <SimpleRouter />
+        <Router />
       </TooltipProvider>
     </QueryClientProvider>
   );
