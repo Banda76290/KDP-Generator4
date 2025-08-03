@@ -1,0 +1,41 @@
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+[15:45:23] ℹ️ [SYSTEM] 🚀 Démarrage du serveur KDP Generator
+[15:45:23] ℹ️ [SYSTEM] 🔧 Configuration des routes API...
+Setting up development auth - REPLIT_DOMAINS not configured
+Development user created with superadmin privileges
+[15:45:25] ℹ️ [AUTH] 🔐 Authentification configurée
+[CRON] Starting exchange rate update service
+[EXCHANGE] Updating exchange rates...
+[EXCHANGE] Fetching rates from: https://api.exchangerate-api.com/v4/latest/USD
+[CRON] Exchange rate updates scheduled every 24 hours
+3:45:25 PM [express] serving on port 5000
+[EXCHANGE] Response status: 200
+[EXCHANGE] Successfully fetched 163 exchange rates
+Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Development mode - bypassing auth, REPLIT_DOMAINS: c49d7141-855c-44df-b3e9-379c460dc47a-00-2jnydyw4oplp2.picard.replit.dev
+3:45:35 PM [express] GET /api/auth/user 200 in 2282ms :: {"id":"dev-user-123","email":"dev@example.c…
+Development mode - bypassing auth, REPLIT_DOMAINS: c49d7141-855c-44df-b3e9-379c460dc47a-00-2jnydyw4oplp2.picard.replit.dev
+Development mode - bypassing auth, REPLIT_DOMAINS: c49d7141-855c-44df-b3e9-379c460dc47a-00-2jnydyw4oplp2.picard.replit.dev
+3:45:36 PM [express] GET /api/dashboard/stats 304 in 358ms :: {"activeProjects":0,"monthlyRevenue":0…
+3:45:38 PM [express] GET /api/projects 304 in 2540ms :: [{"id":"aefb0660-6273-4ef4-828f-732cb9070804…
+[EXCHANGE] Successfully updated 163 exchange rates
+Development mode - bypassing auth, REPLIT_DOMAINS: c49d7141-855c-44df-b3e9-379c460dc47a-00-2jnydyw4oplp2.picard.replit.dev
+Development mode - bypassing auth, REPLIT_DOMAINS: c49d7141-855c-44df-b3e9-379c460dc47a-00-2jnydyw4oplp2.picard.replit.dev
+Development mode - bypassing auth, REPLIT_DOMAINS: c49d7141-855c-44df-b3e9-379c460dc47a-00-2jnydyw4oplp2.picard.replit.dev
+Development mode - bypassing auth, REPLIT_DOMAINS: c49d7141-855c-44df-b3e9-379c460dc47a-00-2jnydyw4oplp2.picard.replit.dev
+3:46:27 PM [express] GET /api/auth/user 200 in 193ms :: {"id":"dev-user-123","email":"dev@example.co…
+3:46:27 PM [express] GET /api/books/3cc31bef-4114-4589-8cfd-ac348b5f0ebb 304 in 289ms :: {"id":"3cc3…
+Development mode - bypassing auth, REPLIT_DOMAINS: c49d7141-855c-44df-b3e9-379c460dc47a-00-2jnydyw4oplp2.picard.replit.dev
+3:46:27 PM [express] GET /api/series 304 in 434ms :: [{"id":"1e699661-ab19-4675-9beb-8db85e0887c8","…
+3:46:27 PM [express] GET /api/projects 304 in 504ms :: [{"id":"aefb0660-6273-4ef4-828f-732cb9070804"…
+3:46:27 PM [express] GET /api/authors 200 in 169ms :: [{"id":"53b3472a-0ddb-4735-8b68-12b683f4c542",…
+Development mode - bypassing auth, REPLIT_DOMAINS: c49d7141-855c-44df-b3e9-379c460dc47a-00-2jnydyw4oplp2.picard.replit.dev
+3:50:23 PM [express] GET /api/auth/user 304 in 2595ms :: {"id":"dev-user-123","email":"dev@example.c…
+Development mode - bypassing auth, REPLIT_DOMAINS: c49d7141-855c-44df-b3e9-379c460dc47a-00-2jnydyw4oplp2.picard.replit.dev
+Development mode - bypassing auth, REPLIT_DOMAINS: c49d7141-855c-44df-b3e9-379c460dc47a-00-2jnydyw4oplp2.picard.replit.dev
+3:50:24 PM [express] GET /api/dashboard/stats 304 in 326ms :: {"activeProjects":0,"monthlyRevenue":0…
+3:50:28 PM [express] GET /api/projects 304 in 4485ms :: [{"id":"aefb0660-6273-4ef4-828f-732cb9070804…
