@@ -123,7 +123,7 @@ export async function setupAuth(app: Express) {
   const customDomainsEnv = process.env.CUSTOM_DOMAINS?.split(",") || [];
   
   // Default custom domains for this application
-  const defaultCustomDomains = ["kdpgenerator.com", "kdpgen-dw.replit.app"];
+  const defaultCustomDomains = ["kdpgenerator.com"];
   
   // Combine all domains and remove duplicates
   const allDomains = [...domains, ...customDomainsEnv, ...defaultCustomDomains];

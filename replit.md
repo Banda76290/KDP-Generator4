@@ -45,7 +45,6 @@ The application follows a modern full-stack architecture with clear separation b
 - **AI Prompt Integration System**: Complete integration between AI prompt administration and execution systems. Database-configured prompts automatically appear in AI Functions interface and are used for content generation. Hybrid system combines database templates with static fallback functions, with database templates taking priority.
 - **Security Enhancements**: XSS vulnerability patched in author biography editor (August 2025). Replaced unsafe innerHTML assignment with DOMParser for secure HTML sanitization without script execution risk.
 - **Expert Analytics Method**: Implemented advanced KDP revenue analysis using detailed sheet extraction method (August 2025). New system extracts data from eBook Royalty + Paperback Royalty + Hardcover Royalty sheets only, excluding Combined Sales duplicates. Preserves original currency amounts and converts to EUR using official BCE exchange rates. Results validated against external expert analysis showing ~9,757 EUR total vs previous incorrect ~3,042 calculations.
-- **Deployment Fix (August 2025)**: Resolved critical deployment issues including React Refresh preamble errors, port configuration conflicts, and static file serving. Created automated deployment preparation scripts and fixed server configuration to ensure successful Replit deployments on port 5000.
 
 ## External Dependencies
 

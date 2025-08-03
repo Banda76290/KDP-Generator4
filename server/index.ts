@@ -66,13 +66,11 @@ app.use((req, res, next) => {
   }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 for both dev and production.
+  // Other ports are firewalled. Default to 5000 for dev, 3000 for production.
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  const defaultPort = '5000';
-  // Always use port 5000 to match Replit deployment expectations
-  // Force port 5000 for both development and production to ensure Replit compatibility
-  const port = 5000;
+  const defaultPort = process.env.NODE_ENV === 'production' ? '3000' : '5000';
+  const port = parseInt(process.env.PORT || defaultPort, 10);
   server.listen({
     port,
     host: "0.0.0.0",
