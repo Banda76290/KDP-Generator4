@@ -59,7 +59,9 @@ app.use((req, res, next) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  // Force development mode when running with tsx
+  const isDevelopment = process.env.NODE_ENV === "development" || process.argv[1]?.includes('tsx');
+  if (isDevelopment) {
     await setupVite(app, server);
   } else {
     serveStatic(app);
@@ -69,13 +71,10 @@ app.use((req, res, next) => {
   // Other ports are firewalled. Default to 5000 for dev, 3000 for production.
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  const defaultPort = process.env.NODE_ENV === 'production' ? '3000' : '5000';
+  // In Replit, use PORT env var or default to 5000 for development
+  const defaultPort = '5000';
   const port = parseInt(process.env.PORT || defaultPort, 10);
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
+  server.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
   });
 })();
