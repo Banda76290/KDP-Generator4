@@ -57,6 +57,7 @@ The application follows a modern full-stack architecture with clear separation b
 ### Production Deployment
 - **Database Seeding**: Automatic initialization with 249 marketplace categories from `complete-categories.sql` on first startup.
 - **Replit Deployments**: Configured for autoscale deployment with build/run commands optimized for database seeding.
+- **Build Dependencies**: All Vite, TypeScript, Tailwind, and related build tools moved to production dependencies (August 2025) to resolve deployment "vite command not found" errors. Build process successfully generates frontend and backend assets for production deployment.
 
 ### Key Libraries
 - **Frontend**: React, TanStack Query, React Hook Form, Recharts, Radix UI.
