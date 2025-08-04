@@ -65,9 +65,9 @@ class AIService {
         tokensUsed
       };
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("OpenAI API error:", error);
-      throw new Error(`AI generation failed: ${error.message}`);
+      throw new Error(`AI generation failed: ${error.message || 'Unknown error'}`);
     }
   }
 
@@ -84,9 +84,9 @@ class AIService {
       });
 
       return { url: response.data[0].url || "" };
-    } catch (error) {
+    } catch (error: any) {
       console.error("OpenAI image generation error:", error);
-      throw new Error(`Cover generation failed: ${error.message}`);
+      throw new Error(`Cover generation failed: ${error.message || 'Unknown error'}`);
     }
   }
 
@@ -115,9 +115,9 @@ class AIService {
         content,
         tokensUsed
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error("OpenAI text improvement error:", error);
-      throw new Error(`Text improvement failed: ${error.message}`);
+      throw new Error(`Text improvement failed: ${error.message || 'Unknown error'}`);
     }
   }
 
