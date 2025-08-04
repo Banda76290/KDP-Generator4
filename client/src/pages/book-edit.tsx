@@ -1923,7 +1923,7 @@ export default function EditBook() {
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {/* Tab Navigation */}
-          <div className="bg-white border-b border-gray-200 mb-8 relative z-40">
+          <div className="bg-white border-b border-gray-200 mb-8 relative">
             <nav className="-mb-px flex space-x-0">
               <button
                 type="button"
