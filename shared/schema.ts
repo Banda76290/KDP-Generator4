@@ -550,7 +550,7 @@ export const salesEvents = pgTable("sales_events", {
   
   // Processing metadata
   isDuplicate: boolean("is_duplicate").default(false),
-  duplicateOfId: varchar("duplicate_of_id"),
+  duplicateOfId: varchar("duplicate_of_id").references(() => salesEvents.id),
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

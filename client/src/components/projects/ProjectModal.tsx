@@ -22,6 +22,10 @@ import DynamicFields from "@/components/forms/DynamicFields";
 import type { ProjectWithRelations } from "@shared/schema";
 
 const projectFormSchema = insertProjectSchema.extend({
+  contributors: z.array(z.object({
+    name: z.string().min(1, "Name is required"),
+    role: z.string().min(1, "Role is required"),
+  })).optional(),
   formats: z.array(z.enum(["ebook", "paperback", "hardcover"])).min(1, "Select at least one format"),
 });
 
@@ -47,10 +51,11 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
       description: "",
       categories: [],
       keywords: [],
-      useAi: false,
+      useAI: false,
       aiPrompt: "",
       aiContentType: "",
       formats: [],
+      contributors: [],
     },
   });
 
@@ -63,13 +68,13 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
         description: project.description || "",
         categories: project.categories || [],
         keywords: project.keywords || [],
-        useAi: project.useAi || false,
+        useAI: project.useAI || false,
         aiPrompt: project.aiPrompt || "",
         aiContentType: project.aiContentType || "",
-        formats: (project.formats || []) as ("ebook" | "paperback" | "hardcover")[],
-
+        formats: project.formats || [],
+        contributors: project.contributors?.map(c => ({ name: c.name, role: c.role })) || [],
       });
-      setUseAI(project.useAi || false);
+      setUseAI(project.useAI || false);
     } else {
       form.reset({
         title: "",
@@ -77,11 +82,11 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
         description: "",
         categories: [],
         keywords: [],
-        useAi: false,
+        useAI: false,
         aiPrompt: "",
         aiContentType: "",
         formats: [],
-
+        contributors: [],
       });
       setUseAI(false);
     }
@@ -89,7 +94,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
 
   const createMutation = useMutation({
     mutationFn: async (data: ProjectFormData) => {
-      return await apiRequest("/api/projects", { method: "POST", body: data as any });
+      return await apiRequest("POST", "/api/projects", data);
     },
     onSuccess: async () => {
       toast({
@@ -122,7 +127,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
 
   const updateMutation = useMutation({
     mutationFn: async (data: ProjectFormData) => {
-      return await apiRequest(`/api/projects/${project?.id}`, { method: "PUT", body: data as any });
+      return await apiRequest("PUT", `/api/projects/${project?.id}`, data);
     },
     onSuccess: async () => {
       toast({
@@ -154,15 +159,10 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
   });
 
   const onSubmit = (data: ProjectFormData) => {
-    const formData = {
-      ...data,
-      userId: user?.id || "",
-    };
-    
-    if (project && project.id) {
-      updateMutation.mutate(formData);
+    if (project) {
+      updateMutation.mutate(data);
     } else {
-      createMutation.mutate(formData);
+      createMutation.mutate(data);
     }
   };
 
@@ -227,7 +227,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
                   checked={useAI}
                   onCheckedChange={(checked) => {
                     setUseAI(checked);
-                    form.setValue("useAi", checked);
+                    form.setValue("useAI", checked);
                   }}
                   disabled={!isPremiumUser}
                 />
@@ -274,7 +274,46 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
             </div>
           )}
 
-
+          {/* Contributors Section */}
+          <DynamicFields
+            label="Contributors"
+            fields={form.watch("contributors") || []}
+            onFieldsChange={(fields) => form.setValue("contributors", fields)}
+            renderField={(field, index, updateField, removeField) => (
+              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                <Input
+                  value={field.name}
+                  onChange={(e) => updateField(index, { ...field, name: e.target.value })}
+                  placeholder="Contributor name"
+                  className="flex-1"
+                />
+                <Select
+                  value={field.role}
+                  onValueChange={(value) => updateField(index, { ...field, role: value })}
+                >
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="author">Author</SelectItem>
+                    <SelectItem value="co-author">Co-author</SelectItem>
+                    <SelectItem value="editor">Editor</SelectItem>
+                    <SelectItem value="illustrator">Illustrator</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeField(index)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+            defaultField={{ name: "", role: "" }}
+          />
 
           {/* Format Selection */}
           <div className="space-y-4">
