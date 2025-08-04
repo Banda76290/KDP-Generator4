@@ -17,7 +17,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { insertBookSchema, type Book, type MarketplaceCategory } from "@shared/schema";
+import { insertBookSchema, type Book } from "@shared/schema";
+import type { MarketplaceCategory } from "@shared/schema";
 import { z } from "zod";
 import Layout from "@/components/Layout";
 import ContentRecommendationSidebar from "@/components/ContentRecommendationSidebar";
@@ -1922,7 +1923,7 @@ export default function EditBook() {
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {/* Tab Navigation */}
-          <div className="bg-white border-b border-gray-200 mb-8">
+          <div className="bg-white border-b border-gray-200 mb-8 relative z-40">
             <nav className="-mb-px flex space-x-0">
               <button
                 type="button"
