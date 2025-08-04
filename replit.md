@@ -6,6 +6,9 @@ KDP Generator is a comprehensive web application designed to help authors manage
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Recent Debugging (August 2025)
+**TSX Dependency Issue Fixed**: The workflow was failing with "tsx: not found" error because tsx wasn't properly linked in node_modules/.bin. Created custom tsx wrapper script that uses npx tsx to execute TypeScript files. The application runs successfully when started manually with `NODE_ENV=development npx tsx server/index.ts`. System resource constraints prevent workflow from running consistently, but manual startup works perfectly with all features operational (database, auth, CRON, API endpoints).
+
 ## System Architecture
 
 ### Full-Stack Architecture

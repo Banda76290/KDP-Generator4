@@ -2,17 +2,6 @@
 
 echo "🚀 Starting KDP Generator development server..."
 
-# Build the application first
-echo "📦 Building application..."
-npm run build
-
-if [ $? -eq 0 ]; then
-    echo "✅ Build completed successfully"
-    echo "🌟 Starting development server..."
-    
-    # Run in development mode
-    NODE_ENV=development node dist/index.js
-else
-    echo "❌ Build failed"
-    exit 1
-fi
+# Use npx tsx directly for development
+echo "🌟 Starting development server with tsx..."
+NODE_ENV=development npx tsx server/index.ts

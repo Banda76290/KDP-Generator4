@@ -1,48 +1,24 @@
 #!/usr/bin/env node
 
-// Simple development server script to work around tsx dependency issue
-import { spawn } from 'child_process';
-import fs from 'fs';
-import path from 'path';
+// Development server wrapper to handle tsx execution
+const { spawn } = require('child_process');
+const path = require('path');
 
-console.log('🚀 Starting KDP Generator development server...');
+// Set environment variables
+process.env.NODE_ENV = 'development';
 
-// Function to build and run the server
-function buildAndRun() {
-  console.log('📦 Building application...');
-  
-  const buildProcess = spawn('npm', ['run', 'build'], { stdio: 'inherit' });
-  
-  buildProcess.on('close', (code) => {
-    if (code === 0) {
-      console.log('✅ Build completed successfully');
-      console.log('🌟 Starting server...');
-      
-      // Set environment variable and run the built server
-      const serverProcess = spawn('node', ['dist/index.js'], { 
-        stdio: 'inherit',
-        env: { ...process.env, NODE_ENV: 'development' }
-      });
-      
-      serverProcess.on('close', (serverCode) => {
-        console.log(`Server exited with code ${serverCode}`);
-      });
-      
-      serverProcess.on('error', (err) => {
-        console.error('Server error:', err);
-      });
-      
-    } else {
-      console.error(`❌ Build failed with code ${code}`);
-      process.exit(1);
-    }
-  });
-  
-  buildProcess.on('error', (err) => {
-    console.error('Build error:', err);
-    process.exit(1);
-  });
-}
+// Run tsx with npx to ensure it's available
+const serverPath = path.join(__dirname, 'server', 'index.ts');
+const child = spawn('npx', ['tsx', serverPath], {
+  stdio: 'inherit',
+  env: process.env
+});
 
-// Start the build and run process
-buildAndRun();
+child.on('error', (error) => {
+  console.error('Failed to start development server:', error);
+  process.exit(1);
+});
+
+child.on('exit', (code) => {
+  process.exit(code);
+});
