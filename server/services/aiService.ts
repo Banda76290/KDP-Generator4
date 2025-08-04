@@ -173,14 +173,14 @@ class AIService {
             const recommendation = await storage.createContentRecommendation({
               userId,
               bookId: book.id,
-              type: recType.type,
+              recommendationType: recType.type,
               title: recType.title,
-              content: response.suggestion,
+              suggestion: response.suggestion,
               reasoning: response.reasoning,
               confidence: Math.min(1, Math.max(0, response.confidence || 0.7)),
               aiModel: "gpt-4o",
-              tokensUsed: tokensUsed.toString(),
-              metadata: JSON.stringify({ originalValue: this.getOriginalValue(book, recType.type) })
+              tokensUsed: tokensUsed,
+              metadata: { originalValue: this.getOriginalValue(book, recType.type) }
             });
 
             recommendations.push(recommendation);
