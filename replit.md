@@ -6,9 +6,6 @@ KDP Generator is a comprehensive web application designed to help authors manage
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
-## Recent Debugging (August 2025)
-**TSX Dependency Issue Fixed**: The workflow was failing with "tsx: not found" error because tsx wasn't properly linked in node_modules/.bin. Created custom tsx wrapper script that uses npx tsx to execute TypeScript files. The application runs successfully when started manually with `NODE_ENV=development npx tsx server/index.ts`. System resource constraints prevent workflow from running consistently, but manual startup works perfectly with all features operational (database, auth, CRON, API endpoints).
-
 ## System Architecture
 
 ### Full-Stack Architecture
@@ -60,7 +57,6 @@ The application follows a modern full-stack architecture with clear separation b
 ### Production Deployment
 - **Database Seeding**: Automatic initialization with 249 marketplace categories from `complete-categories.sql` on first startup.
 - **Replit Deployments**: Configured for autoscale deployment with build/run commands optimized for database seeding.
-- **Build Dependencies**: All Vite, TypeScript, Tailwind, and related build tools moved to production dependencies (August 2025) to resolve deployment "vite command not found" errors. Build process successfully generates frontend and backend assets for production deployment.
 
 ### Key Libraries
 - **Frontend**: React, TanStack Query, React Hook Form, Recharts, Radix UI.

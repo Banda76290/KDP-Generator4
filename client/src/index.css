@@ -236,7 +236,15 @@
 
 .layout-main {
   @apply flex-1 min-w-0 p-4 md:p-6;
-  /* No margin needed - sidebar is now in normal flex flow */
+  /* Responsive margin for sidebar - automatically handled by CSS */
+  margin-left: 0; /* Mobile: no sidebar margin */
+}
+
+/* Desktop: sidebar margin only when sidebar is visible */
+@media (min-width: 768px) {
+  .layout-main {
+    margin-left: 256px; /* 64 * 4 = 256px (w-64) */
+  }
 }
 
 /* Future-proof: Any new page using Layout component will automatically:

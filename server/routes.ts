@@ -620,7 +620,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Legacy AI endpoint removed - using new configured functions system
+  // AI Assistant routes
+  app.post('/api/ai/generate', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const user = await storage.getUser(userId);
+      
+      // Temporarily allow AI access for all users for testing
+      // if (user?.subscriptionTier === 'free') {
+      //   return res.status(403).json({ message: "AI features require a premium subscription" });
+      // }
+
+      const { type, prompt, title } = req.body;
+      if (!type || !prompt) {
+        return res.status(400).json({ message: "Type and prompt are required" });
+      }
+
+      const result = await aiService.generateContent(type, prompt, title);
+      
+      // Save generation to database
+      await storage.addAiGeneration({
+        userId,
+        projectId: req.body.projectId || null,
+        type,
+        prompt,
+        response: result.content,
+        tokensUsed: result.tokensUsed,
+      });
+
+      res.json(result);
+    } catch (error) {
+      console.error("Error generating AI content:", error);
+      res.status(500).json({ message: "Failed to generate AI content", error: (error as Error).message });
+    }
+  });
 
   app.get('/api/ai/generations', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {

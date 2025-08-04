@@ -15,7 +15,7 @@ export default function Sidebar() {
   const { isAdmin } = useAdmin();
 
   return (
-    <aside className="bg-white dark:bg-background w-64 border-r border-border overflow-y-auto hidden md:block flex-shrink-0">
+    <aside className="bg-white dark:bg-background w-64 border-r border-border fixed left-0 top-16 bottom-0 overflow-y-auto hidden md:block">
       <nav className="p-4 space-y-2 pb-8">
         {navigation.map((item) => {
           const isActive = location === item.href;

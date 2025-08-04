@@ -65,17 +65,13 @@ class AIService {
         tokensUsed
       };
 
-    } catch (error: any) {
+    } catch (error) {
       console.error("OpenAI API error:", error);
-      throw new Error(`AI generation failed: ${error.message || 'Unknown error'}`);
+      throw new Error(`AI generation failed: ${error.message}`);
     }
   }
 
   async generateBookCover(prompt: string, bookTitle?: string): Promise<{ url: string }> {
-    if (!openai) {
-      throw new Error("OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables.");
-    }
-    
     try {
       const coverPrompt = `Create a professional book cover design for "${bookTitle || "a book"}". ${prompt}. The image should be suitable for a book cover with clear title space and professional appearance.`;
 
@@ -87,18 +83,14 @@ class AIService {
         quality: "standard",
       });
 
-      return { url: response.data?.[0]?.url || "" };
-    } catch (error: any) {
+      return { url: response.data[0].url || "" };
+    } catch (error) {
       console.error("OpenAI image generation error:", error);
-      throw new Error(`Cover generation failed: ${error.message || 'Unknown error'}`);
+      throw new Error(`Cover generation failed: ${error.message}`);
     }
   }
 
   async improvText(text: string, improvements: string): Promise<AIGenerationResult> {
-    if (!openai) {
-      throw new Error("OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables.");
-    }
-    
     try {
       const completion = await openai.chat.completions.create({
         model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
@@ -123,9 +115,9 @@ class AIService {
         content,
         tokensUsed
       };
-    } catch (error: any) {
+    } catch (error) {
       console.error("OpenAI text improvement error:", error);
-      throw new Error(`Text improvement failed: ${error.message || 'Unknown error'}`);
+      throw new Error(`Text improvement failed: ${error.message}`);
     }
   }
 
@@ -179,7 +171,7 @@ class AIService {
               reasoning: response.reasoning,
               confidence: Math.min(1, Math.max(0, response.confidence || 0.7)),
               aiModel: "gpt-4o",
-              tokensUsed: tokensUsed,
+              tokensUsed,
               metadata: { originalValue: this.getOriginalValue(book, recType.type) }
             });
 
@@ -194,7 +186,7 @@ class AIService {
       return recommendations;
     } catch (error) {
       console.error("Error generating content recommendations:", error);
-      throw new Error(`Content recommendations generation failed: ${(error as Error).message}`);
+      throw new Error(`Content recommendations generation failed: ${error.message}`);
     }
   }
 
