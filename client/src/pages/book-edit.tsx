@@ -1287,39 +1287,42 @@ export default function EditBook() {
       console.log('ProjectId being sent:', formattedData.projectId);
       
       if (isCreating) {
-        const createdBook = await apiRequest("POST", `/api/books`, formattedData);
+        const createdBook = await apiRequest(`/api/books`, { method: "POST", body: formattedData });
         console.log('Received created book response:', createdBook);
         
         // Save contributors after book creation
         if (contributors.length > 0) {
           for (const contributor of contributors) {
-            await apiRequest("POST", "/api/contributors", {
-              bookId: createdBook.id,
-              projectId: formattedData.projectId, // Add projectId for database compatibility
-              name: `${contributor.firstName} ${contributor.lastName}`.trim(), // Add name field for database compatibility
-              role: contributor.role,
-              prefix: contributor.prefix || null,
-              firstName: contributor.firstName,
-              middleName: contributor.middleName || null,
-              lastName: contributor.lastName,
-              suffix: contributor.suffix || null,
+            await apiRequest("/api/contributors", {
+              method: "POST",
+              body: {
+                bookId: createdBook.id,
+                projectId: formattedData.projectId, // Add projectId for database compatibility
+                name: `${contributor.firstName} ${contributor.lastName}`.trim(), // Add name field for database compatibility
+                role: contributor.role,
+                prefix: contributor.prefix || null,
+                firstName: contributor.firstName,
+                middleName: contributor.middleName || null,
+                lastName: contributor.lastName,
+                suffix: contributor.suffix || null,
+              }
             });
           }
         }
         
         return { book: createdBook, shouldNavigate: data.shouldNavigate, nextTab: data.nextTab };
       } else {
-        const updatedBook = await apiRequest("PATCH", `/api/books/${bookId}`, formattedData);
+        const updatedBook = await apiRequest(`/api/books/${bookId}`, { method: "PATCH", body: formattedData });
         console.log('Received updated book response:', updatedBook);
         
         // Update contributors - first delete existing ones, then add new ones
         if (bookId) {
           // Get existing contributors to delete them
           try {
-            const existingContributors = await apiRequest("GET", `/api/contributors/book/${bookId}`);
+            const existingContributors = await apiRequest(`/api/contributors/book/${bookId}`, { method: "GET" });
             if (existingContributors && existingContributors.length > 0) {
               for (const contrib of existingContributors) {
-                await apiRequest("DELETE", `/api/contributors/${contrib.id}/${bookId}`);
+                await apiRequest(`/api/contributors/${contrib.id}/${bookId}`, { method: "DELETE" });
               }
             }
           } catch (error) {
@@ -1343,7 +1346,7 @@ export default function EditBook() {
                 suffix: contributor.suffix || null,
               };
               console.log('Sending contributor data:', contributorData);
-              await apiRequest("POST", "/api/contributors", contributorData);
+              await apiRequest("/api/contributors", { method: "POST", body: contributorData });
             }
           }
         }
@@ -1398,7 +1401,7 @@ export default function EditBook() {
 
   const deleteBook = useMutation({
     mutationFn: async () => {
-      return await apiRequest("DELETE", `/api/books/${bookId}`);
+      return await apiRequest(`/api/books/${bookId}`, { method: "DELETE" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/books"] });
@@ -1528,8 +1531,11 @@ export default function EditBook() {
     }
 
     try {
-      const response = await apiRequest("PATCH", `/api/books/${bookId}`, {
-        isbn: officialIsbnContentValue.trim()
+      const response = await apiRequest(`/api/books/${bookId}`, {
+        method: "PATCH",
+        body: {
+          isbn: officialIsbnContentValue.trim()
+        }
       });
 
       if (response) {
@@ -1634,7 +1640,7 @@ export default function EditBook() {
       console.log('Derived format:', derivedFormat);
       
       const formatParam = derivedFormat ? `?format=${encodeURIComponent(derivedFormat)}` : '';
-      const response = await apiRequest("GET", `/api/marketplace-categories/${encodeURIComponent(marketplace)}${formatParam}`);
+      const response = await apiRequest(`/api/marketplace-categories/${encodeURIComponent(marketplace)}${formatParam}`, { method: "GET" });
       setMarketplaceCategories(response || []);
     } catch (error) {
       console.error("Error loading marketplace categories:", error);
@@ -1657,7 +1663,7 @@ export default function EditBook() {
     try {
       const derivedFormat = deriveBookFormat();
       const formatParam = derivedFormat ? `?format=${encodeURIComponent(derivedFormat)}` : '';
-      const response = await apiRequest("GET", `/api/marketplace-categories/${encodeURIComponent(newMarketplace)}${formatParam}`);
+      const response = await apiRequest(`/api/marketplace-categories/${encodeURIComponent(newMarketplace)}${formatParam}`, { method: "GET" });
       const newMarketplaceCategories: MarketplaceCategory[] = response || [];
       const validCategoryPaths = newMarketplaceCategories.map(cat => cat.categoryPath);
       
@@ -2241,7 +2247,7 @@ export default function EditBook() {
                           if (currentSeriesTitle) {
                             try {
                               // Récupérer toutes les séries pour trouver l'ID correspondant
-                              const seriesResponse = await apiRequest("GET", "/api/series");
+                              const seriesResponse = await apiRequest("/api/series", { method: "GET" });
                               const currentSeries = seriesResponse.find((s: any) => s.title === currentSeriesTitle);
                               
                               if (currentSeries) {
