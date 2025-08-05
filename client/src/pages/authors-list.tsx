@@ -11,10 +11,10 @@ import type { AuthorWithRelations } from "@shared/schema";
 export default function AuthorsListPage() {
   const [, setLocation] = useLocation();
 
-  // Fetch authors with counts
+  // Fetch authors
   const { data: authors = [], isLoading: authorsLoading } = useQuery({
-    queryKey: ["/api/authors", "withCounts"],
-    queryFn: () => apiRequest("GET", "/api/authors?withCounts=true"),
+    queryKey: ["/api/authors"],
+    queryFn: () => apiRequest("GET", "/api/authors"),
   });
 
   return (
@@ -49,15 +49,13 @@ export default function AuthorsListPage() {
               </Button>
             </div>
           ) : (
-            authors.map((author: AuthorWithRelations & { bookCount: number; projectCount: number }) => (
+            authors.map((author: AuthorWithRelations) => (
               <Card key={author.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader className="pb-3">
+                <CardHeader>
                   <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center min-w-0 flex-1">
-                      <User className="w-5 h-5 mr-2 flex-shrink-0" style={{ color: 'var(--kdp-primary-blue)' }} />
-                      <span className="truncate text-base font-semibold" title={author.fullName}>
-                        {author.fullName}
-                      </span>
+                    <div className="flex items-center">
+                      <User className="w-5 h-5 mr-2" style={{ color: 'var(--kdp-primary-blue)' }} />
+                      <span className="truncate">{author.fullName}</span>
                     </div>
                   </CardTitle>
                 </CardHeader>
@@ -66,11 +64,11 @@ export default function AuthorsListPage() {
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-1">
                         <BookOpen className="w-4 h-4" />
-                        <span>{author.bookCount} {author.bookCount === 1 ? 'book' : 'books'}</span>
+                        <span>0 books</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <FolderOpen className="w-4 h-4" />
-                        <span>{author.projectCount} {author.projectCount === 1 ? 'project' : 'projects'}</span>
+                        <span>0 projects</span>
                       </div>
                     </div>
                   </div>

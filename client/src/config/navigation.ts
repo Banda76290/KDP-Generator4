@@ -4,7 +4,6 @@ import {
   FolderOpen, 
   TrendingUp, 
   Upload, 
-  Download,
   Bot, 
   Crown, 
   Settings,
@@ -14,9 +13,7 @@ import {
   Variable,
   Tags,
   Server,
-  User,
-  MessageSquare,
-  DollarSign
+  User
 } from "lucide-react";
 
 interface NavigationItem {
@@ -31,11 +28,9 @@ export const navigation: NavigationItem[] = [
   { name: "Projects", href: "/projects", icon: FolderOpen },
   { name: "Books", href: "/books", icon: FileText },
   { name: "Authors", href: "/authors", icon: User },
-  { name: "Series", href: "/manage-series", icon: Tags },
+  { name: "Manage Series", href: "/manage-series", icon: Tags },
   { name: "Sales Analytics", href: "/analytics", icon: TrendingUp },
-  { name: "Exchange Rates", href: "/exchange-rates", icon: DollarSign },
   { name: "KDP Reports", href: "/kdp-reports", icon: Upload },
-  { name: "Import Management", href: "/import-management", icon: Download, badge: "NEW" },
   { name: "AI Assistant", href: "/ai-assistant", icon: Bot, badge: "PRO" },
   { name: "AI Functions", href: "/ai-functions", icon: Zap, badge: "NEW" },
 ];
@@ -49,9 +44,7 @@ export const adminNavigation: NavigationItem[] = [
   { name: "Dashboard", href: "/admin", icon: Shield, badge: "ADMIN" },
   { name: "User Management", href: "/admin/users", icon: Settings },
   { name: "AI Configuration", href: "/admin/ai-config", icon: Bot },
-  { name: "Prompts IA", href: "/admin/prompts", icon: MessageSquare },
   { name: "Variables IA", href: "/admin/ai-variables", icon: Variable },
-  { name: "Cron Jobs", href: "/admin/cron", icon: Bot },
   { name: "Système", href: "/admin/system", icon: Server },
 ];
 

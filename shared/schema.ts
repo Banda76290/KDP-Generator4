@@ -1,5 +1,4 @@
 import { sql } from 'drizzle-orm';
-import { unique } from 'drizzle-orm/pg-core';
 import {
   index,
   jsonb,
@@ -317,25 +316,6 @@ export const marketplaceCategories = pgTable("marketplace_categories", {
 
 
 
-// Content Recommendations table - AI-powered recommendations for books
-export const contentRecommendations = pgTable("content_recommendations", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  bookId: varchar("book_id").notNull().references(() => books.id, { onDelete: "cascade" }),
-  recommendationType: varchar("recommendation_type").notNull(), // "keywords", "categories", "title", "description", "marketing", "series", "pricing"
-  title: varchar("title").notNull(),
-  suggestion: text("suggestion").notNull(),
-  reasoning: text("reasoning"),
-  confidence: decimal("confidence", { precision: 3, scale: 2 }).default("0.5"), // 0-1 confidence score
-  isApplied: boolean("is_applied").default(false),
-  isUseful: boolean("is_useful"), // User feedback
-  metadata: jsonb("metadata"), // Additional data like original values, alternatives, etc.
-  aiModel: varchar("ai_model").default("gpt-4o"),
-  tokensUsed: integer("tokens_used").default(0),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
 // System configuration table for admin settings
 export const systemConfig = pgTable("system_config", {
   key: varchar("key").primaryKey(),
@@ -430,204 +410,6 @@ export const authorBiographies = pgTable("author_biographies", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// KDP Import status enum
-export const importStatusEnum = pgEnum("import_status", [
-  "pending",
-  "processing", 
-  "completed",
-  "failed"
-]);
-
-// KDP Import file type enum
-export const importFileTypeEnum = pgEnum("import_file_type", [
-  "payments",
-  "prior_month_royalties",
-  "kenp_read", 
-  "dashboard",
-  "royalties_estimator",
-  "orders",
-  "unknown"
-]);
-
-// KDP Imports table - Main import tracking
-export const kdpImports = pgTable("kdp_imports", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  fileName: varchar("file_name").notNull(),
-  fileType: varchar("file_type").notNull(), // MIME type
-  fileSize: integer("file_size").notNull(), // in bytes
-  detectedType: importFileTypeEnum("detected_type"),
-  status: importStatusEnum("status").default("pending"),
-  progress: integer("progress").default(0), // 0-100 percentage
-  totalRecords: integer("total_records").default(0),
-  processedRecords: integer("processed_records").default(0),
-  errorRecords: integer("error_records").default(0),
-  duplicateRecords: integer("duplicate_records").default(0),
-  rawData: jsonb("raw_data"), // Store original file data
-  mappingConfig: jsonb("mapping_config"), // Column mappings and transformation rules
-  errorLog: text("error_log").array().default([]), // Array of error messages
-  summary: jsonb("summary"), // Import summary statistics
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-  completedAt: timestamp("completed_at"),
-});
-
-// Normalized marketplaces table
-export const marketplaces = pgTable("marketplaces", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  rawName: varchar("raw_name").notNull().unique(), // Amazon.de, Amazon.com, etc.
-  code: varchar("code").notNull().unique(), // DE, US, FR, etc.
-  country: varchar("country"), // Germany, United States, France
-  languageHint: varchar("language_hint"), // de, en, fr
-  currency: varchar("currency"), // EUR, USD, GBP
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-// Book identifiers table (ASIN and ISBN separated)
-export const bookIdentifiers = pgTable("book_identifiers", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  bookId: varchar("book_id").references(() => books.id, { onDelete: "cascade" }),
-  type: varchar("type").notNull(), // "ASIN" or "ISBN"
-  value: varchar("value").notNull(),
-  marketplaceId: varchar("marketplace_id").references(() => marketplaces.id),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-}, (table) => ({
-  uniqueIdentifier: unique("unique_identifier").on(table.type, table.value),
-}));
-
-// Product variants table (book + format + marketplace combination)
-export const productVariants = pgTable("product_variants", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  bookId: varchar("book_id").notNull().references(() => books.id, { onDelete: "cascade" }),
-  format: formatEnum("format").notNull(), // ebook, paperback, hardcover
-  marketplaceId: varchar("marketplace_id").references(() => marketplaces.id),
-  asin: varchar("asin"), // Redundant for performance
-  isbn: varchar("isbn"), // Redundant for performance
-  price: decimal("price", { precision: 10, scale: 2 }),
-  currency: varchar("currency"),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-}, (table) => ({
-  uniqueVariant: unique("unique_variant").on(table.bookId, table.format, table.marketplaceId),
-}));
-
-// Sales events table (individual sales with preserved original amounts)
-export const salesEvents = pgTable("sales_events", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  variantId: varchar("variant_id").notNull().references(() => productVariants.id, { onDelete: "cascade" }),
-  importId: varchar("import_id").notNull().references(() => kdpImports.id, { onDelete: "cascade" }),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  
-  // Temporal data
-  eventDate: date("event_date"), // Sale/royalty date
-  reportingPeriod: varchar("reporting_period"), // e.g., "2025-01", "2025-Q1"
-  
-  // Sales metrics
-  unitsSold: integer("units_sold").default(0),
-  unitsRefunded: integer("units_refunded").default(0),
-  netUnitsSold: integer("net_units_sold").default(0),
-  
-  // Financial data (PRESERVED ORIGINAL AMOUNTS - no conversion)
-  originalCurrency: varchar("original_currency").notNull(),
-  originalRoyalty: decimal("original_royalty", { precision: 12, scale: 4 }),
-  originalListPrice: decimal("original_list_price", { precision: 10, scale: 2 }),
-  originalOfferPrice: decimal("original_offer_price", { precision: 10, scale: 2 }),
-  
-  // Additional costs
-  deliveryCost: decimal("delivery_cost", { precision: 10, scale: 2 }),
-  manufacturingCost: decimal("manufacturing_cost", { precision: 10, scale: 2 }),
-  
-  // Metadata
-  royaltyRate: varchar("royalty_rate"), // 35%, 70%
-  transactionType: varchar("transaction_type"),
-  fileSize: decimal("file_size", { precision: 6, scale: 2 }),
-  
-  // Source tracking
-  sourceType: importFileTypeEnum("source_type"), // prior_month_royalties, etc.
-  sheetName: varchar("sheet_name"),
-  rowIndex: integer("row_index"),
-  
-  // Processing metadata
-  isDuplicate: boolean("is_duplicate").default(false),
-  duplicateOfId: varchar("duplicate_of_id").references(() => salesEvents.id),
-  
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-// KENP reads table (separate from sales)
-export const kenpReads = pgTable("kenp_reads", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  variantId: varchar("variant_id").notNull().references(() => productVariants.id, { onDelete: "cascade" }),
-  importId: varchar("import_id").notNull().references(() => kdpImports.id, { onDelete: "cascade" }),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  
-  readDate: date("read_date"),
-  reportingPeriod: varchar("reporting_period"),
-  
-  kenpPages: integer("kenp_pages").default(0),
-  originalCurrency: varchar("original_currency"),
-  originalRoyalty: decimal("original_royalty", { precision: 12, scale: 4 }),
-  
-  sourceType: importFileTypeEnum("source_type"),
-  isDuplicate: boolean("is_duplicate").default(false),
-  
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-// Legacy KDP Import Data table - kept for backward compatibility but deprecated
-export const kdpImportData = pgTable("kdp_import_data", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  importId: varchar("import_id").notNull().references(() => kdpImports.id, { onDelete: "cascade" }),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  
-  // Universal identifiers
-  asin: varchar("asin"), // Amazon Standard Identification Number
-  isbn: varchar("isbn"), // International Standard Book Number
-  title: text("title"),
-  authorName: varchar("author_name"),
-  
-  // Sales data
-  marketplace: varchar("marketplace"), // Amazon.com, Amazon.co.uk, etc.
-  salesDate: date("sales_date"),
-  unitsSold: integer("units_sold").default(0),
-  unitsRefunded: integer("units_refunded").default(0),
-  netUnitsSold: integer("net_units_sold").default(0),
-  
-  // Financial data  
-  currency: varchar("currency"), // USD, EUR, GBP, etc.
-  listPrice: decimal("list_price", { precision: 10, scale: 2 }),
-  offerPrice: decimal("offer_price", { precision: 10, scale: 2 }),
-  royalty: decimal("royalty", { precision: 10, scale: 2 }),
-  royaltyRate: varchar("royalty_rate"), // 35%, 70%, etc.
-  earnings: decimal("earnings", { precision: 10, scale: 2 }),
-  
-  // KDP specific data
-  kenpRead: integer("kenp_read").default(0), // Kindle Edition Normalized Pages
-  transactionType: varchar("transaction_type"), // Standard, Expanded Distribution
-  paymentStatus: varchar("payment_status"), // Paid, Pending
-  
-  // Format information
-  format: formatEnum("format"), // ebook, paperback, hardcover
-  fileSize: decimal("file_size", { precision: 6, scale: 2 }), // in MB
-  deliveryCost: decimal("delivery_cost", { precision: 10, scale: 2 }),
-  manufacturingCost: decimal("manufacturing_cost", { precision: 10, scale: 2 }),
-  
-  // Raw data reference
-  rowIndex: integer("row_index"), // Position in original file
-  sheetName: varchar("sheet_name"), // Excel sheet name
-  rawRowData: jsonb("raw_row_data"), // Original row data for debugging
-  
-  // Processing metadata
-  isProcessed: boolean("is_processed").default(false),
-  isDuplicate: boolean("is_duplicate").default(false),
-  matchedBookId: varchar("matched_book_id").references(() => books.id),
-  
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   projects: many(projects),
@@ -638,11 +420,6 @@ export const usersRelations = relations(users, ({ many }) => ({
   blogComments: many(blogComments),
   series: many(series),
   authors: many(authors),
-  contentRecommendations: many(contentRecommendations),
-  kdpImports: many(kdpImports),
-  kdpImportData: many(kdpImportData),
-  salesEvents: many(salesEvents),
-  kenpReads: many(kenpReads),
 }));
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
@@ -652,66 +429,6 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
   }),
   books: many(books),
   aiGenerations: many(aiGenerations),
-}));
-
-// New relations for normalized tables
-export const marketplacesRelations = relations(marketplaces, ({ many }) => ({
-  bookIdentifiers: many(bookIdentifiers),
-  productVariants: many(productVariants),
-}));
-
-export const bookIdentifiersRelations = relations(bookIdentifiers, ({ one }) => ({
-  book: one(books, {
-    fields: [bookIdentifiers.bookId],
-    references: [books.id],
-  }),
-  marketplace: one(marketplaces, {
-    fields: [bookIdentifiers.marketplaceId],
-    references: [marketplaces.id],
-  }),
-}));
-
-export const productVariantsRelations = relations(productVariants, ({ one, many }) => ({
-  book: one(books, {
-    fields: [productVariants.bookId],
-    references: [books.id],
-  }),
-  marketplace: one(marketplaces, {
-    fields: [productVariants.marketplaceId],
-    references: [marketplaces.id],
-  }),
-  salesEvents: many(salesEvents),
-  kenpReads: many(kenpReads),
-}));
-
-export const salesEventsRelations = relations(salesEvents, ({ one }) => ({
-  variant: one(productVariants, {
-    fields: [salesEvents.variantId],
-    references: [productVariants.id],
-  }),
-  import: one(kdpImports, {
-    fields: [salesEvents.importId],
-    references: [kdpImports.id],
-  }),
-  user: one(users, {
-    fields: [salesEvents.userId],
-    references: [users.id],
-  }),
-}));
-
-export const kenpReadsRelations = relations(kenpReads, ({ one }) => ({
-  variant: one(productVariants, {
-    fields: [kenpReads.variantId],
-    references: [productVariants.id],
-  }),
-  import: one(kdpImports, {
-    fields: [kenpReads.importId],
-    references: [kdpImports.id],
-  }),
-  user: one(users, {
-    fields: [kenpReads.userId],
-    references: [users.id],
-  }),
 }));
 
 export const booksRelations = relations(books, ({ one, many }) => ({
@@ -725,10 +442,7 @@ export const booksRelations = relations(books, ({ one, many }) => ({
   }),
   contributors: many(contributors),
   salesData: many(salesData),
-  bookIdentifiers: many(bookIdentifiers),
-  productVariants: many(productVariants),
   aiGenerations: many(aiGenerations),
-  contentRecommendations: many(contentRecommendations),
 }));
 
 export const contributorsRelations = relations(contributors, ({ one }) => ({
@@ -834,41 +548,6 @@ export const seriesRelations = relations(series, ({ one }) => ({
   }),
 }));
 
-export const contentRecommendationsRelations = relations(contentRecommendations, ({ one }) => ({
-  user: one(users, {
-    fields: [contentRecommendations.userId],
-    references: [users.id],
-  }),
-  book: one(books, {
-    fields: [contentRecommendations.bookId],
-    references: [books.id],
-  }),
-}));
-
-// KDP Import relations
-export const kdpImportsRelations = relations(kdpImports, ({ one, many }) => ({
-  user: one(users, {
-    fields: [kdpImports.userId],
-    references: [users.id],
-  }),
-  importData: many(kdpImportData),
-}));
-
-export const kdpImportDataRelations = relations(kdpImportData, ({ one }) => ({
-  user: one(users, {
-    fields: [kdpImportData.userId],
-    references: [users.id],
-  }),
-  import: one(kdpImports, {
-    fields: [kdpImportData.importId],
-    references: [kdpImports.id],
-  }),
-  matchedBook: one(books, {
-    fields: [kdpImportData.matchedBookId],
-    references: [books.id],
-  }),
-}));
-
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -901,12 +580,6 @@ export const insertBookSchema = createInsertSchema(books).omit({
     lastName: z.string().optional(),
     suffix: z.string().optional(),
   })).optional(),
-});
-
-export const insertContentRecommendationSchema = createInsertSchema(contentRecommendations).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
 });
 
 export const insertContributorSchema = createInsertSchema(contributors).omit({
@@ -952,22 +625,6 @@ export const insertAuditLogSchema = createInsertSchema(adminAuditLog).omit({
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
-
-// Exchange rates table for currency conversion
-export const exchangeRates = pgTable("exchange_rates", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  fromCurrency: varchar("from_currency", { length: 3 }).notNull(),
-  toCurrency: varchar("to_currency", { length: 3 }).notNull(),
-  rate: decimal("rate", { precision: 12, scale: 6 }).notNull(),
-  date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD format
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  index("idx_exchange_rates_currencies_date").on(table.fromCurrency, table.toCurrency, table.date),
-]);
-
-export type InsertExchangeRate = typeof exchangeRates.$inferInsert;
-export type ExchangeRate = typeof exchangeRates.$inferSelect;
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
 export type InsertBook = z.infer<typeof insertBookSchema>;
@@ -984,8 +641,6 @@ export type InsertAiModel = z.infer<typeof insertAiModelSchema>;
 export type AiModel = typeof aiModels.$inferSelect;
 export type InsertAiUsageLimit = z.infer<typeof insertAiUsageLimitSchema>;
 export type AiUsageLimit = typeof aiUsageLimits.$inferSelect;
-export type InsertContentRecommendation = z.infer<typeof insertContentRecommendationSchema>;
-export type ContentRecommendation = typeof contentRecommendations.$inferSelect;
 export type InsertSystemConfig = z.infer<typeof insertSystemConfigSchema>;
 export type SystemConfig = typeof systemConfig.$inferSelect;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
@@ -1078,30 +733,4 @@ export type BlogPostWithRelations = BlogPost & {
   author: User;
   category?: BlogCategory;
   comments: BlogComment[];
-};
-
-// KDP Import Zod schemas
-export const insertKdpImportSchema = createInsertSchema(kdpImports).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-  completedAt: true,
-});
-
-export const insertKdpImportDataSchema = createInsertSchema(kdpImportData).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-// KDP Import types
-export type KdpImport = typeof kdpImports.$inferSelect;
-export type InsertKdpImport = z.infer<typeof insertKdpImportSchema>;
-export type KdpImportData = typeof kdpImportData.$inferSelect;
-export type InsertKdpImportData = z.infer<typeof insertKdpImportDataSchema>;
-
-// KDP Import with relations
-export type KdpImportWithRelations = KdpImport & {
-  user: User;
-  importData: KdpImportData[];
 };

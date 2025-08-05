@@ -5,13 +5,12 @@ import { apiRequest } from "@/lib/queryClient";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Edit3, Save, BookOpen, FolderOpen, Trash2, User } from "lucide-react";
+import { ArrowLeft, Edit3, Save, BookOpen, FolderOpen, Trash2 } from "lucide-react";
 import type { AuthorWithRelations, ProjectWithRelations, Book } from "@shared/schema";
 
 const LANGUAGES = [
@@ -32,14 +31,6 @@ export default function AuthorViewPage() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("English");
   const [biography, setBiography] = useState<string>("");
   const [isEditing, setIsEditing] = useState(false);
-  const [isEditingAuthor, setIsEditingAuthor] = useState(false);
-  const [authorForm, setAuthorForm] = useState({
-    prefix: "",
-    firstName: "",
-    middleName: "",
-    lastName: "",
-    suffix: ""
-  });
 
   // Fetch author details
   const { data: author, isLoading: authorLoading } = useQuery({
@@ -126,15 +117,13 @@ export default function AuthorViewPage() {
   const cleanHTML = (html: string): string => {
     if (!html) return '';
     
-    // Use DOMParser to safely parse HTML without executing scripts
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
     
-    // Remove dangerous elements
-    const scripts = doc.querySelectorAll('script, iframe, object, embed');
+    const scripts = temp.querySelectorAll('script, iframe, object, embed');
     scripts.forEach(script => script.remove());
     
-    const allElements = doc.querySelectorAll('*');
+    const allElements = temp.querySelectorAll('*');
     allElements.forEach(element => {
       const safeAttributes = ['href', 'title', 'alt', 'class'];
       const attributesToRemove: string[] = [];
@@ -155,7 +144,7 @@ export default function AuthorViewPage() {
       }
     });
     
-    return doc.body.innerHTML;
+    return temp.innerHTML;
   };
 
   // Add CSS for the biography editor
@@ -184,28 +173,6 @@ export default function AuthorViewPage() {
       }
     };
   }, []);
-
-  // Update author form when author data loads
-  React.useEffect(() => {
-    if (author) {
-      setAuthorForm({
-        prefix: author.prefix || "",
-        firstName: author.firstName || "",
-        middleName: author.middleName || "",
-        lastName: author.lastName || "",
-        suffix: author.suffix || ""
-      });
-    }
-  }, [author]);
-
-  // Auto-activate editing mode if coming from book edit page
-  React.useEffect(() => {
-    const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
-    if (returnToBookEdit && author) {
-      // Automatically enter edit mode when coming from book editing
-      setIsEditingAuthor(true);
-    }
-  }, [author]);
 
   // Update biography state when data changes
   React.useEffect(() => {
@@ -254,47 +221,9 @@ export default function AuthorViewPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId, "biography", selectedLanguage] });
       setIsEditing(false);
       toast({ title: "Biography saved successfully" });
-      
-      // Check if we need to return to book edit page (like in series-edit.tsx)
-      const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
-      if (returnToBookEdit) {
-        // Clear the flag and return to book edit page
-        sessionStorage.removeItem('returnToBookEdit');
-        if (returnToBookEdit === 'new') {
-          setLocation('/books/create');
-        } else {
-          setLocation(`/books/edit/${returnToBookEdit}`);
-        }
-      }
     },
     onError: () => {
       toast({ title: "Failed to save biography", variant: "destructive" });
-    },
-  });
-
-  // Update author mutation
-  const updateAuthorMutation = useMutation({
-    mutationFn: (authorData: typeof authorForm) =>
-      apiRequest("PUT", `/api/authors/${authorId}`, authorData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId] });
-      setIsEditingAuthor(false);
-      toast({ title: "Author updated successfully" });
-      
-      // Check if we need to return to book edit page (like in series-edit.tsx)
-      const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
-      if (returnToBookEdit) {
-        // Clear the flag and return to book edit page
-        sessionStorage.removeItem('returnToBookEdit');
-        if (returnToBookEdit === 'new') {
-          setLocation('/books/create');
-        } else {
-          setLocation(`/books/edit/${returnToBookEdit}`);
-        }
-      }
-    },
-    onError: () => {
-      toast({ title: "Failed to update author", variant: "destructive" });
     },
   });
 
@@ -313,14 +242,6 @@ export default function AuthorViewPage() {
 
   const handleSaveBiography = () => {
     updateBiographyMutation.mutate({ biography });
-  };
-
-  const handleSaveAuthor = () => {
-    updateAuthorMutation.mutate(authorForm);
-  };
-
-  const handleAuthorFormChange = (field: keyof typeof authorForm, value: string) => {
-    setAuthorForm(prev => ({ ...prev, [field]: value }));
   };
 
   const handleLanguageChange = (language: string) => {
@@ -356,25 +277,11 @@ export default function AuthorViewPage() {
           <div className="flex items-center gap-4">
             <Button 
               variant="outline" 
-              onClick={() => {
-                // Check if we need to return to book edit page
-                const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
-                if (returnToBookEdit) {
-                  // Clear the flag and return to book edit page
-                  sessionStorage.removeItem('returnToBookEdit');
-                  if (returnToBookEdit === 'new') {
-                    setLocation('/books/create');
-                  } else {
-                    setLocation(`/books/edit/${returnToBookEdit}`);
-                  }
-                } else {
-                  setLocation("/authors");
-                }
-              }}
+              onClick={() => setLocation("/authors")}
               className="flex items-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
-              {sessionStorage.getItem('returnToBookEdit') ? 'Back to Book' : 'Back to Authors'}
+              Back to Authors
             </Button>
             <div>
               <h1 className="text-3xl font-bold">{author.fullName}</h1>
@@ -409,108 +316,8 @@ export default function AuthorViewPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column - Author Details & Biography */}
+          {/* Left Column - Biography */}
           <div className="space-y-6">
-            {/* Author Details Editor */}
-            <Card className="border-2" style={{ borderColor: 'var(--kdp-primary-blue)', backgroundColor: '#f0f8ff' }}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="w-5 h-5" />
-                    Author Information
-                  </CardTitle>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsEditingAuthor(!isEditingAuthor)}
-                  >
-                    <Edit3 className="w-4 h-4 mr-1" />
-                    {isEditingAuthor ? 'Cancel' : 'Edit'}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {isEditingAuthor ? (
-                  <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="author-prefix">Prefix (Optional)</Label>
-                        <Input
-                          id="author-prefix"
-                          placeholder="Dr., Prof., etc."
-                          value={authorForm.prefix}
-                          onChange={(e) => handleAuthorFormChange('prefix', e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="author-suffix">Suffix (Optional)</Label>
-                        <Input
-                          id="author-suffix"
-                          placeholder="Jr., Sr., PhD, etc."
-                          value={authorForm.suffix}
-                          onChange={(e) => handleAuthorFormChange('suffix', e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="author-firstname">First Name *</Label>
-                        <Input
-                          id="author-firstname"
-                          placeholder="John"
-                          value={authorForm.firstName}
-                          onChange={(e) => handleAuthorFormChange('firstName', e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="author-middlename">Middle Name (Optional)</Label>
-                        <Input
-                          id="author-middlename"
-                          placeholder="Michael"
-                          value={authorForm.middleName}
-                          onChange={(e) => handleAuthorFormChange('middleName', e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="author-lastname">Last Name *</Label>
-                        <Input
-                          id="author-lastname"
-                          placeholder="Doe"
-                          value={authorForm.lastName}
-                          onChange={(e) => handleAuthorFormChange('lastName', e.target.value)}
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end pt-4">
-                      <Button 
-                        onClick={handleSaveAuthor} 
-                        disabled={updateAuthorMutation.isPending || !authorForm.firstName || !authorForm.lastName}
-                        className="kdp-btn-primary"
-                      >
-                        <Save className="w-4 h-4 mr-2" />
-                        {updateAuthorMutation.isPending ? "Saving..." : "Save Author Info"}
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <div className="space-y-2">
-                    <div className="text-lg font-medium">
-                      {[authorForm.prefix, authorForm.firstName, authorForm.middleName, authorForm.lastName, authorForm.suffix]
-                        .filter(Boolean)
-                        .join(' ')}
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Click Edit to modify author information
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
             {/* Biography Editor */}
             <Card className="border-2" style={{ borderColor: 'var(--kdp-secondary-orange)', backgroundColor: '#fff9f0' }}>
               <CardContent className="p-6">
