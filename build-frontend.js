@@ -28,7 +28,7 @@ if (fs.existsSync(indexHtmlSource)) {
   // Add CSS link before closing head tag
   htmlContent = htmlContent.replace(
     '</head>',
-    '    <link rel="stylesheet" href="/assets/main.css">\n  </head>'
+    '    <link rel="stylesheet" href="/assets/tailwind-processed.css">\n  </head>'
   );
   fs.writeFileSync(indexHtmlDest, htmlContent);
   console.log('✓ Copied index.html to dist/');
@@ -85,22 +85,24 @@ async function build() {
     
     console.log('✓ Frontend build completed successfully!');
     
-    // Create a simple CSS file if it doesn't exist
-    const cssPath = path.resolve(__dirname, 'dist/assets/style.css');
-    if (!fs.existsSync(cssPath)) {
-      fs.writeFileSync(cssPath, `
-/* Basic styles for KDP Generator */
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  background-color: #f8fafc;
-}
-
-#root {
-  min-height: 100vh;
-}
-      `);
-      console.log('✓ Created basic CSS file');
+    // Process Tailwind CSS
+    console.log('🎨 Processing Tailwind CSS...');
+    const { execSync } = await import('child_process');
+    
+    try {
+      execSync('npx tailwindcss -i client/src/index.css -o dist/assets/tailwind-processed.css --minify', {
+        stdio: 'pipe'
+      });
+      console.log('✓ Tailwind CSS processed successfully!');
+    } catch (error) {
+      console.error('❌ Tailwind CSS processing failed:', error.message);
+      // Fallback: copy the original CSS file
+      const sourceCssPath = path.resolve(__dirname, 'client/src/index.css');
+      const destCssPath = path.resolve(__dirname, 'dist/assets/tailwind-processed.css');
+      if (fs.existsSync(sourceCssPath)) {
+        fs.copyFileSync(sourceCssPath, destCssPath);
+        console.log('✓ Copied original CSS as fallback');
+      }
     }
     
   } catch (error) {
