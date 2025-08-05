@@ -33,7 +33,7 @@ interface Contributor {
 
 const bookFormSchema = insertBookSchema.extend({
   projectId: z.string().min(1, "Project selection is required"),
-});
+};
 type BookFormData = z.infer<typeof bookFormSchema>;
 
 const languages = [
@@ -134,20 +134,20 @@ export default function EditBook() {
       // Check if execCommand is supported
       if (typeof document.execCommand !== 'function') {
         console.error('execCommand is not supported in this browser');
-        toast({ title: "Erreur", description: "Cette fonctionnalité n'est pas supportée dans votre navigateur", variant: "destructive" });
+        toast({ title: "Erreur", description: "Cette fonctionnalité n'est pas supportée dans votre navigateur", variant: "destructive")};
         return;
       }
 
       // Apply the formatting command
       const success = document.execCommand(command, false, value);
       if (!success) {
-        console.warn(`execCommand failed for command: ${command}`);
+        console.warn(`execCommand failed for command: ${command)}`);
       }
       
       updateDescriptionFromHTML();
     } catch (error) {
       console.error('Error applying description formatting:', error);
-      toast({ title: "Erreur", description: "Erreur lors de l'application du formatage", variant: "destructive" });
+      toast({ title: "Erreur", description: "Erreur lors de l'application du formatage", variant: "destructive")};
     }
   };
 
@@ -164,15 +164,13 @@ export default function EditBook() {
       if (styleAttr) {
         // Remove styles that contain CSS custom properties (--tw-* variables)
         if (styleAttr.includes('--tw-') || styleAttr.includes('--gradient') || styleAttr.includes('--ring') || styleAttr.includes('--shadow')) {
-          element.removeAttribute('style');
-        } else {
+          element.removeAttribute('style');)} else {
           // Keep only essential inline styles (color, font-weight, etc.)
           const cleanStyles = styleAttr
             .split(';')
             .filter(style => {
               const prop = style.trim().split(':')[0]?.trim();
-              return ['color', 'font-weight', 'font-style', 'text-decoration'].includes(prop);
-            })
+              return ['color', 'font-weight', 'font-style', 'text-decoration'].includes(prop);)}
             .join('; ');
           
           if (cleanStyles) {
@@ -226,7 +224,7 @@ export default function EditBook() {
       }
     } catch (error) {
       console.error('Error in handleDescriptionFormatChange:', error);
-      toast({ title: "Erreur", description: "Erreur lors du changement de format", variant: "destructive" });
+      toast({ title: "Erreur", description: "Erreur lors du changement de format", variant: "destructive")};
     }
   };
 
@@ -249,7 +247,7 @@ export default function EditBook() {
     preSelectedProjectId,
     fullUrl: window.location.href,
     search: window.location.search
-  });
+  };
 
   // Fetch existing book data (only if editing)
   const { data: book, isLoading: bookLoading, error } = useQuery<Book>({
@@ -260,7 +258,7 @@ export default function EditBook() {
     staleTime: 0, // Always consider data stale for immediate updates
   });
   
-  console.log('Query State:', { book, bookLoading, error, isCreating });
+  console.log('Query State:', { book, bookLoading, error, isCreating };
 
   const form = useForm<BookFormData>({
     resolver: zodResolver(bookFormSchema),
@@ -317,7 +315,7 @@ export default function EditBook() {
 
   // Save current form state to session storage (for navigation to series creation only)
   const saveFormDataToSession = () => { const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
-    console.log('saveFormDataToSession called:', { returnToBookEdit, bookId: bookId || 'new', shouldSave: returnToBookEdit === (bookId || 'new' });
+    console.log('saveFormDataToSession called:', { returnToBookEdit, bookId: bookId || 'new', shouldSave: returnToBookEdit === (bookId || 'new')};
     
     const watchedFormData = form.watch();
     const currentFormData = {
@@ -330,7 +328,7 @@ export default function EditBook() {
     };
     
     const storageKey = `bookFormData_${bookId || 'new'}`;
-    console.log('Saving form data to sessionStorage:', { storageKey, data: currentFormData });
+    console.log('Saving form data to sessionStorage:', { storageKey, data: currentFormData };
     sessionStorage.setItem(storageKey, JSON.stringify(currentFormData));
   };
 
@@ -340,7 +338,7 @@ export default function EditBook() {
     const autoSave = () => {
       // Only auto-save if we are about to navigate to series creation
       const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
-      console.log('Auto-save check:', { returnToBookEdit, currentBookId: bookId || 'new', shouldSave: returnToBookEdit === (bookId || 'new' });
+      console.log('Auto-save check:', { returnToBookEdit, currentBookId: bookId || 'new', shouldSave: returnToBookEdit === (bookId || 'new')};
       if (returnToBookEdit === (bookId || 'new')) {
         saveFormDataToSession();
         console.log('Auto-saved form data to sessionStorage');
@@ -351,7 +349,7 @@ export default function EditBook() {
     const subscription = form.watch(() => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(autoSave, 500);
-    });
+    };
 
     // Also save when state arrays change
     timeoutId = setTimeout(autoSave, 500);
@@ -397,7 +395,7 @@ export default function EditBook() {
     const returnFromSeries = sessionStorage.getItem('returnToBookEdit');
     const newlyCreatedSeries = sessionStorage.getItem('newlyCreatedSeries');
     
-    console.log('Restoration check:', { returnFromSeries, bookId: bookId || 'new', hasStorageData: !!savedFormData, shouldRestore: savedFormData && returnFromSeries === (bookId || 'new' });
+    console.log('Restoration check:', { returnFromSeries, bookId: bookId || 'new', hasStorageData: !!savedFormData, shouldRestore: savedFormData && returnFromSeries === (bookId || 'new')};
     
     if (savedFormData && returnFromSeries === (bookId || 'new')) {
       console.log('Restoring form data from sessionStorage');
@@ -421,8 +419,7 @@ export default function EditBook() {
         if (formFields.seriesTitle) {
           setOriginalSeriesData({
             seriesTitle: formFields.seriesTitle,
-            seriesNumber: formFields.seriesNumber || null
-          });
+            seriesNumber: formFields.seriesNumber || null)};
         }
         
         // Immediate form reset - same as buttons "Create series" and "Edit series details"
@@ -454,8 +451,7 @@ export default function EditBook() {
           setTimeout(() => {
             const editor = document.getElementById('description-editor') as HTMLDivElement;
             if (editor) {
-              editor.innerHTML = formFields.description || '';
-            }
+              editor.innerHTML = formFields.description || '';)}
           }, 200);
         }
         
@@ -476,7 +472,7 @@ export default function EditBook() {
     }
     
     // Only load book data if we didn't restore from sessionStorage
-    console.log('Book loading check:', { book: !!book, hasRestoredFromStorage, shouldLoadBook: book && !hasRestoredFromStorage });
+    console.log('Book loading check:', { book: !!book, hasRestoredFromStorage, shouldLoadBook: book && !hasRestoredFromStorage };
     if (book && !hasRestoredFromStorage) {
       // Load description into WYSIWYG editor
       if (book.description) {
@@ -490,8 +486,7 @@ export default function EditBook() {
         setTimeout(() => {
           const editor = document.getElementById('description-editor') as HTMLDivElement;
           if (editor) {
-            editor.innerHTML = book.description || '';
-          }
+            editor.innerHTML = book.description || '';)}
         }, 100);
       }
       form.reset({
@@ -520,15 +515,14 @@ export default function EditBook() {
         seriesTitle: book.seriesTitle || "",
         seriesNumber: book.seriesNumber || null,
         editionNumber: book.editionNumber || null,
-      });
+      };
 
       // Set series checkbox state and store original series data
       setIsPartOfSeries(!!book.seriesTitle);
       if (book.seriesTitle) {
         setOriginalSeriesData({
           seriesTitle: book.seriesTitle,
-          seriesNumber: book.seriesNumber || null
-        });
+          seriesNumber: book.seriesNumber || null)};
       }
 
       // Set separate state arrays
@@ -555,8 +549,7 @@ export default function EditBook() {
           firstName: contrib.firstName,
           middleName: contrib.middleName || "",
           lastName: contrib.lastName,
-          suffix: contrib.suffix || "",
-        }));
+          suffix: contrib.suffix || "",)});
         setContributors(loadedContributors);
       } else {
         setContributors([]);
@@ -567,16 +560,16 @@ export default function EditBook() {
   // Fetch projects for selection
   const { data: projects = [] } = useQuery({
     queryKey: ["/api/projects"],
-  });
+  };
 
   // Fetch series for selection
   const { data: userSeries = [] } = useQuery<any[]>({
     queryKey: ["/api/series"],
-    queryFn: () => apiRequest("/api/series", { method: "GET" }),
+    queryFn: () => apiRequest("/api/series", { method: "GET")},
   });
 
   const saveBook = useMutation({
-    mutationFn: async (data: { bookData: BookFormData; shouldNavigate?: boolean; nextTab?: string }) => {
+    mutationFn: async (data: { bookData: BookFormData; shouldNavigate?: boolean; nextTab?: string)} => {
       const formattedData = {
         ...data.bookData,
         categories,
@@ -589,7 +582,7 @@ export default function EditBook() {
       console.log(isCreating ? 'Creating book data:' : 'Updating book data:', formattedData);
       console.log('ProjectId being sent:', formattedData.projectId);
       
-      if (isCreating) { const createdBook = await apiRequest(`/api/books`, { method: "POST", body: JSON.stringify(formattedData });
+      if (isCreating) { const createdBook = await apiRequest(`/api/books`, { method: "POST", body: JSON.stringify(formattedData)};
         console.log('Received created book response:', createdBook);
         
         // Save contributors after book creation
@@ -598,7 +591,7 @@ export default function EditBook() {
             await apiRequest("/api/contributors", { method: "POST", body: JSON.stringify({
               bookId: createdBook.id,
               projectId: formattedData.projectId, // Add projectId for database compatibility
-              name: `${contributor.firstName} ${contributor.lastName}`.trim(), // Add name field for database compatibility
+              name: `${contributor.firstName)} ${contributor.lastName}`.trim(), // Add name field for database compatibility
               role: contributor.role,
               prefix: contributor.prefix || null,
               firstName: contributor.firstName,
@@ -611,17 +604,17 @@ export default function EditBook() {
         
         return { book: createdBook, shouldNavigate: data.shouldNavigate, nextTab: data.nextTab };
       } else {
-        const updatedBook = await apiRequest(`/api/books/${bookId}`, { method: "PATCH", body: JSON.stringify(formattedData });
+        const updatedBook = await apiRequest(`/api/books/${bookId)}`, { method: "PATCH", body: JSON.stringify(formattedData)};
         console.log('Received updated book response:', updatedBook);
         
         // Update contributors - first delete existing ones, then add new ones
         if (bookId) {
           // Get existing contributors to delete them
           try {
-            const existingContributors = await apiRequest(`/api/contributors/book/${bookId}`, { method: "GET" });
+            const existingContributors = await apiRequest(`/api/contributors/book/${bookId)}`, { method: "GET" };
             if (existingContributors && existingContributors.length > 0) {
               for (const contrib of existingContributors) {
-                await apiRequest(`/api/contributors/${contrib.id}/${bookId}`, { method: "DELETE" });
+                await apiRequest(`/api/contributors/${contrib.id)}/${bookId}`, { method: "DELETE" };
               }
             }
           } catch (error) {
@@ -645,7 +638,7 @@ export default function EditBook() {
                 suffix: contributor.suffix || null,
               };
               console.log('Sending contributor data:', contributorData);
-              await apiRequest("/api/contributors", { method: "POST", body: JSON.stringify(contributorData });
+              await apiRequest("/api/contributors", { method: "POST", body: JSON.stringify(contributorData)};
             }
           }
         }
@@ -656,14 +649,14 @@ export default function EditBook() {
     onSuccess: (result) => {
       // Update the current book query cache with the latest data
       if (result.book && !isCreating) {
-        queryClient.setQueryData([`/api/books/${bookId}`], result.book);
+        queryClient.setQueryData([`/api/books/${bookId)}`], result.book);
       }
       
       // Invalidate all related queries to ensure fresh data
-      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/books"] };
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
       if (!isCreating) {
-        queryClient.invalidateQueries({ queryKey: [`/api/books/${bookId}`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/books/${bookId)}`] });
       }
       
       toast.success({
@@ -674,11 +667,11 @@ export default function EditBook() {
       if (isCreating && result.book) {
         // After creation, redirect to edit mode with the new book ID
         if (result.nextTab) {
-          setLocation(`/books/edit/${result.book.id}?tab=${result.nextTab}`);
+          setLocation(`/books/edit/${result.book.id)}?tab=${result.nextTab}`);
         } else if (result.shouldNavigate) {
           setLocation("/projects");
         } else {
-          setLocation(`/books/edit/${result.book.id}`);
+          setLocation(`/books/edit/${result.book.id)}`);
         }
       } else {
         if (result.nextTab) {
@@ -692,7 +685,7 @@ export default function EditBook() {
       console.error(isCreating ? 'Book creation error:' : 'Book update error:', error);
       toast({
         title: "Error",
-        description: error.message || `Failed to ${isCreating ? 'create' : 'update'} book`,
+        description: error.message || `Failed to ${isCreating ? 'create' : 'update')} book`,
         variant: "destructive",
       });
     },
@@ -700,15 +693,15 @@ export default function EditBook() {
 
   const deleteBook = useMutation({
     mutationFn: async () => {
-      return await apiRequest(`/api/books/${bookId}`, { method: "DELETE" });
+      return await apiRequest(`/api/books/${bookId)}`, { method: "DELETE" };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/books"])};
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
       toast({
         title: "Book Deleted",
         description: "Your book has been deleted successfully.",
-      });
+      };
       setLocation("/projects");
     },
     onError: (error) => {
@@ -716,8 +709,7 @@ export default function EditBook() {
       toast({
         title: "Error",
         description: error.message || "Failed to delete book",
-        variant: "destructive",
-      });
+        variant: "destructive",)};
     },
   });
 
@@ -736,7 +728,7 @@ export default function EditBook() {
 
   const updateContributor = (id: string, field: keyof Contributor, value: string) => {
     setContributors(contributors.map(c => 
-      c.id === id ? { ...c, [field]: value } : c
+      c.id === id ? { ...c, [field]: value)} : c
     ));
   };
 
@@ -765,7 +757,7 @@ export default function EditBook() {
   };
 
   const onSubmit = (data: BookFormData) => {
-    saveBook.mutate({ bookData: data, shouldNavigate: true });
+    saveBook.mutate({ bookData: data, shouldNavigate: true)};
   };
 
   const handleSaveAsDraft = (data: BookFormData) => {
@@ -774,7 +766,7 @@ export default function EditBook() {
       status: "draft" as const,
     };
     
-    saveBook.mutate({ bookData: draftData });
+    saveBook.mutate({ bookData: draftData };
   };
 
   const handleSaveAndContinue = (data: BookFormData) => {
@@ -785,7 +777,7 @@ export default function EditBook() {
       nextTab = "pricing";
     }
     
-    saveBook.mutate({ bookData: data, nextTab });
+    saveBook.mutate({ bookData: data, nextTab };
   };
 
   const handleDelete = () => {
@@ -810,7 +802,7 @@ export default function EditBook() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Book Not Found</h1>
           <p className="text-gray-600 mb-4">The book you're looking for doesn't exist or you don't have permission to edit it.</p>
-          <Button onClick={()} => setLocation("/projects")>
+          <Button onClick={())} => setLocation("/projects")>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Projects
           </Button>
@@ -840,7 +832,7 @@ export default function EditBook() {
           {!isCreating && (
             <Button
               variant="destructive"
-              onClick={handleDelete}
+              onClick={handleDelete)}
               disabled={deleteBook.isPending}
             >
               <Trash2 className="w-4 h-4 mr-2" />
@@ -849,7 +841,7 @@ export default function EditBook() {
           )}
         </div>
 
-        <form onSubmit={ form.handleSubmit(onSubmit } className="space-y-8">
+        <form onSubmit={ form.handleSubmit(onSubmit)} className="space-y-8">
           {/* Tab Navigation */}
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8">
@@ -872,8 +864,7 @@ export default function EditBook() {
                     setTimeout(() => {
                       const editor = document.getElementById('description-editor') as HTMLDivElement;
                       if (editor && descriptionEditorContent) {
-                        editor.innerHTML = descriptionEditorContent;
-                      }
+                        editor.innerHTML = descriptionEditorContent;)}
                     }, 50);
                   }
                 }}
@@ -935,7 +926,7 @@ export default function EditBook() {
               <CardTitle>Basic information about your book</CardTitle>
             </CardHeader>
             <CardContent className="space-y-8">
-              {/* Project Selection Section */}
+              {/* Project Selection Section */)}
               <div className="bg-gray-50 rounded-lg border p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Project Association</h3>
                 <div className="space-y-2">
@@ -945,19 +936,19 @@ export default function EditBook() {
                   </p>
                   <Select 
                     value={form.watch("projectId") || ""} 
-                    onValueChange={ (value) => form.setValue("projectId", value }
+                    onValueChange={ (value) => form.setValue("projectId", value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a project" />
                     </SelectTrigger>
                     <SelectContent>
                       {(projects as any[]).map((project: any) => (
-                        <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>
+                        <SelectItem key={project.id)} value={project.id}>{project.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   {form.formState.errors.projectId && (
-                    <p className="text-sm text-red-600">{form.formState.errors.projectId.message}</p>
+                    <p className="text-sm text-red-600">{form.formState.errors.projectId.message)}</p>
                   )}
                 </div>
               </div>
@@ -974,14 +965,14 @@ export default function EditBook() {
                     </p>
                     <Select 
                       value={form.watch("language") || ""} 
-                      onValueChange={ (value) => form.setValue("language", value }
+                      onValueChange={ (value) => form.setValue("language", value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select language" />
                       </SelectTrigger>
                       <SelectContent>
                         {languages.map((lang) => (
-                          <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+                          <SelectItem key={lang)} value={lang}>{lang}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -997,10 +988,10 @@ export default function EditBook() {
                     <Input
                       id="title"
                       placeholder="Enter your book title"
-                      {...form.register("title", { required: "Title is required" })}
+                      {...form.register("title", { required: "Title is required")}}
                     />
                     {form.formState.errors.title && (
-                      <p className="text-sm text-red-600">{form.formState.errors.title.message}</p>
+                      <p className="text-sm text-red-600">{form.formState.errors.title.message)}</p>
                     )}
                   </div>
 
@@ -1011,7 +1002,7 @@ export default function EditBook() {
                     <Input
                       id="subtitle"
                       placeholder="Enter subtitle (optional)"
-                      { ...form.register("subtitle" }
+                      { ...form.register("subtitle")}
                     />
                   </div>
                 </div>
@@ -1042,8 +1033,7 @@ export default function EditBook() {
                         if (currentSeriesTitle) {
                           setOriginalSeriesData({
                             seriesTitle: currentSeriesTitle,
-                            seriesNumber: currentSeriesNumber || null
-                          });
+                            seriesNumber: currentSeriesNumber || null)};
                         }
                         form.setValue("seriesTitle", "");
                         form.setValue("seriesNumber", null);
@@ -1072,7 +1062,7 @@ export default function EditBook() {
                   <div className="bg-gray-50 p-4 rounded-md border space-y-4">
                     <div className="space-y-2">
                       <Label className="font-medium text-[16px] text-gray-700">Series Title</Label>
-                      <p className="text-sm font-medium">{form.watch("seriesTitle" }</p>
+                      <p className="text-sm font-medium">{form.watch("seriesTitle")}</p>
                     </div>
                     <div className="flex gap-2">
                       <Button 
@@ -1100,7 +1090,7 @@ export default function EditBook() {
                                 window.location.href = '/manage-series';
                               }
                             } catch (error) {
-                              console.error('Error finding series:', { method: "GET" });
+                              console.error('Error finding series:', { method: "GET")};
                               // Fallback vers la liste des séries
                               window.location.href = '/manage-series';
                             }
@@ -1134,7 +1124,7 @@ export default function EditBook() {
                                 toast.success({
                                   title: "Livre retiré de la série",
                                   description: "Le livre a été retiré de la série avec succès.",
-                                )});
+                                )};
                               }}
                             >
                               Remove from series
@@ -1153,7 +1143,7 @@ export default function EditBook() {
                       <div className="flex-1">
                         <Label className="font-medium text-[16px]">Select existing series</Label>
                         <Select 
-                          value={form.watch("seriesTitle") || ""} 
+                          value={form.watch("seriesTitle") || "")} 
                           onValueChange={(value) => {
                             form.setValue("seriesTitle", value);
                             form.setValue("seriesNumber", 1);
@@ -1165,7 +1155,7 @@ export default function EditBook() {
                           <SelectContent>
                             {userSeries.length > 0 ? (
                               userSeries.map((series: any) => (
-                                <SelectItem key={series.id} value={series.title}>
+                                <SelectItem key={series.id)} value={series.title}>
                                   {series.title}
                                 </SelectItem>
                               ))
@@ -1220,7 +1210,7 @@ export default function EditBook() {
                           type="number"
                           min="1"
                           placeholder="1"
-                          {...form.register("seriesNumber", { valueAsNumber: true })}
+                          {...form.register("seriesNumber", { valueAsNumber: true)}}
                           className="w-32"
                         />
                       </div>
@@ -1240,7 +1230,7 @@ export default function EditBook() {
                       type="number"
                       min="1"
                       placeholder="1"
-                      {...form.register("editionNumber", { valueAsNumber: true })}
+                      {...form.register("editionNumber", { valueAsNumber: true)}}
                     />
                   </div>
                 </div>
@@ -1264,28 +1254,27 @@ export default function EditBook() {
                       <div className="grid grid-cols-5 gap-3 mt-2">
                         <Input
                           placeholder="Prefix"
-                          { ...form.register("authorPrefix" }
+                          { ...form.register("authorPrefix")}
                         />
                         <Input
                           placeholder="First name"
-                          {...form.register("authorFirstName", { required: "First name is required" })}
+                          {...form.register("authorFirstName", { required: "First name is required")}}
                         />
                         <Input
                           placeholder="Middle name"
-                          { ...form.register("authorMiddleName" }
+                          { ...form.register("authorMiddleName")}
                         />
                         <Input
                           placeholder="Last name"
-                          {...form.register("authorLastName", { required: "Last name is required" })}
+                          {...form.register("authorLastName", { required: "Last name is required")}}
                         />
                         <Input
                           placeholder="Suffix"
-                          { ...form.register("authorSuffix" }
+                          { ...form.register("authorSuffix")}
                         />
                       </div>
                       { (form.formState.errors.authorFirstName || form.formState.errors.authorLastName) && (
-                        <p className="text-sm text-red-600 mt-1">First name and last name are required</p>
-                       }
+                        <p className="text-sm text-red-600 mt-1">First name and last name are required</p>)}
                     </div>
                   </div>
 
@@ -1302,10 +1291,10 @@ export default function EditBook() {
                       <Label className="font-medium text-[14px]">Contributors <span className="text-sm font-normal text-gray-500">(Optional)</span></Label>
                   
                   {contributors.map((contributor, index) => (
-                    <div key={contributor.id} className="grid grid-cols-7 gap-3 mt-2 items-center">
+                    <div key={contributor.id)} className="grid grid-cols-7 gap-3 mt-2 items-center">
                       <Select 
                         value={contributor.role} 
-                        onValueChange={ (value) => updateContributor(contributor.id, 'role', value }
+                        onValueChange={ (value) => updateContributor(contributor.id, 'role', value)}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Role" />
@@ -1365,7 +1354,7 @@ export default function EditBook() {
                       type="button" 
                       variant="outline" 
                       size="sm" 
-                      onClick={addContributor}
+                      onClick={addContributor)}
                       className="mt-3"
                     >
                       Add Another
@@ -1383,7 +1372,7 @@ export default function EditBook() {
                   <div>
                     <Label htmlFor="description-editor" className="font-medium text-[16px]">Description</Label>
                     <p className="text-sm text-gray-600 mt-1">
-                      Provide a description that will entice readers to buy your book. What is your book about? What makes it interesting? What should readers expect? This can be copied from the back cover of your book. Maximum { maxDescriptionCharacters.toLocaleString( } characters.
+                      Provide a description that will entice readers to buy your book. What is your book about? What makes it interesting? What should readers expect? This can be copied from the back cover of your book. Maximum { maxDescriptionCharacters.toLocaleString()} characters.
                     </p>
                   </div>
                 
@@ -1468,7 +1457,7 @@ export default function EditBook() {
                   />
                   <input
                     type="hidden"
-                    { ...form.register('description' }
+                    { ...form.register('description')}
                   />
                   <div className="flex justify-end">
                     <span className={`text-sm ${descriptionCharacterCount > maxDescriptionCharacters ? 'text-red-600' : 'text-green-600'}`}>
@@ -1490,7 +1479,7 @@ export default function EditBook() {
                     </p>
                     <RadioGroup 
                       value={form.watch("publishingRights") || ""} 
-                      onValueChange={ (value) => form.setValue("publishingRights", value as any }
+                      onValueChange={ (value) => form.setValue("publishingRights", value as any)}
                     >
                       <div className="flex items-start space-x-2">
                         <RadioGroupItem value="owned" id="owned" className="mt-1" />
@@ -1523,7 +1512,7 @@ export default function EditBook() {
                     </p>
                     <div className="flex flex-wrap gap-2 mb-2">
                       {categories.map((category) => (
-                        <Badge key={category} variant="secondary" className="flex items-center gap-1">
+                        <Badge key={category)} variant="secondary" className="flex items-center gap-1">
                           {category}
                           <X 
                             className="w-3 h-3 cursor-pointer" 
@@ -1568,7 +1557,7 @@ export default function EditBook() {
                     </p>
                     <div className="flex flex-wrap gap-2 mb-2">
                       {keywords.map((keyword) => (
-                        <Badge key={keyword} variant="secondary" className="flex items-center gap-1">
+                        <Badge key={keyword)} variant="secondary" className="flex items-center gap-1">
                           {keyword}
                           <X 
                             className="w-3 h-3 cursor-pointer" 
@@ -1620,7 +1609,7 @@ export default function EditBook() {
                       <Checkbox
                         id="hasExplicitContent"
                         checked={form.watch("hasExplicitContent") || false}
-                        onCheckedChange={ (checked) => form.setValue("hasExplicitContent", checked as boolean }
+                        onCheckedChange={ (checked) => form.setValue("hasExplicitContent", checked as boolean)}
                         className="mt-1"
                       />
                       <div className="flex-1">
@@ -1633,7 +1622,7 @@ export default function EditBook() {
                       <Checkbox
                         id="useAI"
                         checked={form.watch("useAI") || false}
-                        onCheckedChange={ (checked) => form.setValue("useAI", checked as boolean }
+                        onCheckedChange={ (checked) => form.setValue("useAI", checked as boolean)}
                         className="mt-1"
                       />
                       <div className="flex-1">
@@ -1646,7 +1635,7 @@ export default function EditBook() {
                       <Checkbox
                         id="previouslyPublished"
                         checked={form.watch("previouslyPublished") || false}
-                        onCheckedChange={ (checked) => form.setValue("previouslyPublished", checked as boolean }
+                        onCheckedChange={ (checked) => form.setValue("previouslyPublished", checked as boolean)}
                         className="mt-1"
                       />
                       <div className="flex-1">
@@ -1659,7 +1648,7 @@ export default function EditBook() {
                       <Checkbox
                         id="isLowContentBook"
                         checked={form.watch("isLowContentBook") || false}
-                        onCheckedChange={ (checked) => form.setValue("isLowContentBook", checked as boolean }
+                        onCheckedChange={ (checked) => form.setValue("isLowContentBook", checked as boolean)}
                         className="mt-1"
                       />
                       <Label htmlFor="useAI" className="font-medium text-[16px]">AI was used in creating this book</Label>
@@ -1675,14 +1664,14 @@ export default function EditBook() {
                   <Label htmlFor="primaryMarketplace" className="font-medium text-[16px]">Primary Marketplace</Label>
                   <Select 
                     value={form.watch("primaryMarketplace") || ""} 
-                    onValueChange={ (value) => form.setValue("primaryMarketplace", value }
+                    onValueChange={ (value) => form.setValue("primaryMarketplace", value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select primary marketplace" />
                     </SelectTrigger>
                     <SelectContent>
                       {marketplaces.map((marketplace) => (
-                        <SelectItem key={marketplace} value={marketplace}>{marketplace}</SelectItem>
+                        <SelectItem key={marketplace)} value={marketplace}>{marketplace}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -1739,8 +1728,7 @@ export default function EditBook() {
                 </p>
               </div>
             </CardContent>
-          </Card>
-           }
+          </Card>)}
 
           {/* Paperback Rights & Pricing Tab */}
           {activeTab === "pricing" && (
@@ -1750,7 +1738,7 @@ export default function EditBook() {
 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Distribution Rights */}
+              {/* Distribution Rights */)}
               <div className="space-y-4">
                 <Label className="font-medium text-[16px]">Territories</Label>
                 <p className="text-sm text-gray-600">
@@ -1773,14 +1761,14 @@ export default function EditBook() {
                 <Label htmlFor="primaryMarketplace" className="font-medium text-[16px]">Primary Marketplace</Label>
                 <Select 
                   value={form.watch("primaryMarketplace") || ""} 
-                  onValueChange={ (value) => form.setValue("primaryMarketplace", value }
+                  onValueChange={ (value) => form.setValue("primaryMarketplace", value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select primary marketplace" />
                   </SelectTrigger>
                   <SelectContent>
                     {marketplaces.map((marketplace) => (
-                      <SelectItem key={marketplace} value={marketplace}>{marketplace}</SelectItem>
+                      <SelectItem key={marketplace)} value={marketplace}>{marketplace}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -1878,7 +1866,7 @@ export default function EditBook() {
                 onClick={() => {
                   const formData = form.getValues();
                   handleSaveAsDraft(formData);
-                })}
+                }}
                 disabled={saveBook.isPending || descriptionCharacterCount > maxDescriptionCharacters}
               >
                 { saveBook.isPending ? (
@@ -1887,16 +1875,14 @@ export default function EditBook() {
                     Saving...
                   </>
                 ) : (
-                  "Save as Draft"
-                 }
+                  "Save as Draft")}
               </Button>
               {activeTab !== "pricing" && (
                 <Button
                   type="button"
                   onClick={() => {
                     const formData = form.getValues();
-                    handleSaveAndContinue(formData);
-                  })}
+                    handleSaveAndContinue(formData);)}}
                   disabled={saveBook.isPending || descriptionCharacterCount > maxDescriptionCharacters}
                   className="bg-orange-600 hover:bg-orange-700"
                 >
@@ -1906,20 +1892,19 @@ export default function EditBook() {
                       Saving...
                     </>
                   ) : (
-                    "Save and Continue"
-                   }
+                    "Save and Continue")}
                 </Button>
               )}
               {activeTab === "pricing" && (
                 <Button
                   type="submit"
-                  disabled={saveBook.isPending || descriptionCharacterCount > maxDescriptionCharacters}
+                  disabled={saveBook.isPending || descriptionCharacterCount > maxDescriptionCharacters)}
                   className="bg-orange-600 hover:bg-orange-700"
                 >
                   {saveBook.isPending ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {isCreating ? 'Creating...' : 'Updating...'}
+                      {isCreating ? 'Creating...' : 'Updating...')}
                     </>
                   ) : (
                     <>
@@ -1948,7 +1933,7 @@ export default function EditBook() {
               onClick={() => {
                 deleteBook.mutate();
                 setShowDeleteDialog(false);
-              })}
+              }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete

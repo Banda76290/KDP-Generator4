@@ -31,7 +31,7 @@ interface Contributor {
 
 const kdpFormSchema = insertProjectSchema.extend({
   formats: z.array(z.enum(["ebook", "paperback", "hardcover"])).optional(),
-}).partial();
+}.partial();
 
 type KDPFormData = z.infer<typeof kdpFormSchema>;
 
@@ -94,14 +94,14 @@ export default function ProjectCreate() {
       };
       
       console.log('Sending project data:', projectData);
-      const project = await apiRequest("/api/projects", { method: "POST", body: JSON.stringify(projectData });
+      const project = await apiRequest("/api/projects", { method: "POST", body: JSON.stringify(projectData)};
       console.log('Received project response:', project);
       
       // Create contributors if any
       if (contributors.length > 0) {
         for (const contributor of contributors) {
           await apiRequest("/api/contributors", { method: "POST", body: JSON.stringify({ projectId: project.id,
-            name: `${contributor.firstName }) ${contributor.lastName}`.trim(),
+            name: `${contributor.firstName)} ${contributor.lastName}`.trim(),
             role: contributor.role,
           }});
         }
@@ -110,15 +110,15 @@ export default function ProjectCreate() {
       return project;
     },
     onSuccess: (project) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"])};
       toast({
         title: "Project Created",
         description: "Your KDP project has been created successfully.",
-      });
+      };
       
       if (createBookToo) {
         // Redirect to book creation page with project ID
-        setLocation(`/books/create?projectId=${project.id}`);
+        setLocation(`/books/create?projectId=${project.id)}`);
       } else {
         setLocation("/projects");
       }
@@ -133,8 +133,7 @@ export default function ProjectCreate() {
       toast({
         title: "Error",
         description: error.message || "Failed to create project",
-        variant: "destructive",
-      });
+        variant: "destructive",)};
     },
   });
 
@@ -153,7 +152,7 @@ export default function ProjectCreate() {
 
   const updateContributor = (id: string, field: keyof Contributor, value: string) => {
     setContributors(contributors.map(c => 
-      c.id === id ? { ...c, [field]: value } : c
+      c.id === id ? { ...c, [field]: value)} : c
     ));
   };
 
@@ -205,7 +204,7 @@ export default function ProjectCreate() {
 
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border">
               <div className="p-6">
-                <form onSubmit={form.handleSubmit((data) => createProject.mutate({ ...data, status: 'in_review' }))}>
+                <form onSubmit={form.handleSubmit((data) => createProject.mutate({ ...data, status: 'in_review')}}>
                   <div className="space-y-6">
                     <Card>
                       <CardHeader>
@@ -218,13 +217,13 @@ export default function ProjectCreate() {
                         {/* Language */}
                         <div>
                           <Label htmlFor="language">Language</Label>
-                          <Select value={form.watch("language") ?? ""} onValueChange={ (value) => form.setValue("language", value }>
+                          <Select value={form.watch("language") ?? ""} onValueChange={ (value) => form.setValue("language", value)}>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                               {languages.map((lang) => (
-                                <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+                                <SelectItem key={lang)} value={lang}>{lang}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -234,12 +233,12 @@ export default function ProjectCreate() {
                         <div>
                           <Label htmlFor="title">Book Title</Label>
                           <Input
-                            { ...form.register("title" }
+                            { ...form.register("title")}
                             placeholder="From Zero to Hero with Google Analytics"
                             className="mt-1"
                           />
                           {form.formState.errors.title && (
-                            <p className="text-red-500 text-sm mt-1">{form.formState.errors.title.message}</p>
+                            <p className="text-red-500 text-sm mt-1">{form.formState.errors.title.message)}</p>
                           )}
                         </div>
 
@@ -247,7 +246,7 @@ export default function ProjectCreate() {
                         <div>
                           <Label htmlFor="subtitle">Subtitle (Optional)</Label>
                           <Input
-                            { ...form.register("subtitle" }
+                            { ...form.register("subtitle")}
                             placeholder="Turn statistics into winning strategies"
                             className="mt-1"
                           />
@@ -258,7 +257,7 @@ export default function ProjectCreate() {
                           <div>
                             <Label htmlFor="seriesTitle">Series Title (Optional)</Label>
                             <Input
-                              { ...form.register("seriesTitle" }
+                              { ...form.register("seriesTitle")}
                               placeholder="From Zero to Hero"
                               className="mt-1"
                             />
@@ -266,7 +265,7 @@ export default function ProjectCreate() {
                           <div>
                             <Label htmlFor="seriesNumber">Series Number</Label>
                             <Input
-                              {...form.register("seriesNumber", { valueAsNumber: true })}
+                              {...form.register("seriesNumber", { valueAsNumber: true)}}
                               type="number"
                               placeholder="1"
                               className="mt-1"
@@ -278,7 +277,7 @@ export default function ProjectCreate() {
                         <div>
                           <Label htmlFor="editionNumber">Edition Number (Optional)</Label>
                           <Input
-                            { ...form.register("editionNumber" }
+                            { ...form.register("editionNumber")}
                             placeholder="1"
                             className="mt-1"
                           />
@@ -296,7 +295,7 @@ export default function ProjectCreate() {
                           <div>
                             <Label>Prefix</Label>
                             <Input
-                              { ...form.register("authorPrefix" }
+                              { ...form.register("authorPrefix")}
                               placeholder="Dr."
                               className="mt-1"
                             />
@@ -304,7 +303,7 @@ export default function ProjectCreate() {
                           <div>
                             <Label>First Name</Label>
                             <Input
-                              { ...form.register("authorFirstName" }
+                              { ...form.register("authorFirstName")}
                               placeholder="Sébastien"
                               className="mt-1"
                             />
@@ -312,14 +311,14 @@ export default function ProjectCreate() {
                           <div>
                             <Label>Middle Name</Label>
                             <Input
-                              { ...form.register("authorMiddleName" }
+                              { ...form.register("authorMiddleName")}
                               className="mt-1"
                             />
                           </div>
                           <div>
                             <Label>Last Name</Label>
                             <Input
-                              { ...form.register("authorLastName" }
+                              { ...form.register("authorLastName")}
                               placeholder="JULLIARD-BESSON"
                               className="mt-1"
                             />
@@ -327,7 +326,7 @@ export default function ProjectCreate() {
                           <div>
                             <Label>Suffix</Label>
                             <Input
-                              { ...form.register("authorSuffix" }
+                              { ...form.register("authorSuffix")}
                               placeholder="PhD"
                               className="mt-1"
                             />
@@ -346,17 +345,17 @@ export default function ProjectCreate() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         {contributors.map((contributor) => (
-                          <div key={contributor.id} className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                          <div key={contributor.id)} className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded">
                             <Select 
                               value={contributor.role} 
-                              onValueChange={ (value) => updateContributor(contributor.id, "role", value }
+                              onValueChange={ (value) => updateContributor(contributor.id, "role", value)}
                             >
                               <SelectTrigger className="w-32">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
                                 {contributorRoles.map((role) => (
-                                  <SelectItem key={role} value={role}>{role}</SelectItem>
+                                  <SelectItem key={role)} value={role}>{role}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
@@ -402,7 +401,7 @@ export default function ProjectCreate() {
                         ))}
                         
                         {contributors.length < 9 && (
-                          <Button type="button" variant="outline" onClick={addContributor} className="w-full">
+                          <Button type="button" variant="outline" onClick={addContributor)} className="w-full">
                             <Plus className="h-4 w-4 mr-2" />
                             Add Another
                           </Button>
@@ -420,7 +419,7 @@ export default function ProjectCreate() {
                       </CardHeader>
                       <CardContent>
                         <Textarea
-                          { ...form.register("description" }
+                          { ...form.register("description")}
                           placeholder="In the world of digital marketing, understanding data is essential to making informed decisions..."
                           rows={6}
                           className="resize-none"
@@ -439,7 +438,7 @@ export default function ProjectCreate() {
                       <CardContent>
                         <RadioGroup
                           value={form.watch("publishingRights") ?? "owned"}
-                          onValueChange={ (value) => form.setValue("publishingRights", value }
+                          onValueChange={ (value) => form.setValue("publishingRights", value)}
                         >
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="owned" id="owned" />
@@ -466,7 +465,7 @@ export default function ProjectCreate() {
                           </p>
                           <RadioGroup
                             value={form.watch("hasExplicitContent") ? "yes" : "no"}
-                            onValueChange={ (value) => form.setValue("hasExplicitContent", value === "yes" }
+                            onValueChange={ (value) => form.setValue("hasExplicitContent", value === "yes")}
                           >
                             <div className="flex items-center space-x-2">
                               <RadioGroupItem value="yes" id="explicit-yes" />
@@ -487,26 +486,26 @@ export default function ProjectCreate() {
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <Label>Minimum</Label>
-                              <Select value={form.watch("readingAgeMin") ?? ""} onValueChange={ (value) => form.setValue("readingAgeMin", value }>
+                              <Select value={form.watch("readingAgeMin") ?? ""} onValueChange={ (value) => form.setValue("readingAgeMin", value)}>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select one" />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {readingAges.map((age) => (
-                                    <SelectItem key={age} value={age}>{age}</SelectItem>
+                                    <SelectItem key={age)} value={age}>{age}</SelectItem>
                                   ))}
                                 </SelectContent>
                               </Select>
                             </div>
                             <div>
                               <Label>Maximum</Label>
-                              <Select value={form.watch("readingAgeMax") ?? ""} onValueChange={ (value) => form.setValue("readingAgeMax", value }>
+                              <Select value={form.watch("readingAgeMax") ?? ""} onValueChange={ (value) => form.setValue("readingAgeMax", value)}>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select one" />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {readingAges.map((age) => (
-                                    <SelectItem key={age} value={age}>{age}</SelectItem>
+                                    <SelectItem key={age)} value={age}>{age}</SelectItem>
                                   ))}
                                 </SelectContent>
                               </Select>
@@ -525,13 +524,13 @@ export default function ProjectCreate() {
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <Select value={form.watch("primaryMarketplace") ?? ""} onValueChange={ (value) => form.setValue("primaryMarketplace", value }>
+                        <Select value={form.watch("primaryMarketplace") ?? ""} onValueChange={ (value) => form.setValue("primaryMarketplace", value)}>
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             {marketplaces.map((marketplace) => (
-                              <SelectItem key={marketplace} value={marketplace}>{marketplace}</SelectItem>
+                              <SelectItem key={marketplace)} value={marketplace}>{marketplace}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -549,7 +548,7 @@ export default function ProjectCreate() {
                       <CardContent className="space-y-4">
                         <div className="flex flex-wrap gap-2">
                           {categories.map((category) => (
-                            <Badge key={category} variant="secondary" className="flex items-center gap-1">
+                            <Badge key={category)} variant="secondary" className="flex items-center gap-1">
                               {category}
                               <X
                                 className="h-3 w-3 cursor-pointer"
@@ -566,8 +565,7 @@ export default function ProjectCreate() {
                                 if (e.key === "Enter") {
                                   e.preventDefault();
                                   addCategory(e.currentTarget.value);
-                                  e.currentTarget.value = "";
-                                }
+                                  e.currentTarget.value = "";)}
                               }}
                             />
                             <Button type="button" variant="outline">Edit categories</Button>
@@ -580,7 +578,7 @@ export default function ProjectCreate() {
                             <Checkbox
                               id="low-content"
                               checked={form.watch("isLowContentBook") ?? false}
-                              onCheckedChange={ (checked) => form.setValue("isLowContentBook", !!checked }
+                              onCheckedChange={ (checked) => form.setValue("isLowContentBook", !!checked)}
                             />
                             <Label htmlFor="low-content">Low-content book (content is 16-point font size or greater)</Label>
                           </div>
@@ -588,7 +586,7 @@ export default function ProjectCreate() {
                             <Checkbox
                               id="large-print"
                               checked={form.watch("isLargePrintBook") ?? false}
-                              onCheckedChange={ (checked) => form.setValue("isLargePrintBook", !!checked }
+                              onCheckedChange={ (checked) => form.setValue("isLargePrintBook", !!checked)}
                             />
                             <Label htmlFor="large-print">Large-print book (content is 16-point font size or greater)</Label>
                           </div>
@@ -607,7 +605,7 @@ export default function ProjectCreate() {
                       <CardContent className="space-y-4">
                         <div className="flex flex-wrap gap-2">
                           {keywords.map((keyword) => (
-                            <Badge key={keyword} variant="secondary" className="flex items-center gap-1">
+                            <Badge key={keyword)} variant="secondary" className="flex items-center gap-1">
                               {keyword}
                               <X
                                 className="h-3 w-3 cursor-pointer"
@@ -624,8 +622,7 @@ export default function ProjectCreate() {
                                 if (e.key === "Enter") {
                                   e.preventDefault();
                                   addKeyword(e.currentTarget.value);
-                                  e.currentTarget.value = "";
-                                }
+                                  e.currentTarget.value = "";)}
                               }}
                             />
                             <Input
@@ -657,7 +654,7 @@ export default function ProjectCreate() {
                       <CardContent className="space-y-4">
                         <RadioGroup
                           value={form.watch("previouslyPublished") ? "previously" : "same"}
-                          onValueChange={ (value) => form.setValue("previouslyPublished", value === "previously" }
+                          onValueChange={ (value) => form.setValue("previouslyPublished", value === "previously")}
                         >
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="same" id="same-date" />
@@ -673,7 +670,7 @@ export default function ProjectCreate() {
                           <div>
                             <Label htmlFor="previousPublicationDate">Previous Publication Date</Label>
                             <Input
-                              {...form.register("previousPublicationDate" }
+                              {...form.register("previousPublicationDate")}
                               type="date"
                               className="mt-1"
                             />
@@ -693,7 +690,7 @@ export default function ProjectCreate() {
                       <CardContent className="space-y-4">
                         <RadioGroup
                           value={form.watch("releaseOption") ?? "immediate"}
-                          onValueChange={ (value) => form.setValue("releaseOption", value }
+                          onValueChange={ (value) => form.setValue("releaseOption", value)}
                         >
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="immediate" id="immediate" />
@@ -709,7 +706,7 @@ export default function ProjectCreate() {
                           <div>
                             <Label htmlFor="scheduledReleaseDate">Scheduled Release Date</Label>
                             <Input
-                              {...form.register("scheduledReleaseDate" }
+                              {...form.register("scheduledReleaseDate")}
                               type="date"
                               className="mt-1"
                             />
@@ -729,10 +726,10 @@ export default function ProjectCreate() {
                       <CardContent>
                         <div className="space-y-2">
                           {(["ebook", "paperback", "hardcover"] as const).map((format) => (
-                            <div key={format} className="flex items-center space-x-2">
+                            <div key={format)} className="flex items-center space-x-2">
                               <Checkbox
                                 id={format}
-                                checked={ form.watch("formats")?.includes(format }
+                                checked={ form.watch("formats")?.includes(format)}
                                 onCheckedChange={(checked) => {
                                   const currentFormats = form.watch("formats") || [];
                                   if (checked) {
@@ -747,7 +744,7 @@ export default function ProjectCreate() {
                           ))}
                         </div>
                         {form.formState.errors.formats && (
-                          <p className="text-red-500 text-sm mt-1">{form.formState.errors.formats.message}</p>
+                          <p className="text-red-500 text-sm mt-1">{form.formState.errors.formats.message)}</p>
                         )}
                       </CardContent>
                     </Card>
@@ -759,7 +756,7 @@ export default function ProjectCreate() {
                           <Checkbox
                             id="create-book-too"
                             checked={createBookToo}
-                            onCheckedChange={ (checked) => setCreateBookToo(!!checked }
+                            onCheckedChange={ (checked) => setCreateBookToo(!!checked)}
                           />
                           <Label htmlFor="create-book-too" className="text-base">
                             Also create a book in this project after creation
@@ -787,7 +784,7 @@ export default function ProjectCreate() {
                           
                           const formData = form.getValues();
                           console.log('Bypassing form validation, sending data directly:', formData);
-                          createProject.mutate({ ...formData, status: 'draft' )});
+                          createProject.mutate({ ...formData, status: 'draft' )};
                         }}
                         disabled={createProject.isPending}
                       >

@@ -40,8 +40,7 @@ export default function AdminAudit() {
       toast({
         title: "Accès refusé",
         description: "Vous n'avez pas les permissions d'administrateur.",
-        variant: "destructive",
-      });
+        variant: "destructive",)};
       setTimeout(() => {
         window.location.href = "/";
       }, 500);
@@ -155,12 +154,12 @@ export default function AdminAudit() {
                   </TableHeader>
                   <TableBody>
                     {auditData.logs.map((log) => (
-                      <TableRow key={log.id}>
+                      <TableRow key={log.id)}>
                         <TableCell>
                           <div className="text-sm">
-                            <div>{ format(new Date(log.createdAt), "dd/MM/yyyy" }</div>
+                            <div>{ format(new Date(log.createdAt), "dd/MM/yyyy")}</div>
                             <div className="text-muted-foreground">
-                              { format(new Date(log.createdAt), "HH:mm:ss" }
+                              { format(new Date(log.createdAt), "HH:mm:ss")}
                             </div>
                           </div>
                         </TableCell>
@@ -180,19 +179,19 @@ export default function AdminAudit() {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            { getActionIcon(log.action }
-                            <Badge variant={ getActionBadgeVariant(log.action }>
-                              { log.action.toUpperCase( }
+                            { getActionIcon(log.action)}
+                            <Badge variant={ getActionBadgeVariant(log.action)}>
+                              { log.action.toUpperCase()}
                             </Badge>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div>
-                            <div className="font-medium">{ getResourceLabel(log.resource }</div>
+                            <div className="font-medium">{ getResourceLabel(log.resource)}</div>
                             { log.resourceId && (
                               <div className="text-sm text-muted-foreground font-mono">
                                 {log.resourceId.length > 20 
-                                  ? `${log.resourceId.substring(0, 20 }...`
+                                  ? `${log.resourceId.substring(0, 20)}...`
                                   : log.resourceId
                                 }
                               </div>
@@ -207,7 +206,7 @@ export default function AdminAudit() {
                                   Voir détails
                                 </summary>
                                 <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-x-auto">
-                                  {JSON.stringify(log.details, null, 2 }
+                                  {JSON.stringify(log.details, null, 2)}
                                 </pre>
                               </details>
                             </div>
@@ -227,7 +226,7 @@ export default function AdminAudit() {
               {/* Pagination */}
               <div className="flex items-center justify-between">
                 <div className="text-sm text-muted-foreground">
-                  Page {currentPage + 1} sur { Math.ceil((auditData?.total || 0) / limit }
+                  Page {currentPage + 1} sur { Math.ceil((auditData?.total || 0) / limit)}
                 </div>
                 <div className="flex items-center gap-2">
                   <Button

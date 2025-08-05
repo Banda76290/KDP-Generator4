@@ -14,7 +14,7 @@ export default function AuthorsListPage() {
   // Fetch authors with counts
   const { data: authors = [], isLoading: authorsLoading } = useQuery({
     queryKey: ["/api/authors", "withCounts"],
-    queryFn: () => apiRequest("/api/authors?withCounts=true", { method: "GET" }),
+    queryFn: () => apiRequest("/api/authors?withCounts=true", { method: "GET")},
   });
 
   return (
@@ -43,13 +43,13 @@ export default function AuthorsListPage() {
               <p className="text-gray-500 dark:text-gray-400 mb-4">
                 Get started by creating your first author
               </p>
-              <Button onClick={() => setLocation("/authors/create")} className="kdp-btn-primary">
+              <Button onClick={() => setLocation("/authors/create"))} className="kdp-btn-primary">
                 <Plus className="w-4 h-4 mr-2" />
                 Create First Author
               </Button>
             </div>
           ) : (
-            authors.map((author: AuthorWithRelations & { bookCount: number; projectCount: number }) => (
+            authors.map((author: AuthorWithRelations & { bookCount: number; projectCount: number } => (
               <Card key={author.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center justify-between">

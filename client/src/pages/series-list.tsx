@@ -40,8 +40,7 @@ function useSeriesData() {
     queryKey: ['/api/series'],
     queryFn: async () => {
       const response = await fetch('/api/series', {
-        credentials: 'include' // Include cookies for authentication
-      });
+        credentials: 'include' // Include cookies for authentication)};
       if (!response.ok) {
         throw new Error('Failed to fetch series');
       }
@@ -66,34 +65,34 @@ export default function SeriesListPage() {
   // Mutation to remove book from series
   const removeBookFromSeries = useMutation({
     mutationFn: async (bookId: string) => {
-      return await apiRequest(`/api/books/${bookId}`, { method: "PATCH", body: JSON.stringify({ seriesTitle: "",
-        seriesNumber: null })});
+      return await apiRequest(`/api/books/${bookId)}`, { method: "PATCH", body: JSON.stringify({ seriesTitle: "",
+        seriesNumber: null)}});
     },
     onSuccess: () => {
       // Invalidate queries to refresh the data
-      queryClient.invalidateQueries({ queryKey: ['/api/series'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/books'] });
-      toast.success({ title: "Book Removed", description: "The book has been successfully removed from the series." });
+      queryClient.invalidateQueries({ queryKey: ['/api/series'])};
+      queryClient.invalidateQueries({ queryKey: ['/api/books'] };
+      toast.success({ title: "Book Removed", description: "The book has been successfully removed from the series." };
     },
     onError: (error: any) => {
-      toast.error({ title: "Error", description: error.message || "Failed to remove book from series" });
+      toast.error({ title: "Error", description: error.message || "Failed to remove book from series")};
     },
   });
 
   // Mutation to delete series
   const deleteSeries = useMutation({
     mutationFn: async (seriesId: string) => {
-      return await apiRequest(`/api/series/${seriesId}`, { method: "DELETE" });
+      return await apiRequest(`/api/series/${seriesId)}`, { method: "DELETE" };
     },
     onSuccess: () => {
       // Invalidate queries to refresh the data
-      queryClient.invalidateQueries({ queryKey: ['/api/series'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/books'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
-      toast.success({ title: "Series Deleted", description: "The series has been successfully deleted." });
+      queryClient.invalidateQueries({ queryKey: ['/api/series'])};
+      queryClient.invalidateQueries({ queryKey: ['/api/books'] };
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] };
+      toast.success({ title: "Series Deleted", description: "The series has been successfully deleted." };
     },
     onError: (error: any) => {
-      toast.error({ title: "Error", description: error.message || "Failed to delete series" });
+      toast.error({ title: "Error", description: error.message || "Failed to delete series")};
     },
   });
 
@@ -102,7 +101,7 @@ export default function SeriesListPage() {
     const monthlyRevenue = books.reduce((sum, book) => sum + parseFloat(book.monthlyRevenue || '0'), 0);
     return {
       totalRevenue: totalRevenue.toFixed(2),
-      monthlyRevenue: monthlyRevenue.toFixed(2 };
+      monthlyRevenue: monthlyRevenue.toFixed(2)};
   };
 
   // Filter and sort series
@@ -111,7 +110,7 @@ export default function SeriesListPage() {
       const matchesSearch = seriesItem.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            (seriesItem.description || '').toLowerCase().includes(searchTerm.toLowerCase());
       return matchesSearch;
-    })
+    }
     .sort((a: SeriesData, b: SeriesData) => {
       switch (sortBy) {
         case "newest":
@@ -180,7 +179,7 @@ export default function SeriesListPage() {
               />
             </div>
             
-            <Select value={sortBy} onValueChange={ (value) => setSortBy(value as typeof sortBy }>
+            <Select value={sortBy} onValueChange={ (value) => setSortBy(value as typeof sortBy)}>
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
@@ -213,19 +212,17 @@ export default function SeriesListPage() {
         { isLoading && (
           <div className="text-center py-8">
             <div className="text-gray-600">Loading series...</div>
-          </div>
-         }
+          </div>)}
 
         { error && (
           <div className="text-center py-8">
             <div className="text-red-600">Failed to load series. Please try again.</div>
-          </div>
-         }
+          </div>)}
 
         {/* Results Count */}
         {!isLoading && !error && (
           <div className="text-sm text-gray-600">
-            {filteredSeries.length} series found
+            {filteredSeries.length)} series found
           </div>
         )}
 
@@ -235,7 +232,7 @@ export default function SeriesListPage() {
             <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No series found</h3>
             <p className="text-gray-600 mb-6">
-              {searchTerm ? "Try adjusting your search terms" : "Create your first series to get started"}
+              {searchTerm ? "Try adjusting your search terms" : "Create your first series to get started")}
             </p>
             <Button 
               onClick={ () => setLocation('/series-setup' )}
@@ -252,7 +249,7 @@ export default function SeriesListPage() {
         {!isLoading && !error && filteredSeries.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredSeries.map((seriesItem: SeriesData) => (
-              <Card key={seriesItem.id} className="hover:shadow-lg transition-shadow">
+              <Card key={seriesItem.id)} className="hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -290,7 +287,7 @@ export default function SeriesListPage() {
                           <AlertDialogTrigger asChild>
                             <DropdownMenuItem 
                               className="text-red-600 focus:text-red-600"
-                              onSelect={ (e) => e.preventDefault( }
+                              onSelect={ (e) => e.preventDefault()}
                             >
                               <Trash2 className="w-4 h-4 mr-2" />
                               Delete Series
@@ -335,19 +332,19 @@ export default function SeriesListPage() {
                       <div className="space-y-2">
                         <h4 className="text-sm font-medium text-gray-800 flex items-center">
                           <Book className="w-4 h-4 mr-1" />
-                          Books in this series ({seriesItem.books.length})
+                          Books in this series ({seriesItem.books.length)}
                         </h4>
                         <div className="space-y-2 max-h-32 overflow-y-auto">
                           {seriesItem.books
                             .sort((a, b) => (a.seriesNumber || 0) - (b.seriesNumber || 0))
                             .map((book) => (
-                              <div key={book.id} className="text-xs p-3 bg-gray-50 rounded space-y-2">
+                              <div key={book.id)} className="text-xs p-3 bg-gray-50 rounded space-y-2">
                                 {/* First row: Series number and title with remove button */}
                                 <div className="flex items-start justify-between">
                                   <div className="flex items-center space-x-2 flex-1 min-w-0">
                                     {book.seriesNumber && (
                                       <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs font-medium flex-shrink-0">
-                                        #{book.seriesNumber}
+                                        #{book.seriesNumber)}
                                       </span>
                                     )}
                                     <span className="font-medium truncate">{book.title}</span>
@@ -408,8 +405,7 @@ export default function SeriesListPage() {
                       <div className="text-xs text-gray-500 italic flex items-center">
                         <Book className="w-3 h-3 mr-1" />
                         No books in this series yet
-                      </div>
-                     }
+                      </div>)}
 
                     {/* Revenue Statistics */}
                     {seriesItem.books && seriesItem.books.length > 0 && (
@@ -421,7 +417,7 @@ export default function SeriesListPage() {
                           <div>
                             <p className="text-xs text-gray-500">This Month</p>
                             <p className="text-sm font-semibold text-gray-900">
-                              ${calculateSeriesRevenue(seriesItem.books).monthlyRevenue}
+                              ${calculateSeriesRevenue(seriesItem.books).monthlyRevenue)}
                             </p>
                           </div>
                         </div>
@@ -441,7 +437,7 @@ export default function SeriesListPage() {
 
                     {/* Creation Date */}
                     <div className="text-xs text-gray-500 pt-2">
-                      Created: { new Date(seriesItem.createdAt).toLocaleDateString( }
+                      Created: { new Date(seriesItem.createdAt).toLocaleDateString()}
                     </div>
 
 

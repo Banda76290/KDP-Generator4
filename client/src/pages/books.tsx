@@ -46,8 +46,7 @@ export default function BooksPage() {
     if (!isLoading && !isAuthenticated) {
       toast.error({
         title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-      });
+        description: "You are logged out. Logging in again...",)};
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
@@ -133,98 +132,91 @@ function BooksContent() {
   const { data: books = [], isLoading: booksLoading } = useQuery<Book[]>({
     queryKey: ["/api/books"],
     staleTime: 0, // Always refetch to get latest ISBN changes
-  });
+  };
 
   // Fetch all projects for assignment dropdown
   const { data: projects = [] } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
-  });
+  };
 
   // Mutation for assigning book to project
   const assignBookMutation = useMutation({
-    mutationFn: async ({ bookId, projectId }: { bookId: string; projectId: string }) => {
-      return apiRequest(`/api/books/${bookId}`, { method: "PATCH", body: JSON.stringify({ projectId }) });
+    mutationFn: async ({ bookId, projectId)}: { bookId: string; projectId: string } => {
+      return apiRequest(`/api/books/${bookId)}`, { method: "PATCH", body: JSON.stringify({ projectId)} });
     },
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Book assigned to project successfully",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+        description: "Book assigned to project successfully",)};
+      queryClient.invalidateQueries({ queryKey: ["/api/books"] };
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
     },
     onError: (error: Error) => {
       toast({
         title: "Error",
         description: error.message,
-        variant: "destructive",
-      });
+        variant: "destructive",)};
     },
   });
 
   // Mutation for duplicating book
   const duplicateBookMutation = useMutation({
     mutationFn: async (bookId: string) => {
-      return apiRequest(`/api/books/${bookId}/duplicate`, { method: "POST" });
+      return apiRequest(`/api/books/${bookId)}/duplicate`, { method: "POST" };
     },
     onSuccess: () => {
       toast.success({
         title: "Success",
-        description: "Book duplicated successfully",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
+        description: "Book duplicated successfully",)};
+      queryClient.invalidateQueries({ queryKey: ["/api/books"] };
     },
     onError: (error: Error) => {
       toast.error({
         title: "Error",
-        description: error.message,
-      });
+        description: error.message,)};
     },
   });
 
   // Mutation for deleting book
   const deleteBookMutation = useMutation({
     mutationFn: async (bookId: string) => {
-      return apiRequest(`/api/books/${bookId}`, { method: "DELETE" });
+      return apiRequest(`/api/books/${bookId)}`, { method: "DELETE" };
     },
     onSuccess: () => {
       toast.success({
         title: "Success",
-        description: "Book deleted successfully",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+        description: "Book deleted successfully",)};
+      queryClient.invalidateQueries({ queryKey: ["/api/books"] };
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
     },
     onError: (error: Error) => {
       toast.error({
         title: "Error",
-        description: error.message,
-      });
+        description: error.message,)};
     },
   });
 
   // Mutation for translating book
   const translateBookMutation = useMutation({
-    mutationFn: async ({ bookId, targetLanguage }: { bookId: string; targetLanguage: string }) => {
-      return apiRequest(`/api/books/${bookId}/translate`, { 
+    mutationFn: async ({ bookId, targetLanguage)}: { bookId: string; targetLanguage: string } => {
+      return apiRequest(`/api/books/${bookId)}/translate`, { 
         method: "POST", 
-        body: JSON.stringify({ targetLanguage }) 
+        body: JSON.stringify({ targetLanguage)} 
       });
     },
     onSuccess: (data: any) => {
       toast.success({
         title: "Translation Complete",
-        description: `Book successfully translated to ${data.targetLanguage}`,
+        description: `Book successfully translated to ${data.targetLanguage)}`,
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/books"] };
       setBookToTranslate(null);
       setSelectedLanguage("");
     },
     onError: (error: Error) => {
       toast.error({
         title: "Translation Failed",
-        description: error.message,
-      });
+        description: error.message,)};
     },
   });
 
@@ -232,8 +224,7 @@ function BooksContent() {
     if (bookToTranslate && selectedLanguage) {
       translateBookMutation.mutate({
         bookId: bookToTranslate.id,
-        targetLanguage: selectedLanguage
-      });
+        targetLanguage: selectedLanguage)};
     }
   };
 
@@ -253,7 +244,7 @@ function BooksContent() {
       const matchesLanguage = filterLanguage === "all" || book.language === filterLanguage;
       
       return matchesSearch && matchesStatus && matchesFormat && matchesAssignment && matchesLanguage;
-    })
+    }
     .sort((a: Book, b: Book) => {
       const getLastModifiedDate = (book: Book) => {
         return new Date(book.updatedAt || book.createdAt || 0);
@@ -340,7 +331,7 @@ function BooksContent() {
             <div className="flex items-center gap-2 mt-2">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
               <span className="text-sm text-amber-600">
-                {unassignedBooksCount} book{unassignedBooksCount !== 1 ? 's' : ''} not assigned to any project
+                {unassignedBooksCount)} book{unassignedBooksCount !== 1 ? 's' : ''} not assigned to any project
               </span>
             </div>
           )}
@@ -408,14 +399,14 @@ function BooksContent() {
           <SelectContent>
             <SelectItem value="all">All Languages</SelectItem>
             {languages.map((language) => (
-              <SelectItem key={language} value={language}>
+              <SelectItem key={language)} value={language}>
                 {language}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
-        <Select value={sortBy} onValueChange={ (value) => setSortBy(value as SortOption }>
+        <Select value={sortBy} onValueChange={ (value) => setSortBy(value as SortOption)}>
           <SelectTrigger>
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
@@ -447,7 +438,7 @@ function BooksContent() {
       {booksLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i} className="animate-pulse">
+            <Card key={i)} className="animate-pulse">
               <CardHeader>
                 <div className="h-4 bg-gray-200 rounded w-3/4"></div>
                 <div className="h-3 bg-gray-200 rounded w-1/2"></div>
@@ -482,7 +473,7 @@ function BooksContent() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredAndSortedBooks.map((book: Book) => (
-            <Card key={book.id} className={`relative ${!book.projectId ? 'border-amber-200 bg-amber-50' : ''}`}>
+            <Card key={book.id)} className={`relative ${!book.projectId ? 'border-amber-200 bg-amber-50' : ''}`}>
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
                   <div className="flex-1 min-w-0">
@@ -502,7 +493,7 @@ function BooksContent() {
                     {book.subtitle && (
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <p className="text-sm text-muted-foreground truncate cursor-help">{book.subtitle}</p>
+                          <p className="text-sm text-muted-foreground truncate cursor-help">{book.subtitle)}</p>
                         </TooltipTrigger>
                         <TooltipContent>
                           <p>{book.subtitle}</p>
@@ -534,7 +525,7 @@ function BooksContent() {
                         onClick={() => {
                           setBookToTranslate(book);
                           setSelectedLanguage("");
-                        })}
+                        }}
                         disabled={translateBookMutation.isPending}
                       >
                         <Languages className="h-4 w-4 mr-2" />
@@ -558,17 +549,17 @@ function BooksContent() {
                   {/* Author */}
                   { (book.authorFirstName || book.authorLastName) && (
                     <p className="text-sm text-muted-foreground">
-                      by {[book.authorFirstName, book.authorLastName].filter(Boolean).join(' ' }
+                      by {[book.authorFirstName, book.authorLastName].filter(Boolean).join(' ')}
                     </p>
                   )}
 
                   {/* Status and Format */}
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant={ getStatusBadgeVariant(book.status }>
+                    <Badge variant={ getStatusBadgeVariant(book.status)}>
                       {book.status}
                     </Badge>
                     <Badge variant="outline">
-                      { getFormatIcon(book.format } {book.format}
+                      { getFormatIcon(book.format)} {book.format}
                     </Badge>
                   </div>
 
@@ -576,7 +567,7 @@ function BooksContent() {
                   {book.language && (
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <Globe className="h-4 w-4" />
-                      <span>{book.language}</span>
+                      <span>{book.language)}</span>
                     </div>
                   )}
 
@@ -585,7 +576,7 @@ function BooksContent() {
                     <span className="text-xs font-medium">ISBN/ASIN:</span>
                     <span>
                       {book.isbn ? (
-                        <span className="font-medium text-foreground">{book.isbn}</span>
+                        <span className="font-medium text-foreground">{book.isbn)}</span>
                       ) : book.isbnPlaceholder ? (
                         <span className="text-amber-600">{book.isbnPlaceholder}</span>
                       ) : (
@@ -599,10 +590,10 @@ function BooksContent() {
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <Library className="h-4 w-4" />
                       <span>
-                        Series: <span className="font-medium text-foreground">{book.seriesTitle}</span>
+                        Series: <span className="font-medium text-foreground">{book.seriesTitle)}</span>
                         {book.seriesNumber && (
                           <span className="ml-1 bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs font-medium">
-                            #{book.seriesNumber}
+                            #{book.seriesNumber)}
                           </span>
                         )}
                       </span>
@@ -614,7 +605,7 @@ function BooksContent() {
                     { book.projectId ? (
                       <div className="text-sm">
                         <span className="text-muted-foreground">Project: </span>
-                        <span className="font-medium">{getProjectName(book.projectId }</span>
+                        <span className="font-medium">{getProjectName(book.projectId)}</span>
                       </div>
                     ) : (
                       <div className="space-y-2">
@@ -624,7 +615,7 @@ function BooksContent() {
                         </div>
                         <Select
                           onValueChange={(projectId) => 
-                            assignBookMutation.mutate({ bookId: book.id, projectId })
+                            assignBookMutation.mutate({ bookId: book.id, projectId)}
                           }
                           disabled={assignBookMutation.isPending}
                         >
@@ -633,7 +624,7 @@ function BooksContent() {
                           </SelectTrigger>
                           <SelectContent>
                             {projects.map((project: Project) => (
-                              <SelectItem key={project.id} value={project.id}>
+                              <SelectItem key={project.id)} value={project.id}>
                                 {project.name}
                               </SelectItem>
                             ))}
@@ -650,7 +641,7 @@ function BooksContent() {
                         <TrendingUp className="h-3 w-3" />
                         This Month
                       </div>
-                      <div className="font-medium">${ parseFloat(book.monthlyRevenue || '0').toFixed(2 }</div>
+                      <div className="font-medium">${ parseFloat(book.monthlyRevenue || '0').toFixed(2)}</div>
                       <div className="text-muted-foreground">{book.totalSales || 0} sales</div>
                     </div>
                     <div>
@@ -658,7 +649,7 @@ function BooksContent() {
                         <DollarSign className="h-3 w-3" />
                         Total
                       </div>
-                      <div className="font-medium">${ parseFloat(book.totalRevenue || '0').toFixed(2 }</div>
+                      <div className="font-medium">${ parseFloat(book.totalRevenue || '0').toFixed(2)}</div>
                       <div className="text-muted-foreground">{book.totalSales || 0} sales</div>
                     </div>
                   </div>
@@ -670,7 +661,7 @@ function BooksContent() {
       )}
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!bookToDelete} onOpenChange={ () => setBookToDelete(null }>
+      <AlertDialog open={!!bookToDelete} onOpenChange={ () => setBookToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Book</AlertDialogTitle>
@@ -727,7 +718,7 @@ function BooksContent() {
                   {languages
                     .filter(lang => lang !== bookToTranslate?.language)
                     .map((language) => (
-                      <SelectItem key={language} value={language}>
+                      <SelectItem key={language)} value={language}>
                         {language}
                       </SelectItem>
                     ))}
@@ -742,7 +733,7 @@ function BooksContent() {
               onClick={() => {
                 setBookToTranslate(null);
                 setSelectedLanguage("");
-              })}
+              }}
             >
               Cancel
             </Button>
@@ -759,8 +750,7 @@ function BooksContent() {
                 <>
                   <Languages className="h-4 w-4 mr-2" />
                   Translate Book
-                </>
-               }
+                </>)}
             </Button>
           </DialogFooter>
         </DialogContent>

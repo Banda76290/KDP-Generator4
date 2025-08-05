@@ -83,8 +83,7 @@ export default function AIConfig() {
       toast({
         title: "Access Denied",
         description: "You need administrator privileges to access this page.",
-        variant: "destructive",
-      });
+        variant: "destructive",)};
       window.location.href = "/";
       return;
     }
@@ -94,41 +93,41 @@ export default function AIConfig() {
   const { data: promptTemplates, isLoading: promptsLoading } = useQuery({
     queryKey: ["/api/admin/ai/prompts"],
     enabled: isAuthenticated && ((user as any)?.role === "admin" || (user as any)?.role === "superadmin"),
-  });
+  };
 
   const { data: aiModels, isLoading: modelsLoading } = useQuery({
     queryKey: ["/api/admin/ai/models"],
     enabled: isAuthenticated && ((user as any)?.role === "admin" || (user as any)?.role === "superadmin"),
-  });
+  };
 
   const { data: usageLimits, isLoading: limitsLoading } = useQuery({
     queryKey: ["/api/admin/ai/limits"],
     enabled: isAuthenticated && ((user as any)?.role === "admin" || (user as any)?.role === "superadmin"),
-  });
+  };
 
   const { data: aiStats } = useQuery({
     queryKey: ["/api/admin/ai/stats"],
     enabled: isAuthenticated && ((user as any)?.role === "admin" || (user as any)?.role === "superadmin"),
-  });
+  };
 
   // Mutations for CRUD operations
   const savePromptMutation = useMutation({
     mutationFn: async (data: Partial<AIPromptTemplate>) => {
       const method = data.id ? "PUT" : "POST";
       const url = data.id ? `/api/admin/ai/prompts/${data.id}` : "/api/admin/ai/prompts";
-      return await apiRequest(url, { method, body: JSON.stringify(data });
+      return await apiRequest(url, { method, body: JSON.stringify(data)};
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/prompts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/prompts"])};
       setEditingPrompt(null);
-      toast({ title: "Success", description: "Prompt template saved successfully" });
+      toast({ title: "Success", description: "Prompt template saved successfully" };
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
         window.location.href = "/api/login";
         return;
       }
-      toast({ title: "Error", description: "Failed to save prompt template", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to save prompt template", variant: "destructive" };
     },
   });
 
@@ -136,19 +135,19 @@ export default function AIConfig() {
     mutationFn: async (data: Partial<AIModel>) => {
       const method = data.id ? "PUT" : "POST";
       const url = data.id ? `/api/admin/ai/models/${data.id}` : "/api/admin/ai/models";
-      return await apiRequest(url, { method, body: JSON.stringify(data });
+      return await apiRequest(url, { method, body: JSON.stringify(data)};
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/models"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/models"])};
       setEditingModel(null);
-      toast({ title: "Success", description: "AI model saved successfully" });
+      toast({ title: "Success", description: "AI model saved successfully" };
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
         window.location.href = "/api/login";
         return;
       }
-      toast({ title: "Error", description: "Failed to save AI model", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to save AI model", variant: "destructive" };
     },
   });
 
@@ -156,29 +155,29 @@ export default function AIConfig() {
     mutationFn: async (data: Partial<AIUsageLimit>) => {
       const method = data.id ? "PUT" : "POST";
       const url = data.id ? `/api/admin/ai/limits/${data.id}` : "/api/admin/ai/limits";
-      return await apiRequest(url, { method, body: JSON.stringify(data });
+      return await apiRequest(url, { method, body: JSON.stringify(data)};
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/limits"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/limits"])};
       setEditingLimit(null);
-      toast({ title: "Success", description: "Usage limit saved successfully" });
+      toast({ title: "Success", description: "Usage limit saved successfully" };
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
         window.location.href = "/api/login";
         return;
       }
-      toast({ title: "Error", description: "Failed to save usage limit", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to save usage limit", variant: "destructive" };
     },
   });
 
   const deletePromptMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/admin/ai/prompts/${id}`, { method: "DELETE" });
+      return await apiRequest(`/api/admin/ai/prompts/${id)}`, { method: "DELETE" };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/prompts"] });
-      toast({ title: "Success", description: "Prompt template deleted successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/prompts"])};
+      toast({ title: "Success", description: "Prompt template deleted successfully" };
     },
   });
 
@@ -223,7 +222,7 @@ export default function AIConfig() {
                       </div>
                       <div>
                         <p className="text-sm text-gray-600">Total Tokens Used</p>
-                        <p className="text-lg font-semibold">{aiStats.totalTokensUsed?.toLocaleString() || 0}</p>
+                        <p className="text-lg font-semibold">{aiStats.totalTokensUsed?.toLocaleString() || 0)}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -296,7 +295,7 @@ export default function AIConfig() {
                       <div className="text-center py-8">Loading...</div>
                     ) : (
                       (promptTemplates as any)?.map((template: any) => (
-                        <div key={template.id} className="border rounded-lg p-4">
+                        <div key={template.id)} className="border rounded-lg p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-2">
@@ -305,15 +304,14 @@ export default function AIConfig() {
                                   {template.isActive ? "Actif" : "Inactif"}
                                 </Badge>
                                 { template.isDefault && (
-                                  <Badge variant="outline">Par défaut</Badge>
-                                 }
+                                  <Badge variant="outline">Par défaut</Badge>)}
                               </div>
                               <p className="text-sm text-gray-600 mb-2">Type: {template.type}</p>
                               <p className="text-sm text-gray-600 mb-2">Modèle: {template.model}</p>
                               <div className="text-xs text-gray-500">
                                 Max Tokens: {template.maxTokens} | Température: {template.temperature}
                                 {template.variables && template.variables.length > 0 && (
-                                  <span className="ml-2">| Variables: {template.variables.length}</span>
+                                  <span className="ml-2">| Variables: {template.variables.length)}</span>
                                 )}
                               </div>
                             </div>
@@ -360,7 +358,7 @@ export default function AIConfig() {
                       <div className="text-center py-8">Loading...</div>
                     ) : (
                       (aiModels as any)?.map((model: any) => (
-                        <div key={model.id} className="border rounded-lg p-4">
+                        <div key={model.id)} className="border rounded-lg p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-2">
@@ -413,7 +411,7 @@ export default function AIConfig() {
                       <div className="text-center py-8">Loading...</div>
                     ) : (
                       (usageLimits as any)?.map((limit: any) => (
-                        <div key={limit.id} className="border rounded-lg p-4">
+                        <div key={limit.id)} className="border rounded-lg p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <h3 className="font-medium capitalize mb-2">{limit.subscriptionTier} Tier</h3>
@@ -436,7 +434,7 @@ export default function AIConfig() {
                                   <p className="text-sm font-medium text-gray-600">Allowed Models:</p>
                                   <div className="flex flex-wrap gap-1 mt-1">
                                     {limit.allowedModels.map((model: string) => (
-                                      <Badge key={model} variant="outline" className="text-xs">
+                                      <Badge key={model)} variant="outline" className="text-xs">
                                         {model}
                                       </Badge>
                                     ))}
@@ -466,27 +464,27 @@ export default function AIConfig() {
           {/* Modals de Configuration */}
           {editingPrompt && (
             <PromptTemplateModal
-              template={editingPrompt}
+              template={editingPrompt)}
               onSave={savePromptMutation.mutate}
-              onClose={ () => setEditingPrompt(null }
+              onClose={ () => setEditingPrompt(null)}
               isLoading={savePromptMutation.isPending}
             />
           )}
 
           {editingModel && (
             <ModelConfigModal
-              model={editingModel}
+              model={editingModel)}
               onSave={saveModelMutation.mutate}
-              onClose={ () => setEditingModel(null }
+              onClose={ () => setEditingModel(null)}
               isLoading={saveModelMutation.isPending}
             />
           )}
 
           {editingLimit && (
             <UsageLimitModal
-              limit={editingLimit}
-              onSave={ (data) => saveLimitMutation.mutate(data }
-              onClose={ () => setEditingLimit(null }
+              limit={editingLimit)}
+              onSave={ (data) => saveLimitMutation.mutate(data)}
+              onClose={ () => setEditingLimit(null)}
               isLoading={saveLimitMutation.isPending}
             />
           )}

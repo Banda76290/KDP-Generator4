@@ -82,8 +82,7 @@ const SidebarProvider = React.forwardRef<
       (value: boolean | ((value: boolean) => boolean)) => {
         const openState = typeof value === "function" ? value(open) : value
         if (setOpenProp) {
-          setOpenProp(openState)
-        } else {
+          setOpenProp(openState))} else {
           _setOpen(openState)
         }
 
@@ -129,7 +128,7 @@ const SidebarProvider = React.forwardRef<
         openMobile,
         setOpenMobile,
         toggleSidebar,
-      }),
+      },
       [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
     )
 
@@ -187,7 +186,7 @@ const Sidebar = React.forwardRef<
           className={cn(
             "flex h-full w-[--sidebar-width] flex-col bg-sidebar text-sidebar-foreground",
             className
-          )}
+          ))}
           ref={ref}
           {...props}
         >
@@ -198,7 +197,7 @@ const Sidebar = React.forwardRef<
 
     if (isMobile) {
       return (
-        <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+        <Sheet open={openMobile)} onOpenChange={setOpenMobile} {...props}>
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
@@ -283,7 +282,7 @@ const SidebarTrigger = React.forwardRef<
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
-      })}
+      }}
       {...props}
     >
       <PanelLeft />
@@ -328,7 +327,7 @@ const SidebarInset = React.forwardRef<
 >(({ className, ...props }, ref) => {
   return (
     <main
-      ref={ref}
+      ref={ref)}
       className={cn(
         "relative flex w-full flex-1 flex-col bg-background",
         "md:peer-data-[variant=inset]:m-2 md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow",
@@ -346,7 +345,7 @@ const SidebarInput = React.forwardRef<
 >(({ className, ...props }, ref) => {
   return (
     <Input
-      ref={ref}
+      ref={ref)}
       data-sidebar="input"
       className={cn(
         "h-8 w-full bg-background shadow-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
@@ -364,7 +363,7 @@ const SidebarHeader = React.forwardRef<
 >(({ className, ...props }, ref) => {
   return (
     <div
-      ref={ref}
+      ref={ref)}
       data-sidebar="header"
       className={cn("flex flex-col gap-2 p-2", className)}
       {...props}
@@ -379,7 +378,7 @@ const SidebarFooter = React.forwardRef<
 >(({ className, ...props }, ref) => {
   return (
     <div
-      ref={ref}
+      ref={ref)}
       data-sidebar="footer"
       className={cn("flex flex-col gap-2 p-2", className)}
       {...props}
@@ -394,7 +393,7 @@ const SidebarSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => {
   return (
     <Separator
-      ref={ref}
+      ref={ref)}
       data-sidebar="separator"
       className={cn("mx-2 w-auto bg-sidebar-border", className)}
       {...props}
@@ -409,7 +408,7 @@ const SidebarContent = React.forwardRef<
 >(({ className, ...props }, ref) => {
   return (
     <div
-      ref={ref}
+      ref={ref)}
       data-sidebar="content"
       className={cn(
         "flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden",
@@ -427,7 +426,7 @@ const SidebarGroup = React.forwardRef<
 >(({ className, ...props }, ref) => {
   return (
     <div
-      ref={ref}
+      ref={ref)}
       data-sidebar="group"
       className={cn("relative flex w-full min-w-0 flex-col p-2", className)}
       {...props}
@@ -444,7 +443,7 @@ const SidebarGroupLabel = React.forwardRef<
 
   return (
     <Comp
-      ref={ref}
+      ref={ref)}
       data-sidebar="group-label"
       className={cn(
         "flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 outline-none ring-sidebar-ring transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
@@ -465,7 +464,7 @@ const SidebarGroupAction = React.forwardRef<
 
   return (
     <Comp
-      ref={ref}
+      ref={ref)}
       data-sidebar="group-action"
       className={cn(
         "absolute right-3 top-3.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
@@ -570,7 +569,7 @@ const SidebarMenuButton = React.forwardRef<
         data-sidebar="menu-button"
         data-size={size}
         data-active={isActive}
-        className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+        className={cn(sidebarMenuButtonVariants({ variant, size)}, className)}
         {...props}
       />
     )
@@ -611,7 +610,7 @@ const SidebarMenuAction = React.forwardRef<
 
   return (
     <Comp
-      ref={ref}
+      ref={ref)}
       data-sidebar="menu-action"
       className={cn(
         "absolute right-1 top-1.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 peer-hover/menu-button:text-sidebar-accent-foreground [&>svg]:size-4 [&>svg]:shrink-0",
@@ -660,7 +659,7 @@ const SidebarMenuSkeleton = React.forwardRef<
 >(({ className, showIcon = false, ...props }, ref) => {
   // Random width between 50 to 90%.
   const width = React.useMemo(() => {
-    return `${Math.floor(Math.random() * 40) + 50}%`
+    return `${Math.floor(Math.random() * 40) + 50)}%`
   }, [])
 
   return (
@@ -725,7 +724,7 @@ const SidebarMenuSubButton = React.forwardRef<
 
   return (
     <Comp
-      ref={ref}
+      ref={ref)}
       data-sidebar="menu-sub-button"
       data-size={size}
       data-active={isActive}

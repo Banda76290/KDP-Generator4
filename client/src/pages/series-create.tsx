@@ -43,7 +43,7 @@ export default function SeriesCreatePage() {
     if (characterCount > maxCharacters) {
       toast({
         title: "Error",
-        description: `Description exceeds ${maxCharacters} character limit.`,
+        description: `Description exceeds ${maxCharacters)} character limit.`,
         variant: "destructive"
       });
       return;
@@ -73,20 +73,19 @@ export default function SeriesCreatePage() {
       }
 
       // Invalidate and refetch series data
-      await queryClient.invalidateQueries({ queryKey: ['/api/series'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/series'] };
       
       toast({
         title: "Series saved",
         description: "Your series has been successfully created.",
-      });
+      };
       setLocation('/manage-series');
     } catch (error) {
       console.error('Error saving series:', error);
       toast({
         title: "Error",
         description: "Failed to save series. Please try again.",
-        variant: "destructive"
-      });
+        variant: "destructive")};
     }
   };
 
@@ -183,8 +182,7 @@ export default function SeriesCreatePage() {
             .split(';')
             .filter(style => {
               const prop = style.trim().split(':')[0]?.trim();
-              return ['color', 'font-weight', 'font-style', 'text-decoration'].includes(prop);
-            })
+              return ['color', 'font-weight', 'font-style', 'text-decoration'].includes(prop);)}
             .join('; ');
           
           if (cleanStyles) {
@@ -279,7 +277,7 @@ export default function SeriesCreatePage() {
           <h1 className="text-3xl font-bold text-gray-900">Series Setup</h1>
         </div>
 
-        <form onSubmit={ form.handleSubmit(onSubmit } className="space-y-6">
+        <form onSubmit={ form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Language Section */}
           <Card>
             <CardHeader>
@@ -291,8 +289,8 @@ export default function SeriesCreatePage() {
                   Choose the primary language for this series.
                 </p>
                 <Select 
-                  value={ form.watch('language' } 
-                  onValueChange={ (value) => form.setValue('language', value }
+                  value={ form.watch('language')} 
+                  onValueChange={ (value) => form.setValue('language', value)}
                 >
                   <SelectTrigger className="w-full max-w-md">
                     <SelectValue />
@@ -356,11 +354,11 @@ export default function SeriesCreatePage() {
                 <Input
                   id="title"
                   placeholder="Enter your series name"
-                  {...form.register('title', { required: 'Series title is required' })}
+                  {...form.register('title', { required: 'Series title is required')}}
                   className="w-full"
                 />
                 {form.formState.errors.title && (
-                  <p className="text-sm text-red-600">{form.formState.errors.title.message}</p>
+                  <p className="text-sm text-red-600">{form.formState.errors.title.message)}</p>
                 )}
               </div>
             </CardContent>
@@ -377,8 +375,8 @@ export default function SeriesCreatePage() {
                   Choose how you want to display titles in your series.
                 </p>
                 <RadioGroup 
-                  value={ form.watch('readingOrder' } 
-                  onValueChange={ (value: 'ordered' | 'unordered') => form.setValue('readingOrder', value }
+                  value={ form.watch('readingOrder')} 
+                  onValueChange={ (value: 'ordered' | 'unordered') => form.setValue('readingOrder', value)}
                 >
                   <div className="space-y-4">
                     <div className="flex items-start space-x-2">
@@ -495,7 +493,7 @@ export default function SeriesCreatePage() {
                     1.
                   </Button>
                   <div className="w-px h-6 bg-gray-300"></div>
-                  <Select defaultValue="normal" onValueChange={ (value) => handleFormatChange(value }>
+                  <Select defaultValue="normal" onValueChange={ (value) => handleFormatChange(value)}>
                     <SelectTrigger className="w-24 h-8">
                       <SelectValue />
                     </SelectTrigger>
@@ -550,7 +548,7 @@ export default function SeriesCreatePage() {
                             onClick={() => {
                               setLinkUrl('');
                               setShowLinkDialog(false);
-                            })}
+                            }}
                           >
                             Cancel
                           </Button>
@@ -589,7 +587,7 @@ export default function SeriesCreatePage() {
                   />
                   <input
                     type="hidden"
-                    { ...form.register('description' }
+                    { ...form.register('description')}
                   />
                   <div className="flex justify-end">
                     <span className={`text-sm ${characterCount > maxCharacters ? 'text-red-600' : 'text-green-600'}`}>

@@ -10,15 +10,14 @@ export default function KPICards() {
   
   const { data: stats, isLoading, error } = useQuery({
     queryKey: ["/api/dashboard/stats"],
-  });
+  };
 
   useEffect(() => {
     if (error && isUnauthorizedError(error as Error)) {
       toast({
         title: "Unauthorized",
         description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
+        variant: "destructive",)};
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
@@ -30,7 +29,7 @@ export default function KPICards() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {[1, 2, 3, 4].map((i) => (
-          <Card key={i} className="animate-pulse">
+          <Card key={i)} className="animate-pulse">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-2">
@@ -58,7 +57,7 @@ export default function KPICards() {
       iconColor: "text-primary",
     },
     { title: "Monthly Revenue",
-      value: `$${(stats?.monthlyRevenue || 0).toLocaleString( }`,
+      value: `$${(stats?.monthlyRevenue || 0).toLocaleString()}`,
       change: "+18.2%",
       changeType: "positive" as const,
       icon: DollarSign,
@@ -88,7 +87,7 @@ export default function KPICards() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       {kpiData.map((kpi) => (
-        <Card key={kpi.title} className="shadow-sm border border-gray-200">
+        <Card key={kpi.title)} className="shadow-sm border border-gray-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -100,8 +99,7 @@ export default function KPICards() {
                   { kpi.changeType === "positive" ? (
                     <ArrowUp className="w-4 h-4 mr-1" />
                   ) : (
-                    <ArrowDown className="w-4 h-4 mr-1" />
-                   }
+                    <ArrowDown className="w-4 h-4 mr-1" />)}
                   {kpi.change}
                 </p>
               </div>

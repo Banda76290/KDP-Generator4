@@ -27,7 +27,7 @@ export default function SEOHead({
     // Helper function to update meta tags
     const updateMeta = (name: string, content: string, property = false) => {
       const attribute = property ? 'property' : 'name';
-      let meta = document.querySelector(`meta[${attribute}="${name}"]`);
+      let meta = document.querySelector(`meta[${attribute)}="${name}"]`);
       
       if (!meta) {
         meta = document.createElement('meta');
