@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Upload, FileSpreadsheet, Download } from "lucide-react";
 
 export default function SimpleImportManagement() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFile, setSelectedFile] = useState(null as File | null);
 
   const handleFileSelect = (event: any) => {
     const file = event.target.files?.[0];
@@ -20,7 +20,7 @@ export default function SimpleImportManagement() {
       <div className="space-y-6 p-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight">Import Management</h1>
-          <Badge variant="secondary">NEW</Badge>
+          <Badge>NEW</Badge>
         </div>
 
         <Card>
@@ -50,8 +50,8 @@ export default function SimpleImportManagement() {
                     id="file-upload"
                   />
                   <label htmlFor="file-upload">
-                    <Button variant="outline" className="cursor-pointer" asChild>
-                      <span>Select File</span>
+                    <Button className="cursor-pointer">
+                      Select File
                     </Button>
                   </label>
                   

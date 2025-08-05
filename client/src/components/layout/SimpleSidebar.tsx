@@ -35,7 +35,7 @@ export default function SimpleSidebar() {
   return (
     <aside className="bg-white dark:bg-background w-64 border-r border-border fixed left-0 top-16 bottom-0 overflow-y-auto hidden md:block">
       <nav className="p-4 space-y-2 pb-8">
-        {navItems.map((item) => {
+        {navItems.map((item: any) => {
           const isActive = location === item.href;
           const IconComponent = item.icon;
           return (
@@ -52,14 +52,7 @@ export default function SimpleSidebar() {
                 <IconComponent className="w-5 h-5" />
                 <span>{item.name}</span>
                 {item.badge && (
-                  <Badge 
-                    className={cn(
-                      "text-xs",
-                      isActive 
-                        ? "bg-white text-primary" 
-                        : "bg-secondary text-secondary-foreground"
-                    )}
-                  >
+                  <Badge className="text-xs">
                     {item.badge}
                   </Badge>
                 )}
