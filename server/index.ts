@@ -56,17 +56,31 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  const isDevelopment = process.env.NODE_ENV === "development";
-  console.log("Environment check:", { NODE_ENV: process.env.NODE_ENV, isDevelopment, appEnv: app.get("env") });
-  
-  if (isDevelopment) {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
-  }
+  // temporarily serve a simple HTML page to test basic routing
+  app.get("*", (req, res) => {
+    const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>KDP Generator - Test Mode</title>
+    </head>
+    <body>
+      <h1>KDP Generator - Test Mode</h1>
+      <p>Server is running successfully!</p>
+      <p>Current path: ${req.path}</p>
+      <div>
+        <a href="/">Home</a> | 
+        <a href="/import-management">Import Management</a> | 
+        <a href="/projects">Projects</a>
+      </div>
+      ${req.path === '/import-management' ? '<h2>✅ Import Management Page - This works!</h2>' : ''}
+    </body>
+    </html>
+    `;
+    res.send(html);
+  });
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
