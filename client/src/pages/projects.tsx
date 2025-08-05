@@ -11,9 +11,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, BarChart3, BookOpen, Globe, DollarSign, TrendingUp, ArrowUpDown, Copy } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Plus, Search, Filter, Settings, Edit, Trash2, BarChart3, BookOpen, Globe, DollarSign, TrendingUp, ArrowUpDown, Copy, Languages } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { ProjectWithRelations } from "@shared/schema";
@@ -27,6 +28,19 @@ export default function Projects() {
   const [sortBy, setSortBy] = useState("createdAt"); // Default sort by creation date
   const [projectToDelete, setProjectToDelete] = useState<ProjectWithRelations | null>(null);
   const [deleteAssociatedBooks, setDeleteAssociatedBooks] = useState(false);
+  const [bookToTranslate, setBookToTranslate] = useState<any | null>(null);
+  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
+
+  // Language options for translation
+  const LANGUAGE_OPTIONS = [
+    "English", "Spanish", "French", "German", "Italian", "Portuguese", "Dutch", "Russian", "Polish", "Swedish", 
+    "Norwegian", "Danish", "Finnish", "Czech", "Hungarian", "Romanian", "Bulgarian", "Croatian", "Serbian", 
+    "Slovak", "Slovenian", "Lithuanian", "Latvian", "Estonian", "Greek", "Turkish", "Arabic", "Hebrew", 
+    "Chinese (Simplified)", "Chinese (Traditional)", "Japanese", "Korean", "Thai", "Vietnamese", "Indonesian", 
+    "Malay", "Filipino", "Hindi", "Bengali", "Tamil", "Telugu", "Marathi", "Gujarati", "Kannada", "Malayalam", 
+    "Punjabi", "Urdu", "Swahili", "Hausa", "Yoruba", "Zulu", "Amharic"
+  ];
 
   const { data: projects, isLoading: projectsLoading, error } = useQuery({
     queryKey: ["/api/projects"],
@@ -107,6 +121,30 @@ export default function Projects() {
       toast.error({
         title: "Error",
         description: "Failed to duplicate book",
+      });
+    },
+  });
+
+  // Book translation mutation
+  const translateBookMutation = useMutation({
+    mutationFn: async ({ bookId, targetLanguage }: { bookId: string; targetLanguage: string }) => {
+      return await apiRequest("POST", `/api/books/${bookId}/translate`, { targetLanguage });
+    },
+    onSuccess: () => {
+      toast.success({
+        title: "Success",
+        description: "Book translated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
+      setBookToTranslate(null);
+      setSelectedLanguage("");
+    },
+    onError: (error) => {
+      console.error("Book translation failed:", error);
+      toast.error({
+        title: "Error", 
+        description: "Failed to translate book",
       });
     },
   });
@@ -242,6 +280,32 @@ export default function Projects() {
 
   const handleDuplicateBook = (bookId: string) => {
     duplicateBook.mutate(bookId);
+  };
+
+  const handleTranslateBook = (book: any) => {
+    setBookToTranslate(book);
+    setSelectedLanguage("");
+  };
+
+  const handleConfirmTranslation = () => {
+    if (bookToTranslate && selectedLanguage) {
+      translateBookMutation.mutate({
+        bookId: bookToTranslate.id,
+        targetLanguage: selectedLanguage
+      });
+    }
+  };
+
+  const toggleProjectExpansion = (projectId: string) => {
+    setExpandedProjects(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(projectId)) {
+        newSet.delete(projectId);
+      } else {
+        newSet.add(projectId);
+      }
+      return newSet;
+    });
   };
 
   return (
@@ -387,8 +451,8 @@ export default function Projects() {
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
-                            <MoreHorizontal className="w-4 h-4" />
+                          <Button variant="ghost" size="sm" className="w-8 h-8 p-0 hover:bg-blue-50">
+                            <Settings className="w-4 h-4 text-[#38b6ff]" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -424,13 +488,20 @@ export default function Projects() {
                             <BookOpen className="w-4 h-4" />
                             Books ({project.books.length})
                           </div>
-                          {project.books.map((book: any) => (
+                          {project.books
+                            .slice(0, expandedProjects.has(project.id) ? project.books.length : 3)
+                            .map((book: any) => (
                             <div key={book.id} className="border rounded-lg p-3 bg-gray-50 space-y-2">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <h4 className="text-sm font-medium text-gray-900 leading-tight break-words cursor-help">{book.title}</h4>
+                                      <h4 
+                                        className="text-sm font-medium text-gray-900 leading-tight break-words cursor-pointer hover:!text-blue-600 transition-colors"
+                                        onClick={() => setLocation(`/books/edit/${book.id}`)}
+                                      >
+                                        {book.title}
+                                      </h4>
                                     </TooltipTrigger>
                                     <TooltipContent>
                                       <p>{book.title}</p>
@@ -462,8 +533,8 @@ export default function Projects() {
                                   </Badge>
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                                        <MoreHorizontal className="w-3 h-3" />
+                                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                                        <Settings className="w-3 h-3 text-[#38b6ff]" />
                                       </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
@@ -474,6 +545,10 @@ export default function Projects() {
                                       <DropdownMenuItem onClick={() => handleDuplicateBook(book.id)}>
                                         <Copy className="w-3 h-3 mr-2" />
                                         Duplicate
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleTranslateBook(book)}>
+                                        <Languages className="w-3 h-3 mr-2" />
+                                        Create Translated Copy
                                       </DropdownMenuItem>
                                     </DropdownMenuContent>
                                   </DropdownMenu>
@@ -501,6 +576,18 @@ export default function Projects() {
                               </div>
                             </div>
                           ))}
+                          
+                          {/* See More / Show Less Button */}
+                          {project.books.length > 3 && (
+                            <div className="text-center pt-2">
+                              <button
+                                onClick={() => toggleProjectExpansion(project.id)}
+                                className="text-sm text-gray-600 hover:text-blue-600 transition-colors cursor-pointer"
+                              >
+                                {expandedProjects.has(project.id) ? 'Show Less' : 'See More'}
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <div className="text-center py-4 text-gray-500">
@@ -613,6 +700,65 @@ export default function Projects() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Translation Dialog */}
+      <Dialog open={!!bookToTranslate} onOpenChange={() => {
+        setBookToTranslate(null);
+        setSelectedLanguage("");
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Translate Book</DialogTitle>
+            <DialogDescription>
+              Create a translated version of "{bookToTranslate?.title}" in another language.
+              This will create a new book with translated content.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Current Language:</label>
+              <p className="text-sm text-muted-foreground">{bookToTranslate?.language || 'English'}</p>
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium mb-2 block">Translate to:</label>
+              <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select target language" />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  {LANGUAGE_OPTIONS
+                    .filter(lang => lang !== bookToTranslate?.language)
+                    .map((language) => (
+                    <SelectItem key={language} value={language}>
+                      {language}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setBookToTranslate(null);
+                setSelectedLanguage("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleConfirmTranslation}
+              disabled={!selectedLanguage || translateBookMutation.isPending}
+            >
+              {translateBookMutation.isPending ? "Translating..." : "Create Translation"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       </TooltipProvider>
     </Layout>
   );

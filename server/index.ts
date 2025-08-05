@@ -1,20 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
-import path from "path";
-import fs from "fs";
 import { registerRoutes } from "./routes";
-// import { setupVite, serveStatic, log } from "./vite"; // Temporarily disabled due to vite dependency issues
-
-// Temporary log function while vite is disabled
-function log(message: string, source = "express") {
-  const formattedTime = new Date().toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
-  console.log(`${formattedTime} [${source}] ${message}`);
-}
+import { setupVite, serveStatic, log } from "./vite";
 import { seedDatabase } from "./seedDatabase.js";
+import { cronService } from "./services/cronService";
 
 const app = express();
 // Increase payload limit to handle rich text content (10MB)
@@ -56,6 +44,9 @@ app.use((req, res, next) => {
   // await seedDatabase(); // Disabled automatic seeding - use Admin System page for manual control
   
   const server = await registerRoutes(app);
+  
+  // Start exchange rate cron service
+  cronService.start();
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -68,41 +59,11 @@ app.use((req, res, next) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  
-  // Serve the built frontend assets using Express static middleware
-  console.log("Setting up static file serving from dist/");
-  
-  // Serve static assets
-  app.use('/assets', express.static('dist/assets'));
-  
-  // Serve the main React application for all non-API routes
-  app.get("*", (req, res) => {
-    if (req.path.startsWith("/api/")) {
-      return res.status(404).json({ error: "API endpoint not found" });
-    }
-    
-    // Serve the built React application
-    const indexPath = path.resolve('dist/index.html');
-    if (fs.existsSync(indexPath)) {
-      res.sendFile(indexPath);
-    } else {
-      res.status(503).send(`
-        <html>
-          <head><title>KDP Generator - Build Required</title></head>
-          <body>
-            <h1>Frontend Build Required</h1>
-            <p>Please run: <code>node build-frontend.js</code> to build the frontend.</p>
-          </body>
-        </html>
-      `);
-    }
-  });
-
-  // if (app.get("env") === "development") {
-  //   await setupVite(app, server);
-  // } else {
-  //   serveStatic(app);
-  // }
+  if (app.get("env") === "development") {
+    await setupVite(app, server);
+  } else {
+    serveStatic(app);
+  }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.

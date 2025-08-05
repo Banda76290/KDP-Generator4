@@ -3,7 +3,7 @@ import { useLocation, useParams } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { X, Plus, Trash2, CheckCircle, ArrowLeft, BookOpen, Loader2, Link2 } from "lucide-react";
+import { X, Plus, Trash2, CheckCircle, ArrowLeft, BookOpen, Loader2, Link2, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,6 +20,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { insertBookSchema, type Book, type MarketplaceCategory } from "@shared/schema";
 import { z } from "zod";
 import Layout from "@/components/Layout";
+import ContentRecommendationSidebar from "@/components/ContentRecommendationSidebar";
 
 interface Contributor {
   id: string;
@@ -594,6 +595,8 @@ export default function EditBook() {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [isPartOfSeries, setIsPartOfSeries] = useState(false);
   const [hasRestoredFromStorage, setHasRestoredFromStorage] = useState(false);
+  const [selectedAuthorId, setSelectedAuthorId] = useState<string>("");
+  const [authorExplicitlyRemoved, setAuthorExplicitlyRemoved] = useState<boolean>(false);
   const [marketplaceCategories, setMarketplaceCategories] = useState<MarketplaceCategory[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [resetTriggers, setResetTriggers] = useState<{ [key: number]: number }>({});
@@ -607,6 +610,7 @@ export default function EditBook() {
     seriesTitle: string;
     seriesNumber: number | null;
   } | null>(null);
+
   
   // ISBN Apply functionality states
   const [officialIsbnContentValue, setOfficialIsbnContentValue] = useState("");
@@ -620,6 +624,9 @@ export default function EditBook() {
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
   const [descriptionEditorContent, setDescriptionEditorContent] = useState('');
+  
+  // AI Recommendation Sidebar state
+  const [showAISidebar, setShowAISidebar] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -885,7 +892,8 @@ export default function EditBook() {
       keywords,
       categories,
       contributors,
-      isPartOfSeries
+      isPartOfSeries,
+      selectedAuthorId
     };
     
     const storageKey = `bookFormData_${bookId || 'new'}`;
@@ -920,7 +928,7 @@ export default function EditBook() {
       clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
-  }, [form, keywords, categories, contributors, isPartOfSeries, bookId]);
+  }, [form, keywords, categories, contributors, isPartOfSeries, selectedAuthorId, bookId]);
 
   // Clean up auto-saved data when leaving the page normally (not via series creation)
   useEffect(() => {
@@ -975,7 +983,7 @@ export default function EditBook() {
         console.log('Form data being restored:', formData);
         
         // Restore all form fields automatically (future-proof)
-        const { keywords: savedKeywords, categories: savedCategories, contributors: savedContributors, isPartOfSeries: savedIsPartOfSeries, ...formFields } = formData;
+        const { keywords: savedKeywords, categories: savedCategories, contributors: savedContributors, isPartOfSeries: savedIsPartOfSeries, selectedAuthorId: savedSelectedAuthorId, ...formFields } = formData;
         
         // Store series data as original if it exists
         if (formFields.seriesTitle) {
@@ -1001,6 +1009,10 @@ export default function EditBook() {
         if (typeof savedIsPartOfSeries === 'boolean') {
           setIsPartOfSeries(savedIsPartOfSeries);
         }
+        if (savedSelectedAuthorId) {
+          setSelectedAuthorId(savedSelectedAuthorId);
+        }
+
         
         // Restore description in WYSIWYG editor safely
         if (formFields.description) {
@@ -1144,6 +1156,29 @@ export default function EditBook() {
         });
       }
 
+      // Auto-detect matching author and set states accordingly
+      if (book.authorFirstName || book.authorLastName) {
+        const authorName = `${book.authorPrefix || ""} ${book.authorFirstName || ""} ${book.authorMiddleName || ""} ${book.authorLastName || ""} ${book.authorSuffix || ""}`.trim();
+        const matchingAuthor = authors.find(author => 
+          author.fullName === authorName ||
+          (author.firstName === (book.authorFirstName || "") && 
+           author.lastName === (book.authorLastName || "") &&
+           (author.prefix || "") === (book.authorPrefix || "") &&
+           (author.middleName || "") === (book.authorMiddleName || "") &&
+           (author.suffix || "") === (book.authorSuffix || ""))
+        );
+        
+        if (matchingAuthor) {
+          setSelectedAuthorId(matchingAuthor.id);
+          console.log('Auto-detected matching author:', matchingAuthor);
+        } else {
+          setSelectedAuthorId("");
+          console.log('No matching author found, keeping form fields');
+        }
+      } else {
+        setSelectedAuthorId("");
+      }
+
       // Set separate state arrays
       if (book.keywords) {
         if (typeof book.keywords === 'string') {
@@ -1209,6 +1244,33 @@ export default function EditBook() {
   const { data: userSeries = [] } = useQuery<any[]>({
     queryKey: ["/api/series"],
   });
+
+  // Load existing authors
+  const { data: authors = [], isLoading: loadingAuthors } = useQuery<any[]>({
+    queryKey: ["/api/authors"],
+  });
+
+  // Auto-detect author from book data when authors and book are loaded
+  useEffect(() => {
+    if (authors.length > 0 && book && !hasRestoredFromStorage && !selectedAuthorId && !authorExplicitlyRemoved) {
+      // Try to find matching author based on book's author fields
+      const bookAuthorName = `${book.authorPrefix || ''} ${book.authorFirstName || ''} ${book.authorMiddleName || ''} ${book.authorLastName || ''} ${book.authorSuffix || ''}`.trim();
+      
+      if (bookAuthorName && bookAuthorName !== '') {
+        const matchingAuthor = authors.find(author => {
+          const authorFullName = `${author.prefix || ''} ${author.firstName || ''} ${author.middleName || ''} ${author.lastName || ''} ${author.suffix || ''}`.trim();
+          return authorFullName === bookAuthorName;
+        });
+        
+        if (matchingAuthor) {
+          console.log('Auto-detected matching author:', matchingAuthor);
+          setSelectedAuthorId(matchingAuthor.id);
+        } else {
+          console.log('No matching author found, keeping form fields');
+        }
+      }
+    }
+  }, [authors, book, hasRestoredFromStorage, selectedAuthorId, authorExplicitlyRemoved]);
 
   const saveBook = useMutation({
     mutationFn: async (data: { bookData: BookFormData; shouldNavigate?: boolean; nextTab?: string }) => {
@@ -1378,6 +1440,24 @@ export default function EditBook() {
 
   const removeContributor = (id: string) => {
     setContributors(contributors.filter(c => c.id !== id));
+  };
+
+  // Function to handle author selection from dropdown
+  const handleAuthorSelection = (authorId: string) => {
+    if (authorId) {
+      const selectedAuthor = authors.find(author => author.id === authorId);
+      if (selectedAuthor) {
+        // Reset the explicitly removed flag to allow future auto-detection
+        setAuthorExplicitlyRemoved(false);
+        // Populate form fields with selected author data
+        form.setValue("authorPrefix", selectedAuthor.prefix || "");
+        form.setValue("authorFirstName", selectedAuthor.firstName || "");
+        form.setValue("authorMiddleName", selectedAuthor.middleName || "");
+        form.setValue("authorLastName", selectedAuthor.lastName || "");
+        form.setValue("authorSuffix", selectedAuthor.suffix || "");
+        setSelectedAuthorId(authorId);
+      }
+    }
   };
 
   // ISBN validation function
@@ -1806,25 +1886,39 @@ export default function EditBook() {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto w-full">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              onClick={() => setLocation("/projects")}
-              className="flex items-center space-x-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back</span>
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{isCreating ? 'Create Book' : 'Edit Book'}</h1>
-              <p className="text-gray-600">{isCreating ? 'Set up your new book with all the details' : 'Update your book details and settings'}</p>
+      <div className="flex w-full h-[calc(100vh-80px)]">
+        {/* Main Content */}
+        <div className={`${showAISidebar ? 'flex-1' : 'w-full'} overflow-y-auto`}>
+          <div className="max-w-4xl mx-auto w-full p-4">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center space-x-4">
+                <Button
+                  variant="ghost"
+                  onClick={() => setLocation("/projects")}
+                  className="flex items-center space-x-2"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back</span>
+                </Button>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">{isCreating ? 'Create Book' : 'Edit Book'}</h1>
+                  <p className="text-gray-600">{isCreating ? 'Set up your new book with all the details' : 'Update your book details and settings'}</p>
+                </div>
+              </div>
+              
+              {/* AI Recommendations Toggle */}
+              {!isCreating && bookId && (
+                <Button
+                  variant={showAISidebar ? "default" : "outline"}
+                  onClick={() => setShowAISidebar(!showAISidebar)}
+                  className="flex items-center space-x-2"
+                >
+                  <Lightbulb className="w-4 h-4" />
+                  <span>AI Recommendations</span>
+                </Button>
+              )}
             </div>
-          </div>
-
-        </div>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {/* Tab Navigation */}
@@ -2315,35 +2409,120 @@ export default function EditBook() {
                         Enter the primary author or contributor. Pen names are allowed. Note: before continuing, check your spelling since this field cannot be updated after publication.
                       </p>
                     </div>
-                
-                    <div>
-                      <Label className="font-medium text-[14px]">Primary Author or Contributor</Label>
-                      <div className="grid grid-cols-5 gap-3 mt-2">
-                        <Input
-                          placeholder="Prefix"
-                          {...form.register("authorPrefix")}
-                        />
-                        <Input
-                          placeholder="First name"
-                          {...form.register("authorFirstName", { required: "First name is required" })}
-                        />
-                        <Input
-                          placeholder="Middle name"
-                          {...form.register("authorMiddleName")}
-                        />
-                        <Input
-                          placeholder="Last name"
-                          {...form.register("authorLastName", { required: "Last name is required" })}
-                        />
-                        <Input
-                          placeholder="Suffix"
-                          {...form.register("authorSuffix")}
-                        />
-                      </div>
-                      {(form.formState.errors.authorFirstName || form.formState.errors.authorLastName) && (
-                        <p className="text-sm text-red-600 mt-1">First name and last name are required</p>
-                      )}
-                    </div>
+
+                    {/* Author selection or display */}
+                    {selectedAuthorId ? (
+                      // Show selected author with edit/remove buttons (like Series)
+                      (<div className="p-4 rounded-md border border-green-200 bg-[#f9fafb]">
+                        <div className="space-y-3">
+                          <Label className="font-medium text-[16px] text-gray-700">Author</Label>
+                          <div className="text-lg font-medium text-gray-900">
+                            {authors.find(a => a.id === selectedAuthorId)?.fullName || "Unknown Author"}
+                          </div>
+                          <div className="flex gap-3">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const selectedAuthor = authors.find(a => a.id === selectedAuthorId);
+                                if (selectedAuthor) {
+                                  sessionStorage.setItem('returnToBookEdit', bookId || 'new');
+                                  saveFormDataToSession();
+                                  setLocation(`/authors/${selectedAuthor.id}`);
+                                }
+                              }}
+                            >
+                              Edit author details
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                >
+                                  Remove from author
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Remove author from book</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to remove this author from the book? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => {
+                                      // Mark that the author was explicitly removed to prevent auto-detection
+                                      setAuthorExplicitlyRemoved(true);
+                                      // Clear author selection and form fields to return to selection interface
+                                      setSelectedAuthorId("");
+                                      form.setValue("authorPrefix", "");
+                                      form.setValue("authorFirstName", "");
+                                      form.setValue("authorMiddleName", "");
+                                      form.setValue("authorLastName", "");
+                                      form.setValue("authorSuffix", "");
+                                      // This will automatically switch back to the author selection interface
+                                      // because selectedAuthorId is now empty, triggering the conditional rendering
+                                    }}
+                                    className="bg-destructive hover:bg-destructive/90"
+                                  >
+                                    Remove from author
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </div>
+                      </div>)
+                    ) : (
+                      // Show author selection dropdown (when no author selected)
+                      (<div className="space-y-4">
+                        <div className="flex gap-2">
+                          <div className="flex-1">
+                            <Label className="font-medium text-[16px]">Select existing author</Label>
+                            <Select 
+                              value={selectedAuthorId} 
+                              onValueChange={handleAuthorSelection}
+                            >
+                              <SelectTrigger className="mt-1">
+                                <SelectValue placeholder="Choose an author..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {authors.length > 0 ? (
+                                  authors.map((author) => (
+                                    <SelectItem key={author.id} value={author.id}>
+                                      {author.fullName}
+                                    </SelectItem>
+                                  ))
+                                ) : (
+                                  <SelectItem value="no-author" disabled>
+                                    No authors available - Create one first
+                                  </SelectItem>
+                                )}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="pt-6">
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                sessionStorage.setItem('returnToBookEdit', bookId || 'new');
+                                saveFormDataToSession();
+                                window.location.href = '/authors/create';
+                              }}
+                            >
+                              Create author
+                            </Button>
+                          </div>
+                        </div>
+                      </div>)
+                    )}
                   </div>
 
                   {/* Contributors Section */}
@@ -3067,7 +3246,7 @@ export default function EditBook() {
                   </p>
                   {book?.isbn ? (
                     // Show only Official ISBN field in read-only mode when applied
-                    <div className="space-y-2">
+                    (<div className="space-y-2">
                       <Label htmlFor="officialIsbnContentApplied" className="text-sm font-medium">Official ISBN/ASIN</Label>
                       <Input
                         id="officialIsbnContentApplied"
@@ -3078,10 +3257,10 @@ export default function EditBook() {
                       <p className="text-sm text-green-600">
                         ✓ Official ISBN/ASIN applied successfully. This ISBN/ASIN is now active for your book.
                       </p>
-                    </div>
+                    </div>)
                   ) : (
                     // Show both fields when no official ISBN is applied
-                    <div className="space-y-4">
+                    (<div className="space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor="isbnPlaceholderContent" className="text-sm font-medium">ISBN/ASIN Placeholder</Label>
                         <Input
@@ -3133,7 +3312,7 @@ export default function EditBook() {
                         </div>
                         <p className="text-sm text-gray-500">Enter your own ISBN/ASIN number if you have purchased one or get one from Amazon</p>
                       </div>
-                    </div>
+                    </div>)
                   )}
                 </div>
               </div>
@@ -3587,6 +3766,17 @@ export default function EditBook() {
             </div>
           </div>
         </form>
+          </div>
+        </div>
+        
+        {/* AI Recommendations Sidebar */}
+        {!isCreating && bookId && (
+          <ContentRecommendationSidebar
+            bookId={bookId}
+            isVisible={showAISidebar}
+            onToggle={() => setShowAISidebar(!showAISidebar)}
+          />
+        )}
       </div>
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
@@ -3959,7 +4149,6 @@ export default function EditBook() {
           </div>
         </DialogContent>
       </Dialog>
-      
       {/* ISBN Apply Confirmation Dialog */}
       <AlertDialog open={showIsbnContentApplyDialog} onOpenChange={setShowIsbnContentApplyDialog}>
         <AlertDialogContent>
