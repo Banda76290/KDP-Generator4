@@ -364,7 +364,7 @@ export default function AuthorViewPage() {
                   sessionStorage.removeItem('returnToBookEdit');
                   if (returnToBookEdit === 'new') {
                     setLocation('/books/create');
-                  } else {
+                  )} else {
                     setLocation(`/books/edit/${returnToBookEdit}`);
                   }
                 } else {
@@ -398,7 +398,7 @@ export default function AuthorViewPage() {
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={ () => deleteAuthorMutation.mutate( }
+                  onClick={ () => deleteAuthorMutation.mutate( )}
                   className="bg-destructive hover:bg-destructive/90"
                 >
                   Delete
@@ -422,7 +422,7 @@ export default function AuthorViewPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={ () => setIsEditingAuthor(!isEditingAuthor }
+                    onClick={ () => setIsEditingAuthor(!isEditingAuthor )}
                   >
                     <Edit3 className="w-4 h-4 mr-1" />
                     {isEditingAuthor ? 'Cancel' : 'Edit'}
@@ -439,7 +439,7 @@ export default function AuthorViewPage() {
                           id="author-prefix"
                           placeholder="Dr., Prof., etc."
                           value={authorForm.prefix}
-                          onChange={ (e) => handleAuthorFormChange('prefix', e.target.value }
+                          onChange={ (e) => handleAuthorFormChange('prefix', e.target.value )}
                         />
                       </div>
                       <div className="space-y-2">
@@ -448,7 +448,7 @@ export default function AuthorViewPage() {
                           id="author-suffix"
                           placeholder="Jr., Sr., PhD, etc."
                           value={authorForm.suffix}
-                          onChange={ (e) => handleAuthorFormChange('suffix', e.target.value }
+                          onChange={ (e) => handleAuthorFormChange('suffix', e.target.value )}
                         />
                       </div>
                     </div>
@@ -460,7 +460,7 @@ export default function AuthorViewPage() {
                           id="author-firstname"
                           placeholder="John"
                           value={authorForm.firstName}
-                          onChange={ (e) => handleAuthorFormChange('firstName', e.target.value }
+                          onChange={ (e) => handleAuthorFormChange('firstName', e.target.value )}
                           required
                         />
                       </div>
@@ -470,7 +470,7 @@ export default function AuthorViewPage() {
                           id="author-middlename"
                           placeholder="Michael"
                           value={authorForm.middleName}
-                          onChange={ (e) => handleAuthorFormChange('middleName', e.target.value }
+                          onChange={ (e) => handleAuthorFormChange('middleName', e.target.value )}
                         />
                       </div>
                       <div className="space-y-2">
@@ -479,7 +479,7 @@ export default function AuthorViewPage() {
                           id="author-lastname"
                           placeholder="Doe"
                           value={authorForm.lastName}
-                          onChange={ (e) => handleAuthorFormChange('lastName', e.target.value }
+                          onChange={ (e) => handleAuthorFormChange('lastName', e.target.value )}
                           required
                         />
                       </div>
@@ -552,7 +552,7 @@ export default function AuthorViewPage() {
                       type="button" 
                       variant="outline" 
                       size="sm" 
-                      onClick={ () => applyBiographyFormatting('bold' }
+                      onClick={ () => applyBiographyFormatting('bold' )}
                     >
                       <strong>B</strong>
                     </Button>
@@ -561,7 +561,7 @@ export default function AuthorViewPage() {
                       type="button" 
                       variant="outline" 
                       size="sm" 
-                      onClick={ () => applyBiographyFormatting('italic' }
+                      onClick={ () => applyBiographyFormatting('italic' )}
                     >
                       <em>I</em>
                     </Button>
@@ -570,7 +570,7 @@ export default function AuthorViewPage() {
                       type="button" 
                       variant="outline" 
                       size="sm" 
-                      onClick={ () => applyBiographyFormatting('underline' }
+                      onClick={ () => applyBiographyFormatting('underline' )}
                     >
                       <u>U</u>
                     </Button>
@@ -579,7 +579,7 @@ export default function AuthorViewPage() {
                       type="button" 
                       variant="outline" 
                       size="sm" 
-                      onClick={ () => applyBiographyFormatting('insertUnorderedList' }
+                      onClick={ () => applyBiographyFormatting('insertUnorderedList' )}
                     >
                       • List
                     </Button>
@@ -588,7 +588,7 @@ export default function AuthorViewPage() {
                       type="button" 
                       variant="outline" 
                       size="sm" 
-                      onClick={ () => applyBiographyFormatting('insertOrderedList' }
+                      onClick={ () => applyBiographyFormatting('insertOrderedList' )}
                     >
                       1. List
                     </Button>
@@ -597,7 +597,7 @@ export default function AuthorViewPage() {
                       type="button" 
                       variant="outline" 
                       size="sm" 
-                      onClick={ () => applyBiographyFormatting('createLink', prompt('Enter URL:') || undefined }
+                      onClick={ () => applyBiographyFormatting('createLink', prompt('Enter URL:') || undefined )}
                     >
                       🔗 Link
                     </Button>

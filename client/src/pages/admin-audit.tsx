@@ -116,7 +116,7 @@ export default function AdminAudit() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={ () => window.history.back( }>
+        <Button variant="ghost" size="sm" onClick={ () => window.history.back( )}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour
         </Button>
@@ -234,7 +234,7 @@ export default function AdminAudit() {
                     variant="outline"
                     size="sm"
                     disabled={currentPage === 0}
-                    onClick={ () => setCurrentPage(currentPage - 1 }
+                    onClick={ () => setCurrentPage(currentPage - 1 )}
                   >
                     Précédent
                   </Button>
@@ -242,7 +242,7 @@ export default function AdminAudit() {
                     variant="outline"
                     size="sm"
                     disabled={currentPage >= Math.ceil((auditData?.total || 0) / limit) - 1}
-                    onClick={ () => setCurrentPage(currentPage + 1 }
+                    onClick={ () => setCurrentPage(currentPage + 1 )}
                   >
                     Suivant
                   </Button>

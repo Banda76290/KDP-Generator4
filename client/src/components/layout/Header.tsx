@@ -30,7 +30,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
             className="md:hidden p-2"
             onClick={() => {
               onMenuClick?.();
-            }}
+            })}
           >
             <Menu className="h-5 w-5" />
           </Button>

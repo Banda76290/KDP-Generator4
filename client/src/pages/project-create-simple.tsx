@@ -128,8 +128,7 @@ export default function CreateProject() {
             <div className="mb-6">
               <Button
                 variant="ghost"
-                onClick={ () => setLocation("/projects" }
-                className="mb-4"
+                onClick={ () => setLocation("/projects")} className="mb-4"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Projects
@@ -160,7 +159,7 @@ export default function CreateProject() {
                     <Input
                       { ...form.register("name" }
                       placeholder="Ex: Google Analytics Guide, Fantasy Romance Series..."
-                      onChange={ (e) => handleNameChange(e.target.value }
+                      onChange={ (e) => handleNameChange(e.target.value )}
                       className="mt-1"
                     />
                     {form.formState.errors.name && (
@@ -270,7 +269,7 @@ export default function CreateProject() {
                     <Button 
                       type="button" 
                       variant="outline" 
-                      onClick={ () => setLocation("/projects" }
+                      onClick={ ()} => setLocation("/projects")
                     >
                       Cancel
                     </Button>

@@ -379,7 +379,7 @@ export default function Analytics() {
                           <span>Évolution sur {selectedPeriod} jours</span>
                           <select 
                             value={selectedPeriod}
-                            onChange={ (e) => setSelectedPeriod(e.target.value }
+                            onChange={ (e) => setSelectedPeriod(e.target.value )}
                             className="border rounded px-2 py-1 text-sm"
                           >
                             <option value="7">7 jours</option>

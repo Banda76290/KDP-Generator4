@@ -313,7 +313,7 @@ export default function ImportManagement() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={ () => setSelectedFile(null }
+                    onClick={ () => setSelectedFile(null )}
                     className="ml-2"
                   >
                     <X className="w-4 h-4" />
@@ -329,7 +329,7 @@ export default function ImportManagement() {
                   </Button>
                   <Button 
                     variant="outline" 
-                    onClick={ () => setSelectedFile(null }
+                    onClick={ () => setSelectedFile(null )}
                   >
                     Cancel
                   </Button>
@@ -347,7 +347,7 @@ export default function ImportManagement() {
                   </p>
                   <Button 
                     variant="outline" 
-                    onClick={ () => fileInputRef.current?.click( }
+                    onClick={ () => fileInputRef.current?.click( )}
                     className="mt-4"
                   >
                     Select Files
@@ -357,7 +357,7 @@ export default function ImportManagement() {
                     type="file"
                     className="hidden"
                     accept=".xlsx,.xls,.csv"
-                    onChange={ (e) => handleFileSelect(Array.from(e.target.files || [] }
+                    onChange={ (e) => handleFileSelect(Array.from(e.target.files || [] )}
                   />
                 </div>
               </div>
@@ -422,14 +422,14 @@ export default function ImportManagement() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={ () => toggleExpandImport(importRecord.id }
+                        onClick={ () => toggleExpandImport(importRecord.id )}
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={ () => handleDelete(importRecord.id }
+                        onClick={ () => handleDelete(importRecord.id )}
                         disabled={deleteMutation.isPending}
                       >
                         <Trash2 className="w-4 h-4" />

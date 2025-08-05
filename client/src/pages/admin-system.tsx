@@ -604,7 +604,7 @@ export default function AdminSystem() {
       <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={ () => window.history.back( }>
+            <Button variant="ghost" size="sm" onClick={ () => window.history.back( )}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Retour
             </Button>
@@ -852,7 +852,7 @@ export default function AdminSystem() {
                       id="production-url"
                       type="url"
                       value={productionUrl}
-                      onChange={ (e) => setProductionUrl(e.target.value }
+                      onChange={ (e) => setProductionUrl(e.target.value )}
                       placeholder="https://votre-site.replit.app"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
@@ -954,7 +954,7 @@ export default function AdminSystem() {
                     toast({
                       title: "Cache vidé",
                       description: "Le cache applicatif a été vidé avec succès.",
-                    });
+                    )});
                   }}
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
@@ -977,7 +977,7 @@ export default function AdminSystem() {
                     toast({
                       title: "Optimisation lancée",
                       description: "Le système optimise automatiquement les performances.",
-                    });
+                    )});
                   }}
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
@@ -1047,7 +1047,7 @@ export default function AdminSystem() {
                   variant="outline" 
                   className="w-full"
                   onClick={() => {
-                    queryClient.invalidateQueries({ queryKey: ["/api/admin/system/health"] });
+                    queryClient.invalidateQueries({ queryKey: ["/api/admin/system/health"] )});
                     toast({
                       title: "Vérification lancée",
                       description: "État du système mis à jour.",
@@ -1108,7 +1108,7 @@ export default function AdminSystem() {
                 <Button 
                   variant={isPaused ? "destructive" : "outline"} 
                   size="sm" 
-                  onClick={ () => setIsPaused(!isPaused }
+                  onClick={ () => setIsPaused(!isPaused )}
                 >
                   { isPaused ? (
                     <>
@@ -1125,7 +1125,7 @@ export default function AdminSystem() {
                 <Button 
                   variant={autoRefreshLogs ? "default" : "outline"} 
                   size="sm" 
-                  onClick={ () => setAutoRefreshLogs(!autoRefreshLogs }
+                  onClick={ () => setAutoRefreshLogs(!autoRefreshLogs )}
                   disabled={isPaused}
                 >
                   <RefreshCw className={`h-4 w-4 mr-2 ${autoRefreshLogs && !isPaused ? 'animate-spin' : ''}`} />
@@ -1134,7 +1134,7 @@ export default function AdminSystem() {
                 <Button 
                   variant={autoScrollEnabled ? "default" : "destructive"} 
                   size="sm" 
-                  onClick={ () => setAutoScrollEnabled(!autoScrollEnabled }
+                  onClick={ () => setAutoScrollEnabled(!autoScrollEnabled )}
                   title={autoScrollEnabled ? "Désactiver le défilement automatique" : "Activer le défilement automatique"}
                 >
                   <Terminal className="h-4 w-4 mr-2" />
@@ -1166,7 +1166,7 @@ export default function AdminSystem() {
                   variant="outline" 
                   size="sm" 
                   onClick={() => {
-                    queryClient.invalidateQueries({ queryKey: ['/api/admin/system/logs'] });
+                    queryClient.invalidateQueries({ queryKey: ['/api/admin/system/logs'] )});
                     setAutoScrollEnabled(true);
                   }}
                   disabled={isPaused}

@@ -1889,7 +1889,7 @@ export default function EditBook() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Book Not Found</h1>
           <p className="text-gray-600 mb-4">The book you're looking for doesn't exist or you don't have permission to edit it.</p>
-          <Button onClick={() => setLocation("/projects" }>
+          <Button onClick={()} => setLocation("/projects")>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Projects
           </Button>
@@ -1909,7 +1909,7 @@ export default function EditBook() {
               <div className="flex items-center space-x-4">
                 <Button
                   variant="ghost"
-                  onClick={ () => setLocation("/projects" }
+                  onClick={ () => setLocation("/projects")}
                   className="flex items-center space-x-2"
                 >
                   <ArrowLeft className="w-4 h-4" />
@@ -1924,8 +1924,8 @@ export default function EditBook() {
               {/* AI Recommendations Toggle */}
               {!isCreating && bookId && (
                 <Button
-                  variant={showAISidebar ? "default" : "outline"}
-                  onClick={ () => setShowAISidebar(!showAISidebar }
+                  variant={showAISidebar ? "default" : "outline")
+                  onClick={ () => setShowAISidebar(!showAISidebar )}
                   className="flex items-center space-x-2"
                 >
                   <Lightbulb className="w-4 h-4" />
@@ -1950,7 +1950,7 @@ export default function EditBook() {
                       form.setValue('description', cleanedHtmlContent);
                       setDescriptionEditorContent(cleanedHtmlContent);
                     }
-                  }
+                  )}
                   setActiveTab("details");
                   // Restaurer le contenu de l'éditeur si on revient sur l'onglet details
                   if ("details" !== activeTab) {
@@ -2010,7 +2010,7 @@ export default function EditBook() {
                       form.setValue('description', cleanedHtmlContent);
                       setDescriptionEditorContent(cleanedHtmlContent);
                     }
-                  }
+                  )}
                   setActiveTab("content");
                 }}
                 className={`relative px-6 py-2 font-semibold text-base transition-all duration-200 ease-in-out ${
@@ -2038,7 +2038,7 @@ export default function EditBook() {
                       form.setValue('description', cleanedHtmlContent);
                       setDescriptionEditorContent(cleanedHtmlContent);
                     }
-                  }
+                  )}
                   setActiveTab("pricing");
                 }}
                 className={`relative px-6 py-2 font-semibold text-base transition-all duration-200 ease-in-out ${
@@ -2300,7 +2300,7 @@ export default function EditBook() {
                                 toast.success({
                                   title: "Livre retiré de la série",
                                   description: "Le livre a été retiré de la série avec succès.",
-                                });
+                                )});
                               }}
                             >
                               Remove from series
@@ -2357,7 +2357,7 @@ export default function EditBook() {
                                 // ORDRE IMPORTANT: Définir le marqueur AVANT la sauvegarde pour "Edit series details"
                                 sessionStorage.setItem('returnToBookEdit', bookId || 'new');
                                 saveFormDataToSession();
-                                window.location.href = `/series-edit/${matchingSeries.id}`;
+                                window.location.href = `/series-edit/${matchingSeries.id)}`;
                               } else {
                                 window.location.href = '/manage-series';
                               }
@@ -2443,7 +2443,7 @@ export default function EditBook() {
                                 if (selectedAuthor) {
                                   sessionStorage.setItem('returnToBookEdit', bookId || 'new');
                                   saveFormDataToSession();
-                                  setLocation(`/authors/${selectedAuthor.id}`);
+                                  setLocation(`/authors/${selectedAuthor.id)}`);
                                 }
                               }}
                             >
@@ -2481,7 +2481,7 @@ export default function EditBook() {
                                       form.setValue("authorSuffix", "");
                                       // This will automatically switch back to the author selection interface
                                       // because selectedAuthorId is now empty, triggering the conditional rendering
-                                    }}
+                                    })}
                                     className="bg-destructive hover:bg-destructive/90"
                                   >
                                     Remove from author
@@ -2529,7 +2529,7 @@ export default function EditBook() {
                                 sessionStorage.setItem('returnToBookEdit', bookId || 'new');
                                 saveFormDataToSession();
                                 window.location.href = '/authors/create';
-                              }}
+                              })}
                             >
                               Create author
                             </Button>
@@ -2576,33 +2576,33 @@ export default function EditBook() {
                       <Input
                         placeholder="Prefix"
                         value={contributor.prefix || ""}
-                        onChange={ (e) => updateContributor(contributor.id, 'prefix', e.target.value }
+                        onChange={ (e) => updateContributor(contributor.id, 'prefix', e.target.value )}
                       />
                       <Input
                         placeholder="First name"
                         value={contributor.firstName}
-                        onChange={ (e) => updateContributor(contributor.id, 'firstName', e.target.value }
+                        onChange={ (e) => updateContributor(contributor.id, 'firstName', e.target.value )}
                       />
                       <Input
                         placeholder="Middle name"
                         value={contributor.middleName || ""}
-                        onChange={ (e) => updateContributor(contributor.id, 'middleName', e.target.value }
+                        onChange={ (e) => updateContributor(contributor.id, 'middleName', e.target.value )}
                       />
                       <Input
                         placeholder="Last name"
                         value={contributor.lastName}
-                        onChange={ (e) => updateContributor(contributor.id, 'lastName', e.target.value }
+                        onChange={ (e) => updateContributor(contributor.id, 'lastName', e.target.value )}
                       />
                       <Input
                         placeholder="Suffix"
                         value={contributor.suffix || ""}
-                        onChange={ (e) => updateContributor(contributor.id, 'suffix', e.target.value }
+                        onChange={ (e) => updateContributor(contributor.id, 'suffix', e.target.value )}
                       />
                       <Button 
                         type="button" 
                         variant="outline" 
                         size="sm" 
-                        onClick={ () => removeContributor(contributor.id }
+                        onClick={ () => removeContributor(contributor.id )}
                         className="text-gray-600 hover:text-red-600"
                       >
                         Remove
@@ -2650,19 +2650,19 @@ export default function EditBook() {
                     </SelectContent>
                   </Select>
                   
-                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('bold' }>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('bold' )}>
                     <strong>B</strong>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('italic' }>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('italic' )}>
                     <em>I</em>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('underline' }>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('underline' )}>
                     <u>U</u>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('insertUnorderedList' }>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('insertUnorderedList' )}>
                     • List
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('insertOrderedList' }>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('insertOrderedList' )}>
                     1. List
                   </Button>
                   
@@ -2680,10 +2680,10 @@ export default function EditBook() {
                         <Input
                           placeholder="Enter URL"
                           value={linkUrl}
-                          onChange={ (e) => setLinkUrl(e.target.value }
+                          onChange={ (e) => setLinkUrl(e.target.value )}
                         />
                         <div className="flex justify-end space-x-2">
-                          <Button variant="outline" onClick={ () => setShowLinkDialog(false }>
+                          <Button variant="outline" onClick={ () => setShowLinkDialog(false )}>
                             Cancel
                           </Button>
                           <Button 
@@ -2932,7 +2932,7 @@ export default function EditBook() {
                             <button 
                               type="button"
                               className="ml-2 text-blue-600 hover:text-blue-800"
-                              onClick={ () => removeCategory(category }
+                              onClick={ () => removeCategory(category )}
                             >
                               ✏
                             </button>
@@ -3023,7 +3023,7 @@ export default function EditBook() {
                         {keyword}
                         <X 
                           className="w-3 h-3 cursor-pointer" 
-                          onClick={ () => removeKeyword(keyword }
+                          onClick={ () => removeKeyword(keyword )}
                         />
                       </Badge>
                     ))}
@@ -3048,7 +3048,7 @@ export default function EditBook() {
                           addKeyword(input.value);
                           input.value = '';
                         }
-                      }}
+                      )}}
                     >
                       Add
                     </Button>
@@ -3079,7 +3079,7 @@ export default function EditBook() {
                           onChange={() => {
                             form.setValue("previouslyPublished", false);
                             form.setValue("previousPublicationDate", null);
-                          }}
+                          })}
                           className="w-4 h-4 text-[#38b6ff] border-gray-300 focus:ring-[#38b6ff]"
                         />
                       </div>
@@ -3099,7 +3099,7 @@ export default function EditBook() {
                             id="previouslyPublishedOption"
                             name="publicationDateOption"
                             checked={form.watch("previouslyPublished") || false}
-                            onChange={ () => form.setValue("previouslyPublished", true }
+                            onChange={ () => form.setValue("previouslyPublished", true )}
                             className="w-4 h-4 text-[#38b6ff] border-gray-300 focus:ring-[#38b6ff]"
                           />
                         </div>
@@ -3121,7 +3121,7 @@ export default function EditBook() {
                           <Input
                             type="date"
                             value={form.watch("previousPublicationDate") || ""}
-                            onChange={ (e) => form.setValue("previousPublicationDate", e.target.value || null }
+                            onChange={ (e) => form.setValue("previousPublicationDate", e.target.value || null )}
                             max={new Date().toISOString().split('T')[0]}
                             className="max-w-xs"
                             placeholder="MM/DD/YYYY"
@@ -3174,7 +3174,7 @@ export default function EditBook() {
                               form.setValue("releaseOption", "immediate");
                               form.setValue("scheduledReleaseDate", null);
                             }
-                          }}
+                          )}}
                           className="w-4 h-4 text-[#38b6ff] mt-1"
                         />
                         <div className="flex-1">
@@ -3202,7 +3202,7 @@ export default function EditBook() {
                             if (e.target.checked && !form.watch("previouslyPublished")) {
                               form.setValue("releaseOption", "scheduled");
                             }
-                          }}
+                          )}}
                           className={`w-4 h-4 mt-1 ${form.watch("previouslyPublished") ? "text-gray-400 cursor-not-allowed" : "text-[#38b6ff]"}`}
                         />
                         <div className="flex-1">
@@ -3215,7 +3215,7 @@ export default function EditBook() {
                               <Input
                                 type="date"
                                 value={form.watch("scheduledReleaseDate") || ""}
-                                onChange={ (e) => form.setValue("scheduledReleaseDate", e.target.value || null }
+                                onChange={ (e) => form.setValue("scheduledReleaseDate", e.target.value || null )}
                                 min={new Date().toISOString().split('T')[0]}
                                 disabled={ !!form.watch("previouslyPublished" }
                                 className={`max-w-xs ${form.watch("previouslyPublished") ? "opacity-50 cursor-not-allowed" : ""}`}
@@ -3302,7 +3302,7 @@ export default function EditBook() {
                                 if (isbnValidationError) {
                                   setIsbnValidationError("");
                                 }
-                              }}
+                              )}}
                               className={`${isbnValidationError ? 'border-red-500 focus:border-red-500' : ''}`}
                             />
                             { isCheckingIsbn && (
@@ -3317,7 +3317,7 @@ export default function EditBook() {
                           </div>
                           <Button
                             type="button"
-                            onClick={ () => setShowIsbnContentApplyDialog(true }
+                            onClick={ () => setShowIsbnContentApplyDialog(true )}
                             className="bg-[#ef4444] hover:bg-red-600 text-white flex-shrink-0"
                             disabled={!officialIsbnContentValue?.trim() || !!isbnValidationError || isCheckingIsbn}
                           >
@@ -3381,7 +3381,7 @@ export default function EditBook() {
                           </button>
                           <button 
                             className="p-3 text-left border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
-                            onClick={ () => setTrimSizeModalOpen(true }
+                            onClick={ () => setTrimSizeModalOpen(true )}
                           >
                             Select a different size
                           </button>
@@ -3705,7 +3705,7 @@ export default function EditBook() {
             <Button
               type="button"
               variant="outline"
-              onClick={ () => setLocation("/projects" }
+              onClick={ ()} => setLocation("/projects")
             >
               Cancel
             </Button>
@@ -3726,7 +3726,7 @@ export default function EditBook() {
                 onClick={() => {
                   const formData = form.getValues();
                   handleSaveAsDraft(formData);
-                }}
+                })}
                 disabled={saveBook.isPending || descriptionCharacterCount > maxDescriptionCharacters}
               >
                 { saveBook.isPending ? (
@@ -3744,7 +3744,7 @@ export default function EditBook() {
                   onClick={() => {
                     const formData = form.getValues();
                     handleSaveAndContinue(formData);
-                  }}
+                  })}
                   disabled={saveBook.isPending || descriptionCharacterCount > maxDescriptionCharacters}
                   className="bg-[#ff9500] hover:bg-orange-700"
                 >
@@ -3807,7 +3807,7 @@ export default function EditBook() {
               onClick={() => {
                 deleteBook.mutate();
                 setShowDeleteDialog(false);
-              }}
+              })}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
@@ -3849,7 +3849,7 @@ export default function EditBook() {
                     <div key={index} className="border border-gray-200 rounded">
                       <div 
                         className="flex items-center justify-between p-3 bg-gray-50 cursor-pointer hover:bg-gray-100"
-                        onClick={() => setExpandedCategory(expandedCategory === `selector-${index}` ? null : `selector-${index}`)}
+                        onClick={() => setExpandedCategory(expandedCategory === `selector-${index)}` ? null : `selector-${index}`)}
                       >
                         <div className="flex items-center space-x-2">
                           <div className="w-4 h-4 flex items-center justify-center">
@@ -3873,7 +3873,7 @@ export default function EditBook() {
                                   setResetTriggers(prev => ({
                                     ...prev,
                                     [index]: (prev[index] || 0) + 1
-                                  }));
+                                  )}));
                                   // Remove the category from temp UI selections
                                   const newCategories = tempUISelections.filter((_, i) => i !== index);
                                   setTempUISelections(newCategories);
@@ -3891,7 +3891,7 @@ export default function EditBook() {
                                   e.stopPropagation();
                                   const newCategories = tempUISelections.filter((_, i) => i !== index);
                                   setTempUISelections(newCategories);
-                                }}
+                                })}
                               >
                                 Remove
                               </Button>
@@ -3953,7 +3953,7 @@ export default function EditBook() {
                         className="text-blue-600 hover:text-blue-800"
                         onClick={() => {
                           setTempUISelections(tempUISelections.filter(c => c !== categoryPath));
-                        }}
+                        })}
                       >
                         Remove
                       </button>
@@ -4044,7 +4044,7 @@ export default function EditBook() {
                 {trimSizes.mostPopular.map((size) => (
                   <button
                     key={size.id}
-                    onClick={ () => setSelectedTrimSize(size.id }
+                    onClick={ () => setSelectedTrimSize(size.id )}
                     className={`p-3 text-center border rounded-md text-sm transition-colors ${
                       selectedTrimSize === size.id
                         ? 'border-2 border-teal-500 bg-teal-50 font-medium'
@@ -4067,7 +4067,7 @@ export default function EditBook() {
                 {trimSizes.moreStandard.map((size) => (
                   <button
                     key={size.id}
-                    onClick={ () => setSelectedTrimSize(size.id }
+                    onClick={ () => setSelectedTrimSize(size.id )}
                     className={`p-3 text-center border rounded-md text-sm transition-colors ${
                       selectedTrimSize === size.id
                         ? 'border-2 border-teal-500 bg-teal-50 font-medium'
@@ -4091,7 +4091,7 @@ export default function EditBook() {
                 {trimSizes.nonStandard.map((size) => (
                   <button
                     key={size.id}
-                    onClick={ () => setSelectedTrimSize(size.id }
+                    onClick={ () => setSelectedTrimSize(size.id )}
                     className={`p-3 text-center border rounded-md text-sm transition-colors ${
                       selectedTrimSize === size.id
                         ? 'border-2 border-teal-500 bg-teal-50 font-medium'
@@ -4148,14 +4148,14 @@ export default function EditBook() {
           
           {/* Modal Footer */}
           <div className="flex justify-end space-x-2 pt-4 border-t">
-            <Button variant="outline" onClick={ () => setTrimSizeModalOpen(false }>
+            <Button variant="outline" onClick={ () => setTrimSizeModalOpen(false )}>
               Cancel
             </Button>
             <Button 
               onClick={() => {
                 // Here you would update the trim size in the form
                 setTrimSizeModalOpen(false);
-              }}
+              })}
               className="bg-[#ff9500] hover:bg-orange-700 text-white"
             >
               Select Size

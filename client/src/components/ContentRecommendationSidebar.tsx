@@ -181,7 +181,7 @@ export default function ContentRecommendationSidebar({
           Get intelligent suggestions to improve your book's success
         </p>
         <Button
-          onClick={ () => generateMutation.mutate( }
+          onClick={ () => generateMutation.mutate( )}
           disabled={generateMutation.isPending}
           className="w-full"
           size="sm"
@@ -323,7 +323,7 @@ export default function ContentRecommendationSidebar({
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleApply(recommendation }
+                            onClick={() => handleApply(recommendation )}
                             disabled={feedbackMutation.isPending}
                             className="h-6 px-2 text-xs"
                           >
@@ -337,7 +337,7 @@ export default function ContentRecommendationSidebar({
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleFeedback(recommendation, true }
+                              onClick={() => handleFeedback(recommendation, true )}
                               disabled={feedbackMutation.isPending}
                               className="h-6 w-6 p-0 text-green-600 hover:bg-green-50"
                             >
@@ -346,7 +346,7 @@ export default function ContentRecommendationSidebar({
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={ () => handleFeedback(recommendation, false }
+                              onClick={ () => handleFeedback(recommendation, false )}
                               disabled={feedbackMutation.isPending}
                               className="h-6 w-6 p-0 text-red-600 hover:bg-red-50"
                             >
@@ -358,7 +358,7 @@ export default function ContentRecommendationSidebar({
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={ () => deleteMutation.mutate(recommendation.id }
+                          onClick={ () => deleteMutation.mutate(recommendation.id )}
                           disabled={deleteMutation.isPending}
                           className="h-6 w-6 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
                         >

@@ -139,7 +139,7 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
                     onChange={(e) => setFormData(prev => ({ 
                       ...prev, 
                       monthlyTokenLimit: parseInt(e.target.value) || 0 
-                    }))}
+                    )}))}
                     placeholder="Ex: 50000"
                   />
                 </div>
@@ -164,7 +164,7 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
                     onChange={(e) => setFormData(prev => ({ 
                       ...prev, 
                       dailyRequestLimit: parseInt(e.target.value) || 0 
-                    }))}
+                    )}))}
                     placeholder="Ex: 100"
                   />
                 </div>
@@ -180,7 +180,7 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
                     onChange={(e) => setFormData(prev => ({ 
                       ...prev, 
                       maxTokensPerRequest: parseInt(e.target.value) || 1000 
-                    }))}
+                    )}))}
                   />
                 </div>
               </div>
@@ -218,7 +218,7 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
                     <Badge key={model} variant="secondary" className="flex items-center gap-1">
                       {model}
                       <button
-                        onClick={ () => toggleModel(model }
+                        onClick={ () => toggleModel(model )}
                         className="ml-1 hover:bg-gray-300 rounded-full p-0.5"
                       >
                         <X className="w-3 h-3" />

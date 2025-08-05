@@ -178,7 +178,7 @@ export default function AdminBlogCategories() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={ () => window.history.back( }>
+          <Button variant="ghost" size="sm" onClick={ () => window.history.back( )}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
@@ -258,7 +258,7 @@ export default function AdminBlogCategories() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={ () => handleEdit(category }
+                            onClick={ () => handleEdit(category )}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -281,7 +281,7 @@ export default function AdminBlogCategories() {
                                 <Button variant="outline">Annuler</Button>
                                 <Button 
                                   variant="destructive"
-                                  onClick={ () => deleteCategoryMutation.mutate(category.id }
+                                  onClick={ () => deleteCategoryMutation.mutate(category.id )}
                                 >
                                   Supprimer
                                 </Button>
@@ -328,7 +328,7 @@ export default function AdminBlogCategories() {
               <Input
                 id="name"
                 value={formData.name}
-                onChange={ (e) => handleNameChange(e.target.value }
+                onChange={ (e) => handleNameChange(e.target.value )}
                 placeholder="Nom de la catégorie"
                 required
               />
@@ -339,7 +339,7 @@ export default function AdminBlogCategories() {
               <Input
                 id="slug"
                 value={formData.slug}
-                onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value )}))}
                 placeholder="slug-de-la-categorie"
                 required
               />
@@ -350,7 +350,7 @@ export default function AdminBlogCategories() {
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value )}))}
                 placeholder="Description de la catégorie"
                 rows={3}
               />
@@ -363,12 +363,12 @@ export default function AdminBlogCategories() {
                   type="color"
                   id="color"
                   value={formData.color}
-                  onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value )}))}
                   className="w-12 h-8 border rounded cursor-pointer"
                 />
                 <Input
                   value={formData.color}
-                  onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value )}))}
                   placeholder="#3B82F6"
                   className="flex-1"
                 />
@@ -376,7 +376,7 @@ export default function AdminBlogCategories() {
             </div>
             
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={ () => setIsDialogOpen(false }>
+              <Button type="button" variant="outline" onClick={ () => setIsDialogOpen(false )}>
                 Annuler
               </Button>
               <Button 

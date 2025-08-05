@@ -26,7 +26,7 @@ export default function AuthorsListPage() {
             <h1 className="text-3xl font-bold">Authors</h1>
             <p className="text-gray-600 dark:text-gray-400">Manage your publishing authors</p>
           </div>
-          <Button onClick={ () => setLocation("/authors/create" } className="kdp-btn-primary">
+          <Button onClick={ () => setLocation("/authors/create")} className="kdp-btn-primary">
             <Plus className="w-4 h-4 mr-2" />
             Create Author
           </Button>
@@ -43,7 +43,7 @@ export default function AuthorsListPage() {
               <p className="text-gray-500 dark:text-gray-400 mb-4">
                 Get started by creating your first author
               </p>
-              <Button onClick={() => setLocation("/authors/create" } className="kdp-btn-primary">
+              <Button onClick={() => setLocation("/authors/create")} className="kdp-btn-primary">
                 <Plus className="w-4 h-4 mr-2" />
                 Create First Author
               </Button>
@@ -79,7 +79,7 @@ export default function AuthorsListPage() {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      onClick={() => setLocation(`/authors/${author.id}`)}
+                      onClick={() => setLocation(`/authors/${author.id)}`)}
                       className="flex items-center gap-1"
                     >
                       <Eye className="w-4 h-4" />

@@ -157,7 +157,7 @@ export default function AdminUsers() {
   return (
     <Layout>
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={ () => window.history.back( }>
+        <Button variant="ghost" size="sm" onClick={ () => window.history.back( )}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour
         </Button>
@@ -187,7 +187,7 @@ export default function AdminUsers() {
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
                   setCurrentPage(0);
-                }}
+                })}
                 className="pl-9"
               />
             </div>
@@ -276,7 +276,7 @@ export default function AdminUsers() {
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => deactivateUserMutation.mutate(user.id }>
+                                  <AlertDialogAction onClick={() => deactivateUserMutation.mutate(user.id )}>
                                     Désactiver
                                   </AlertDialogAction>
                                 </AlertDialogFooter>
@@ -286,7 +286,7 @@ export default function AdminUsers() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={ () => reactivateUserMutation.mutate(user.id }
+                              onClick={ () => reactivateUserMutation.mutate(user.id )}
                             >
                               <UserCheck className="h-4 w-4" />
                             </Button>
@@ -309,7 +309,7 @@ export default function AdminUsers() {
                   variant="outline"
                   size="sm"
                   disabled={currentPage === 0}
-                  onClick={ () => setCurrentPage(currentPage - 1 }
+                  onClick={ () => setCurrentPage(currentPage - 1 )}
                 >
                   Précédent
                 </Button>
@@ -317,7 +317,7 @@ export default function AdminUsers() {
                   variant="outline"
                   size="sm"
                   disabled={currentPage >= Math.ceil((usersData?.total || 0) / limit) - 1}
-                  onClick={ () => setCurrentPage(currentPage + 1 }
+                  onClick={ () => setCurrentPage(currentPage + 1 )}
                 >
                   Suivant
                 </Button>

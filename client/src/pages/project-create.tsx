@@ -187,8 +187,7 @@ export default function ProjectCreate() {
             <div className="mb-6">
               <Button
                 variant="ghost"
-                onClick={ () => setLocation("/projects" }
-                className="mb-4"
+                onClick={ () => setLocation("/projects")} className="mb-4"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Retour aux projets
@@ -364,38 +363,38 @@ export default function ProjectCreate() {
                             <Input
                               placeholder="Prefix"
                               value={contributor.prefix}
-                              onChange={ (e) => updateContributor(contributor.id, "prefix", e.target.value }
+                              onChange={ (e) => updateContributor(contributor.id, "prefix", e.target.value )}
                               className="w-20"
                             />
                             <Input
                               placeholder="First Name"
                               value={contributor.firstName}
-                              onChange={ (e) => updateContributor(contributor.id, "firstName", e.target.value }
+                              onChange={ (e) => updateContributor(contributor.id, "firstName", e.target.value )}
                               className="flex-1"
                             />
                             <Input
                               placeholder="Middle Name"
                               value={contributor.middleName}
-                              onChange={ (e) => updateContributor(contributor.id, "middleName", e.target.value }
+                              onChange={ (e) => updateContributor(contributor.id, "middleName", e.target.value )}
                               className="flex-1"
                             />
                             <Input
                               placeholder="Last Name"
                               value={contributor.lastName}
-                              onChange={ (e) => updateContributor(contributor.id, "lastName", e.target.value }
+                              onChange={ (e) => updateContributor(contributor.id, "lastName", e.target.value )}
                               className="flex-1"
                             />
                             <Input
                               placeholder="Suffix"
                               value={contributor.suffix}
-                              onChange={ (e) => updateContributor(contributor.id, "suffix", e.target.value }
+                              onChange={ (e) => updateContributor(contributor.id, "suffix", e.target.value )}
                               className="w-20"
                             />
                             <Button
                               type="button"
                               variant="outline"
                               size="sm"
-                              onClick={ () => removeContributor(contributor.id }
+                              onClick={ () => removeContributor(contributor.id )}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -554,7 +553,7 @@ export default function ProjectCreate() {
                               {category}
                               <X
                                 className="h-3 w-3 cursor-pointer"
-                                onClick={ () => removeCategory(category }
+                                onClick={ () => removeCategory(category )}
                               />
                             </Badge>
                           ))}
@@ -612,7 +611,7 @@ export default function ProjectCreate() {
                               {keyword}
                               <X
                                 className="h-3 w-3 cursor-pointer"
-                                onClick={ () => removeKeyword(keyword }
+                                onClick={ () => removeKeyword(keyword )}
                               />
                             </Badge>
                           ))}
@@ -774,7 +773,7 @@ export default function ProjectCreate() {
                   </div>
 
                   <div className="flex justify-between items-center pt-6 border-t mt-6">
-                    <Button type="button" variant="outline" onClick={ () => setLocation("/projects" }>
+                    <Button type="button" variant="outline" onClick={ ()} => setLocation("/projects")>
                       Cancel
                     </Button>
                     <div className="flex gap-2">
@@ -788,7 +787,7 @@ export default function ProjectCreate() {
                           
                           const formData = form.getValues();
                           console.log('Bypassing form validation, sending data directly:', formData);
-                          createProject.mutate({ ...formData, status: 'draft' });
+                          createProject.mutate({ ...formData, status: 'draft' )});
                         }}
                         disabled={createProject.isPending}
                       >

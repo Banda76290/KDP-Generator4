@@ -175,7 +175,7 @@ export default function SeriesListPage() {
               <Input
                 placeholder="Search series..."
                 value={searchTerm}
-                onChange={ (e) => setSearchTerm(e.target.value }
+                onChange={ (e) => setSearchTerm(e.target.value )}
                 className="pl-10 w-full sm:w-80"
               />
             </div>
@@ -238,7 +238,7 @@ export default function SeriesListPage() {
               {searchTerm ? "Try adjusting your search terms" : "Create your first series to get started"}
             </p>
             <Button 
-              onClick={ () => setLocation('/series-setup' }
+              onClick={ () => setLocation('/series-setup' )}
               style={{ backgroundColor: '#38b6ff' }} 
               className="hover:opacity-90 text-white"
             >
@@ -307,7 +307,7 @@ export default function SeriesListPage() {
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction 
-                                onClick={ () => handleDeleteSeries(seriesItem.id }
+                                onClick={ () => handleDeleteSeries(seriesItem.id )}
                                 className="bg-red-600 hover:bg-red-700"
                               >
                                 Delete Series
@@ -375,7 +375,7 @@ export default function SeriesListPage() {
                                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                                         <AlertDialogAction 
                                           className="bg-red-600 hover:bg-red-700"
-                                          onClick={ () => removeBookFromSeries.mutate(book.id }
+                                          onClick={ () => removeBookFromSeries.mutate(book.id )}
                                           disabled={removeBookFromSeries.isPending}
                                         >
                                           {removeBookFromSeries.isPending ? "Removing..." : "Remove from Series"}

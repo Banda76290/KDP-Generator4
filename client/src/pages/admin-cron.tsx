@@ -126,7 +126,7 @@ export default function AdminCron() {
           </div>
           <Button 
             onClick={() => {
-              queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/jobs"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/jobs"] )});
               queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/logs"] });
             }}
             variant="outline"
@@ -174,7 +174,7 @@ export default function AdminCron() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={ () => runJobMutation.mutate(job.id }
+                            onClick={ () => runJobMutation.mutate(job.id )}
                             disabled={runJobMutation.isPending}
                           >
                             <Play className="h-3 w-3 mr-1" />
@@ -186,7 +186,7 @@ export default function AdminCron() {
                             onClick={() => toggleJobMutation.mutate({
                               jobId: job.id,
                               enabled: !job.enabled
-                            })}
+                            )})}
                             disabled={toggleJobMutation.isPending}
                           >
                             { job.enabled ? (

@@ -130,7 +130,7 @@ export default function AdminConfig() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={ () => window.history.back( }>
+        <Button variant="ghost" size="sm" onClick={ () => window.history.back( )}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour
         </Button>
@@ -160,7 +160,7 @@ export default function AdminConfig() {
               <Input
                 id="config-key"
                 value={newConfig.key}
-                onChange={(e) => setNewConfig({ ...newConfig, key: e.target.value })}
+                onChange={(e) => setNewConfig({ ...newConfig, key: e.target.value )})}
                 placeholder="ex: platform_name"
               />
             </div>
@@ -169,7 +169,7 @@ export default function AdminConfig() {
               <Input
                 id="config-value"
                 value={newConfig.value}
-                onChange={(e) => setNewConfig({ ...newConfig, value: e.target.value })}
+                onChange={(e) => setNewConfig({ ...newConfig, value: e.target.value )})}
                 placeholder="ex: KDP Generator"
               />
             </div>
@@ -178,7 +178,7 @@ export default function AdminConfig() {
               <Textarea
                 id="config-description"
                 value={newConfig.description}
-                onChange={(e) => setNewConfig({ ...newConfig, description: e.target.value })}
+                onChange={(e) => setNewConfig({ ...newConfig, description: e.target.value )})}
                 placeholder="Description du paramètre"
                 rows={3}
               />
@@ -225,7 +225,7 @@ export default function AdminConfig() {
                         key: configItem.key,
                         value: existingConfig?.value || configItem.defaultValue,
                         description: configItem.description,
-                      })}
+                      )})}
                     >
                       {existingConfig ? "Modifier" : "Ajouter"}
                     </Button>
@@ -275,7 +275,7 @@ export default function AdminConfig() {
                             key: configItem.key,
                             value: configItem.value,
                             description: configItem.description || "",
-                          })}
+                          )})}
                         >
                           Modifier
                         </Button>

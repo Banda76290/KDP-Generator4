@@ -360,7 +360,7 @@ function BooksContent() {
           <Input
             placeholder="Search books..."
             value={searchTerm}
-            onChange={ (e) => setSearchTerm(e.target.value }
+            onChange={ (e) => setSearchTerm(e.target.value )}
             className="pl-10"
           />
         </div>
@@ -490,7 +490,7 @@ function BooksContent() {
                       <TooltipTrigger asChild>
                         <CardTitle 
                           className="text-lg truncate cursor-pointer hover:text-blue-600 transition-colors"
-                          onClick={() => setLocation(`/books/edit/${book.id}`)}
+                          onClick={() => setLocation(`/books/edit/${book.id)}`)}
                         >
                           {book.title}
                         </CardTitle>
@@ -524,7 +524,7 @@ function BooksContent() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={ () => duplicateBookMutation.mutate(book.id }
+                        onClick={ () => duplicateBookMutation.mutate(book.id )}
                         disabled={duplicateBookMutation.isPending}
                       >
                         <Copy className="h-4 w-4 mr-2" />
@@ -534,7 +534,7 @@ function BooksContent() {
                         onClick={() => {
                           setBookToTranslate(book);
                           setSelectedLanguage("");
-                        }}
+                        })}
                         disabled={translateBookMutation.isPending}
                       >
                         <Languages className="h-4 w-4 mr-2" />
@@ -542,7 +542,7 @@ function BooksContent() {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={ () => setBookToDelete(book }
+                        onClick={ () => setBookToDelete(book )}
                         className="text-destructive focus:text-destructive"
                         disabled={deleteBookMutation.isPending}
                       >
@@ -686,7 +686,7 @@ function BooksContent() {
                   deleteBookMutation.mutate(bookToDelete.id);
                   setBookToDelete(null);
                 }
-              }}
+              )}}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
@@ -742,7 +742,7 @@ function BooksContent() {
               onClick={() => {
                 setBookToTranslate(null);
                 setSelectedLanguage("");
-              }}
+              })}
             >
               Cancel
             </Button>

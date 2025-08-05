@@ -458,7 +458,7 @@ export default function SeriesSetupPage() {
                   
                   if (returnToBookEdit === 'new') {
                     setLocation('/books/create');
-                  } else {
+                  )} else {
                     setLocation(`/books/edit/${returnToBookEdit}`);
                   }
                 } else {
@@ -615,7 +615,7 @@ export default function SeriesSetupPage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={ () => applyFormatting('bold' }
+                    onClick={ () => applyFormatting('bold' )}
                     title="Bold"
                   >
                     <strong>B</strong>
@@ -625,7 +625,7 @@ export default function SeriesSetupPage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={ () => applyFormatting('italic' }
+                    onClick={ () => applyFormatting('italic' )}
                     title="Italic"
                   >
                     <em>I</em>
@@ -635,7 +635,7 @@ export default function SeriesSetupPage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={ () => applyFormatting('underline' }
+                    onClick={ () => applyFormatting('underline' )}
                     title="Underline"
                   >
                     <u>U</u>
@@ -646,7 +646,7 @@ export default function SeriesSetupPage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={ () => applyFormatting('insertUnorderedList' }
+                    onClick={ () => applyFormatting('insertUnorderedList' )}
                     title="Bullet List"
                   >
                     •
@@ -656,7 +656,7 @@ export default function SeriesSetupPage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={ () => applyFormatting('insertOrderedList' }
+                    onClick={ () => applyFormatting('insertOrderedList' )}
                     title="Numbered List"
                   >
                     1.
@@ -700,7 +700,7 @@ export default function SeriesSetupPage() {
                             type="url"
                             placeholder="https://example.com"
                             value={linkUrl}
-                            onChange={ (e) => setLinkUrl(e.target.value }
+                            onChange={ (e) => setLinkUrl(e.target.value )}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
                                 e.preventDefault();
@@ -717,7 +717,7 @@ export default function SeriesSetupPage() {
                             onClick={() => {
                               setLinkUrl('');
                               setShowLinkDialog(false);
-                            }}
+                            })}
                           >
                             Cancel
                           </Button>
@@ -789,7 +789,7 @@ export default function SeriesSetupPage() {
                   
                   if (returnToBookEdit === 'new') {
                     setLocation('/books/create');
-                  } else {
+                  )} else {
                     setLocation(`/books/edit/${returnToBookEdit}`);
                   }
                 } else {

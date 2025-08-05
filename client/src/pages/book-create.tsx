@@ -209,8 +209,7 @@ export default function CreateBook() {
             <div className="mb-6">
               <Button
                 variant="ghost"
-                onClick={ () => setLocation("/projects" }
-                className="mb-4"
+                onClick={ () => setLocation("/projects")} className="mb-4"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Projects
@@ -389,7 +388,7 @@ export default function CreateBook() {
                             <Button
                               type="button"
                               variant="outline"
-                              onClick={ () => setLocation('/authors/create' }
+                              onClick={ () => setLocation('/authors/create' )}
                             >
                               Créer un Auteur
                             </Button>
@@ -412,7 +411,7 @@ export default function CreateBook() {
                       </CardHeader>
                       <CardContent>
                         <Textarea
-                          { ...form.register("description" }
+                          { ...form.register("description")
                           placeholder="Dans le monde du marketing digital, comprendre les données est essentiel..."
                           rows={6}
                           className="resize-none"
@@ -438,7 +437,7 @@ export default function CreateBook() {
                               {category}
                               <X
                                 className="h-3 w-3 cursor-pointer"
-                                onClick={ () => removeCategory(category }
+                                onClick={ () => removeCategory(category )}
                               />
                             </Badge>
                           ))}
@@ -475,7 +474,7 @@ export default function CreateBook() {
                               {keyword}
                               <X
                                 className="h-3 w-3 cursor-pointer"
-                                onClick={ () => removeKeyword(keyword }
+                                onClick={ () => removeKeyword(keyword )}
                               />
                             </Badge>
                           ))}
@@ -512,7 +511,7 @@ export default function CreateBook() {
                   </div>
 
                   <div className="flex justify-between items-center pt-6 border-t mt-6">
-                    <Button type="button" variant="outline" onClick={ () => setLocation("/projects" }>
+                    <Button type="button" variant="outline" onClick={ ()} => setLocation("/projects")>
                       Annuler
                     </Button>
                     <div className="flex gap-2">
@@ -521,7 +520,7 @@ export default function CreateBook() {
                         variant="outline"
                         onClick={() => {
                           const formData = form.getValues();
-                          createBook.mutate({ ...formData, status: 'draft' });
+                          createBook.mutate({ ...formData, status: 'draft' )});
                         }}
                         disabled={createBook.isPending}
                       >

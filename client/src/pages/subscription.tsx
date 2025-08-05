@@ -173,7 +173,7 @@ export default function Subscription() {
                     <Button 
                       className="w-full" 
                       variant={plan.buttonVariant}
-                      onClick={ () => handleUpgrade(plan.name }
+                      onClick={ () => handleUpgrade(plan.name )}
                       disabled={plan.current}
                     >
                       {plan.buttonText}

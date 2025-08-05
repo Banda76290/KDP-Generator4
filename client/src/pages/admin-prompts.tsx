@@ -221,7 +221,7 @@ export default function AdminPrompts() {
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => { resetForm(); setEditingPrompt(null); }}>
+              <Button onClick={() => { resetForm(); setEditingPrompt(null); })}>
                 <Plus className="w-4 h-4 mr-2" />
                 Nouveau Prompt
               </Button>
@@ -242,7 +242,7 @@ export default function AdminPrompts() {
                     <label className="text-sm font-medium">Type *</label>
                     <Input
                       value={formData.type}
-                      onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, type: e.target.value )})}
                       placeholder="ex: keywords, title, description..."
                     />
                   </div>
@@ -250,7 +250,7 @@ export default function AdminPrompts() {
                     <label className="text-sm font-medium">Nom *</label>
                     <Input
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value )})}
                       placeholder="Nom du template"
                     />
                   </div>
@@ -261,7 +261,7 @@ export default function AdminPrompts() {
                   <Textarea
                     rows={4}
                     value={formData.systemPrompt}
-                    onChange={(e) => setFormData({ ...formData, systemPrompt: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, systemPrompt: e.target.value )})}
                     placeholder="Définit le rôle et le comportement de l'IA..."
                   />
                 </div>
@@ -271,7 +271,7 @@ export default function AdminPrompts() {
                   <Textarea
                     rows={6}
                     value={formData.userPromptTemplate}
-                    onChange={(e) => setFormData({ ...formData, userPromptTemplate: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, userPromptTemplate: e.target.value )})}
                     placeholder="Template avec variables {bookContext}, {bookTitle}, etc..."
                   />
                   <p className="text-xs text-muted-foreground mt-1">
@@ -284,7 +284,7 @@ export default function AdminPrompts() {
                     type="checkbox"
                     id="isActive"
                     checked={formData.isActive}
-                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked )})}
                   />
                   <label htmlFor="isActive" className="text-sm font-medium">
                     Prompt actif
@@ -299,7 +299,7 @@ export default function AdminPrompts() {
                     setIsDialogOpen(false);
                     setEditingPrompt(null);
                     resetForm();
-                  }}
+                  })}
                 >
                   <X className="w-4 h-4 mr-2" />
                   Annuler
@@ -334,7 +334,7 @@ export default function AdminPrompts() {
                   <p className="text-muted-foreground mb-4">
                     Créez votre premier template de prompt pour les recommandations IA.
                   </p>
-                  <Button onClick={() => setIsDialogOpen(true }>
+                  <Button onClick={() => setIsDialogOpen(true )}>
                     <Plus className="w-4 h-4 mr-2" />
                     Créer un prompt
                   </Button>
@@ -388,7 +388,7 @@ export default function AdminPrompts() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={ () => handleEdit(prompt }
+                          onClick={ () => handleEdit(prompt )}
                         >
                           <Edit2 className="w-4 h-4 mr-2" />
                           Modifier
@@ -411,7 +411,7 @@ export default function AdminPrompts() {
                             <AlertDialogFooter>
                               <AlertDialogCancel>Annuler</AlertDialogCancel>
                               <AlertDialogAction
-                                onClick={ () => deleteMutation.mutate(prompt.id }
+                                onClick={ () => deleteMutation.mutate(prompt.id )}
                                 className="bg-red-600 hover:bg-red-700"
                               >
                                 Supprimer

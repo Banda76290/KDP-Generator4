@@ -161,7 +161,7 @@ export default function ImportManagementPage() {
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) handleFileSelect(file);
-                    }}
+                    })}
                     className="hidden"
                     id="file-upload"
                   />
@@ -241,7 +241,7 @@ export default function ImportManagementPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setLocation(`/imports/${importRecord.id}`)}
+                        onClick={() => setLocation(`/imports/${importRecord.id)}`)}
                       >
                         <Eye className="w-4 h-4 mr-1" />
                         View
@@ -251,7 +251,7 @@ export default function ImportManagementPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            window.open(`/api/imports/${importRecord.id}/export`, '_blank');
+                            window.open(`/api/imports/${importRecord.id)}/export`, '_blank');
                           }}
                         >
                           <Download className="w-4 h-4 mr-1" />
@@ -261,7 +261,7 @@ export default function ImportManagementPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={ () => deleteMutation.mutate(importRecord.id }
+                        onClick={ () => deleteMutation.mutate(importRecord.id )}
                         disabled={deleteMutation.isPending}
                       >
                         <Trash2 className="w-4 h-4 mr-1" />

@@ -348,7 +348,7 @@ export default function SeriesEditPage() {
                     
                     if (returnToBookEdit === 'new') {
                       setLocation('/books/create');
-                    } else {
+                    )} else {
                       setLocation(`/books/edit/${returnToBookEdit}`);
                     }
                   } else {
@@ -520,19 +520,19 @@ export default function SeriesEditPage() {
                     </SelectContent>
                   </Select>
                   
-                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('bold' }>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('bold' )}>
                     <strong>B</strong>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('italic' }>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('italic' )}>
                     <em>I</em>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('underline' }>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('underline' )}>
                     <u>U</u>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('insertUnorderedList' }>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('insertUnorderedList' )}>
                     • List
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('insertOrderedList' }>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('insertOrderedList' )}>
                     1. List
                   </Button>
                   
@@ -550,10 +550,10 @@ export default function SeriesEditPage() {
                         <Input
                           placeholder="Enter URL"
                           value={linkUrl}
-                          onChange={ (e) => setLinkUrl(e.target.value }
+                          onChange={ (e) => setLinkUrl(e.target.value )}
                         />
                         <div className="flex justify-end space-x-2">
-                          <Button variant="outline" onClick={ () => setShowLinkDialog(false }>
+                          <Button variant="outline" onClick={ () => setShowLinkDialog(false )}>
                             Cancel
                           </Button>
                           <Button onClick={insertLink} style={{ backgroundColor: '#38b6ff', borderColor: '#38b6ff' }}>
@@ -607,7 +607,7 @@ export default function SeriesEditPage() {
                     
                     if (returnToBookEdit === 'new') {
                       setLocation('/books/create');
-                    } else {
+                    )} else {
                       setLocation(`/books/edit/${returnToBookEdit}`);
                     }
                   } else {

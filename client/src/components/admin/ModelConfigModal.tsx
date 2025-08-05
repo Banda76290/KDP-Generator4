@@ -76,7 +76,7 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value )}))}
                     placeholder="gpt-4o"
                   />
                 </div>
@@ -85,7 +85,7 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
                   <Input
                     id="displayName"
                     value={formData.displayName}
-                    onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value }))}
+                    onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value )}))}
                     placeholder="GPT-4o"
                   />
                 </div>
@@ -129,7 +129,7 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
                     type="number"
                     min="100"
                     value={formData.maxTokens}
-                    onChange={(e) => setFormData(prev => ({ ...prev, maxTokens: parseInt(e.target.value) || 4096 }))}
+                    onChange={(e) => setFormData(prev => ({ ...prev, maxTokens: parseInt(e.target.value) || 4096 )}))}
                   />
                 </div>
                 <div>
@@ -139,7 +139,7 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
                     type="number"
                     min="1000"
                     value={formData.contextWindow}
-                    onChange={(e) => setFormData(prev => ({ ...prev, contextWindow: parseInt(e.target.value) || 128000 }))}
+                    onChange={(e) => setFormData(prev => ({ ...prev, contextWindow: parseInt(e.target.value) || 128000 )}))}
                   />
                 </div>
               </div>
@@ -159,7 +159,7 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
                     step="0.000001"
                     min="0"
                     value={formData.inputPricePer1kTokens}
-                    onChange={ (e) => setFormData(prev => ({ ...prev, inputPricePer1kTokens: parseFloat(e.target.value) || 0  }
+                    onChange={ (e) => setFormData(prev => ({ ...prev, inputPricePer1kTokens: parseFloat(e.target.value) || 0  )}
                   />
                   <p className="text-xs text-muted-foreground mt-1">
                     ${ costPer1MTokensInput.toFixed(2 } per 1M tokens
@@ -173,7 +173,7 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
                     step="0.000001"
                     min="0"
                     value={formData.outputPricePer1kTokens}
-                    onChange={ (e) => setFormData(prev => ({ ...prev, outputPricePer1kTokens: parseFloat(e.target.value) || 0  }
+                    onChange={ (e) => setFormData(prev => ({ ...prev, outputPricePer1kTokens: parseFloat(e.target.value) || 0  )}
                   />
                   <p className="text-xs text-muted-foreground mt-1">
                     ${ costPer1MTokensOutput.toFixed(2 } per 1M tokens

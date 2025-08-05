@@ -284,7 +284,7 @@ export default function AIConfig() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>Fonctionnalités IA Configurables</CardTitle>
-                    <Button onClick={() => setEditingPrompt({} as AIPromptTemplate)}>
+                    <Button onClick={() => setEditingPrompt({)} as AIPromptTemplate)}>
                       <Plus className="w-4 h-4 mr-2" />
                       Nouvelle Fonctionnalité
                     </Button>
@@ -321,14 +321,14 @@ export default function AIConfig() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={ () => setEditingPrompt(template }
+                                onClick={ () => setEditingPrompt(template )}
                               >
                                 <Edit className="w-3 h-3" />
                               </Button>
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={ () => deletePromptMutation.mutate(template.id }
+                                onClick={ () => deletePromptMutation.mutate(template.id )}
                               >
                                 <Trash2 className="w-3 h-3" />
                               </Button>
@@ -348,7 +348,7 @@ export default function AIConfig() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>AI Models Configuration</CardTitle>
-                    <Button onClick={() => setEditingModel({} as AIModel)}>
+                    <Button onClick={() => setEditingModel({)} as AIModel)}>
                       <Plus className="w-4 h-4 mr-2" />
                       Add Model
                     </Button>
@@ -381,7 +381,7 @@ export default function AIConfig() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={ () => setEditingModel(model }
+                                onClick={ () => setEditingModel(model )}
                               >
                                 <Edit className="w-3 h-3" />
                               </Button>
@@ -401,7 +401,7 @@ export default function AIConfig() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>Usage Limits by Subscription Tier</CardTitle>
-                    <Button onClick={() => setEditingLimit({} as AIUsageLimit)}>
+                    <Button onClick={() => setEditingLimit({)} as AIUsageLimit)}>
                       <Plus className="w-4 h-4 mr-2" />
                       Add Limit
                     </Button>
@@ -448,7 +448,7 @@ export default function AIConfig() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={ () => setEditingLimit(limit }
+                                onClick={ () => setEditingLimit(limit )}
                               >
                                 <Edit className="w-3 h-3" />
                               </Button>

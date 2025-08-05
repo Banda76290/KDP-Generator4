@@ -186,7 +186,7 @@ export default function AIVariables() {
                           <div className="flex items-center gap-2 mb-1">
                             <code 
                               className="text-sm font-mono bg-gray-100 text-gray-800 px-2 py-1 rounded cursor-pointer hover:bg-blue-100 transition-colors"
-                              onClick={ () => copyToClipboard(field.field }
+                              onClick={ () => copyToClipboard(field.field )}
                             >
                               {"{"}
                               {field.field}
@@ -196,7 +196,7 @@ export default function AIVariables() {
                               size="sm"
                               variant="ghost"
                               className="h-6 w-6 p-0 hover:bg-blue-50"
-                              onClick={ () => copyToClipboard(field.field }
+                              onClick={ () => copyToClipboard(field.field )}
                             >
                               { copiedField === field.field ? (
                                 <CheckCircle className="w-3 h-3 text-green-600" />

@@ -185,7 +185,7 @@ export default function AIAssistant() {
                     </label>
                     <Textarea
                       value={prompt}
-                      onChange={ (e) => setPrompt(e.target.value }
+                      onChange={ (e) => setPrompt(e.target.value )}
                       placeholder="Describe what you want the AI to generate..."
                       rows={6}
                       className="resize-none"

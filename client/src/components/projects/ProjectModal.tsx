@@ -282,7 +282,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
               <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                 <Input
                   value={field.name}
-                  onChange={(e) => updateField(index, { ...field, name: e.target.value })}
+                  onChange={(e) => updateField(index, { ...field, name: e.target.value )})}
                   placeholder="Contributor name"
                   className="flex-1"
                 />
@@ -304,7 +304,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={ () => removeField(index }
+                  onClick={ () => removeField(index )}
                   className="text-red-500 hover:text-red-700"
                 >
                   <Trash2 className="w-4 h-4" />

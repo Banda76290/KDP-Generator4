@@ -313,7 +313,7 @@ export default function AIFunctions() {
                               key={func.key}
                               variant={selectedFunction?.key === func.key ? 'default' : 'ghost'}
                               className="w-full justify-start text-left h-auto p-3"
-                              onClick={ () => setSelectedFunction(func }
+                              onClick={ () => setSelectedFunction(func )}
                             >
                               <div>
                                 <div className="font-medium">{func.name}</div>
@@ -404,7 +404,7 @@ export default function AIFunctions() {
                                 variant="outline"
                                 size="sm"
                                 className="h-auto p-2 text-left justify-start"
-                                onClick={() => copyToClipboard(`{${field.field}}`)}
+                                onClick={() => copyToClipboard(`{${field.field})}`)}
                               >
                                 <div>
                                   <code className="text-xs font-mono">{`{${field.field}}`}</code>
@@ -442,7 +442,7 @@ export default function AIFunctions() {
                         <Textarea
                           id="custom-prompt"
                           value={customPrompt}
-                          onChange={ (e) => setCustomPrompt(e.target.value }
+                          onChange={ (e) => setCustomPrompt(e.target.value )}
                           rows={6}
                           className="mt-2"
                         />
@@ -454,7 +454,7 @@ export default function AIFunctions() {
                           <Input
                             id="custom-model"
                             value={customModel}
-                            onChange={ (e) => setCustomModel(e.target.value }
+                            onChange={ (e) => setCustomModel(e.target.value )}
                             className="mt-2"
                           />
                         </div>
@@ -467,7 +467,7 @@ export default function AIFunctions() {
                             max="2"
                             step="0.1"
                             value={customTemperature}
-                            onChange={ (e) => setCustomTemperature(e.target.value }
+                            onChange={ (e) => setCustomTemperature(e.target.value )}
                             className="mt-2"
                           />
                         </div>
@@ -485,7 +485,7 @@ export default function AIFunctions() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => copyToClipboard(generatedContent }
+                            onClick={() => copyToClipboard(generatedContent )}
                           >
                             <Copy className="w-4 h-4 mr-2" />
                             Copy

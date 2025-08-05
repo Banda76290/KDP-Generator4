@@ -139,7 +139,7 @@ export default function AdminBlogPosts() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={ () => window.history.back( }>
+          <Button variant="ghost" size="sm" onClick={ () => window.history.back( )}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
@@ -177,7 +177,7 @@ export default function AdminBlogPosts() {
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
                     setCurrentPage(0);
-                  }}
+                  })}
                 />
               </div>
               <select
@@ -185,7 +185,7 @@ export default function AdminBlogPosts() {
                 onChange={(e) => {
                   setStatusFilter(e.target.value);
                   setCurrentPage(0);
-                }}
+                })}
                 className="px-3 py-2 border rounded-md"
               >
                 <option value="all">Tous les statuts</option>
@@ -264,7 +264,7 @@ export default function AdminBlogPosts() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => window.location.href = `/admin/blog/posts/${post.id}/edit`}
+                              onClick={() => window.location.href = `/admin/blog/posts/${post.id)}/edit`}
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -274,7 +274,7 @@ export default function AdminBlogPosts() {
                               onChange={(e) => updateStatusMutation.mutate({ 
                                 postId: post.id, 
                                 status: e.target.value 
-                              })}
+                              )})}
                               className="px-2 py-1 text-xs border rounded"
                             >
                               <option value="draft">Brouillon</option>
@@ -300,7 +300,7 @@ export default function AdminBlogPosts() {
                                   <Button variant="outline">Annuler</Button>
                                   <Button 
                                     variant="destructive"
-                                    onClick={ () => deletePostMutation.mutate(post.id }
+                                    onClick={ () => deletePostMutation.mutate(post.id )}
                                   >
                                     Supprimer
                                   </Button>
@@ -335,7 +335,7 @@ export default function AdminBlogPosts() {
                     variant="outline"
                     size="sm"
                     disabled={currentPage === 0}
-                    onClick={ () => setCurrentPage(currentPage - 1 }
+                    onClick={ () => setCurrentPage(currentPage - 1 )}
                   >
                     Précédent
                   </Button>
@@ -343,7 +343,7 @@ export default function AdminBlogPosts() {
                     variant="outline"
                     size="sm"
                     disabled={currentPage >= Math.ceil(postsData.total / limit) - 1}
-                    onClick={ () => setCurrentPage(currentPage + 1 }
+                    onClick={ () => setCurrentPage(currentPage + 1 )}
                   >
                     Suivant
                   </Button>

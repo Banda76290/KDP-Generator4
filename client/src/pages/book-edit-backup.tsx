@@ -810,7 +810,7 @@ export default function EditBook() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Book Not Found</h1>
           <p className="text-gray-600 mb-4">The book you're looking for doesn't exist or you don't have permission to edit it.</p>
-          <Button onClick={() => setLocation("/projects" }>
+          <Button onClick={()} => setLocation("/projects")>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Projects
           </Button>
@@ -827,8 +827,7 @@ export default function EditBook() {
           <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
-              onClick={ () => setLocation("/projects" }
-              className="flex items-center space-x-2"
+              onClick={ () => setLocation("/projects")} className="flex items-center space-x-2"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back</span>
@@ -866,7 +865,7 @@ export default function EditBook() {
                       form.setValue('description', cleanedHtmlContent);
                       setDescriptionEditorContent(cleanedHtmlContent);
                     }
-                  }
+                  )}
                   setActiveTab("details");
                   // Restaurer le contenu de l'éditeur si on revient sur l'onglet details
                   if ("details" !== activeTab) {
@@ -896,7 +895,7 @@ export default function EditBook() {
                       form.setValue('description', cleanedHtmlContent);
                       setDescriptionEditorContent(cleanedHtmlContent);
                     }
-                  }
+                  )}
                   setActiveTab("content");
                 }}
                 className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
@@ -917,7 +916,7 @@ export default function EditBook() {
                       form.setValue('description', cleanedHtmlContent);
                       setDescriptionEditorContent(cleanedHtmlContent);
                     }
-                  }
+                  )}
                   setActiveTab("pricing");
                 }}
                 className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
@@ -1135,7 +1134,7 @@ export default function EditBook() {
                                 toast.success({
                                   title: "Livre retiré de la série",
                                   description: "Le livre a été retiré de la série avec succès.",
-                                });
+                                )});
                               }}
                             >
                               Remove from series
@@ -1192,7 +1191,7 @@ export default function EditBook() {
                                 // ORDRE IMPORTANT: Définir le marqueur AVANT la sauvegarde pour "Edit series details"
                                 sessionStorage.setItem('returnToBookEdit', bookId || 'new');
                                 saveFormDataToSession();
-                                window.location.href = `/series-edit/${matchingSeries.id}`;
+                                window.location.href = `/series-edit/${matchingSeries.id)}`;
                               } else {
                                 window.location.href = '/manage-series';
                               }
@@ -1327,33 +1326,33 @@ export default function EditBook() {
                       <Input
                         placeholder="Prefix"
                         value={contributor.prefix || ""}
-                        onChange={ (e) => updateContributor(contributor.id, 'prefix', e.target.value }
+                        onChange={ (e) => updateContributor(contributor.id, 'prefix', e.target.value )}
                       />
                       <Input
                         placeholder="First name"
                         value={contributor.firstName}
-                        onChange={ (e) => updateContributor(contributor.id, 'firstName', e.target.value }
+                        onChange={ (e) => updateContributor(contributor.id, 'firstName', e.target.value )}
                       />
                       <Input
                         placeholder="Middle name"
                         value={contributor.middleName || ""}
-                        onChange={ (e) => updateContributor(contributor.id, 'middleName', e.target.value }
+                        onChange={ (e) => updateContributor(contributor.id, 'middleName', e.target.value )}
                       />
                       <Input
                         placeholder="Last name"
                         value={contributor.lastName}
-                        onChange={ (e) => updateContributor(contributor.id, 'lastName', e.target.value }
+                        onChange={ (e) => updateContributor(contributor.id, 'lastName', e.target.value )}
                       />
                       <Input
                         placeholder="Suffix"
                         value={contributor.suffix || ""}
-                        onChange={ (e) => updateContributor(contributor.id, 'suffix', e.target.value }
+                        onChange={ (e) => updateContributor(contributor.id, 'suffix', e.target.value )}
                       />
                       <Button 
                         type="button" 
                         variant="outline" 
                         size="sm" 
-                        onClick={ () => removeContributor(contributor.id }
+                        onClick={ () => removeContributor(contributor.id )}
                         className="text-gray-600 hover:text-red-600"
                       >
                         Remove
@@ -1402,19 +1401,19 @@ export default function EditBook() {
                     </SelectContent>
                   </Select>
                   
-                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('bold' }>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('bold' )}>
                     <strong>B</strong>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('italic' }>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('italic' )}>
                     <em>I</em>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('underline' }>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('underline' )}>
                     <u>U</u>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('insertUnorderedList' }>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('insertUnorderedList' )}>
                     • List
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('insertOrderedList' }>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('insertOrderedList' )}>
                     1. List
                   </Button>
                   
@@ -1432,10 +1431,10 @@ export default function EditBook() {
                         <Input
                           placeholder="Enter URL"
                           value={linkUrl}
-                          onChange={ (e) => setLinkUrl(e.target.value }
+                          onChange={ (e) => setLinkUrl(e.target.value )}
                         />
                         <div className="flex justify-end space-x-2">
-                          <Button variant="outline" onClick={ () => setShowLinkDialog(false }>
+                          <Button variant="outline" onClick={ () => setShowLinkDialog(false )}>
                             Cancel
                           </Button>
                           <Button 
@@ -1528,7 +1527,7 @@ export default function EditBook() {
                           {category}
                           <X 
                             className="w-3 h-3 cursor-pointer" 
-                            onClick={ () => removeCategory(category }
+                            onClick={ () => removeCategory(category )}
                           />
                         </Badge>
                       ))}
@@ -1553,7 +1552,7 @@ export default function EditBook() {
                             addCategory(input.value);
                             input.value = '';
                           }
-                        }}
+                        )}}
                       >
                         Add
                       </Button>
@@ -1573,7 +1572,7 @@ export default function EditBook() {
                           {keyword}
                           <X 
                             className="w-3 h-3 cursor-pointer" 
-                            onClick={ () => removeKeyword(keyword }
+                            onClick={ () => removeKeyword(keyword )}
                           />
                         </Badge>
                       ))}
@@ -1598,7 +1597,7 @@ export default function EditBook() {
                             addKeyword(input.value);
                             input.value = '';
                           }
-                        }}
+                        )}}
                       >
                         Add
                       </Button>
@@ -1868,7 +1867,7 @@ export default function EditBook() {
             <Button
               type="button"
               variant="outline"
-              onClick={ () => setLocation("/projects" }
+              onClick={ ()} => setLocation("/projects")
             >
               Cancel
             </Button>
@@ -1879,7 +1878,7 @@ export default function EditBook() {
                 onClick={() => {
                   const formData = form.getValues();
                   handleSaveAsDraft(formData);
-                }}
+                })}
                 disabled={saveBook.isPending || descriptionCharacterCount > maxDescriptionCharacters}
               >
                 { saveBook.isPending ? (
@@ -1897,7 +1896,7 @@ export default function EditBook() {
                   onClick={() => {
                     const formData = form.getValues();
                     handleSaveAndContinue(formData);
-                  }}
+                  })}
                   disabled={saveBook.isPending || descriptionCharacterCount > maxDescriptionCharacters}
                   className="bg-orange-600 hover:bg-orange-700"
                 >
@@ -1949,7 +1948,7 @@ export default function EditBook() {
               onClick={() => {
                 deleteBook.mutate();
                 setShowDeleteDialog(false);
-              }}
+              })}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
