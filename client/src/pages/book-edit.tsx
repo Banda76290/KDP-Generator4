@@ -306,13 +306,18 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
 
   // Get categories by level and parent (dynamic)
   const getCategoriesForLevel = (level: number, parentPath?: string) => {
+    console.log(`getCategoriesForLevel called with level=${level}, parentPath=${parentPath}`);
+    console.log(`marketplaceCategories length: ${marketplaceCategories.length}`);
+    
     // For marketplace categories that are all deep-level (4+), we need to build a virtual hierarchy
     // from the category paths instead of relying on level-based filtering
     
     const minLevel = marketplaceCategories.length > 0 ? Math.min(...marketplaceCategories.map(cat => cat.level)) : 3;
+    console.log(`minLevel: ${minLevel}`);
     
     // If all our categories are deep-level (4+), we need special handling
     if (minLevel >= 4) {
+      console.log('Using virtual hierarchy for deep-level categories');
       // Extract unique path segments to build a virtual hierarchy
       const pathSegments = new Set<string>();
       
@@ -326,6 +331,8 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
           pathSegments.add(partialPath);
         }
       });
+      
+      console.log(`Generated ${pathSegments.size} virtual path segments:`, Array.from(pathSegments));
       
       // Convert to array and filter by the requested level and parent
       const allVirtualCategories = Array.from(pathSegments).map(path => {
@@ -344,15 +351,21 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
         };
       });
       
+      console.log(`Generated ${allVirtualCategories.length} virtual categories`);
+      
       // Filter by level and parent
       if (level === 2) { // Root level for virtual hierarchy
-        return allVirtualCategories
+        const result = allVirtualCategories
           .filter(cat => cat.level === 2)
           .sort((a, b) => a.displayName.localeCompare(b.displayName));
+        console.log(`Returning ${result.length} categories for level 2:`, result);
+        return result;
       } else {
-        return allVirtualCategories
+        const result = allVirtualCategories
           .filter(cat => cat.level === level && cat.parentPath === parentPath)
           .sort((a, b) => a.displayName.localeCompare(b.displayName));
+        console.log(`Returning ${result.length} categories for level ${level} with parent "${parentPath}":`, result);
+        return result;
       }
     }
     
@@ -3832,6 +3845,24 @@ export default function EditBook() {
               )}
 
 
+
+              {/* Debug Information */}
+              {!loadingCategories && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded p-3 text-sm">
+                  <div className="font-medium text-yellow-800 mb-2">Debug Info:</div>
+                  <div className="text-yellow-700">
+                    <div>Marketplace categories: {marketplaceCategories.length}</div>
+                    <div>Selected categories: {selectedCategories.length}</div>
+                    <div>Temp UI selections: {tempUISelections.length}</div>
+                    <div>Current marketplace: {form.watch("primaryMarketplace")}</div>
+                    {marketplaceCategories.length > 0 && (
+                      <div className="mt-2">
+                        <div>Sample category: {JSON.stringify(marketplaceCategories[0], null, 2)}</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Category Selection Interface */}
               {!loadingCategories && marketplaceCategories.length > 0 && (
