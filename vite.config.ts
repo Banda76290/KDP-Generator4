@@ -28,7 +28,12 @@ export default defineConfig({
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
     rollupOptions: {
-      external: ['framer-motion'],
+      external: (id) => {
+        return id.includes('framer-motion') || 
+               id.includes('motion') ||
+               id.includes('@emotion') ||
+               id.includes('emotion');
+      },
       output: {
         globals: {
           'framer-motion': 'FramerMotion'
