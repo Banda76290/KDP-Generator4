@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -29,7 +29,7 @@ export default function ImportManagementPage() {
   // Fetch import history
   const { data: imports = [], isLoading: importsLoading } = useQuery({
     queryKey: ["/api/imports"],
-    queryFn: () => apiRequest("/api/imports"),
+    queryFn: () => apiRequest("GET", "/api/imports"),
   });
 
   // Upload mutation
@@ -51,7 +51,7 @@ export default function ImportManagementPage() {
   // Delete import mutation
   const deleteMutation = useMutation({
     mutationFn: (importId: string) => 
-      apiRequest(`/api/imports/${importId}`, { method: "DELETE" }),
+      apiRequest("DELETE", `/api/imports/${importId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/imports"] });
     },
@@ -60,18 +60,18 @@ export default function ImportManagementPage() {
   const handleFileSelect = (file: File) => {
     if (file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
         file.type === "application/vnd.ms-excel" ||
-        file.name.includes('.csv')) {
+        file.name.endsWith('.csv')) {
       setSelectedFile(file);
     } else {
-      console.log("Please select an Excel (.xlsx, .xls) or CSV file");
+      alert("Please select an Excel (.xlsx, .xls) or CSV file");
     }
   };
 
-  const handleDrop = (e: any) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    const files = e.dataTransfer?.files;
-    if (files && files[0]) handleFileSelect(files[0]);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFileSelect(file);
   };
 
   const handleUpload = () => {

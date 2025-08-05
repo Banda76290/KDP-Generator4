@@ -40,7 +40,7 @@ import SeriesSetup from "@/pages/series-setup";
 import AuthorsListPage from "@/pages/authors-list";
 import AuthorCreatePage from "@/pages/author-create";
 import AuthorViewPage from "@/pages/author-view";
-import ImportManagement from "@/pages/TestImport";
+import ImportManagement from "@/pages/ImportManagement";
 import ExchangeRates from "@/pages/ExchangeRates";
 
 function Router() {
