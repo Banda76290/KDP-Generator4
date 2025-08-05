@@ -7,7 +7,7 @@ import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, in
 import { aiService } from "./services/aiService";
 import { parseKDPReport } from "./services/kdpParser";
 import { generateUniqueIsbnPlaceholder, ensureIsbnPlaceholder } from "./utils/isbnGenerator";
-import { seedDatabase, forceSeedDatabase } from "./seedDatabase.js";
+import { seedDatabase, forceSeedDatabase } from "./seedDatabase";
 import { z } from "zod";
 import OpenAI from "openai";
 
@@ -1637,7 +1637,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/ai/generate", isAuthenticated, async (req, res) => {
     try {
       const { functionKey, bookId, projectId, customPrompt, customModel, customTemperature } = req.body;
-      const userId = req.user?.replit?.id;
+      const userId = req.user?.claims?.sub;
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
