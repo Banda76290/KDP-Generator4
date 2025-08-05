@@ -20,10 +20,15 @@ const indexHtmlDest = path.resolve(__dirname, 'dist/index.html');
 
 if (fs.existsSync(indexHtmlSource)) {
   let htmlContent = fs.readFileSync(indexHtmlSource, 'utf8');
-  // Update script src to point to bundled JS
+  // Update script src to point to bundled JS and add CSS link
   htmlContent = htmlContent.replace(
     /src=".*\/main\.tsx"/,
     'src="/assets/main.js"'
+  );
+  // Add CSS link before closing head tag
+  htmlContent = htmlContent.replace(
+    '</head>',
+    '    <link rel="stylesheet" href="/assets/main.css">\n  </head>'
   );
   fs.writeFileSync(indexHtmlDest, htmlContent);
   console.log('✓ Copied index.html to dist/');
