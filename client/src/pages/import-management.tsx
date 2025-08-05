@@ -60,18 +60,18 @@ export default function ImportManagementPage() {
   const handleFileSelect = (file: File) => {
     if (file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
         file.type === "application/vnd.ms-excel" ||
-        file.name.endsWith('.csv')) {
+        file.name.includes('.csv')) {
       setSelectedFile(file);
     } else {
-      alert("Please select an Excel (.xlsx, .xls) or CSV file");
+      console.log("Please select an Excel (.xlsx, .xls) or CSV file");
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e: any) => {
     e.preventDefault();
     setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleFileSelect(file);
+    const files = e.dataTransfer?.files;
+    if (files && files[0]) handleFileSelect(files[0]);
   };
 
   const handleUpload = () => {
