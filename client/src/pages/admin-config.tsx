@@ -27,7 +27,7 @@ export default function AdminConfig() {
     key: "",
     value: "",
     description: "",
-  };
+  });
 
   // Redirect to home if not admin
   useEffect(() => {
@@ -35,7 +35,8 @@ export default function AdminConfig() {
       toast({
         title: "Accès refusé",
         description: "Vous n'avez pas les permissions d'administrateur.",
-        variant: "destructive",)};
+        variant: "destructive",
+      });
       setTimeout(() => {
         window.location.href = "/";
       }, 500);
@@ -46,23 +47,25 @@ export default function AdminConfig() {
   const { data: config, isLoading: configLoading } = useQuery<SystemConfig[]>({
     queryKey: ["/api/admin/config"],
     enabled: isAdmin,
-  };
+  });
 
   const updateConfigMutation = useMutation({
-    mutationFn: async (configData: { key: string; value: string; description?: string)} => { return await apiRequest("/api/admin/config", { method: "PUT", body: JSON.stringify(configData)};
+    mutationFn: async (configData: { key: string; value: string; description?: string }) => {
+      return await apiRequest("/api/admin/config", "PUT", configData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/config"])};
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/config"] });
       toast.success({
         title: "Succès",
         description: "Configuration mise à jour avec succès.",
-      };
-      setNewConfig({ key: "", value: "", description: "" };
+      });
+      setNewConfig({ key: "", value: "", description: "" });
     },
     onError: (error: Error) => {
       toast.error({
         title: "Erreur",
-        description: error.message || "Impossible de mettre à jour la configuration.",)};
+        description: error.message || "Impossible de mettre à jour la configuration.",
+      });
     },
   });
 
@@ -70,7 +73,8 @@ export default function AdminConfig() {
     if (!newConfig.key || !newConfig.value) {
       toast.error({
         title: "Erreur",
-        description: "La clé et la valeur sont obligatoires.",)};
+        description: "La clé et la valeur sont obligatoires.",
+      });
       return;
     }
 
@@ -127,7 +131,7 @@ export default function AdminConfig() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={ () => window.history.back( )}>
+        <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour
         </Button>
@@ -157,7 +161,7 @@ export default function AdminConfig() {
               <Input
                 id="config-key"
                 value={newConfig.key}
-                onChange={(e) => setNewConfig({ ...newConfig, key: e.target.value )}}
+                onChange={(e) => setNewConfig({ ...newConfig, key: e.target.value })}
                 placeholder="ex: platform_name"
               />
             </div>
@@ -166,7 +170,7 @@ export default function AdminConfig() {
               <Input
                 id="config-value"
                 value={newConfig.value}
-                onChange={(e) => setNewConfig({ ...newConfig, value: e.target.value )}}
+                onChange={(e) => setNewConfig({ ...newConfig, value: e.target.value })}
                 placeholder="ex: KDP Generator"
               />
             </div>
@@ -175,7 +179,7 @@ export default function AdminConfig() {
               <Textarea
                 id="config-description"
                 value={newConfig.description}
-                onChange={(e) => setNewConfig({ ...newConfig, description: e.target.value )}}
+                onChange={(e) => setNewConfig({ ...newConfig, description: e.target.value })}
                 placeholder="Description du paramètre"
                 rows={3}
               />
@@ -207,7 +211,7 @@ export default function AdminConfig() {
               {commonConfigs.map((configItem) => {
                 const existingConfig = config?.find(c => c.key === configItem.key);
                 return (
-                  <div key={configItem.key)} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div key={configItem.key} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="space-y-1">
                       <div className="font-medium">{configItem.label}</div>
                       <div className="text-sm text-muted-foreground">{configItem.description}</div>
@@ -222,7 +226,7 @@ export default function AdminConfig() {
                         key: configItem.key,
                         value: existingConfig?.value || configItem.defaultValue,
                         description: configItem.description,
-                      )}}
+                      })}
                     >
                       {existingConfig ? "Modifier" : "Ajouter"}
                     </Button>
@@ -257,12 +261,12 @@ export default function AdminConfig() {
                 </TableHeader>
                 <TableBody>
                   {config.map((configItem) => (
-                    <TableRow key={configItem.key)}>
+                    <TableRow key={configItem.key}>
                       <TableCell className="font-mono text-sm">{configItem.key}</TableCell>
                       <TableCell className="max-w-xs truncate">{configItem.value}</TableCell>
                       <TableCell className="max-w-xs truncate">{configItem.description || "-"}</TableCell>
                       <TableCell>
-                        { new Date(configItem.updatedAt).toLocaleDateString("fr-FR")}
+                        {new Date(configItem.updatedAt).toLocaleDateString("fr-FR")}
                       </TableCell>
                       <TableCell>
                         <Button
@@ -272,7 +276,7 @@ export default function AdminConfig() {
                             key: configItem.key,
                             value: configItem.value,
                             description: configItem.description || "",
-                          )}}
+                          })}
                         >
                           Modifier
                         </Button>

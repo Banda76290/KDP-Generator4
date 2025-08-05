@@ -39,33 +39,33 @@ export default function AuthorViewPage() {
     middleName: "",
     lastName: "",
     suffix: ""
-  };
+  });
 
   // Fetch author details
   const { data: author, isLoading: authorLoading } = useQuery({
     queryKey: ["/api/authors", authorId],
-    queryFn: () => apiRequest(`/api/authors/${authorId)}`, { method: "GET" },
+    queryFn: () => apiRequest("GET", `/api/authors/${authorId}`),
     enabled: !!authorId,
   });
 
   // Fetch biography for selected language
   const { data: biographyData, isLoading: biographyLoading } = useQuery({
     queryKey: ["/api/authors", authorId, "biography", selectedLanguage],
-    queryFn: () => apiRequest(`/api/authors/${authorId)}/biography/${selectedLanguage}`, { method: "GET" },
+    queryFn: () => apiRequest("GET", `/api/authors/${authorId}/biography/${selectedLanguage}`),
     enabled: !!authorId,
   });
 
   // Fetch author projects
   const { data: authorProjects = [] } = useQuery({
     queryKey: ["/api/authors", authorId, "projects"],
-    queryFn: () => apiRequest(`/api/authors/${authorId)}/projects`, { method: "GET" },
+    queryFn: () => apiRequest("GET", `/api/authors/${authorId}/projects`),
     enabled: !!authorId,
   });
 
   // Fetch author books  
   const { data: authorBooks = [] } = useQuery({
     queryKey: ["/api/authors", authorId, "books"],
-    queryFn: () => apiRequest(`/api/authors/${authorId)}/books`, { method: "GET" },
+    queryFn: () => apiRequest("GET", `/api/authors/${authorId}/books`),
     enabled: !!authorId,
   });
 
@@ -82,19 +82,19 @@ export default function AuthorViewPage() {
       
       if (typeof document.execCommand !== 'function') {
         console.error('execCommand is not supported in this browser');
-        toast({ title: "Erreur", description: "Cette fonctionnalité n'est pas supportée dans votre navigateur", variant: "destructive")};
+        toast({ title: "Erreur", description: "Cette fonctionnalité n'est pas supportée dans votre navigateur", variant: "destructive" });
         return;
       }
 
       const success = document.execCommand(command, false, value);
       if (!success) {
-        console.warn(`execCommand failed for command: ${command)}`);
+        console.warn(`execCommand failed for command: ${command}`);
       }
       
       updateBiographyFromHTML();
     } catch (error) {
       console.error('Error applying biography formatting:', error);
-      toast({ title: "Erreur", description: "Erreur lors de l'application du formatage", variant: "destructive")};
+      toast({ title: "Erreur", description: "Erreur lors de l'application du formatage", variant: "destructive" });
     }
   };
 
@@ -142,12 +142,13 @@ export default function AuthorViewPage() {
       for (let i = 0; i < element.attributes.length; i++) {
         const attr = element.attributes[i];
         if (!safeAttributes.includes(attr.name) && !attr.name.startsWith('data-')) {
-          attributesToRemove.push(attr.name);)}
+          attributesToRemove.push(attr.name);
+        }
       }
       
       attributesToRemove.forEach(attrName => {
         element.removeAttribute(attrName);
-      };
+      });
       
       if (element.getAttribute('href')?.startsWith('javascript:')) {
         element.removeAttribute('href');
@@ -192,7 +193,8 @@ export default function AuthorViewPage() {
         firstName: author.firstName || "",
         middleName: author.middleName || "",
         lastName: author.lastName || "",
-        suffix: author.suffix || "")};
+        suffix: author.suffix || ""
+      });
     }
   }, [author]);
 
@@ -246,12 +248,12 @@ export default function AuthorViewPage() {
 
   // Update biography mutation
   const updateBiographyMutation = useMutation({
-    mutationFn: ({ biography)}: { biography: string } =>
-      apiRequest(`/api/authors/${authorId}/biography/${selectedLanguage}`, { method: "PUT", body: JSON.stringify({ biography)} }),
+    mutationFn: ({ biography }: { biography: string }) =>
+      apiRequest("PUT", `/api/authors/${authorId}/biography/${selectedLanguage}`, { biography }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId, "biography", selectedLanguage])};
+      queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId, "biography", selectedLanguage] });
       setIsEditing(false);
-      toast({ title: "Biography saved successfully" };
+      toast({ title: "Biography saved successfully" });
       
       // Check if we need to return to book edit page (like in series-edit.tsx)
       const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
@@ -261,23 +263,23 @@ export default function AuthorViewPage() {
         if (returnToBookEdit === 'new') {
           setLocation('/books/create');
         } else {
-          setLocation(`/books/edit/${returnToBookEdit)}`);
+          setLocation(`/books/edit/${returnToBookEdit}`);
         }
       }
     },
     onError: () => {
-      toast({ title: "Failed to save biography", variant: "destructive")};
+      toast({ title: "Failed to save biography", variant: "destructive" });
     },
   });
 
   // Update author mutation
   const updateAuthorMutation = useMutation({
     mutationFn: (authorData: typeof authorForm) =>
-      apiRequest(`/api/authors/${authorId)}`, { method: "PUT", body: JSON.stringify(authorData)},
+      apiRequest("PUT", `/api/authors/${authorId}`, authorData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId])};
+      queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId] });
       setIsEditingAuthor(false);
-      toast({ title: "Author updated successfully" };
+      toast({ title: "Author updated successfully" });
       
       // Check if we need to return to book edit page (like in series-edit.tsx)
       const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
@@ -287,30 +289,30 @@ export default function AuthorViewPage() {
         if (returnToBookEdit === 'new') {
           setLocation('/books/create');
         } else {
-          setLocation(`/books/edit/${returnToBookEdit)}`);
+          setLocation(`/books/edit/${returnToBookEdit}`);
         }
       }
     },
     onError: () => {
-      toast({ title: "Failed to update author", variant: "destructive")};
+      toast({ title: "Failed to update author", variant: "destructive" });
     },
   });
 
   // Delete author mutation
   const deleteAuthorMutation = useMutation({
-    mutationFn: () => apiRequest(`/api/authors/${authorId)}`, { method: "DELETE" },
+    mutationFn: () => apiRequest("DELETE", `/api/authors/${authorId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/authors"])};
-      toast({ title: "Author deleted successfully" };
+      queryClient.invalidateQueries({ queryKey: ["/api/authors"] });
+      toast({ title: "Author deleted successfully" });
       setLocation("/authors");
     },
     onError: () => {
-      toast({ title: "Failed to delete author", variant: "destructive")};
+      toast({ title: "Failed to delete author", variant: "destructive" });
     },
   });
 
   const handleSaveBiography = () => {
-    updateBiographyMutation.mutate({ biography)};
+    updateBiographyMutation.mutate({ biography });
   };
 
   const handleSaveAuthor = () => {
@@ -318,7 +320,7 @@ export default function AuthorViewPage() {
   };
 
   const handleAuthorFormChange = (field: keyof typeof authorForm, value: string) => {
-    setAuthorForm(prev => ({ ...prev, [field]: value)});
+    setAuthorForm(prev => ({ ...prev, [field]: value }));
   };
 
   const handleLanguageChange = (language: string) => {
@@ -362,8 +364,8 @@ export default function AuthorViewPage() {
                   sessionStorage.removeItem('returnToBookEdit');
                   if (returnToBookEdit === 'new') {
                     setLocation('/books/create');
-                  )} else {
-                    setLocation(`/books/edit/${returnToBookEdit)}`);
+                  } else {
+                    setLocation(`/books/edit/${returnToBookEdit}`);
                   }
                 } else {
                   setLocation("/authors");
@@ -396,7 +398,7 @@ export default function AuthorViewPage() {
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={ () => deleteAuthorMutation.mutate( )}
+                  onClick={() => deleteAuthorMutation.mutate()}
                   className="bg-destructive hover:bg-destructive/90"
                 >
                   Delete
@@ -420,7 +422,7 @@ export default function AuthorViewPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={ () => setIsEditingAuthor(!isEditingAuthor )}
+                    onClick={() => setIsEditingAuthor(!isEditingAuthor)}
                   >
                     <Edit3 className="w-4 h-4 mr-1" />
                     {isEditingAuthor ? 'Cancel' : 'Edit'}
@@ -436,8 +438,8 @@ export default function AuthorViewPage() {
                         <Input
                           id="author-prefix"
                           placeholder="Dr., Prof., etc."
-                          value={authorForm.prefix)}
-                          onChange={ (e) => handleAuthorFormChange('prefix', e.target.value )}
+                          value={authorForm.prefix}
+                          onChange={(e) => handleAuthorFormChange('prefix', e.target.value)}
                         />
                       </div>
                       <div className="space-y-2">
@@ -446,7 +448,7 @@ export default function AuthorViewPage() {
                           id="author-suffix"
                           placeholder="Jr., Sr., PhD, etc."
                           value={authorForm.suffix}
-                          onChange={ (e) => handleAuthorFormChange('suffix', e.target.value )}
+                          onChange={(e) => handleAuthorFormChange('suffix', e.target.value)}
                         />
                       </div>
                     </div>
@@ -458,7 +460,7 @@ export default function AuthorViewPage() {
                           id="author-firstname"
                           placeholder="John"
                           value={authorForm.firstName}
-                          onChange={ (e) => handleAuthorFormChange('firstName', e.target.value )}
+                          onChange={(e) => handleAuthorFormChange('firstName', e.target.value)}
                           required
                         />
                       </div>
@@ -468,7 +470,7 @@ export default function AuthorViewPage() {
                           id="author-middlename"
                           placeholder="Michael"
                           value={authorForm.middleName}
-                          onChange={ (e) => handleAuthorFormChange('middleName', e.target.value )}
+                          onChange={(e) => handleAuthorFormChange('middleName', e.target.value)}
                         />
                       </div>
                       <div className="space-y-2">
@@ -477,7 +479,7 @@ export default function AuthorViewPage() {
                           id="author-lastname"
                           placeholder="Doe"
                           value={authorForm.lastName}
-                          onChange={ (e) => handleAuthorFormChange('lastName', e.target.value )}
+                          onChange={(e) => handleAuthorFormChange('lastName', e.target.value)}
                           required
                         />
                       </div>
@@ -497,7 +499,7 @@ export default function AuthorViewPage() {
                 ) : (
                   <div className="space-y-2">
                     <div className="text-lg font-medium">
-                      { [authorForm.prefix, authorForm.firstName, authorForm.middleName, authorForm.lastName, authorForm.suffix]
+                      {[authorForm.prefix, authorForm.firstName, authorForm.middleName, authorForm.lastName, authorForm.suffix]
                         .filter(Boolean)
                         .join(' ')}
                     </div>
@@ -520,7 +522,7 @@ export default function AuthorViewPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {LANGUAGES.map((lang) => (
-                      <SelectItem key={lang.value)} value={lang.value}>
+                      <SelectItem key={lang.value} value={lang.value}>
                         {lang.label}
                       </SelectItem>
                     ))}
@@ -532,7 +534,7 @@ export default function AuthorViewPage() {
                 <div className="text-center py-8">Loading biography...</div>
               ) : (
                 <div className="space-y-4">
-                  {/* Formatting Toolbar (exact copy from Book Description) */)}
+                  {/* Formatting Toolbar (exact copy from Book Description) */}
                   <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border">
                     <Select onValueChange={handleBiographyFormatChange}>
                       <SelectTrigger className="w-32">
@@ -550,7 +552,7 @@ export default function AuthorViewPage() {
                       type="button" 
                       variant="outline" 
                       size="sm" 
-                      onClick={ () => applyBiographyFormatting('bold' )}
+                      onClick={() => applyBiographyFormatting('bold')}
                     >
                       <strong>B</strong>
                     </Button>
@@ -559,7 +561,7 @@ export default function AuthorViewPage() {
                       type="button" 
                       variant="outline" 
                       size="sm" 
-                      onClick={ () => applyBiographyFormatting('italic' )}
+                      onClick={() => applyBiographyFormatting('italic')}
                     >
                       <em>I</em>
                     </Button>
@@ -568,7 +570,7 @@ export default function AuthorViewPage() {
                       type="button" 
                       variant="outline" 
                       size="sm" 
-                      onClick={ () => applyBiographyFormatting('underline' )}
+                      onClick={() => applyBiographyFormatting('underline')}
                     >
                       <u>U</u>
                     </Button>
@@ -577,7 +579,7 @@ export default function AuthorViewPage() {
                       type="button" 
                       variant="outline" 
                       size="sm" 
-                      onClick={ () => applyBiographyFormatting('insertUnorderedList' )}
+                      onClick={() => applyBiographyFormatting('insertUnorderedList')}
                     >
                       • List
                     </Button>
@@ -586,7 +588,7 @@ export default function AuthorViewPage() {
                       type="button" 
                       variant="outline" 
                       size="sm" 
-                      onClick={ () => applyBiographyFormatting('insertOrderedList' )}
+                      onClick={() => applyBiographyFormatting('insertOrderedList')}
                     >
                       1. List
                     </Button>
@@ -595,7 +597,7 @@ export default function AuthorViewPage() {
                       type="button" 
                       variant="outline" 
                       size="sm" 
-                      onClick={ () => applyBiographyFormatting('createLink', prompt('Enter URL:') || undefined )}
+                      onClick={() => applyBiographyFormatting('createLink', prompt('Enter URL:') || undefined)}
                     >
                       🔗 Link
                     </Button>
@@ -649,7 +651,7 @@ export default function AuthorViewPage() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <FolderOpen className="w-5 h-5 mr-2" />
-                  Projects ({authorProjects.length}
+                  Projects ({authorProjects.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -660,15 +662,15 @@ export default function AuthorViewPage() {
                 ) : (
                   <div className="space-y-4">
                     {authorProjects.map((project: ProjectWithRelations) => (
-                      <div key={project.id)} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div key={project.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <h4 className="font-semibold text-lg">{project.title}</h4>
                             {project.subtitle && (
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{project.subtitle)}</p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{project.subtitle}</p>
                             )}
                             {project.description && (
-                              <p className="text-sm text-gray-500 mt-2 line-clamp-2">{project.description)}</p>
+                              <p className="text-sm text-gray-500 mt-2 line-clamp-2">{project.description}</p>
                             )}
                             <div className="flex items-center gap-2 mt-3">
                               <Badge variant="secondary">{project.status}</Badge>
@@ -688,7 +690,7 @@ export default function AuthorViewPage() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <BookOpen className="w-5 h-5 mr-2" />
-                  All Books ({authorBooks.length}
+                  All Books ({authorBooks.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -699,12 +701,12 @@ export default function AuthorViewPage() {
                 ) : (
                   <div className="space-y-4">
                     {authorBooks.map((book: Book) => (
-                      <div key={book.id)} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div key={book.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <h4 className="font-semibold text-lg">{book.title}</h4>
                             {book.subtitle && (
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{book.subtitle)}</p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{book.subtitle}</p>
                             )}
                             <div className="flex items-center gap-2 mt-3">
                               <Badge variant="secondary">{book.status}</Badge>

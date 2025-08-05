@@ -41,20 +41,22 @@ interface DetailedAnalytics {
 export default function AnalyticsDetailed() {
   const { data, isLoading, refetch } = useQuery<DetailedAnalytics>({
     queryKey: ['/api/analytics/detailed'],
-  };
+  });
 
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: currency,
-      minimumFractionDigits: 2,)}.format(amount);
+      minimumFractionDigits: 2,
+    }).format(amount);
   };
 
   const refreshData = () => {
     refetch();
     toast({
       title: "Données actualisées",
-      description: "Les analytics détaillées ont été mises à jour",)};
+      description: "Les analytics détaillées ont été mises à jour",
+    });
   };
 
   if (isLoading) {
@@ -64,7 +66,7 @@ export default function AnalyticsDetailed() {
           <div className="h-8 bg-gray-200 rounded w-1/3"></div>
           <div className="grid gap-6 md:grid-cols-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i)} className="h-32 bg-gray-200 rounded"></div>
+              <div key={i} className="h-32 bg-gray-200 rounded"></div>
             ))}
           </div>
         </div>
@@ -114,7 +116,7 @@ export default function AnalyticsDetailed() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{ data.totalRecords.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{data.totalRecords.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
               De {data.totalCurrencies} devises
             </p>
@@ -154,7 +156,7 @@ export default function AnalyticsDetailed() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-800">
-              { formatCurrency(data.totalInEUR, 'EUR')}
+              {formatCurrency(data.totalInEUR, 'EUR')}
             </div>
             <p className="text-xs text-green-600">
               Taux BCE (1er août 2025)
@@ -177,7 +179,7 @@ export default function AnalyticsDetailed() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {data.royaltiesByCurrency.map((curr, index) => (
-              <div key={index)} className="flex items-center justify-between p-4 border rounded-lg">
+              <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center gap-3">
                   <Badge variant="outline" className="font-mono text-lg">
                     {curr.currency}
@@ -189,10 +191,10 @@ export default function AnalyticsDetailed() {
                 </div>
                 <div className="text-right">
                   <div className="font-bold text-lg">
-                    { formatCurrency(curr.totalRoyalty, curr.currency)}
+                    {formatCurrency(curr.totalRoyalty, curr.currency)}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    { curr.formats.join(', ')}
+                    {curr.formats.join(', ')}
                   </div>
                 </div>
               </div>
@@ -215,21 +217,21 @@ export default function AnalyticsDetailed() {
         <CardContent>
           <div className="space-y-3">
             {data.conversions.map((conv, index) => (
-              <div key={index)} className="flex items-center justify-between p-4 border rounded-lg">
+              <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center gap-4">
                   <Badge className="font-mono">{conv.currency}</Badge>
                   <div className="text-sm">
                     <div className="font-medium">
-                      { formatCurrency(conv.originalAmount, conv.currency)}
+                      {formatCurrency(conv.originalAmount, conv.currency)}
                     </div>
                     <div className="text-muted-foreground">
-                      Taux: 1 EUR = { conv.exchangeRate.toFixed(4)} {conv.currency}
+                      Taux: 1 EUR = {conv.exchangeRate.toFixed(4)} {conv.currency}
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="font-bold text-green-700">
-                    { formatCurrency(conv.amountInEUR, 'EUR')}
+                    {formatCurrency(conv.amountInEUR, 'EUR')}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     {conv.transactionCount} trans. • {conv.formatsCount} formats
@@ -249,10 +251,10 @@ export default function AnalyticsDetailed() {
               </div>
               <div className="text-right">
                 <div className="text-3xl font-bold text-green-900">
-                  { formatCurrency(data.totalInEUR, 'EUR')}
+                  {formatCurrency(data.totalInEUR, 'EUR')}
                 </div>
                 <div className="text-sm text-green-700">
-                  { data.totalTransactions.toLocaleString()} transactions
+                  {data.totalTransactions.toLocaleString()} transactions
                 </div>
               </div>
             </div>
@@ -301,7 +303,7 @@ export default function AnalyticsDetailed() {
               </div>
               <div>
                 <span className="text-green-700">Total EUR converti:</span>
-                <span className="font-mono ml-2">{ data.totalInEUR.toFixed(2)} EUR</span>
+                <span className="font-mono ml-2">{data.totalInEUR.toFixed(2)} EUR</span>
               </div>
             </div>
           </div>
