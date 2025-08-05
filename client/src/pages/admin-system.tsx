@@ -325,7 +325,7 @@ export default function AdminSystem() {
     mutationFn: async () => {
       addLog('📤 Début de l\'export des catégories...', 'info');
       try {
-        const result = await apiRequest("GET", "/api/admin/categories/export");
+        const result = await apiRequest("/api/admin/categories/export", { method: "GET" });
         addLog(`✅ Export réussi: ${result.count} catégories`, 'success');
         return result;
       } catch (error: any) {
