@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -29,7 +29,7 @@ export default function ImportManagementPage() {
   // Fetch import history
   const { data: imports = [], isLoading: importsLoading } = useQuery({
     queryKey: ["/api/imports"],
-    queryFn: () => apiRequest("GET", "/api/imports"),
+    queryFn: () => apiRequest("/api/imports"),
   });
 
   // Upload mutation
@@ -51,7 +51,7 @@ export default function ImportManagementPage() {
   // Delete import mutation
   const deleteMutation = useMutation({
     mutationFn: (importId: string) => 
-      apiRequest("DELETE", `/api/imports/${importId}`),
+      apiRequest(`/api/imports/${importId}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/imports"] });
     },
