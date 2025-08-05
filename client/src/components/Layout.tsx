@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import Header from "@/components/layout/Header";
-import Sidebar from "@/components/layout/Sidebar";
+import SimpleSidebar from "@/components/layout/SimpleSidebar";
 import MobileSidebar from "@/components/layout/MobileSidebar";
 
 interface LayoutProps {
@@ -18,7 +18,7 @@ export default function Layout({ children }: LayoutProps) {
     <div className="layout-container">
       <Header onMenuClick={handleMenuClick} />
       <div className="layout-content">
-        <Sidebar />
+        <SimpleSidebar />
         <MobileSidebar 
           open={mobileMenuOpen} 
           onOpenChange={setMobileMenuOpen}

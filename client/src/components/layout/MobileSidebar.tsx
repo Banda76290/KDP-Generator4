@@ -42,8 +42,9 @@ export default function MobileSidebar({ open, onOpenChange }: MobileSidebarProps
         
         <div className="flex-1 overflow-y-auto h-full max-h-[calc(100vh-120px)]">
         <nav className="p-4 space-y-2">
-          {navigation.map((item) => {
+          {navigation && navigation.length > 0 && navigation.map((item: any) => {
             const isActive = location === item.href;
+            const IconComponent = item.icon;
             return (
               <Link key={item.name} href={item.href}>
                 <span
@@ -56,7 +57,7 @@ export default function MobileSidebar({ open, onOpenChange }: MobileSidebarProps
                   style={isActive ? { backgroundColor: '#38b6ff' } : {}}
                   onClick={handleLinkClick}
                 >
-                  <item.icon className="w-5 h-5" />
+                  <IconComponent className="w-5 h-5" />
                   <span>{item.name}</span>
                   {item.badge && (
                     <Badge 

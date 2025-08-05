@@ -17,8 +17,9 @@ export default function Sidebar() {
   return (
     <aside className="bg-white dark:bg-background w-64 border-r border-border fixed left-0 top-16 bottom-0 overflow-y-auto hidden md:block">
       <nav className="p-4 space-y-2 pb-8">
-        {navigation.map((item) => {
+        {navigation && navigation.length > 0 && navigation.map((item: any) => {
           const isActive = location === item.href;
+          const IconComponent = item.icon;
           return (
             <Link key={item.name} href={item.href}>
               <span
@@ -30,7 +31,7 @@ export default function Sidebar() {
                 )}
                 style={isActive ? { backgroundColor: '#38b6ff' } : {}}
               >
-                <item.icon className="w-5 h-5" />
+                <IconComponent className="w-5 h-5" />
                 <span>{item.name}</span>
                 {item.badge && (
                   <Badge 
