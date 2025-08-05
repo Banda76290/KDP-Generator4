@@ -6,7 +6,7 @@ interface LayoutProps {
   children: ReactNode;
 }
 
-const navItems = [
+const navItems: any[] = [
   { name: "Dashboard", href: "/", icon: Home },
   { name: "Projects", href: "/projects", icon: FolderOpen },
   { name: "Books", href: "/books", icon: FileText },
@@ -17,7 +17,8 @@ const navItems = [
 ];
 
 export default function SimpleLayout({ children }: LayoutProps) {
-  const [location] = useLocation() as [string];
+  const locationData = useLocation();
+  const location = locationData[0];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -30,7 +31,7 @@ export default function SimpleLayout({ children }: LayoutProps) {
         {/* Sidebar */}
         <aside className="w-64 bg-white border-r border-gray-200 min-h-[calc(100vh-64px)]">
           <nav className="p-4 space-y-2">
-            {navItems.map((item: any) => {
+            {(navItems as any).map((item: any) => {
               const isActive = location === item.href;
               const IconComponent = item.icon;
               

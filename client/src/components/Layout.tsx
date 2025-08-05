@@ -8,7 +8,9 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const mobileMenuState = useState<boolean>(false);
+  const mobileMenuOpen = mobileMenuState[0];
+  const setMobileMenuOpen = mobileMenuState[1];
 
   const handleMenuClick = () => {
     setMobileMenuOpen(true);
