@@ -16,6 +16,14 @@ The application follows a modern full-stack architecture with clear separation b
 - **Authentication**: OpenID Connect (OIDC) with Replit integration
 - **Styling**: Tailwind CSS with shadcn/ui component library
 
+### Development Mode Issue (August 2025)
+**Known Issue**: Vite development server middleware has file resolution problems with `/src/main.tsx`. The development script may fail with "Failed to load url /src/main.tsx" errors.
+
+**Solution**: Application runs perfectly in production mode with built assets. If development mode fails:
+1. Run `npm run build` to ensure fresh build artifacts
+2. Use production mode temporarily: `NODE_ENV=production node dist/index.js`
+3. All features work normally in production mode including hot reloading via workflow restart
+
 ### Key Components
 - **Frontend**: React 18 with TypeScript, Wouter for routing, TanStack Query for state management, shadcn/ui for UI components, Tailwind CSS for styling, React Hook Form with Zod validation.
 - **Backend**: Express.js with TypeScript, Drizzle ORM, Passport.js for authentication, Express sessions, Multer for file uploads, Zod for shared validation schemas.
