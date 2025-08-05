@@ -27,6 +27,14 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    rollupOptions: {
+      external: ['framer-motion'],
+      output: {
+        globals: {
+          'framer-motion': 'FramerMotion'
+        }
+      }
+    }
   },
   server: {
     fs: {
