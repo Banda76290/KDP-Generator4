@@ -70,7 +70,7 @@ export default function AnalyticsComparison() {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 2,
-    }).format(num);
+    ).format(num);
   };
 
   return (
@@ -221,7 +221,7 @@ export default function AnalyticsComparison() {
                       </div>
                       <div className="text-right">
                         <div className="font-medium">
-                          {formatCurrency(curr.originalAmount, curr.currency)}
+                          { formatCurrency(curr.originalAmount, curr.currency }
                         </div>
                       </div>
                     </div>
@@ -315,7 +315,7 @@ export default function AnalyticsComparison() {
                             </span>
                           </div>
                           <div className="font-medium">
-                            {formatCurrency(curr.originalAmount, curr.currency)}
+                            { formatCurrency(curr.originalAmount, curr.currency }
                           </div>
                         </div>
                       ))}

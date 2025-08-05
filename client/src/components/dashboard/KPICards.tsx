@@ -57,9 +57,8 @@ export default function KPICards() {
       iconBg: "bg-blue-100",
       iconColor: "text-primary",
     },
-    {
-      title: "Monthly Revenue",
-      value: `$${(stats?.monthlyRevenue || 0).toLocaleString()}`,
+    { title: "Monthly Revenue",
+      value: `$${(stats?.monthlyRevenue || 0).toLocaleString( }`,
       change: "+18.2%",
       changeType: "positive" as const,
       icon: DollarSign,
@@ -98,11 +97,11 @@ export default function KPICards() {
                 <p className={`text-sm mt-2 flex items-center ${
                   kpi.changeType === "positive" ? "text-success" : "text-warning"
                 }`}>
-                  {kpi.changeType === "positive" ? (
+                  { kpi.changeType === "positive" ? (
                     <ArrowUp className="w-4 h-4 mr-1" />
                   ) : (
                     <ArrowDown className="w-4 h-4 mr-1" />
-                  )}
+                   }
                   {kpi.change}
                 </p>
               </div>

@@ -44,28 +44,28 @@ export default function AuthorViewPage() {
   // Fetch author details
   const { data: author, isLoading: authorLoading } = useQuery({
     queryKey: ["/api/authors", authorId],
-    queryFn: () => apiRequest("GET", `/api/authors/${authorId}`),
+    queryFn: () => apiRequest(`/api/authors/${authorId}`, { method: "GET" }),
     enabled: !!authorId,
   });
 
   // Fetch biography for selected language
   const { data: biographyData, isLoading: biographyLoading } = useQuery({
     queryKey: ["/api/authors", authorId, "biography", selectedLanguage],
-    queryFn: () => apiRequest("GET", `/api/authors/${authorId}/biography/${selectedLanguage}`),
+    queryFn: () => apiRequest(`/api/authors/${authorId}/biography/${selectedLanguage}`, { method: "GET" }),
     enabled: !!authorId,
   });
 
   // Fetch author projects
   const { data: authorProjects = [] } = useQuery({
     queryKey: ["/api/authors", authorId, "projects"],
-    queryFn: () => apiRequest("GET", `/api/authors/${authorId}/projects`),
+    queryFn: () => apiRequest(`/api/authors/${authorId}/projects`, { method: "GET" }),
     enabled: !!authorId,
   });
 
   // Fetch author books  
   const { data: authorBooks = [] } = useQuery({
     queryKey: ["/api/authors", authorId, "books"],
-    queryFn: () => apiRequest("GET", `/api/authors/${authorId}/books`),
+    queryFn: () => apiRequest(`/api/authors/${authorId}/books`, { method: "GET" }),
     enabled: !!authorId,
   });
 
@@ -249,7 +249,7 @@ export default function AuthorViewPage() {
   // Update biography mutation
   const updateBiographyMutation = useMutation({
     mutationFn: ({ biography }: { biography: string }) =>
-      apiRequest("PUT", `/api/authors/${authorId}/biography/${selectedLanguage}`, { biography }),
+      apiRequest(`/api/authors/${authorId}/biography/${selectedLanguage}`, { method: "PUT", body: JSON.stringify({ biography }) }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId, "biography", selectedLanguage] });
       setIsEditing(false);
@@ -275,7 +275,7 @@ export default function AuthorViewPage() {
   // Update author mutation
   const updateAuthorMutation = useMutation({
     mutationFn: (authorData: typeof authorForm) =>
-      apiRequest("PUT", `/api/authors/${authorId}`, authorData),
+      apiRequest(`/api/authors/${authorId}`, { method: "PUT", body: JSON.stringify(authorData }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId] });
       setIsEditingAuthor(false);
@@ -300,7 +300,7 @@ export default function AuthorViewPage() {
 
   // Delete author mutation
   const deleteAuthorMutation = useMutation({
-    mutationFn: () => apiRequest("DELETE", `/api/authors/${authorId}`),
+    mutationFn: () => apiRequest(`/api/authors/${authorId}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors"] });
       toast({ title: "Author deleted successfully" });
@@ -398,7 +398,7 @@ export default function AuthorViewPage() {
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={() => deleteAuthorMutation.mutate()}
+                  onClick={ () => deleteAuthorMutation.mutate( }
                   className="bg-destructive hover:bg-destructive/90"
                 >
                   Delete
@@ -422,7 +422,7 @@ export default function AuthorViewPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setIsEditingAuthor(!isEditingAuthor)}
+                    onClick={ () => setIsEditingAuthor(!isEditingAuthor }
                   >
                     <Edit3 className="w-4 h-4 mr-1" />
                     {isEditingAuthor ? 'Cancel' : 'Edit'}
@@ -439,7 +439,7 @@ export default function AuthorViewPage() {
                           id="author-prefix"
                           placeholder="Dr., Prof., etc."
                           value={authorForm.prefix}
-                          onChange={(e) => handleAuthorFormChange('prefix', e.target.value)}
+                          onChange={ (e) => handleAuthorFormChange('prefix', e.target.value }
                         />
                       </div>
                       <div className="space-y-2">
@@ -448,7 +448,7 @@ export default function AuthorViewPage() {
                           id="author-suffix"
                           placeholder="Jr., Sr., PhD, etc."
                           value={authorForm.suffix}
-                          onChange={(e) => handleAuthorFormChange('suffix', e.target.value)}
+                          onChange={ (e) => handleAuthorFormChange('suffix', e.target.value }
                         />
                       </div>
                     </div>
@@ -460,7 +460,7 @@ export default function AuthorViewPage() {
                           id="author-firstname"
                           placeholder="John"
                           value={authorForm.firstName}
-                          onChange={(e) => handleAuthorFormChange('firstName', e.target.value)}
+                          onChange={ (e) => handleAuthorFormChange('firstName', e.target.value }
                           required
                         />
                       </div>
@@ -470,7 +470,7 @@ export default function AuthorViewPage() {
                           id="author-middlename"
                           placeholder="Michael"
                           value={authorForm.middleName}
-                          onChange={(e) => handleAuthorFormChange('middleName', e.target.value)}
+                          onChange={ (e) => handleAuthorFormChange('middleName', e.target.value }
                         />
                       </div>
                       <div className="space-y-2">
@@ -479,7 +479,7 @@ export default function AuthorViewPage() {
                           id="author-lastname"
                           placeholder="Doe"
                           value={authorForm.lastName}
-                          onChange={(e) => handleAuthorFormChange('lastName', e.target.value)}
+                          onChange={ (e) => handleAuthorFormChange('lastName', e.target.value }
                           required
                         />
                       </div>
@@ -499,9 +499,9 @@ export default function AuthorViewPage() {
                 ) : (
                   <div className="space-y-2">
                     <div className="text-lg font-medium">
-                      {[authorForm.prefix, authorForm.firstName, authorForm.middleName, authorForm.lastName, authorForm.suffix]
+                      { [authorForm.prefix, authorForm.firstName, authorForm.middleName, authorForm.lastName, authorForm.suffix]
                         .filter(Boolean)
-                        .join(' ')}
+                        .join(' ' }
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       Click Edit to modify author information
@@ -552,7 +552,7 @@ export default function AuthorViewPage() {
                       type="button" 
                       variant="outline" 
                       size="sm" 
-                      onClick={() => applyBiographyFormatting('bold')}
+                      onClick={ () => applyBiographyFormatting('bold' }
                     >
                       <strong>B</strong>
                     </Button>
@@ -561,7 +561,7 @@ export default function AuthorViewPage() {
                       type="button" 
                       variant="outline" 
                       size="sm" 
-                      onClick={() => applyBiographyFormatting('italic')}
+                      onClick={ () => applyBiographyFormatting('italic' }
                     >
                       <em>I</em>
                     </Button>
@@ -570,7 +570,7 @@ export default function AuthorViewPage() {
                       type="button" 
                       variant="outline" 
                       size="sm" 
-                      onClick={() => applyBiographyFormatting('underline')}
+                      onClick={ () => applyBiographyFormatting('underline' }
                     >
                       <u>U</u>
                     </Button>
@@ -579,7 +579,7 @@ export default function AuthorViewPage() {
                       type="button" 
                       variant="outline" 
                       size="sm" 
-                      onClick={() => applyBiographyFormatting('insertUnorderedList')}
+                      onClick={ () => applyBiographyFormatting('insertUnorderedList' }
                     >
                       • List
                     </Button>
@@ -588,7 +588,7 @@ export default function AuthorViewPage() {
                       type="button" 
                       variant="outline" 
                       size="sm" 
-                      onClick={() => applyBiographyFormatting('insertOrderedList')}
+                      onClick={ () => applyBiographyFormatting('insertOrderedList' }
                     >
                       1. List
                     </Button>
@@ -597,7 +597,7 @@ export default function AuthorViewPage() {
                       type="button" 
                       variant="outline" 
                       size="sm" 
-                      onClick={() => applyBiographyFormatting('createLink', prompt('Enter URL:') || undefined)}
+                      onClick={ () => applyBiographyFormatting('createLink', prompt('Enter URL:') || undefined }
                     >
                       🔗 Link
                     </Button>

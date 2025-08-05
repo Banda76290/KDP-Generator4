@@ -363,7 +363,7 @@ export default function SeriesEditPage() {
             </div>
           </div>
 
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={ form.handleSubmit(onSubmit } className="space-y-8">
             {/* Language Selection */}
             <Card>
               <CardHeader>
@@ -371,8 +371,8 @@ export default function SeriesEditPage() {
               </CardHeader>
               <CardContent>
                 <Select
-                  value={form.watch('language')}
-                  onValueChange={(value) => form.setValue('language', value)}
+                  value={ form.watch('language' }
+                  onValueChange={ (value) => form.setValue('language', value }
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select language" />
@@ -448,8 +448,8 @@ export default function SeriesEditPage() {
               </CardHeader>
               <CardContent>
                 <RadioGroup
-                  value={form.watch('readingOrder')}
-                  onValueChange={(value: 'ordered' | 'unordered') => form.setValue('readingOrder', value)}
+                  value={ form.watch('readingOrder' }
+                  onValueChange={ (value: 'ordered' | 'unordered') => form.setValue('readingOrder', value }
                   className="space-y-4"
                 >
                   <div className="flex items-start space-x-3">
@@ -502,7 +502,7 @@ export default function SeriesEditPage() {
               <CardHeader>
                 <CardTitle>Description</CardTitle>
                 <p className="text-sm text-gray-600">
-                  Describe your series to help readers understand what to expect. Maximum {maxCharacters.toLocaleString()} characters.
+                  Describe your series to help readers understand what to expect. Maximum { maxCharacters.toLocaleString( } characters.
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -520,19 +520,19 @@ export default function SeriesEditPage() {
                     </SelectContent>
                   </Select>
                   
-                  <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('bold')}>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('bold' }>
                     <strong>B</strong>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('italic')}>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('italic' }>
                     <em>I</em>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('underline')}>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('underline' }>
                     <u>U</u>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('insertUnorderedList')}>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('insertUnorderedList' }>
                     • List
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={() => applyFormatting('insertOrderedList')}>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('insertOrderedList' }>
                     1. List
                   </Button>
                   
@@ -550,10 +550,10 @@ export default function SeriesEditPage() {
                         <Input
                           placeholder="Enter URL"
                           value={linkUrl}
-                          onChange={(e) => setLinkUrl(e.target.value)}
+                          onChange={ (e) => setLinkUrl(e.target.value }
                         />
                         <div className="flex justify-end space-x-2">
-                          <Button variant="outline" onClick={() => setShowLinkDialog(false)}>
+                          <Button variant="outline" onClick={ () => setShowLinkDialog(false }>
                             Cancel
                           </Button>
                           <Button onClick={insertLink} style={{ backgroundColor: '#38b6ff', borderColor: '#38b6ff' }}>
@@ -582,11 +582,11 @@ export default function SeriesEditPage() {
                 {/* Character Counter */}
                 <div className="flex justify-between items-center text-sm">
                   <span className={characterCount > maxCharacters ? 'text-red-500' : 'text-gray-600'}>
-                    {characterCount.toLocaleString()} / {maxCharacters.toLocaleString()} characters
+                    { characterCount.toLocaleString( } / { maxCharacters.toLocaleString( } characters
                   </span>
-                  {characterCount > maxCharacters && (
+                  { characterCount > maxCharacters && (
                     <span className="text-red-500 font-medium">
-                      Exceeds limit by {(characterCount - maxCharacters).toLocaleString()} characters
+                      Exceeds limit by {(characterCount - maxCharacters).toLocaleString( } characters
                     </span>
                   )}
                 </div>

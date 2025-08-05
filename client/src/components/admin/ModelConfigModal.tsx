@@ -159,10 +159,10 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
                     step="0.000001"
                     min="0"
                     value={formData.inputPricePer1kTokens}
-                    onChange={(e) => setFormData(prev => ({ ...prev, inputPricePer1kTokens: parseFloat(e.target.value) || 0 }))}
+                    onChange={ (e) => setFormData(prev => ({ ...prev, inputPricePer1kTokens: parseFloat(e.target.value) || 0  }
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    ${costPer1MTokensInput.toFixed(2)} per 1M tokens
+                    ${ costPer1MTokensInput.toFixed(2 } per 1M tokens
                   </p>
                 </div>
                 <div>
@@ -173,10 +173,10 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
                     step="0.000001"
                     min="0"
                     value={formData.outputPricePer1kTokens}
-                    onChange={(e) => setFormData(prev => ({ ...prev, outputPricePer1kTokens: parseFloat(e.target.value) || 0 }))}
+                    onChange={ (e) => setFormData(prev => ({ ...prev, outputPricePer1kTokens: parseFloat(e.target.value) || 0  }
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    ${costPer1MTokensOutput.toFixed(2)} per 1M tokens
+                    ${ costPer1MTokensOutput.toFixed(2 } per 1M tokens
                   </p>
                 </div>
               </div>
@@ -184,7 +184,7 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
               <div className="bg-blue-50 p-3 rounded-lg">
                 <p className="text-sm text-blue-900">
                   <strong>Exemple de coût:</strong> Pour 1000 tokens input + 500 tokens output = 
-                  ${((formData.inputPricePer1kTokens * 1) + (formData.outputPricePer1kTokens * 0.5)).toFixed(4)}
+                  ${ ((formData.inputPricePer1kTokens * 1) + (formData.outputPricePer1kTokens * 0.5)).toFixed(4 }
                 </p>
               </div>
             </CardContent>

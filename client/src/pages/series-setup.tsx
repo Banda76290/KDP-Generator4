@@ -479,7 +479,7 @@ export default function SeriesSetupPage() {
           </h1>
         </div>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={ form.handleSubmit(onSubmit } className="space-y-6">
           {/* Language Section */}
           <Card>
             <CardHeader>
@@ -491,8 +491,8 @@ export default function SeriesSetupPage() {
                   Choose the primary language for this series.
                 </p>
                 <Select 
-                  value={form.watch('language')} 
-                  onValueChange={(value) => form.setValue('language', value)}
+                  value={ form.watch('language' } 
+                  onValueChange={ (value) => form.setValue('language', value }
                 >
                   <SelectTrigger className="w-full max-w-md">
                     <SelectValue />
@@ -544,8 +544,8 @@ export default function SeriesSetupPage() {
                   Choose how you want to display titles in your series.
                 </p>
                 <RadioGroup 
-                  value={form.watch('readingOrder')} 
-                  onValueChange={(value: 'ordered' | 'unordered') => form.setValue('readingOrder', value)}
+                  value={ form.watch('readingOrder' } 
+                  onValueChange={ (value: 'ordered' | 'unordered') => form.setValue('readingOrder', value }
                 >
                   <div className="space-y-4">
                     <div className="flex items-start space-x-2">
@@ -615,7 +615,7 @@ export default function SeriesSetupPage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={() => applyFormatting('bold')}
+                    onClick={ () => applyFormatting('bold' }
                     title="Bold"
                   >
                     <strong>B</strong>
@@ -625,7 +625,7 @@ export default function SeriesSetupPage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={() => applyFormatting('italic')}
+                    onClick={ () => applyFormatting('italic' }
                     title="Italic"
                   >
                     <em>I</em>
@@ -635,7 +635,7 @@ export default function SeriesSetupPage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={() => applyFormatting('underline')}
+                    onClick={ () => applyFormatting('underline' }
                     title="Underline"
                   >
                     <u>U</u>
@@ -646,7 +646,7 @@ export default function SeriesSetupPage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={() => applyFormatting('insertUnorderedList')}
+                    onClick={ () => applyFormatting('insertUnorderedList' }
                     title="Bullet List"
                   >
                     •
@@ -656,13 +656,13 @@ export default function SeriesSetupPage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={() => applyFormatting('insertOrderedList')}
+                    onClick={ () => applyFormatting('insertOrderedList' }
                     title="Numbered List"
                   >
                     1.
                   </Button>
                   <div className="w-px h-6 bg-gray-300"></div>
-                  <Select defaultValue="normal" onValueChange={(value) => handleFormatChange(value)}>
+                  <Select defaultValue="normal" onValueChange={ (value) => handleFormatChange(value }>
                     <SelectTrigger className="w-24 h-8">
                       <SelectValue />
                     </SelectTrigger>
@@ -700,7 +700,7 @@ export default function SeriesSetupPage() {
                             type="url"
                             placeholder="https://example.com"
                             value={linkUrl}
-                            onChange={(e) => setLinkUrl(e.target.value)}
+                            onChange={ (e) => setLinkUrl(e.target.value }
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
                                 e.preventDefault();
@@ -763,7 +763,7 @@ export default function SeriesSetupPage() {
                   />
                   <input
                     type="hidden"
-                    {...form.register('description')}
+                    { ...form.register('description' }
                   />
                   <div className="flex justify-end">
                     <span className={`text-sm ${characterCount > maxCharacters ? 'text-red-600' : 'text-green-600'}`}>

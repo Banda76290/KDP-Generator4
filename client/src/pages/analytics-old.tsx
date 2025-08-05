@@ -151,9 +151,8 @@ export default function Analytics() {
         currency: validCurrency,
         minimumFractionDigits: validCurrency === 'JPY' ? 0 : 2,
       }).format(amount);
-    } catch (error) {
-      // Fallback for any formatting errors
-      return `${amount.toFixed(2)} ${currency}`;
+    } catch (error) { // Fallback for any formatting errors
+      return `${amount.toFixed(2 } ${currency}`;
     }
   };
 
@@ -234,11 +233,11 @@ export default function Analytics() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-primary">
-              {overviewLoading ? (
+              { overviewLoading ? (
                 <div className="w-16 h-6 bg-gray-200 animate-pulse rounded" />
               ) : (
                 overview?.totalImports || 0
-              )}
+               }
             </div>
             <p className="text-xs text-muted-foreground">
               Fichiers KDP importés
@@ -253,11 +252,11 @@ export default function Analytics() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-primary">
-              {overviewLoading ? (
+              { overviewLoading ? (
                 <div className="w-16 h-6 bg-gray-200 animate-pulse rounded" />
               ) : (
                 overview?.totalRecords?.toLocaleString('fr-FR') || 0
-              )}
+               }
             </div>
             <p className="text-xs text-muted-foreground">
               Transactions importées
@@ -272,11 +271,10 @@ export default function Analytics() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-secondary">
-              {overviewLoading ? (
+              { overviewLoading ? (
                 <div className="w-20 h-6 bg-gray-200 animate-pulse rounded" />
               ) : (
-                overview?.totalRoyaltiesUSD ? formatCurrency(overview.totalRoyaltiesUSD, 'USD') : (mainCurrency ? formatCurrency(mainCurrency.amount, mainCurrency.currency) : '0 $')
-              )}
+                overview?.totalRoyaltiesUSD ? formatCurrency(overview.totalRoyaltiesUSD, 'USD') : (mainCurrency ? formatCurrency(mainCurrency.amount, mainCurrency.currency) : '0 $' }
             </div>
             <p className="text-xs text-muted-foreground">
               {overview?.totalRoyaltiesUSD ? `Converti automatiquement en USD` : (totalCurrencies > 1 ? `${totalCurrencies} devises différentes` : 'Royautés cumulées')}
@@ -291,11 +289,11 @@ export default function Analytics() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-primary">
-              {overviewLoading ? (
+              { overviewLoading ? (
                 <div className="w-12 h-6 bg-gray-200 animate-pulse rounded" />
               ) : (
                 overview?.uniqueBooks || 0
-              )}
+               }
             </div>
             <p className="text-xs text-muted-foreground">
               ASINs différents
@@ -338,7 +336,7 @@ export default function Analytics() {
                     <YAxis yAxisId="left" />
                     <YAxis yAxisId="right" orientation="right" />
                     <Tooltip 
-                      labelFormatter={(label) => formatDate(label)}
+                      labelFormatter={ (label) => formatDate(label }
                       formatter={(value, name) => [
                         name === 'royalty' ? formatCurrency(Number(value)) : value,
                         name === 'royalty' ? 'Royautés' : 
@@ -396,28 +394,28 @@ export default function Analytics() {
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="text-2xl font-bold text-secondary">
-                            {formatCurrency(currency.amount, currency.currency)}
+                            { formatCurrency(currency.amount, currency.currency }
                           </div>
-                          {currency.amountUSD && currency.currency !== 'USD' && (
+                          { currency.amountUSD && currency.currency !== 'USD' && (
                             <div className="text-sm text-gray-600 mt-1">
-                              ≈ {formatCurrency(currency.amountUSD, 'USD')}
+                              ≈ {formatCurrency(currency.amountUSD, 'USD' }
                             </div>
                           )}
                         </div>
                         <div className="text-sm text-gray-600 text-right">
-                          <div>Moyenne: {formatCurrency(currency.amount / currency.transactions, currency.currency)}</div>
-                          {currency.amountUSD && currency.currency !== 'USD' && (
-                            <div className="mt-1">≈ {formatCurrency(currency.amountUSD / currency.transactions, 'USD')}</div>
+                          <div>Moyenne: { formatCurrency(currency.amount / currency.transactions, currency.currency }</div>
+                          { currency.amountUSD && currency.currency !== 'USD' && (
+                            <div className="mt-1">≈ {formatCurrency(currency.amountUSD / currency.transactions, 'USD' }</div>
                           )}
                         </div>
                       </div>
                     </div>
                   ))}
-                  {royaltiesByCurrency.length === 0 && (
+                  { royaltiesByCurrency.length === 0 && (
                     <div className="text-center py-8 text-gray-500">
                       Aucune donnée de revenus disponible
                     </div>
-                  )}
+                   }
                 </div>
               )}
             </CardContent>
@@ -470,7 +468,7 @@ export default function Analytics() {
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-bold text-secondary">
-                          {book.totalRoyaltyUSD ? formatCurrency(book.totalRoyaltyUSD, 'USD') : formatCurrency(book.totalRoyalty, book.currency)}
+                          { book.totalRoyaltyUSD ? formatCurrency(book.totalRoyaltyUSD, 'USD') : formatCurrency(book.totalRoyalty, book.currency }
                         </div>
                       </div>
                     </div>
@@ -506,7 +504,7 @@ export default function Analytics() {
                         cy="50%"
                         outerRadius={80}
                         label={({ marketplace, percent }) => 
-                          `${marketplace} (${(percent * 100).toFixed(1)}%)`
+                          `${marketplace} (${ (percent * 100).toFixed(1 }%)`
                         }
                       >
                         {marketplaceData?.map((entry, index) => (
@@ -553,13 +551,13 @@ export default function Analytics() {
                           <div>
                             <span className="text-gray-500">Revenus:</span>
                             <div className="font-medium text-secondary">
-                              {marketplace.totalRoyaltyUSD ? formatCurrency(marketplace.totalRoyaltyUSD, 'USD') : formatCurrency(marketplace.totalRoyalty, marketplace.currency)}
+                              { marketplace.totalRoyaltyUSD ? formatCurrency(marketplace.totalRoyaltyUSD, 'USD') : formatCurrency(marketplace.totalRoyalty, marketplace.currency }
                             </div>
                           </div>
                           <div>
                             <span className="text-gray-500">Transactions:</span>
                             <div className="font-medium">
-                              {marketplace.totalSales.toLocaleString('fr-FR')}
+                              { marketplace.totalSales.toLocaleString('fr-FR' }
                             </div>
                           </div>
                         </div>
@@ -584,7 +582,7 @@ export default function Analytics() {
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={topPerformers?.slice(0, 10)}>
+                  <BarChart data={ topPerformers?.slice(0, 10 }>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 
                       dataKey="title" 
@@ -593,7 +591,7 @@ export default function Analytics() {
                       height={100}
                       interval={0}
                       fontSize={10}
-                      tickFormatter={(value) => value.length > 20 ? `${value.substring(0, 20)}...` : value}
+                      tickFormatter={ (value) => value.length > 20 ? `${value.substring(0, 20 }...` : value}
                     />
                     <YAxis />
                     <Tooltip 
@@ -648,12 +646,12 @@ export default function Analytics() {
                           <div>
                             <p className="font-medium">{rate.currency}</p>
                             <p className="text-sm text-muted-foreground">
-                              Dernière mise à jour: {new Date(rate.date).toLocaleDateString('fr-FR')}
+                              Dernière mise à jour: { new Date(rate.date).toLocaleDateString('fr-FR' }
                             </p>
                           </div>
                           <div className="text-right">
                             <p className="font-bold text-lg">
-                              {parseFloat(rate.rate).toFixed(4)}
+                              { parseFloat(rate.rate).toFixed(4 }
                             </p>
                             <p className="text-xs text-muted-foreground">EUR → {rate.currency}</p>
                           </div>

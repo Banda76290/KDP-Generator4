@@ -118,14 +118,13 @@ export default function AIFunctions() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          functionKey: selectedFunction.key,
+        body: JSON.stringify({ functionKey: selectedFunction.key,
           bookId: selectedFunction.requiresBookContext ? selectedBook : undefined,
           projectId: selectedFunction.requiresProjectContext ? selectedProject : undefined,
           customPrompt: customPrompt !== selectedFunction.defaultUserPromptTemplate ? customPrompt : undefined,
           customModel: customModel !== selectedFunction.defaultModel ? customModel : undefined,
           customTemperature: parseFloat(customTemperature) !== selectedFunction.temperature ? parseFloat(customTemperature) : undefined,
-        }),
+        ),
       });
 
       if (!response.ok) {
@@ -314,7 +313,7 @@ export default function AIFunctions() {
                               key={func.key}
                               variant={selectedFunction?.key === func.key ? 'default' : 'ghost'}
                               className="w-full justify-start text-left h-auto p-3"
-                              onClick={() => setSelectedFunction(func)}
+                              onClick={ () => setSelectedFunction(func }
                             >
                               <div>
                                 <div className="font-medium">{func.name}</div>
@@ -422,7 +421,7 @@ export default function AIFunctions() {
                       {/* Generate Button */}
                       <Button 
                         onClick={generateContent} 
-                        disabled={isGenerating || (selectedFunction.requiresBookContext && !selectedBook) || (selectedFunction.requiresProjectContext && !selectedProject)}
+                        disabled={ isGenerating || (selectedFunction.requiresBookContext && !selectedBook) || (selectedFunction.requiresProjectContext && !selectedProject }
                         className="w-full"
                       >
                         <Play className="w-4 h-4 mr-2" />
@@ -443,7 +442,7 @@ export default function AIFunctions() {
                         <Textarea
                           id="custom-prompt"
                           value={customPrompt}
-                          onChange={(e) => setCustomPrompt(e.target.value)}
+                          onChange={ (e) => setCustomPrompt(e.target.value }
                           rows={6}
                           className="mt-2"
                         />
@@ -455,7 +454,7 @@ export default function AIFunctions() {
                           <Input
                             id="custom-model"
                             value={customModel}
-                            onChange={(e) => setCustomModel(e.target.value)}
+                            onChange={ (e) => setCustomModel(e.target.value }
                             className="mt-2"
                           />
                         </div>
@@ -468,7 +467,7 @@ export default function AIFunctions() {
                             max="2"
                             step="0.1"
                             value={customTemperature}
-                            onChange={(e) => setCustomTemperature(e.target.value)}
+                            onChange={ (e) => setCustomTemperature(e.target.value }
                             className="mt-2"
                           />
                         </div>
@@ -482,11 +481,11 @@ export default function AIFunctions() {
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <CardTitle>Generated Content</CardTitle>
-                        {generatedContent && (
+                        { generatedContent && (
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => copyToClipboard(generatedContent)}
+                            onClick={() => copyToClipboard(generatedContent }
                           >
                             <Copy className="w-4 h-4 mr-2" />
                             Copy

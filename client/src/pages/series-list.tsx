@@ -66,10 +66,8 @@ export default function SeriesListPage() {
   // Mutation to remove book from series
   const removeBookFromSeries = useMutation({
     mutationFn: async (bookId: string) => {
-      return await apiRequest("PATCH", `/api/books/${bookId}`, {
-        seriesTitle: "",
-        seriesNumber: null
-      });
+      return await apiRequest(`/api/books/${bookId}`, { method: "PATCH", body: JSON.stringify({ seriesTitle: "",
+        seriesNumber: null })});
     },
     onSuccess: () => {
       // Invalidate queries to refresh the data
@@ -85,7 +83,7 @@ export default function SeriesListPage() {
   // Mutation to delete series
   const deleteSeries = useMutation({
     mutationFn: async (seriesId: string) => {
-      return await apiRequest("DELETE", `/api/series/${seriesId}`);
+      return await apiRequest(`/api/series/${seriesId}`, { method: "DELETE" });
     },
     onSuccess: () => {
       // Invalidate queries to refresh the data
@@ -100,13 +98,11 @@ export default function SeriesListPage() {
   });
 
   // Calculate series revenue
-  const calculateSeriesRevenue = (books: BookData[]) => {
-    const totalRevenue = books.reduce((sum, book) => sum + parseFloat(book.totalRevenue || '0'), 0);
+  const calculateSeriesRevenue = (books: BookData[]) => { const totalRevenue = books.reduce((sum, book) => sum + parseFloat(book.totalRevenue || '0'), 0);
     const monthlyRevenue = books.reduce((sum, book) => sum + parseFloat(book.monthlyRevenue || '0'), 0);
     return {
       totalRevenue: totalRevenue.toFixed(2),
-      monthlyRevenue: monthlyRevenue.toFixed(2)
-    };
+      monthlyRevenue: monthlyRevenue.toFixed(2 };
   };
 
   // Filter and sort series
@@ -179,12 +175,12 @@ export default function SeriesListPage() {
               <Input
                 placeholder="Search series..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={ (e) => setSearchTerm(e.target.value }
                 className="pl-10 w-full sm:w-80"
               />
             </div>
             
-            <Select value={sortBy} onValueChange={(value) => setSortBy(value as typeof sortBy)}>
+            <Select value={sortBy} onValueChange={ (value) => setSortBy(value as typeof sortBy }>
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
@@ -214,17 +210,17 @@ export default function SeriesListPage() {
         </div>
 
         {/* Loading and Error States */}
-        {isLoading && (
+        { isLoading && (
           <div className="text-center py-8">
             <div className="text-gray-600">Loading series...</div>
           </div>
-        )}
+         }
 
-        {error && (
+        { error && (
           <div className="text-center py-8">
             <div className="text-red-600">Failed to load series. Please try again.</div>
           </div>
-        )}
+         }
 
         {/* Results Count */}
         {!isLoading && !error && (
@@ -242,7 +238,7 @@ export default function SeriesListPage() {
               {searchTerm ? "Try adjusting your search terms" : "Create your first series to get started"}
             </p>
             <Button 
-              onClick={() => setLocation('/series-setup')}
+              onClick={ () => setLocation('/series-setup' }
               style={{ backgroundColor: '#38b6ff' }} 
               className="hover:opacity-90 text-white"
             >
@@ -294,7 +290,7 @@ export default function SeriesListPage() {
                           <AlertDialogTrigger asChild>
                             <DropdownMenuItem 
                               className="text-red-600 focus:text-red-600"
-                              onSelect={(e) => e.preventDefault()}
+                              onSelect={ (e) => e.preventDefault( }
                             >
                               <Trash2 className="w-4 h-4 mr-2" />
                               Delete Series
@@ -311,7 +307,7 @@ export default function SeriesListPage() {
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction 
-                                onClick={() => handleDeleteSeries(seriesItem.id)}
+                                onClick={ () => handleDeleteSeries(seriesItem.id }
                                 className="bg-red-600 hover:bg-red-700"
                               >
                                 Delete Series
@@ -379,7 +375,7 @@ export default function SeriesListPage() {
                                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                                         <AlertDialogAction 
                                           className="bg-red-600 hover:bg-red-700"
-                                          onClick={() => removeBookFromSeries.mutate(book.id)}
+                                          onClick={ () => removeBookFromSeries.mutate(book.id }
                                           disabled={removeBookFromSeries.isPending}
                                         >
                                           {removeBookFromSeries.isPending ? "Removing..." : "Remove from Series"}
@@ -408,12 +404,12 @@ export default function SeriesListPage() {
                     )}
 
                     {/* No Books Message */}
-                    {(!seriesItem.books || seriesItem.books.length === 0) && (
+                    { (!seriesItem.books || seriesItem.books.length === 0) && (
                       <div className="text-xs text-gray-500 italic flex items-center">
                         <Book className="w-3 h-3 mr-1" />
                         No books in this series yet
                       </div>
-                    )}
+                     }
 
                     {/* Revenue Statistics */}
                     {seriesItem.books && seriesItem.books.length > 0 && (
@@ -445,7 +441,7 @@ export default function SeriesListPage() {
 
                     {/* Creation Date */}
                     <div className="text-xs text-gray-500 pt-2">
-                      Created: {new Date(seriesItem.createdAt).toLocaleDateString()}
+                      Created: { new Date(seriesItem.createdAt).toLocaleDateString( }
                     </div>
 
 

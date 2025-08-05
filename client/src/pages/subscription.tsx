@@ -132,16 +132,16 @@ export default function Subscription() {
                   key={plan.name} 
                   className={`relative ${plan.popular ? 'border-primary shadow-lg scale-105' : ''} ${plan.current ? 'border-secondary' : ''}`}
                 >
-                  {plan.popular && (
+                  { plan.popular && (
                     <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground">
                       Most Popular
                     </Badge>
-                  )}
-                  {plan.current && (
+                   }
+                  { plan.current && (
                     <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-secondary text-secondary-foreground">
                       Current Plan
                     </Badge>
-                  )}
+                   }
                   
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">{plan.name}</CardTitle>
@@ -173,7 +173,7 @@ export default function Subscription() {
                     <Button 
                       className="w-full" 
                       variant={plan.buttonVariant}
-                      onClick={() => handleUpgrade(plan.name)}
+                      onClick={ () => handleUpgrade(plan.name }
                       disabled={plan.current}
                     >
                       {plan.buttonText}

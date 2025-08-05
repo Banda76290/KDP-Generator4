@@ -23,8 +23,7 @@ export default function AuthorCreatePage() {
   });
 
   // Create author mutation
-  const createAuthorMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("POST", "/api/authors", data),
+  const createAuthorMutation = useMutation({ mutationFn: (data: any) => apiRequest("/api/authors", { method: "POST", body: JSON.stringify(data }),
     onSuccess: (author) => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors"] });
       toast({ title: "Author created successfully" });
@@ -51,7 +50,7 @@ export default function AuthorCreatePage() {
         <div className="flex items-center gap-4">
           <Button 
             variant="outline" 
-            onClick={() => setLocation("/authors")}
+            onClick={ () => setLocation("/authors" }
             className="flex items-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -127,7 +126,7 @@ export default function AuthorCreatePage() {
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => setLocation("/authors")}
+                  onClick={ () => setLocation("/authors" }
                 >
                   Cancel
                 </Button>

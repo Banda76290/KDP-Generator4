@@ -186,7 +186,7 @@ export default function AIVariables() {
                           <div className="flex items-center gap-2 mb-1">
                             <code 
                               className="text-sm font-mono bg-gray-100 text-gray-800 px-2 py-1 rounded cursor-pointer hover:bg-blue-100 transition-colors"
-                              onClick={() => copyToClipboard(field.field)}
+                              onClick={ () => copyToClipboard(field.field }
                             >
                               {"{"}
                               {field.field}
@@ -196,13 +196,13 @@ export default function AIVariables() {
                               size="sm"
                               variant="ghost"
                               className="h-6 w-6 p-0 hover:bg-blue-50"
-                              onClick={() => copyToClipboard(field.field)}
+                              onClick={ () => copyToClipboard(field.field }
                             >
-                              {copiedField === field.field ? (
+                              { copiedField === field.field ? (
                                 <CheckCircle className="w-3 h-3 text-green-600" />
                               ) : (
                                 <Copy className="w-3 h-3 text-gray-600" />
-                              )}
+                               }
                             </Button>
                           </div>
                           <h4 className="font-semibold text-sm text-gray-900 mb-1">
@@ -259,7 +259,7 @@ export default function AIVariables() {
           );
         })}
 
-        {(!categorizedFields || Object.keys(categorizedFields).length === 0) && (
+        { (!categorizedFields || Object.keys(categorizedFields).length === 0) && (
           <Card className="bg-white">
             <CardContent className="py-8">
               <div className="text-center text-gray-600">
@@ -269,7 +269,7 @@ export default function AIVariables() {
               </div>
             </CardContent>
           </Card>
-        )}
+         }
       </div>
     </Layout>
   );

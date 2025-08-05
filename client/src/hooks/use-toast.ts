@@ -24,10 +24,8 @@ const actionTypes = {
 
 let count = 0
 
-function genId() {
-  count = (count + 1) % Number.MAX_SAFE_INTEGER
-  return count.toString()
-}
+function genId() { count = (count + 1) % Number.MAX_SAFE_INTEGER
+  return count.toString( }
 
 type ActionType = typeof actionTypes
 
@@ -92,12 +90,8 @@ export const reducer = (state: State, action: Action): State => {
 
       // ! Side effects ! - This could be extracted into a dismissToast() action,
       // but I'll keep it here for simplicity
-      if (toastId) {
-        addToRemoveQueue(toastId)
-      } else {
-        state.toasts.forEach((toast) => {
-          addToRemoveQueue(toast.id)
-        })
+      if (toastId) { addToRemoveQueue(toastId } else { state.toasts.forEach((toast) => {
+          addToRemoveQueue(toast.id })
       }
 
       return {
@@ -130,11 +124,9 @@ const listeners: Array<(state: State) => void> = []
 
 let memoryState: State = { toasts: [] }
 
-function dispatch(action: Action) {
-  memoryState = reducer(memoryState, action)
+function dispatch(action: Action) { memoryState = reducer(memoryState, action)
   listeners.forEach((listener) => {
-    listener(memoryState)
-  })
+    listener(memoryState })
 }
 
 type Toast = Omit<ToasterToast, "id">
@@ -149,15 +141,13 @@ function toast({ ...props }: Toast) {
     })
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
 
-  dispatch({
-    type: "ADD_TOAST",
+  dispatch({ type: "ADD_TOAST",
     toast: {
       ...props,
       id,
       open: true,
       onOpenChange: (open) => {
-        if (!open) dismiss()
-      },
+        if (!open) dismiss( },
     },
   })
 
@@ -168,16 +158,14 @@ function toast({ ...props }: Toast) {
   }
 }
 
-function useToast() {
-  const [state, setState] = React.useState<State>(memoryState)
+function useToast() { const [state, setState] = React.useState<State>(memoryState)
 
   React.useEffect(() => {
     listeners.push(setState)
     return () => {
       const index = listeners.indexOf(setState)
       if (index > -1) {
-        listeners.splice(index, 1)
-      }
+        listeners.splice(index, 1 }
     }
   }, [state])
 

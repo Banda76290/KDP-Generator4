@@ -163,18 +163,18 @@ export default function AdminCron() {
                     <div key={job.id} className="border rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
-                          {getStatusIcon(job.status)}
+                          { getStatusIcon(job.status }
                           <div>
                             <h3 className="font-semibold">{job.name}</h3>
                             <p className="text-sm text-muted-foreground">{job.description}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          {getStatusBadge(job.status, job.enabled)}
+                          { getStatusBadge(job.status, job.enabled }
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => runJobMutation.mutate(job.id)}
+                            onClick={ () => runJobMutation.mutate(job.id }
                             disabled={runJobMutation.isPending}
                           >
                             <Play className="h-3 w-3 mr-1" />
@@ -189,7 +189,7 @@ export default function AdminCron() {
                             })}
                             disabled={toggleJobMutation.isPending}
                           >
-                            {job.enabled ? (
+                            { job.enabled ? (
                               <>
                                 <Pause className="h-3 w-3 mr-1" />
                                 Disable
@@ -199,7 +199,7 @@ export default function AdminCron() {
                                 <Play className="h-3 w-3 mr-1" />
                                 Enable
                               </>
-                            )}
+                             }
                           </Button>
                         </div>
                       </div>
@@ -251,17 +251,17 @@ export default function AdminCron() {
                   {cronLogs.map((log: any, index: number) => (
                     <div key={index} className="flex items-start gap-3 p-3 bg-muted rounded-lg">
                       <div className="flex-shrink-0 mt-1">
-                        {log.level === 'error' ? (
+                        { log.level === 'error' ? (
                           <AlertCircle className="h-4 w-4 text-red-500" />
                         ) : (
                           <CheckCircle className="h-4 w-4 text-green-500" />
-                        )}
+                         }
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-sm font-medium">{log.job}</span>
                           <span className="text-xs text-muted-foreground">
-                            {new Date(log.timestamp).toLocaleString()}
+                            { new Date(log.timestamp).toLocaleString( }
                           </span>
                         </div>
                         <p className="text-sm text-muted-foreground">{log.message}</p>

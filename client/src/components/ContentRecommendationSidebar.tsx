@@ -181,12 +181,12 @@ export default function ContentRecommendationSidebar({
           Get intelligent suggestions to improve your book's success
         </p>
         <Button
-          onClick={() => generateMutation.mutate()}
+          onClick={ () => generateMutation.mutate( }
           disabled={generateMutation.isPending}
           className="w-full"
           size="sm"
         >
-          {generateMutation.isPending ? (
+          { generateMutation.isPending ? (
             <>
               <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
               Generating...
@@ -196,18 +196,18 @@ export default function ContentRecommendationSidebar({
               <RefreshCw className="w-4 h-4 mr-2" />
               Generate Recommendations
             </>
-          )}
+           }
         </Button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {isLoading && (
+        { isLoading && (
           <div className="flex items-center justify-center py-8">
             <RefreshCw className="w-6 h-6 animate-spin text-gray-400" />
           </div>
-        )}
+         }
 
-        {error && (
+        { error && (
           <Card className="border-red-200 bg-red-50">
             <CardContent className="p-4">
               <p className="text-sm text-red-600">
@@ -215,9 +215,9 @@ export default function ContentRecommendationSidebar({
               </p>
             </CardContent>
           </Card>
-        )}
+         }
 
-        {(recommendations as ContentRecommendation[]).length === 0 && !isLoading && !error && (
+        { (recommendations as ContentRecommendation[]).length === 0 && !isLoading && !error && (
           <Card className="border-blue-200 bg-blue-50">
             <CardContent className="p-4 text-center">
               <Lightbulb className="w-8 h-8 text-blue-600 mx-auto mb-2" />
@@ -229,19 +229,19 @@ export default function ContentRecommendationSidebar({
               </p>
             </CardContent>
           </Card>
-        )}
+         }
 
         {(recommendations as ContentRecommendation[]).map((recommendation: ContentRecommendation) => (
           <Card key={recommendation.id} className="border-gray-200">
             <Collapsible
-              open={expandedItems.has(recommendation.id)}
-              onOpenChange={() => toggleExpanded(recommendation.id)}
+              open={ expandedItems.has(recommendation.id }
+              onOpenChange={ () => toggleExpanded(recommendation.id }
             >
               <CollapsibleTrigger asChild>
                 <CardHeader className="p-3 cursor-pointer hover:bg-gray-50 transition-colors">
                   <div className="flex items-start gap-2">
                     <div className="mt-0.5">
-                      {getRecommendationIcon(recommendation.recommendationType)}
+                      { getRecommendationIcon(recommendation.recommendationType }
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
@@ -251,16 +251,16 @@ export default function ContentRecommendationSidebar({
                         <div className="flex items-center gap-1 ml-2">
                           <Badge 
                             variant="outline" 
-                            className={`text-xs ${getConfidenceColor(Number(recommendation.confidence) || 0.7)}`}
+                            className={ `text-xs ${getConfidenceColor(Number(recommendation.confidence) || 0.7 }`}
                           >
                             <Star className="w-3 h-3 mr-1" />
-                            {Math.round((Number(recommendation.confidence) || 0.7) * 100)}%
+                            { Math.round((Number(recommendation.confidence) || 0.7) * 100 }%
                           </Badge>
-                          {expandedItems.has(recommendation.id) ? (
+                          { expandedItems.has(recommendation.id) ? (
                             <ChevronDown className="w-4 h-4 text-gray-400" />
                           ) : (
                             <ChevronRight className="w-4 h-4 text-gray-400" />
-                          )}
+                           }
                         </div>
                       </div>
                       <p className="text-xs text-gray-600 mt-1 line-clamp-2">
@@ -298,32 +298,32 @@ export default function ContentRecommendationSidebar({
 
                     <div className="flex items-center justify-between pt-2">
                       <div className="flex items-center gap-1">
-                        {recommendation.isApplied && (
+                        { recommendation.isApplied && (
                           <Badge variant="default" className="text-xs bg-green-100 text-green-700">
                             <Check className="w-3 h-3 mr-1" />
                             Applied
                           </Badge>
-                        )}
-                        {recommendation.isUseful === true && (
+                         }
+                        { recommendation.isUseful === true && (
                           <Badge variant="outline" className="text-xs border-green-200 text-green-700">
                             <ThumbsUp className="w-3 h-3 mr-1" />
                             Helpful
                           </Badge>
-                        )}
-                        {recommendation.isUseful === false && (
+                         }
+                        { recommendation.isUseful === false && (
                           <Badge variant="outline" className="text-xs border-red-200 text-red-700">
                             <ThumbsDown className="w-3 h-3 mr-1" />
                             Not helpful
                           </Badge>
-                        )}
+                         }
                       </div>
                       
                       <div className="flex items-center gap-1">
-                        {!recommendation.isApplied && (
+                        { !recommendation.isApplied && (
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleApply(recommendation)}
+                            onClick={() => handleApply(recommendation }
                             disabled={feedbackMutation.isPending}
                             className="h-6 px-2 text-xs"
                           >
@@ -332,12 +332,12 @@ export default function ContentRecommendationSidebar({
                           </Button>
                         )}
                         
-                        {recommendation.isUseful === undefined && (
+                        { recommendation.isUseful === undefined && (
                           <>
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleFeedback(recommendation, true)}
+                              onClick={() => handleFeedback(recommendation, true }
                               disabled={feedbackMutation.isPending}
                               className="h-6 w-6 p-0 text-green-600 hover:bg-green-50"
                             >
@@ -346,7 +346,7 @@ export default function ContentRecommendationSidebar({
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleFeedback(recommendation, false)}
+                              onClick={ () => handleFeedback(recommendation, false }
                               disabled={feedbackMutation.isPending}
                               className="h-6 w-6 p-0 text-red-600 hover:bg-red-50"
                             >
@@ -358,7 +358,7 @@ export default function ContentRecommendationSidebar({
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => deleteMutation.mutate(recommendation.id)}
+                          onClick={ () => deleteMutation.mutate(recommendation.id }
                           disabled={deleteMutation.isPending}
                           className="h-6 w-6 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
                         >

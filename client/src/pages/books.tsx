@@ -143,7 +143,7 @@ function BooksContent() {
   // Mutation for assigning book to project
   const assignBookMutation = useMutation({
     mutationFn: async ({ bookId, projectId }: { bookId: string; projectId: string }) => {
-      return apiRequest("PATCH", `/api/books/${bookId}`, { projectId });
+      return apiRequest(`/api/books/${bookId}`, { method: "PATCH", body: JSON.stringify({ projectId }) });
     },
     onSuccess: () => {
       toast({
@@ -208,7 +208,7 @@ function BooksContent() {
     mutationFn: async ({ bookId, targetLanguage }: { bookId: string; targetLanguage: string }) => {
       return apiRequest(`/api/books/${bookId}/translate`, { 
         method: "POST", 
-        body: { targetLanguage } 
+        body: JSON.stringify({ targetLanguage }) 
       });
     },
     onSuccess: (data: any) => {
@@ -360,7 +360,7 @@ function BooksContent() {
           <Input
             placeholder="Search books..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={ (e) => setSearchTerm(e.target.value }
             className="pl-10"
           />
         </div>
@@ -415,7 +415,7 @@ function BooksContent() {
           </SelectContent>
         </Select>
 
-        <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
+        <Select value={sortBy} onValueChange={ (value) => setSortBy(value as SortOption }>
           <SelectTrigger>
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
@@ -524,7 +524,7 @@ function BooksContent() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => duplicateBookMutation.mutate(book.id)}
+                        onClick={ () => duplicateBookMutation.mutate(book.id }
                         disabled={duplicateBookMutation.isPending}
                       >
                         <Copy className="h-4 w-4 mr-2" />
@@ -542,7 +542,7 @@ function BooksContent() {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={() => setBookToDelete(book)}
+                        onClick={ () => setBookToDelete(book }
                         className="text-destructive focus:text-destructive"
                         disabled={deleteBookMutation.isPending}
                       >
@@ -556,19 +556,19 @@ function BooksContent() {
               <CardContent className="pt-0">
                 <div className="space-y-3">
                   {/* Author */}
-                  {(book.authorFirstName || book.authorLastName) && (
+                  { (book.authorFirstName || book.authorLastName) && (
                     <p className="text-sm text-muted-foreground">
-                      by {[book.authorFirstName, book.authorLastName].filter(Boolean).join(' ')}
+                      by {[book.authorFirstName, book.authorLastName].filter(Boolean).join(' ' }
                     </p>
                   )}
 
                   {/* Status and Format */}
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant={getStatusBadgeVariant(book.status)}>
+                    <Badge variant={ getStatusBadgeVariant(book.status }>
                       {book.status}
                     </Badge>
                     <Badge variant="outline">
-                      {getFormatIcon(book.format)} {book.format}
+                      { getFormatIcon(book.format } {book.format}
                     </Badge>
                   </div>
 
@@ -611,10 +611,10 @@ function BooksContent() {
 
                   {/* Project Assignment */}
                   <div className="space-y-2">
-                    {book.projectId ? (
+                    { book.projectId ? (
                       <div className="text-sm">
                         <span className="text-muted-foreground">Project: </span>
-                        <span className="font-medium">{getProjectName(book.projectId)}</span>
+                        <span className="font-medium">{getProjectName(book.projectId }</span>
                       </div>
                     ) : (
                       <div className="space-y-2">
@@ -650,7 +650,7 @@ function BooksContent() {
                         <TrendingUp className="h-3 w-3" />
                         This Month
                       </div>
-                      <div className="font-medium">${parseFloat(book.monthlyRevenue || '0').toFixed(2)}</div>
+                      <div className="font-medium">${ parseFloat(book.monthlyRevenue || '0').toFixed(2 }</div>
                       <div className="text-muted-foreground">{book.totalSales || 0} sales</div>
                     </div>
                     <div>
@@ -658,7 +658,7 @@ function BooksContent() {
                         <DollarSign className="h-3 w-3" />
                         Total
                       </div>
-                      <div className="font-medium">${parseFloat(book.totalRevenue || '0').toFixed(2)}</div>
+                      <div className="font-medium">${ parseFloat(book.totalRevenue || '0').toFixed(2 }</div>
                       <div className="text-muted-foreground">{book.totalSales || 0} sales</div>
                     </div>
                   </div>
@@ -670,7 +670,7 @@ function BooksContent() {
       )}
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!bookToDelete} onOpenChange={() => setBookToDelete(null)}>
+      <AlertDialog open={!!bookToDelete} onOpenChange={ () => setBookToDelete(null }>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Book</AlertDialogTitle>
@@ -750,7 +750,7 @@ function BooksContent() {
               onClick={handleTranslateBook}
               disabled={!selectedLanguage || translateBookMutation.isPending}
             >
-              {translateBookMutation.isPending ? (
+              { translateBookMutation.isPending ? (
                 <>
                   <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
                   Translating...
@@ -760,7 +760,7 @@ function BooksContent() {
                   <Languages className="h-4 w-4 mr-2" />
                   Translate Book
                 </>
-              )}
+               }
             </Button>
           </DialogFooter>
         </DialogContent>

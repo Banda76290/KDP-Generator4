@@ -111,17 +111,16 @@ export default function CreateBook() {
       };
       
       console.log('Creating book data:', bookData);
-      const book = await apiRequest("POST", "/api/books", bookData);
+      const book = await apiRequest("/api/books", { method: "POST", body: JSON.stringify(bookData });
       console.log('Received book response:', book);
       
       // Create contributors if any
       if (contributors.length > 0) {
         for (const contributor of contributors) {
-          await apiRequest("POST", "/api/contributors", {
-            bookId: book.id,
-            name: `${contributor.firstName} ${contributor.lastName}`.trim(),
+          await apiRequest("/api/contributors", { method: "POST", body: JSON.stringify({ bookId: book.id,
+            name: `${contributor.firstName }) ${contributor.lastName}`.trim(),
             role: contributor.role,
-          });
+          }});
         }
       }
       
@@ -210,7 +209,7 @@ export default function CreateBook() {
             <div className="mb-6">
               <Button
                 variant="ghost"
-                onClick={() => setLocation("/projects")}
+                onClick={ () => setLocation("/projects" }
                 className="mb-4"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
@@ -229,7 +228,7 @@ export default function CreateBook() {
 
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border">
               <div className="p-6">
-                <form onSubmit={form.handleSubmit((data) => createBook.mutate(data))}>
+                <form onSubmit={ form.handleSubmit((data) => createBook.mutate(data }>
                   <div className="space-y-6">
                     {/* Project Selection */}
                     <Card>
@@ -242,7 +241,7 @@ export default function CreateBook() {
                       <CardContent>
                         <Select 
                           value={form.watch("projectId") || ""} 
-                          onValueChange={(value) => form.setValue("projectId", value)}
+                          onValueChange={ (value) => form.setValue("projectId", value }
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select a project (optional)" />
@@ -269,7 +268,7 @@ export default function CreateBook() {
                       <CardContent>
                         <RadioGroup
                           value={form.watch("format") || "ebook"}
-                          onValueChange={(value) => form.setValue("format", value as "ebook" | "paperback" | "hardcover")}
+                          onValueChange={ (value) => form.setValue("format", value as "ebook" | "paperback" | "hardcover" }
                         >
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="ebook" id="ebook" />
@@ -298,7 +297,7 @@ export default function CreateBook() {
                         {/* Language */}
                         <div>
                           <Label htmlFor="language">Language</Label>
-                          <Select value={form.watch("language") ?? ""} onValueChange={(value) => form.setValue("language", value)}>
+                          <Select value={form.watch("language") ?? ""} onValueChange={ (value) => form.setValue("language", value }>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
@@ -314,7 +313,7 @@ export default function CreateBook() {
                         <div>
                           <Label htmlFor="title">Book Title</Label>
                           <Input
-                            {...form.register("title")}
+                            { ...form.register("title" }
                             placeholder="From Zero to Hero with Google Analytics"
                             className="mt-1"
                           />
@@ -327,7 +326,7 @@ export default function CreateBook() {
                         <div>
                           <Label htmlFor="subtitle">Sous-titre (Optionnel)</Label>
                           <Input
-                            {...form.register("subtitle")}
+                            { ...form.register("subtitle" }
                             placeholder="Turn statistics into winning strategies"
                             className="mt-1"
                           />
@@ -338,7 +337,7 @@ export default function CreateBook() {
                           <div>
                             <Label htmlFor="seriesTitle">Titre de Série (Optionnel)</Label>
                             <Input
-                              {...form.register("seriesTitle")}
+                              { ...form.register("seriesTitle" }
                               placeholder="From Zero to Hero"
                               className="mt-1"
                             />
@@ -358,7 +357,7 @@ export default function CreateBook() {
                         <div>
                           <Label htmlFor="editionNumber">Numéro d'Édition (Optionnel)</Label>
                           <Input
-                            {...form.register("editionNumber")}
+                            { ...form.register("editionNumber" }
                             placeholder="1"
                             className="mt-1"
                           />
@@ -390,7 +389,7 @@ export default function CreateBook() {
                             <Button
                               type="button"
                               variant="outline"
-                              onClick={() => setLocation('/authors/create')}
+                              onClick={ () => setLocation('/authors/create' }
                             >
                               Créer un Auteur
                             </Button>
@@ -413,7 +412,7 @@ export default function CreateBook() {
                       </CardHeader>
                       <CardContent>
                         <Textarea
-                          {...form.register("description")}
+                          { ...form.register("description" }
                           placeholder="Dans le monde du marketing digital, comprendre les données est essentiel..."
                           rows={6}
                           className="resize-none"
@@ -439,7 +438,7 @@ export default function CreateBook() {
                               {category}
                               <X
                                 className="h-3 w-3 cursor-pointer"
-                                onClick={() => removeCategory(category)}
+                                onClick={ () => removeCategory(category }
                               />
                             </Badge>
                           ))}
@@ -476,7 +475,7 @@ export default function CreateBook() {
                               {keyword}
                               <X
                                 className="h-3 w-3 cursor-pointer"
-                                onClick={() => removeKeyword(keyword)}
+                                onClick={ () => removeKeyword(keyword }
                               />
                             </Badge>
                           ))}
@@ -513,7 +512,7 @@ export default function CreateBook() {
                   </div>
 
                   <div className="flex justify-between items-center pt-6 border-t mt-6">
-                    <Button type="button" variant="outline" onClick={() => setLocation("/projects")}>
+                    <Button type="button" variant="outline" onClick={ () => setLocation("/projects" }>
                       Annuler
                     </Button>
                     <div className="flex gap-2">
@@ -533,14 +532,14 @@ export default function CreateBook() {
                         disabled={createBook.isPending}
                         className="bg-yellow-500 hover:bg-yellow-600 text-black"
                       >
-                        {createBook.isPending ? (
+                        { createBook.isPending ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             Création...
                           </>
                         ) : (
                           "Créer le Livre"
-                        )}
+                         }
                       </Button>
                     </div>
                   </div>

@@ -308,11 +308,11 @@ export default function AdminPrompts() {
                   onClick={handleSave}
                   disabled={createMutation.isPending || updateMutation.isPending}
                 >
-                  {(createMutation.isPending || updateMutation.isPending) ? (
+                  { (createMutation.isPending || updateMutation.isPending) ? (
                     <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                   ) : (
                     <Save className="w-4 h-4 mr-2" />
-                  )}
+                   }
                   {editingPrompt ? "Modifier" : "Créer"}
                 </Button>
               </div>
@@ -320,7 +320,7 @@ export default function AdminPrompts() {
           </Dialog>
         </div>
 
-        {isLoading ? (
+        { isLoading ? (
           <div className="flex items-center justify-center py-12">
             <RefreshCw className="w-8 h-8 animate-spin text-muted-foreground" />
           </div>
@@ -334,7 +334,7 @@ export default function AdminPrompts() {
                   <p className="text-muted-foreground mb-4">
                     Créez votre premier template de prompt pour les recommandations IA.
                   </p>
-                  <Button onClick={() => setIsDialogOpen(true)}>
+                  <Button onClick={() => setIsDialogOpen(true }>
                     <Plus className="w-4 h-4 mr-2" />
                     Créer un prompt
                   </Button>
@@ -355,7 +355,7 @@ export default function AdminPrompts() {
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Badge className={getTypeColor(prompt.type)}>
+                        <Badge className={ getTypeColor(prompt.type }>
                           {prompt.type}
                         </Badge>
                         <Badge variant={prompt.isActive ? "default" : "secondary"}>
@@ -388,7 +388,7 @@ export default function AdminPrompts() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleEdit(prompt)}
+                          onClick={ () => handleEdit(prompt }
                         >
                           <Edit2 className="w-4 h-4 mr-2" />
                           Modifier
@@ -411,7 +411,7 @@ export default function AdminPrompts() {
                             <AlertDialogFooter>
                               <AlertDialogCancel>Annuler</AlertDialogCancel>
                               <AlertDialogAction
-                                onClick={() => deleteMutation.mutate(prompt.id)}
+                                onClick={ () => deleteMutation.mutate(prompt.id }
                                 className="bg-red-600 hover:bg-red-700"
                               >
                                 Supprimer

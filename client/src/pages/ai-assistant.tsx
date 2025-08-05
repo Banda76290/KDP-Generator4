@@ -28,8 +28,7 @@ export default function AIAssistant() {
   });
 
   const generateMutation = useMutation({
-    mutationFn: async (data: { type: string; prompt: string; title?: string }) => {
-      return await apiRequest("POST", "/api/ai/generate", data);
+    mutationFn: async (data: { type: string; prompt: string; title?: string }) => { return await apiRequest("/api/ai/generate", { method: "POST", body: JSON.stringify(data });
     },
     onSuccess: async (response) => {
       const result = await response.json();
@@ -186,7 +185,7 @@ export default function AIAssistant() {
                     </label>
                     <Textarea
                       value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
+                      onChange={ (e) => setPrompt(e.target.value }
                       placeholder="Describe what you want the AI to generate..."
                       rows={6}
                       className="resize-none"
@@ -195,10 +194,10 @@ export default function AIAssistant() {
 
                   <Button
                     onClick={handleGenerate}
-                    disabled={generateMutation.isPending || !selectedType || !prompt.trim()}
+                    disabled={ generateMutation.isPending || !selectedType || !prompt.trim( }
                     className="w-full bg-primary hover:bg-primary/90"
                   >
-                    {generateMutation.isPending ? (
+                    { generateMutation.isPending ? (
                       <>
                         <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
                         Generating...
@@ -208,7 +207,7 @@ export default function AIAssistant() {
                         <Sparkles className="w-4 h-4 mr-2" />
                         Generate Content
                       </>
-                    )}
+                     }
                   </Button>
                 </CardContent>
               </Card>
@@ -259,12 +258,12 @@ export default function AIAssistant() {
                       <div className="flex items-center justify-between mb-2">
                         <Badge variant="outline">{generation.type}</Badge>
                         <span className="text-xs text-gray-500">
-                          {new Date(generation.createdAt).toLocaleDateString()}
+                          { new Date(generation.createdAt).toLocaleDateString( }
                         </span>
                       </div>
                       <p className="text-sm text-gray-600 mb-2">{generation.prompt}</p>
                       <div className="bg-gray-50 p-3 rounded text-xs">
-                        {generation.response.substring(0, 200)}...
+                        { generation.response.substring(0, 200 }...
                       </div>
                     </div>
                   ))}

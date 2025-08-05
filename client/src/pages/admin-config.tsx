@@ -50,8 +50,7 @@ export default function AdminConfig() {
   });
 
   const updateConfigMutation = useMutation({
-    mutationFn: async (configData: { key: string; value: string; description?: string }) => {
-      return await apiRequest("/api/admin/config", "PUT", configData);
+    mutationFn: async (configData: { key: string; value: string; description?: string }) => { return await apiRequest("/api/admin/config", { method: "PUT", body: JSON.stringify(configData });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/config"] });
@@ -131,7 +130,7 @@ export default function AdminConfig() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
+        <Button variant="ghost" size="sm" onClick={ () => window.history.back( }>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour
         </Button>
@@ -266,7 +265,7 @@ export default function AdminConfig() {
                       <TableCell className="max-w-xs truncate">{configItem.value}</TableCell>
                       <TableCell className="max-w-xs truncate">{configItem.description || "-"}</TableCell>
                       <TableCell>
-                        {new Date(configItem.updatedAt).toLocaleDateString("fr-FR")}
+                        { new Date(configItem.updatedAt).toLocaleDateString("fr-FR" }
                       </TableCell>
                       <TableCell>
                         <Button

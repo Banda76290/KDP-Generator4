@@ -29,7 +29,7 @@ export default function ImportManagementPage() {
   // Fetch import history
   const { data: imports = [], isLoading: importsLoading } = useQuery({
     queryKey: ["/api/imports"],
-    queryFn: () => apiRequest("GET", "/api/imports"),
+    queryFn: () => apiRequest("/api/imports", { method: "GET" }),
   });
 
   // Upload mutation
@@ -51,7 +51,7 @@ export default function ImportManagementPage() {
   // Delete import mutation
   const deleteMutation = useMutation({
     mutationFn: (importId: string) => 
-      apiRequest("DELETE", `/api/imports/${importId}`),
+      apiRequest(`/api/imports/${importId}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/imports"] });
     },
@@ -133,7 +133,7 @@ export default function ImportManagementPage() {
                 e.preventDefault();
                 setIsDragging(true);
               }}
-              onDragLeave={() => setIsDragging(false)}
+              onDragLeave={ () => setIsDragging(false }
               onDrop={handleDrop}
             >
               <FileSpreadsheet className="w-12 h-12 mx-auto mb-4 text-gray-400" />
@@ -141,7 +141,7 @@ export default function ImportManagementPage() {
                 <div className="space-y-2">
                   <p className="text-lg font-medium">{selectedFile.name}</p>
                   <p className="text-sm text-gray-500">
-                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                    { (selectedFile.size / 1024 / 1024).toFixed(2 } MB
                   </p>
                   <Button onClick={handleUpload} disabled={uploadMutation.isPending}>
                     {uploadMutation.isPending ? "Uploading..." : "Upload File"}
@@ -212,12 +212,12 @@ export default function ImportManagementPage() {
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50"
                   >
                     <div className="flex items-center space-x-4">
-                      {getFileTypeIcon(importRecord.fileType)}
+                      { getFileTypeIcon(importRecord.fileType }
                       <div>
                         <div className="flex items-center space-x-2">
                           <h4 className="font-medium">{importRecord.fileName}</h4>
-                          <Badge className={getStatusColor(importRecord.status)}>
-                            {getStatusIcon(importRecord.status)}
+                          <Badge className={ getStatusColor(importRecord.status }>
+                            { getStatusIcon(importRecord.status }
                             <span className="ml-1 capitalize">{importRecord.status}</span>
                           </Badge>
                         </div>
@@ -225,7 +225,7 @@ export default function ImportManagementPage() {
                           <span>Type: {importRecord.detectedType || "Unknown"}</span>
                           <span>Records: {importRecord.totalRecords}</span>
                           <span>
-                            {new Date(importRecord.createdAt).toLocaleDateString()}
+                            { new Date(importRecord.createdAt).toLocaleDateString( }
                           </span>
                         </div>
                         {importRecord.status === "processing" && (
@@ -261,7 +261,7 @@ export default function ImportManagementPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => deleteMutation.mutate(importRecord.id)}
+                        onClick={ () => deleteMutation.mutate(importRecord.id }
                         disabled={deleteMutation.isPending}
                       >
                         <Trash2 className="w-4 h-4 mr-1" />

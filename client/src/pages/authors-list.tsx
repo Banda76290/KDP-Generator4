@@ -14,7 +14,7 @@ export default function AuthorsListPage() {
   // Fetch authors with counts
   const { data: authors = [], isLoading: authorsLoading } = useQuery({
     queryKey: ["/api/authors", "withCounts"],
-    queryFn: () => apiRequest("GET", "/api/authors?withCounts=true"),
+    queryFn: () => apiRequest("/api/authors?withCounts=true", { method: "GET" }),
   });
 
   return (
@@ -26,7 +26,7 @@ export default function AuthorsListPage() {
             <h1 className="text-3xl font-bold">Authors</h1>
             <p className="text-gray-600 dark:text-gray-400">Manage your publishing authors</p>
           </div>
-          <Button onClick={() => setLocation("/authors/create")} className="kdp-btn-primary">
+          <Button onClick={ () => setLocation("/authors/create" } className="kdp-btn-primary">
             <Plus className="w-4 h-4 mr-2" />
             Create Author
           </Button>
@@ -34,7 +34,7 @@ export default function AuthorsListPage() {
 
         {/* Authors Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {authorsLoading ? (
+          { authorsLoading ? (
             <div className="col-span-full text-center py-8">Loading authors...</div>
           ) : authors.length === 0 ? (
             <div className="col-span-full text-center py-12">
@@ -43,7 +43,7 @@ export default function AuthorsListPage() {
               <p className="text-gray-500 dark:text-gray-400 mb-4">
                 Get started by creating your first author
               </p>
-              <Button onClick={() => setLocation("/authors/create")} className="kdp-btn-primary">
+              <Button onClick={() => setLocation("/authors/create" } className="kdp-btn-primary">
                 <Plus className="w-4 h-4 mr-2" />
                 Create First Author
               </Button>

@@ -116,7 +116,7 @@ export default function AIConfig() {
     mutationFn: async (data: Partial<AIPromptTemplate>) => {
       const method = data.id ? "PUT" : "POST";
       const url = data.id ? `/api/admin/ai/prompts/${data.id}` : "/api/admin/ai/prompts";
-      return await apiRequest(method, url, data);
+      return await apiRequest(url, { method, body: JSON.stringify(data });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/prompts"] });
@@ -136,7 +136,7 @@ export default function AIConfig() {
     mutationFn: async (data: Partial<AIModel>) => {
       const method = data.id ? "PUT" : "POST";
       const url = data.id ? `/api/admin/ai/models/${data.id}` : "/api/admin/ai/models";
-      return await apiRequest(method, url, data);
+      return await apiRequest(url, { method, body: JSON.stringify(data });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/models"] });
@@ -156,7 +156,7 @@ export default function AIConfig() {
     mutationFn: async (data: Partial<AIUsageLimit>) => {
       const method = data.id ? "PUT" : "POST";
       const url = data.id ? `/api/admin/ai/limits/${data.id}` : "/api/admin/ai/limits";
-      return await apiRequest(method, url, data);
+      return await apiRequest(url, { method, body: JSON.stringify(data });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/limits"] });
@@ -174,7 +174,7 @@ export default function AIConfig() {
 
   const deletePromptMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest("DELETE", `/api/admin/ai/prompts/${id}`);
+      return await apiRequest(`/api/admin/ai/prompts/${id}`, { method: "DELETE" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/prompts"] });
@@ -304,9 +304,9 @@ export default function AIConfig() {
                                 <Badge variant={template.isActive ? "default" : "secondary"}>
                                   {template.isActive ? "Actif" : "Inactif"}
                                 </Badge>
-                                {template.isDefault && (
+                                { template.isDefault && (
                                   <Badge variant="outline">Par défaut</Badge>
-                                )}
+                                 }
                               </div>
                               <p className="text-sm text-gray-600 mb-2">Type: {template.type}</p>
                               <p className="text-sm text-gray-600 mb-2">Modèle: {template.model}</p>
@@ -321,14 +321,14 @@ export default function AIConfig() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setEditingPrompt(template)}
+                                onClick={ () => setEditingPrompt(template }
                               >
                                 <Edit className="w-3 h-3" />
                               </Button>
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => deletePromptMutation.mutate(template.id)}
+                                onClick={ () => deletePromptMutation.mutate(template.id }
                               >
                                 <Trash2 className="w-3 h-3" />
                               </Button>
@@ -381,7 +381,7 @@ export default function AIConfig() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setEditingModel(model)}
+                                onClick={ () => setEditingModel(model }
                               >
                                 <Edit className="w-3 h-3" />
                               </Button>
@@ -448,7 +448,7 @@ export default function AIConfig() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setEditingLimit(limit)}
+                                onClick={ () => setEditingLimit(limit }
                               >
                                 <Edit className="w-3 h-3" />
                               </Button>
@@ -468,7 +468,7 @@ export default function AIConfig() {
             <PromptTemplateModal
               template={editingPrompt}
               onSave={savePromptMutation.mutate}
-              onClose={() => setEditingPrompt(null)}
+              onClose={ () => setEditingPrompt(null }
               isLoading={savePromptMutation.isPending}
             />
           )}
@@ -477,7 +477,7 @@ export default function AIConfig() {
             <ModelConfigModal
               model={editingModel}
               onSave={saveModelMutation.mutate}
-              onClose={() => setEditingModel(null)}
+              onClose={ () => setEditingModel(null }
               isLoading={saveModelMutation.isPending}
             />
           )}
@@ -485,8 +485,8 @@ export default function AIConfig() {
           {editingLimit && (
             <UsageLimitModal
               limit={editingLimit}
-              onSave={(data) => saveLimitMutation.mutate(data)}
-              onClose={() => setEditingLimit(null)}
+              onSave={ (data) => saveLimitMutation.mutate(data }
+              onClose={ () => setEditingLimit(null }
               isLoading={saveLimitMutation.isPending}
             />
           )}

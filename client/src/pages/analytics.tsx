@@ -273,13 +273,13 @@ export default function Analytics() {
                             outerRadius={100}
                             fill="#8884d8"
                             dataKey="amountInEUR"
-                            label={({ currency, amountInEUR }) => `${currency}: ${amountInEUR.toFixed(0)}€`}
+                            label={({ currency, amountInEUR }) => `${currency}: ${ amountInEUR.toFixed(0 }€`}
                           >
                             {detailedData.conversions.map((_, index) => (
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                           </Pie>
-                          <Tooltip formatter={(value) => [`${Number(value).toFixed(2)}€`, 'Montant EUR']} />
+                          <Tooltip formatter={ (value) => [`${Number(value).toFixed(2 }€`, 'Montant EUR']} />
                         </PieChart>
                       </ResponsiveContainer>
                     </CardContent>
@@ -307,7 +307,7 @@ export default function Analytics() {
                                 </Badge>
                                 <div>
                                   <div className="font-bold text-lg">
-                                    {formatCurrency(curr.totalRoyalty, curr.currency)}
+                                    { formatCurrency(curr.totalRoyalty, curr.currency }
                                   </div>
                                   <div className="text-sm text-muted-foreground">
                                     {curr.transactionCount} transactions • {curr.formatsCount} formats
@@ -315,13 +315,13 @@ export default function Analytics() {
                                 </div>
                               </div>
                               <div className="text-right">
-                                {conversion && (
+                                { conversion && (
                                   <>
                                     <div className="font-bold text-green-700">
-                                      {formatCurrency(conversion.amountInEUR, 'EUR')}
+                                      {formatCurrency(conversion.amountInEUR, 'EUR' }
                                     </div>
                                     <div className="text-xs text-muted-foreground">
-                                      Taux: 1 EUR = {conversion.exchangeRate.toFixed(4)} {curr.currency}
+                                      Taux: 1 EUR = { conversion.exchangeRate.toFixed(4 } {curr.currency}
                                     </div>
                                   </>
                                 )}
@@ -357,7 +357,7 @@ export default function Analytics() {
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="font-bold">{book.totalRoyalty.toFixed(2)} {book.currency}</div>
+                              <div className="font-bold">{ book.totalRoyalty.toFixed(2 } {book.currency}</div>
                               <div className="text-sm text-muted-foreground">
                                 {book.totalUnits} unités
                               </div>
@@ -379,7 +379,7 @@ export default function Analytics() {
                           <span>Évolution sur {selectedPeriod} jours</span>
                           <select 
                             value={selectedPeriod}
-                            onChange={(e) => setSelectedPeriod(e.target.value)}
+                            onChange={ (e) => setSelectedPeriod(e.target.value }
                             className="border rounded px-2 py-1 text-sm"
                           >
                             <option value="7">7 jours</option>
@@ -420,12 +420,12 @@ export default function Analytics() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="text-green-800">
-                      {detailedData && (
+                      { detailedData && (
                         <div className="space-y-3">
                           <div className="flex justify-between">
                             <span>Total EUR:</span>
                             <Badge className="bg-green-200 text-green-900">
-                              {formatCurrency(detailedData.totalInEUR, 'EUR')}
+                              {formatCurrency(detailedData.totalInEUR, 'EUR' }
                             </Badge>
                           </div>
                           <div className="flex justify-between">

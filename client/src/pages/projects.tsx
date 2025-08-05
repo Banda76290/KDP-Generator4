@@ -53,7 +53,7 @@ export default function Projects() {
     mutationFn: async (project: ProjectWithRelations) => {
       console.log("Starting duplication for project:", project.name);
       try {
-        const result = await apiRequest("POST", `/api/projects/${project.id}/duplicate`, {});
+        const result = await apiRequest(`/api/projects/${project.id}/duplicate`, { method: "POST" });
         console.log("Duplication successful:", result);
         return result;
       } catch (error) {
@@ -82,7 +82,7 @@ export default function Projects() {
   const deleteProject = useMutation({
     mutationFn: async ({ projectId, deleteBooks }: { projectId: string; deleteBooks: boolean }) => {
       console.log("Deleting project:", projectId, "with deleteBooks:", deleteBooks);
-      return await apiRequest("DELETE", `/api/projects/${projectId}?deleteBooks=${deleteBooks}`, {});
+      return await apiRequest(`/api/projects/${projectId}?deleteBooks=${deleteBooks}`, { method: "DELETE" });
     },
     onSuccess: (_, { deleteBooks }) => {
       toast.success({
@@ -107,7 +107,7 @@ export default function Projects() {
   const duplicateBook = useMutation({
     mutationFn: async (bookId: string) => {
       console.log("Duplicating book:", bookId);
-      return await apiRequest("POST", `/api/books/${bookId}/duplicate`, {});
+      return await apiRequest(`/api/books/${bookId}/duplicate`, { method: "POST" });
     },
     onSuccess: () => {
       toast.success({
@@ -128,7 +128,7 @@ export default function Projects() {
   // Book translation mutation
   const translateBookMutation = useMutation({
     mutationFn: async ({ bookId, targetLanguage }: { bookId: string; targetLanguage: string }) => {
-      return await apiRequest("POST", `/api/books/${bookId}/translate`, { targetLanguage });
+      return await apiRequest(`/api/books/${bookId}/translate`, { method: "POST", body: JSON.stringify({ targetLanguage }) });
     },
     onSuccess: () => {
       toast.success({
@@ -319,11 +319,11 @@ export default function Projects() {
                 <p className="text-gray-600 mt-1">Manage your book projects and track their progress.</p>
               </div>
               <div className="flex gap-2">
-                <Button onClick={() => setLocation("/project-create-simple")} variant="outline">
+                <Button onClick={ () => setLocation("/project-create-simple" } variant="outline">
                   <Plus className="w-4 h-4 mr-2" />
                   Create Project
                 </Button>
-                <Button onClick={() => setLocation("/books/create")} className="bg-primary hover:bg-primary/90">
+                <Button onClick={ () => setLocation("/books/create" } className="bg-primary hover:bg-primary/90">
                   <Plus className="w-4 h-4 mr-2" />
                   Create Book
                 </Button>
@@ -337,7 +337,7 @@ export default function Projects() {
                 <Input
                   placeholder="Search projects..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={ (e) => setSearchTerm(e.target.value }
                   className="pl-10"
                 />
               </div>
@@ -401,13 +401,13 @@ export default function Projects() {
                   ? "Try adjusting your filters or search terms." 
                   : "Get started by creating your first book project."}
               </p>
-              {(!searchTerm && statusFilter === "all") && (
+              { (!searchTerm && statusFilter === "all") && (
                 <div className="flex gap-2 justify-center">
-                  <Button onClick={() => setLocation("/project-create-simple")} variant="outline">
+                  <Button onClick={() => setLocation("/project-create-simple" } variant="outline">
                     <Plus className="w-4 h-4 mr-2" />
                     Create Your First Project
                   </Button>
-                  <Button onClick={() => setLocation("/books/create")} className="bg-primary hover:bg-primary/90">
+                  <Button onClick={ () => setLocation("/books/create" } className="bg-primary hover:bg-primary/90">
                     <Plus className="w-4 h-4 mr-2" />
                     Create Your First Book
                   </Button>
@@ -422,7 +422,7 @@ export default function Projects() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start space-x-3 flex-1 min-w-0">
                         <div className="w-12 h-12 gradient-blue-purple rounded-lg flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
-                          {generateProjectInitials(project.name || 'Project')}
+                          { generateProjectInitials(project.name || 'Project' }
                         </div>
                         <div className="flex-1 min-w-0">
                           <Tooltip>
@@ -456,11 +456,11 @@ export default function Projects() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEditProject(project)}>
+                          <DropdownMenuItem onClick={ () => handleEditProject(project }>
                             <Edit className="w-4 h-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDuplicateProject(project)}>
+                          <DropdownMenuItem onClick={ () => handleDuplicateProject(project }>
                             <Copy className="w-4 h-4 mr-2" />
                             Duplicate
                           </DropdownMenuItem>
@@ -470,7 +470,7 @@ export default function Projects() {
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             className="text-red-600"
-                            onClick={() => handleDeleteProject(project)}
+                            onClick={ () => handleDeleteProject(project }
                           >
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
@@ -528,8 +528,8 @@ export default function Projects() {
                                   </div>
                                 </div>
                                 <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                                  <Badge className={getStatusColor(book.status || 'draft')}>
-                                    {(book.status || 'draft').replace('_', ' ')}
+                                  <Badge className={ getStatusColor(book.status || 'draft' }>
+                                    { (book.status || 'draft').replace('_', ' ' }
                                   </Badge>
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -542,11 +542,11 @@ export default function Projects() {
                                         <Edit className="w-3 h-3 mr-2" />
                                         Edit
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem onClick={() => handleDuplicateBook(book.id)}>
+                                      <DropdownMenuItem onClick={ () => handleDuplicateBook(book.id }>
                                         <Copy className="w-3 h-3 mr-2" />
                                         Duplicate
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem onClick={() => handleTranslateBook(book)}>
+                                      <DropdownMenuItem onClick={ () => handleTranslateBook(book }>
                                         <Languages className="w-3 h-3 mr-2" />
                                         Create Translated Copy
                                       </DropdownMenuItem>
@@ -562,7 +562,7 @@ export default function Projects() {
                                     <TrendingUp className="w-3 h-3" />
                                     This Month
                                   </div>
-                                  <div className="font-medium">${parseFloat(book.monthlyRevenue || '0').toFixed(2)}</div>
+                                  <div className="font-medium">${ parseFloat(book.monthlyRevenue || '0').toFixed(2 }</div>
                                   <div className="text-gray-500">{book.monthlySales || 0} sales</div>
                                 </div>
                                 <div>
@@ -570,7 +570,7 @@ export default function Projects() {
                                     <DollarSign className="w-3 h-3" />
                                     Total
                                   </div>
-                                  <div className="font-medium">${parseFloat(book.totalRevenue || '0').toFixed(2)}</div>
+                                  <div className="font-medium">${ parseFloat(book.totalRevenue || '0').toFixed(2 }</div>
                                   <div className="text-gray-500">{book.totalSales || 0} sales</div>
                                 </div>
                               </div>
@@ -578,10 +578,10 @@ export default function Projects() {
                           ))}
                           
                           {/* See More / Show Less Button */}
-                          {project.books.length > 3 && (
+                          { project.books.length > 3 && (
                             <div className="text-center pt-2">
                               <button
-                                onClick={() => toggleProjectExpansion(project.id)}
+                                onClick={() => toggleProjectExpansion(project.id }
                                 className="text-sm text-gray-600 hover:text-blue-600 transition-colors cursor-pointer"
                               >
                                 {expandedProjects.has(project.id) ? 'Show Less' : 'See More'}
@@ -624,7 +624,7 @@ export default function Projects() {
                               Total Revenue  
                             </div>
                             <div className="font-semibold text-blue-600">
-                              ${parseFloat(project.totalRevenue || '0').toFixed(2)}
+                              ${ parseFloat(project.totalRevenue || '0').toFixed(2 }
                             </div>
                             <div className="text-xs text-gray-500">{project.totalSales || 0} sales</div>
                           </div>
@@ -662,7 +662,7 @@ export default function Projects() {
                 <Checkbox
                   id="delete-books"
                   checked={deleteAssociatedBooks}
-                  onCheckedChange={(checked) => setDeleteAssociatedBooks(checked as boolean)}
+                  onCheckedChange={ (checked) => setDeleteAssociatedBooks(checked as boolean }
                 />
                 <label
                   htmlFor="delete-books"

@@ -147,7 +147,7 @@ export default function AdminSystem() {
 
   // Clear logs mutation
   const clearLogsMutation = useMutation({
-    mutationFn: () => apiRequest('DELETE', '/api/admin/system/logs'),
+    mutationFn: () => apiRequest('/api/admin/system/logs', { method: 'DELETE' }),
     onSuccess: () => {
       setLogs([]);
       queryClient.invalidateQueries({ queryKey: ['/api/admin/system/logs'] });
@@ -216,11 +216,11 @@ export default function AdminSystem() {
       try {
         const result = await apiRequest("/api/admin/database/seed", { method: "POST" });
         addLog('Réponse reçue du serveur', 'success');
-        addLog(`Résultat: ${JSON.stringify(result, null, 2)}`, 'info');
+        addLog(`Résultat: ${ JSON.stringify(result, null, 2 }`, 'info');
         return result;
       } catch (error: any) {
         addLog(`Erreur API: ${error.message}`, 'error');
-        addLog(`Détails de l'erreur: ${JSON.stringify(error, null, 2)}`, 'error');
+        addLog(`Détails de l'erreur: ${ JSON.stringify(error, null, 2 }`, 'error');
         throw error;
       }
     },
@@ -232,7 +232,7 @@ export default function AdminSystem() {
       addLog('✅ Synchronisation terminée avec succès', 'success');
       if (data.duration) addLog(`⏱️ Durée de l'opération: ${data.duration}`, 'info');
       if (data.timestamp) addLog(`🕐 Horodatage serveur: ${data.timestamp}`, 'info');
-      addLog(`📊 Données complètes: ${JSON.stringify(data, null, 2)}`, 'info');
+      addLog(`📊 Données complètes: ${ JSON.stringify(data, null, 2 }`, 'info');
       toast({
         title: "Synchronisation réussie",
         description: "La base de données a été synchronisée avec succès.",
@@ -263,11 +263,11 @@ export default function AdminSystem() {
       try {
         const result = await apiRequest("/api/admin/database/reset", { method: "POST" });
         addLog('Réponse reçue du serveur pour le reset', 'success');
-        addLog(`Résultat du reset: ${JSON.stringify(result, null, 2)}`, 'info');
+        addLog(`Résultat du reset: ${ JSON.stringify(result, null, 2 }`, 'info');
         return result;
       } catch (error: any) {
         addLog(`Erreur lors du reset: ${error.message}`, 'error');
-        addLog(`Détails de l'erreur reset: ${JSON.stringify(error, null, 2)}`, 'error');
+        addLog(`Détails de l'erreur reset: ${ JSON.stringify(error, null, 2 }`, 'error');
         throw error;
       }
     },
@@ -280,7 +280,7 @@ export default function AdminSystem() {
       addLog('✅ Reset et re-synchronisation terminés avec succès', 'success');
       if (data.duration) addLog(`⏱️ Durée totale du reset: ${data.duration}`, 'info');
       if (data.timestamp) addLog(`🕐 Horodatage serveur: ${data.timestamp}`, 'info');
-      addLog(`📊 Données complètes du reset: ${JSON.stringify(data, null, 2)}`, 'info');
+      addLog(`📊 Données complètes du reset: ${ JSON.stringify(data, null, 2 }`, 'info');
       toast({
         title: "Reset réussi",
         description: "La base de données a été remise à zéro et re-synchronisée.",
@@ -357,10 +357,8 @@ export default function AdminSystem() {
       try {
         const result = await apiRequest("/api/admin/categories/sync-to-production", {
           method: "POST",
-          body: {
-            productionUrl,
-            categories
-          }
+          body: JSON.stringify({ productionUrl,
+            categories })
         });
         addLog('✅ Synchronisation réussie', 'success');
         return result;
@@ -426,25 +424,23 @@ export default function AdminSystem() {
     }
   };
 
-  const generateSQLContent = async () => {
-    const exportResult = await exportCategories.mutateAsync();
+  const generateSQLContent = async () => { const exportResult = await exportCategories.mutateAsync();
     
     if (exportResult.categories && exportResult.categories.length > 0) {
       const categories = exportResult.categories;
       let sqlContent = `-- Export SQL des catégories KDP Generator\n`;
-      sqlContent += `-- Généré le ${new Date().toLocaleString('fr-FR')}\n`;
+      sqlContent += `-- Généré le ${new Date().toLocaleString('fr-FR' }\n`;
       sqlContent += `-- ${categories.length} catégories exportées\n\n`;
       
       sqlContent += `-- Vider et recréer la table\n`;
       sqlContent += `TRUNCATE TABLE marketplace_categories CASCADE;\n\n`;
       
-      categories.forEach((cat: any) => {
-        const values = [
-          `'${cat.marketplace.replace(/'/g, "''")}'`,
-          `'${cat.categoryPath.replace(/'/g, "''")}'`,
-          cat.parentPath ? `'${cat.parentPath.replace(/'/g, "''")}'` : 'NULL',
+      categories.forEach((cat: any) => { const values = [
+          `'${cat.marketplace.replace(/'/g, "''" }'`,
+          `'${ cat.categoryPath.replace(/'/g, "''" }'`,
+          cat.parentPath ? `'${ cat.parentPath.replace(/'/g, "''" }'` : 'NULL',
           cat.level,
-          `'${cat.displayName.replace(/'/g, "''")}'`,
+          `'${ cat.displayName.replace(/'/g, "''" }'`,
           cat.isSelectable,
           cat.sortOrder,
           cat.isActive,
@@ -452,7 +448,7 @@ export default function AdminSystem() {
           'NOW()'
         ];
         
-        sqlContent += `INSERT INTO marketplace_categories (marketplace, category_path, parent_path, level, display_name, is_selectable, sort_order, is_active, created_at, updated_at) VALUES (${values.join(', ')});\n`;
+        sqlContent += `INSERT INTO marketplace_categories (marketplace, category_path, parent_path, level, display_name, is_selectable, sort_order, is_active, created_at, updated_at) VALUES (${ values.join(', ' });\n`;
       });
       
       return { sqlContent, count: categories.length };
@@ -608,7 +604,7 @@ export default function AdminSystem() {
       <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
+            <Button variant="ghost" size="sm" onClick={ () => window.history.back( }>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Retour
             </Button>
@@ -628,7 +624,7 @@ export default function AdminSystem() {
         <Card className="border-l-4 border-l-blue-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div className="flex items-center space-x-3">
-              {getStatusIcon(systemHealth?.database || 'error')}
+              { getStatusIcon(systemHealth?.database || 'error' }
               <div>
                 <CardTitle className="text-lg">État du Système</CardTitle>
                 <CardDescription>
@@ -636,7 +632,7 @@ export default function AdminSystem() {
                 </CardDescription>
               </div>
             </div>
-            {getStatusBadge(systemHealth?.database || 'error')}
+            { getStatusBadge(systemHealth?.database || 'error' }
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -720,7 +716,7 @@ export default function AdminSystem() {
                   disabled={seedingStatus !== 'idle'}
                   className="w-full"
                 >
-                  {seedingStatus === 'seeding' ? (
+                  { seedingStatus === 'seeding' ? (
                     <>
                       <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                       Synchronisation...
@@ -730,7 +726,7 @@ export default function AdminSystem() {
                       <Database className="h-4 w-4 mr-2" />
                       Synchroniser
                     </>
-                  )}
+                   }
                 </Button>
               </div>
 
@@ -745,7 +741,7 @@ export default function AdminSystem() {
                   variant="destructive"
                   className="w-full"
                 >
-                  {seedingStatus === 'resetting' ? (
+                  { seedingStatus === 'resetting' ? (
                     <>
                       <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                       Reset en cours...
@@ -755,7 +751,7 @@ export default function AdminSystem() {
                       <AlertTriangle className="h-4 w-4 mr-2" />
                       Reset & Re-synchroniser
                     </>
-                  )}
+                   }
                 </Button>
               </div>
             </div>
@@ -856,7 +852,7 @@ export default function AdminSystem() {
                       id="production-url"
                       type="url"
                       value={productionUrl}
-                      onChange={(e) => setProductionUrl(e.target.value)}
+                      onChange={ (e) => setProductionUrl(e.target.value }
                       placeholder="https://votre-site.replit.app"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
@@ -870,10 +866,10 @@ export default function AdminSystem() {
               <div className="pt-4 border-t space-y-3">
                 <Button 
                   onClick={handleSyncToProduction}
-                  disabled={seedingStatus !== 'idle' || !productionUrl.trim()}
+                  disabled={ seedingStatus !== 'idle' || !productionUrl.trim( }
                   className="w-full bg-orange-600 hover:bg-orange-700"
                 >
-                  {seedingStatus === 'syncing' ? (
+                  { seedingStatus === 'syncing' ? (
                     <>
                       <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                       Synchronisation en cours...
@@ -883,7 +879,7 @@ export default function AdminSystem() {
                       <ArrowRight className="h-4 w-4 mr-2" />
                       Synchroniser vers Production
                     </>
-                  )}
+                   }
                 </Button>
 
                 <div className="space-y-2">
@@ -917,11 +913,11 @@ export default function AdminSystem() {
                   </Button>
                 </div>
                 
-                {!productionUrl.trim() && (
+                { !productionUrl.trim() && (
                   <p className="text-xs text-muted-foreground mt-2 text-center">
                     Veuillez saisir l'URL de production pour la synchronisation directe
                   </p>
-                )}
+                 }
               </div>
             </div>
           </CardContent>
@@ -1112,9 +1108,9 @@ export default function AdminSystem() {
                 <Button 
                   variant={isPaused ? "destructive" : "outline"} 
                   size="sm" 
-                  onClick={() => setIsPaused(!isPaused)}
+                  onClick={ () => setIsPaused(!isPaused }
                 >
-                  {isPaused ? (
+                  { isPaused ? (
                     <>
                       <Play className="h-4 w-4 mr-2" />
                       Reprendre
@@ -1124,12 +1120,12 @@ export default function AdminSystem() {
                       <Pause className="h-4 w-4 mr-2" />
                       Pause
                     </>
-                  )}
+                   }
                 </Button>
                 <Button 
                   variant={autoRefreshLogs ? "default" : "outline"} 
                   size="sm" 
-                  onClick={() => setAutoRefreshLogs(!autoRefreshLogs)}
+                  onClick={ () => setAutoRefreshLogs(!autoRefreshLogs }
                   disabled={isPaused}
                 >
                   <RefreshCw className={`h-4 w-4 mr-2 ${autoRefreshLogs && !isPaused ? 'animate-spin' : ''}`} />
@@ -1138,7 +1134,7 @@ export default function AdminSystem() {
                 <Button 
                   variant={autoScrollEnabled ? "default" : "destructive"} 
                   size="sm" 
-                  onClick={() => setAutoScrollEnabled(!autoScrollEnabled)}
+                  onClick={ () => setAutoScrollEnabled(!autoScrollEnabled }
                   title={autoScrollEnabled ? "Désactiver le défilement automatique" : "Activer le défilement automatique"}
                 >
                   <Terminal className="h-4 w-4 mr-2" />
@@ -1159,11 +1155,11 @@ export default function AdminSystem() {
                   onClick={clearLogs}
                   disabled={logs.length === 0 || clearLogsMutation.isPending}
                 >
-                  {clearLogsMutation.isPending ? (
+                  { clearLogsMutation.isPending ? (
                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
                     <Trash2 className="h-4 w-4 mr-2" />
-                  )}
+                   }
                   {clearLogsMutation.isPending ? 'Effacement...' : 'Effacer'}
                 </Button>
                 <Button 
@@ -1187,7 +1183,7 @@ export default function AdminSystem() {
               className="bg-black text-green-400 p-4 rounded-lg font-mono text-sm overflow-auto max-h-96 border"
               onScroll={handleLogsScroll}
             >
-              {logs.length === 0 ? (
+              { logs.length === 0 ? (
                 <div className="text-gray-500">
                   {logsLoading ? (
                     <div className="flex items-center space-x-2">
@@ -1196,7 +1192,7 @@ export default function AdminSystem() {
                     </div>
                   ) : (
                     "Aucun log disponible. Effectuez une opération pour voir les logs..."
-                  )}
+                   }
                 </div>
               ) : (
                 <div className="space-y-1">
@@ -1215,19 +1211,19 @@ export default function AdminSystem() {
                 {logs.length > 0 && (
                   <span>
                     {logs.length} entrées • 
-                    {isPaused ? (
+                    { isPaused ? (
                       <span className="text-red-600"> ⏸️ En pause</span>
                     ) : autoRefreshLogs ? (
                       <span className="text-green-600"> 🔄 Auto-actualisation active</span>
                     ) : (
                       <span className="text-orange-600"> ✋ Mode manuel</span>
-                    )}
-                    {userIsInteracting && (
+                     }
+                    { userIsInteracting && (
                       <span className="text-blue-600"> • 👤 Utilisateur actif</span>
-                    )}
-                    {!autoScrollEnabled && !isPaused && (
+                     }
+                    { !autoScrollEnabled && !isPaused && (
                       <span className="text-purple-600"> • 📜 Défilement désactivé</span>
-                    )}
+                     }
                   </span>
                 )}
               </div>

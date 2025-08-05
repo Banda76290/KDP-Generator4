@@ -92,9 +92,8 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
     }
   }, [project, form, isOpen]);
 
-  const createMutation = useMutation({
-    mutationFn: async (data: ProjectFormData) => {
-      return await apiRequest("POST", "/api/projects", data);
+  const createMutation = useMutation({ mutationFn: async (data: ProjectFormData) => {
+      return await apiRequest("/api/projects", { method: "POST", body: JSON.stringify(data });
     },
     onSuccess: async () => {
       toast({
@@ -127,7 +126,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
 
   const updateMutation = useMutation({
     mutationFn: async (data: ProjectFormData) => {
-      return await apiRequest("PUT", `/api/projects/${project?.id}`, data);
+      return await apiRequest(`/api/projects/${project?.id}`, { method: "PUT", body: JSON.stringify(data });
     },
     onSuccess: async () => {
       toast({
@@ -178,7 +177,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={ form.handleSubmit(onSubmit } className="space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900">Basic Information</h3>
@@ -187,7 +186,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
                 <Label htmlFor="title">Title *</Label>
                 <Input
                   id="title"
-                  {...form.register("title")}
+                  { ...form.register("title" }
                   placeholder="Enter book title"
                   className="mt-1"
                 />
@@ -201,7 +200,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
                 <Label htmlFor="subtitle">Subtitle</Label>
                 <Input
                   id="subtitle"
-                  {...form.register("subtitle")}
+                  { ...form.register("subtitle" }
                   placeholder="Enter subtitle"
                   className="mt-1"
                 />
@@ -211,7 +210,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                {...form.register("description")}
+                { ...form.register("description" }
                 placeholder="Enter book description"
                 rows={3}
                 className="mt-1"
@@ -245,11 +244,11 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
           </div>
 
           {/* AI Fields (Conditional) */}
-          {useAI && isPremiumUser && (
+          { useAI && isPremiumUser && (
             <div className="space-y-4">
               <div>
                 <Label htmlFor="aiContentType">AI Content Type</Label>
-                <Select onValueChange={(value) => form.setValue("aiContentType", value)}>
+                <Select onValueChange={(value) => form.setValue("aiContentType", value }>
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select content type" />
                   </SelectTrigger>
@@ -265,7 +264,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
                 <Label htmlFor="aiPrompt">AI Prompt</Label>
                 <Textarea
                   id="aiPrompt"
-                  {...form.register("aiPrompt")}
+                  { ...form.register("aiPrompt" }
                   placeholder="Describe what you want the AI to generate..."
                   rows={3}
                   className="mt-1"
@@ -278,7 +277,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
           <DynamicFields
             label="Contributors"
             fields={form.watch("contributors") || []}
-            onFieldsChange={(fields) => form.setValue("contributors", fields)}
+            onFieldsChange={ (fields) => form.setValue("contributors", fields }
             renderField={(field, index, updateField, removeField) => (
               <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                 <Input
@@ -305,7 +304,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => removeField(index)}
+                  onClick={ () => removeField(index }
                   className="text-red-500 hover:text-red-700"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -362,10 +361,9 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
               disabled={createMutation.isPending || updateMutation.isPending}
               className="bg-primary hover:bg-primary/90"
             >
-              {createMutation.isPending || updateMutation.isPending
+              { createMutation.isPending || updateMutation.isPending
                 ? (project ? "Updating..." : "Creating...")
-                : (project ? "Update Project" : "Create Project")
-              }
+                : (project ? "Update Project" : "Create Project" }
             </Button>
           </div>
         </form>

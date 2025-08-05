@@ -56,7 +56,7 @@ export default function Dashboard() {
                   <Download className="w-4 h-4 mr-2" />
                   Export Report
                 </Button>
-                <Button onClick={() => setLocation("/project-create-simple")} className="bg-primary hover:bg-primary/90">
+                <Button onClick={ () => setLocation("/project-create-simple" } className="bg-primary hover:bg-primary/90">
                   <Plus className="w-4 h-4 mr-2" />
                   New Project
                 </Button>

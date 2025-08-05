@@ -238,7 +238,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                   max="2"
                   step="0.1"
                   value={formData.temperature}
-                  onChange={(e) => setFormData(prev => ({ ...prev, temperature: parseFloat(e.target.value) || 0.7 }))}
+                  onChange={ (e) => setFormData(prev => ({ ...prev, temperature: parseFloat(e.target.value) || 0.7  }
                 />
               </div>
             </div>
@@ -270,7 +270,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                     key={variable.name}
                     variant="outline"
                     size="sm"
-                    onClick={() => insertVariableInPrompt(variable.name, true)}
+                    onClick={ () => insertVariableInPrompt(variable.name, true }
                   >
                     {variable.name}
                   </Button>
@@ -293,7 +293,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                     key={variable.name}
                     variant="outline"
                     size="sm"
-                    onClick={() => insertVariableInPrompt(variable.name, false)}
+                    onClick={ () => insertVariableInPrompt(variable.name, false }
                   >
                     {variable.name}
                   </Button>
@@ -326,7 +326,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
           <TabsContent value="variables" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-medium">Variables Personnalisées</h3>
-              <Button onClick={() => addVariable()} size="sm">
+              <Button onClick={ () => addVariable( } size="sm">
                 <Plus className="w-4 h-4 mr-2" />
                 Nouvelle Variable
               </Button>
@@ -341,7 +341,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                         <Label className="text-xs">Nom</Label>
                         <Input
                           value={variable.name}
-                          onChange={(e) => updateVariable(index, 'name', e.target.value)}
+                          onChange={ (e) => updateVariable(index, 'name', e.target.value }
                           placeholder="nom_variable"
                         />
                       </div>
@@ -349,7 +349,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                         <Label className="text-xs">Description</Label>
                         <Input
                           value={variable.description}
-                          onChange={(e) => updateVariable(index, 'description', e.target.value)}
+                          onChange={ (e) => updateVariable(index, 'description', e.target.value }
                           placeholder="Description de la variable"
                         />
                       </div>
@@ -357,7 +357,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                         <Label className="text-xs">Type</Label>
                         <Select 
                           value={variable.type} 
-                          onValueChange={(value: 'text' | 'number' | 'select') => updateVariable(index, 'type', value)}
+                          onValueChange={ (value: 'text' | 'number' | 'select') => updateVariable(index, 'type', value }
                         >
                           <SelectTrigger>
                             <SelectValue />
@@ -373,7 +373,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                         <div className="flex items-center space-x-2">
                           <Switch
                             checked={variable.required}
-                            onCheckedChange={(checked) => updateVariable(index, 'required', checked)}
+                            onCheckedChange={ (checked) => updateVariable(index, 'required', checked }
                           />
                           <Label className="text-xs">Obligatoire</Label>
                         </div>
@@ -382,7 +382,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => removeVariable(index)}
+                          onClick={ () => removeVariable(index }
                         >
                           <X className="w-4 h-4" />
                         </Button>
@@ -394,7 +394,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                         <Label className="text-xs">Options (séparées par des virgules)</Label>
                         <Input
                           value={variable.options?.join(', ') || ''}
-                          onChange={(e) => updateVariable(index, 'options', e.target.value.split(', ').filter(Boolean))}
+                          onChange={ (e) => updateVariable(index, 'options', e.target.value.split(', ').filter(Boolean }
                           placeholder="Option1, Option2, Option3"
                         />
                       </div>
@@ -414,8 +414,8 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                     key={variable.name}
                     variant="outline"
                     size="sm"
-                    onClick={() => addVariable(variable)}
-                    disabled={formData.variables?.some(v => v.name === variable.name)}
+                    onClick={ () => addVariable(variable }
+                    disabled={ formData.variables?.some(v => v.name === variable.name }
                   >
                     <Plus className="w-3 h-3 mr-2" />
                     {variable.description}

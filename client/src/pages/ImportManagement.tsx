@@ -87,10 +87,9 @@ export default function ImportManagement() {
         body: formData,
       });
     },
-    onSuccess: async (data) => {
-      toast({
+    onSuccess: async (data) => { toast({
         title: "File uploaded successfully",
-        description: `Detected: ${getDetectedTypeDescription(data.parsedData.detectedType)}`,
+        description: `Detected: ${getDetectedTypeDescription(data.parsedData.detectedType }`,
       });
       queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
       setSelectedFile(null);
@@ -308,13 +307,13 @@ export default function ImportManagement() {
                       {selectedFile.name}
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {formatFileSize(selectedFile.size)}
+                      { formatFileSize(selectedFile.size }
                     </p>
                   </div>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setSelectedFile(null)}
+                    onClick={ () => setSelectedFile(null }
                     className="ml-2"
                   >
                     <X className="w-4 h-4" />
@@ -330,7 +329,7 @@ export default function ImportManagement() {
                   </Button>
                   <Button 
                     variant="outline" 
-                    onClick={() => setSelectedFile(null)}
+                    onClick={ () => setSelectedFile(null }
                   >
                     Cancel
                   </Button>
@@ -348,7 +347,7 @@ export default function ImportManagement() {
                   </p>
                   <Button 
                     variant="outline" 
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={ () => fileInputRef.current?.click( }
                     className="mt-4"
                   >
                     Select Files
@@ -358,7 +357,7 @@ export default function ImportManagement() {
                     type="file"
                     className="hidden"
                     accept=".xlsx,.xls,.csv"
-                    onChange={(e) => handleFileSelect(Array.from(e.target.files || []))}
+                    onChange={ (e) => handleFileSelect(Array.from(e.target.files || [] }
                   />
                 </div>
               </div>
@@ -404,14 +403,14 @@ export default function ImportManagement() {
                             {importRecord.fileName}
                           </h3>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {getDetectedTypeDescription(importRecord.detectedType)}
+                            { getDetectedTypeDescription(importRecord.detectedType }
                           </p>
                         </div>
                       </div>
                       <div className="mt-2 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                        <span>{formatFileSize(importRecord.fileSize)}</span>
+                        <span>{ formatFileSize(importRecord.fileSize }</span>
                         <span>
-                          {format(new Date(importRecord.createdAt), 'MMM dd, yyyy HH:mm')}
+                          { format(new Date(importRecord.createdAt), 'MMM dd, yyyy HH:mm' }
                         </span>
                         {importRecord.totalRecords > 0 && (
                           <span>{importRecord.totalRecords} records</span>
@@ -419,18 +418,18 @@ export default function ImportManagement() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      {getStatusBadge(importRecord.status)}
+                      { getStatusBadge(importRecord.status }
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => toggleExpandImport(importRecord.id)}
+                        onClick={ () => toggleExpandImport(importRecord.id }
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleDelete(importRecord.id)}
+                        onClick={ () => handleDelete(importRecord.id }
                         disabled={deleteMutation.isPending}
                       >
                         <Trash2 className="w-4 h-4" />

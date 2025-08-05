@@ -17,11 +17,10 @@ export default function KDPReports() {
   const [dragActive, setDragActive] = useState(false);
   const queryClient = useQueryClient();
 
-  const uploadMutation = useMutation({
-    mutationFn: async (file: File) => {
+  const uploadMutation = useMutation({ mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('kdpReport', file);
-      return await apiRequest("POST", "/api/kdp-reports/upload", formData);
+      return await apiRequest("/api/kdp-reports/upload", { method: "POST", body: JSON.stringify(formData });
     },
     onSuccess: async (response) => {
       const result = await response.json();
@@ -211,7 +210,7 @@ export default function KDPReports() {
                       </Button>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
-                      Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                      Size: { (selectedFile.size / 1024 / 1024).toFixed(2 } MB
                     </p>
                   </div>
                 )}

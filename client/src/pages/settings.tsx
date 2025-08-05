@@ -59,7 +59,7 @@ export default function Settings() {
                   <Avatar className="h-20 w-20">
                     <AvatarImage src={user?.profileImageUrl || undefined} alt="Profile" />
                     <AvatarFallback className="text-lg">
-                      {getUserInitials(user?.firstName || undefined, user?.lastName || undefined)}
+                      { getUserInitials(user?.firstName || undefined, user?.lastName || undefined }
                     </AvatarFallback>
                   </Avatar>
                   <div className="space-y-2">

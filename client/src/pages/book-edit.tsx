@@ -183,8 +183,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
   onCategoryRemove?: (categoryPath: string) => void;
   resetTrigger?: number;
   instanceId?: string;
-}) => {
-  // Calculate maximum depth dynamically from marketplace categories
+}) => { // Calculate maximum depth dynamically from marketplace categories
   const maxDepth = useMemo(() => {
     if (marketplaceCategories.length === 0) return 3; // Default fallback
     
@@ -198,8 +197,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
         const cleanPath = cat.categoryPath.replace(/^Books > /, '').replace(/kindle_ebook > |print_kdp_paperback > /, '');
         const segments = cleanPath.split(' > ');
         for (let i = 1; i <= segments.length; i++) {
-          pathDepths.add(i + 1); // +1 because we start from level 2 (after Books > discriminant)
-        }
+          pathDepths.add(i + 1); // +1 because we start from level 2 (after Books > discriminant }
       });
       return Math.max(...pathDepths) - 1; // Convert to dropdown count
     }
@@ -558,7 +556,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
                     <div className="flex flex-col">
                       <span className="font-medium">{category.displayName}</span>
                       <span className="text-xs text-gray-500 mt-0.5">
-                        {category.categoryPath.replace(/^Books > /, '').replace(/kindle_ebook > |print_kdp_paperback > /, '')}
+                        { category.categoryPath.replace(/^Books > /, '').replace(/kindle_ebook > |print_kdp_paperback > /, '' }
                       </span>
                     </div>
                   </Label>
@@ -883,9 +881,8 @@ export default function EditBook() {
   }, []);
 
   // Save current form state to session storage (for navigation to series creation only)
-  const saveFormDataToSession = () => {
-    const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
-    console.log('saveFormDataToSession called:', { returnToBookEdit, bookId: bookId || 'new', shouldSave: returnToBookEdit === (bookId || 'new') });
+  const saveFormDataToSession = () => { const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
+    console.log('saveFormDataToSession called:', { returnToBookEdit, bookId: bookId || 'new', shouldSave: returnToBookEdit === (bookId || 'new' });
     
     const watchedFormData = form.watch();
     const currentFormData = {
@@ -904,13 +901,12 @@ export default function EditBook() {
   };
 
   // Real-time auto-save: Save form data automatically when any field changes
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+  useEffect(() => { let timeoutId: NodeJS.Timeout;
     
     const autoSave = () => {
       // Only auto-save if we are about to navigate to series creation
       const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
-      console.log('Auto-save check:', { returnToBookEdit, currentBookId: bookId || 'new', shouldSave: returnToBookEdit === (bookId || 'new') });
+      console.log('Auto-save check:', { returnToBookEdit, currentBookId: bookId || 'new', shouldSave: returnToBookEdit === (bookId || 'new' });
       if (returnToBookEdit === (bookId || 'new')) {
         saveFormDataToSession();
         console.log('Auto-saved form data to sessionStorage');
@@ -967,7 +963,7 @@ export default function EditBook() {
     const returnFromSeries = sessionStorage.getItem('returnToBookEdit');
     const newlyCreatedSeries = sessionStorage.getItem('newlyCreatedSeries');
     
-    console.log('Restoration check:', { returnFromSeries, bookId: bookId || 'new', hasStorageData: !!savedFormData, shouldRestore: savedFormData && returnFromSeries === (bookId || 'new') });
+    console.log('Restoration check:', { returnFromSeries, bookId: bookId || 'new', hasStorageData: !!savedFormData, shouldRestore: savedFormData && returnFromSeries === (bookId || 'new' });
     
     if (savedFormData && returnFromSeries === (bookId || 'new')) {
       console.log('Restoring form data from sessionStorage');
@@ -1288,8 +1284,7 @@ export default function EditBook() {
       console.log(isCreating ? 'Creating book data:' : 'Updating book data:', formattedData);
       console.log('ProjectId being sent:', formattedData.projectId);
       
-      if (isCreating) {
-        const createdBook = await apiRequest(`/api/books`, { method: "POST", body: formattedData });
+      if (isCreating) { const createdBook = await apiRequest(`/api/books`, { method: "POST", body: JSON.stringify(formattedData });
         console.log('Received created book response:', createdBook);
         
         // Save contributors after book creation
@@ -1297,10 +1292,9 @@ export default function EditBook() {
           for (const contributor of contributors) {
             await apiRequest("/api/contributors", {
               method: "POST",
-              body: {
-                bookId: createdBook.id,
+              body: JSON.stringify({ bookId: createdBook.id,
                 projectId: formattedData.projectId, // Add projectId for database compatibility
-                name: `${contributor.firstName} ${contributor.lastName}`.trim(), // Add name field for database compatibility
+                name: `${contributor.firstName }) ${contributor.lastName}`.trim(), // Add name field for database compatibility
                 role: contributor.role,
                 prefix: contributor.prefix || null,
                 firstName: contributor.firstName,
@@ -1314,7 +1308,7 @@ export default function EditBook() {
         
         return { book: createdBook, shouldNavigate: data.shouldNavigate, nextTab: data.nextTab };
       } else {
-        const updatedBook = await apiRequest(`/api/books/${bookId}`, { method: "PATCH", body: formattedData });
+        const updatedBook = await apiRequest(`/api/books/${bookId}`, { method: "PATCH", body: JSON.stringify(formattedData });
         console.log('Received updated book response:', updatedBook);
         
         // Update contributors - first delete existing ones, then add new ones
@@ -1348,7 +1342,7 @@ export default function EditBook() {
                 suffix: contributor.suffix || null,
               };
               console.log('Sending contributor data:', contributorData);
-              await apiRequest("/api/contributors", { method: "POST", body: contributorData });
+              await apiRequest("/api/contributors", { method: "POST", body: JSON.stringify(contributorData });
             }
           }
         }
@@ -1473,13 +1467,12 @@ export default function EditBook() {
     }
 
     setIsCheckingIsbn(true);
-    try {
-      // Only exclude current book if it doesn't already have this ISBN
+    try { // Only exclude current book if it doesn't already have this ISBN
       // If the current book already has this ISBN, we don't exclude it to allow proper duplicate detection
       const shouldExclude = book?.isbn !== isbn.trim();
       const url = shouldExclude 
-        ? `/api/books/check-isbn/${encodeURIComponent(isbn.trim())}?excludeBookId=${bookId}`
-        : `/api/books/check-isbn/${encodeURIComponent(isbn.trim())}`;
+        ? `/api/books/check-isbn/${encodeURIComponent(isbn.trim( }?excludeBookId=${bookId}`
+        : `/api/books/check-isbn/${ encodeURIComponent(isbn.trim( }`;
         
       const response = await fetch(url, {
         method: 'GET',
@@ -1535,9 +1528,7 @@ export default function EditBook() {
     try {
       const response = await apiRequest(`/api/books/${bookId}`, {
         method: "PATCH",
-        body: {
-          isbn: officialIsbnContentValue.trim()
-        }
+        body: JSON.stringify({ isbn: officialIsbnContentValue.trim( }) })
       });
 
       if (response) {
@@ -1645,8 +1636,7 @@ export default function EditBook() {
   };
 
   // Function to load categories for a specific marketplace
-  const loadMarketplaceCategories = async (marketplace: string) => {
-    if (!marketplace) return;
+  const loadMarketplaceCategories = async (marketplace: string) => { if (!marketplace) return;
     
     console.log('Loading categories for marketplace:', marketplace);
     
@@ -1659,8 +1649,8 @@ export default function EditBook() {
       const normalizedMarketplace = normalizeMarketplaceName(marketplace);
       console.log('Normalized marketplace:', normalizedMarketplace);
       
-      const formatParam = derivedFormat ? `?format=${encodeURIComponent(derivedFormat)}` : '';
-      const response = await apiRequest(`/api/marketplace-categories/${encodeURIComponent(normalizedMarketplace)}${formatParam}`, { method: "GET" });
+      const formatParam = derivedFormat ? `?format=${encodeURIComponent(derivedFormat }` : '';
+      const response = await apiRequest(`/api/marketplace-categories/${ encodeURIComponent(normalizedMarketplace }${formatParam}`, { method: "GET" });
       setMarketplaceCategories(response || []);
     } catch (error) {
       console.error("Error loading marketplace categories:", error);
@@ -1677,14 +1667,13 @@ export default function EditBook() {
   };
 
   // Function to check if categories are compatible with marketplace
-  const checkCategoryCompatibility = async (newMarketplace: string, currentCategories: string[]) => {
-    if (currentCategories.length === 0) return [];
+  const checkCategoryCompatibility = async (newMarketplace: string, currentCategories: string[]) => { if (currentCategories.length === 0) return [];
     
     try {
       const derivedFormat = deriveBookFormat();
       const normalizedMarketplace = normalizeMarketplaceName(newMarketplace);
-      const formatParam = derivedFormat ? `?format=${encodeURIComponent(derivedFormat)}` : '';
-      const response = await apiRequest(`/api/marketplace-categories/${encodeURIComponent(normalizedMarketplace)}${formatParam}`, { method: "GET" });
+      const formatParam = derivedFormat ? `?format=${encodeURIComponent(derivedFormat }` : '';
+      const response = await apiRequest(`/api/marketplace-categories/${ encodeURIComponent(normalizedMarketplace }${formatParam}`, { method: "GET" });
       const newMarketplaceCategories: MarketplaceCategory[] = response || [];
       const validCategoryPaths = newMarketplaceCategories.map(cat => cat.categoryPath);
       
@@ -1895,13 +1884,12 @@ export default function EditBook() {
     );
   }
 
-  if (!isCreating && (error || !book)) {
-    return (
+  if (!isCreating && (error || !book)) { return (
       <Layout>
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Book Not Found</h1>
           <p className="text-gray-600 mb-4">The book you're looking for doesn't exist or you don't have permission to edit it.</p>
-          <Button onClick={() => setLocation("/projects")}>
+          <Button onClick={() => setLocation("/projects" }>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Projects
           </Button>
@@ -1921,7 +1909,7 @@ export default function EditBook() {
               <div className="flex items-center space-x-4">
                 <Button
                   variant="ghost"
-                  onClick={() => setLocation("/projects")}
+                  onClick={ () => setLocation("/projects" }
                   className="flex items-center space-x-2"
                 >
                   <ArrowLeft className="w-4 h-4" />
@@ -1937,7 +1925,7 @@ export default function EditBook() {
               {!isCreating && bookId && (
                 <Button
                   variant={showAISidebar ? "default" : "outline"}
-                  onClick={() => setShowAISidebar(!showAISidebar)}
+                  onClick={ () => setShowAISidebar(!showAISidebar }
                   className="flex items-center space-x-2"
                 >
                   <Lightbulb className="w-4 h-4" />
@@ -1946,7 +1934,7 @@ export default function EditBook() {
               )}
             </div>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={ form.handleSubmit(onSubmit } className="space-y-8">
           {/* Tab Navigation */}
           <div className="bg-white border-b border-gray-200 mb-8">
             <nav className="-mb-px flex space-x-0">
@@ -2090,12 +2078,12 @@ export default function EditBook() {
                         )}
                       </span>
                     </span>
-                    {form.watch("language") && (
+                    { form.watch("language") && (
                       <span className="flex items-center">
                         <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
                         </svg>
-                        <span>{form.watch("language")}</span>
+                        <span>{form.watch("language" }</span>
                       </span>
                     )}
                   </div>
@@ -2123,7 +2111,7 @@ export default function EditBook() {
                   </p>
                   <Select 
                     value={form.watch("projectId") || ""} 
-                    onValueChange={(value) => form.setValue("projectId", value)}
+                    onValueChange={ (value) => form.setValue("projectId", value }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a project" />
@@ -2152,7 +2140,7 @@ export default function EditBook() {
                     </p>
                     <Select 
                       value={form.watch("language") || ""} 
-                      onValueChange={(value) => form.setValue("language", value)}
+                      onValueChange={ (value) => form.setValue("language", value }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select language" />
@@ -2189,7 +2177,7 @@ export default function EditBook() {
                     <Input
                       id="subtitle"
                       placeholder="Enter subtitle (optional)"
-                      {...form.register("subtitle")}
+                      { ...form.register("subtitle" }
                     />
                   </div>
                 </div>
@@ -2246,11 +2234,11 @@ export default function EditBook() {
                 </div>
 
                 {/* Series details - shown when checkbox is checked */}
-                {form.watch("seriesTitle") && (
+                { form.watch("seriesTitle") && (
                   <div className="bg-gray-50 p-4 rounded-md border space-y-4">
                     <div className="space-y-2">
                       <Label className="font-medium text-[16px] text-gray-700">Series Title</Label>
-                      <p className="text-sm font-medium">{form.watch("seriesTitle")}</p>
+                      <p className="text-sm font-medium">{form.watch("seriesTitle" }</p>
                     </div>
                     <div className="flex gap-2">
                       <Button 
@@ -2417,7 +2405,7 @@ export default function EditBook() {
                       id="editionNumber"
                       type="text"
                       placeholder="1"
-                      {...form.register("editionNumber")}
+                      { ...form.register("editionNumber" }
                     />
                   </div>
                 </div>
@@ -2567,7 +2555,7 @@ export default function EditBook() {
                     <div key={contributor.id} className="grid grid-cols-7 gap-3 mt-2 items-center">
                       <Select 
                         value={contributor.role} 
-                        onValueChange={(value) => updateContributor(contributor.id, 'role', value)}
+                        onValueChange={ (value) => updateContributor(contributor.id, 'role', value }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Role" />
@@ -2588,33 +2576,33 @@ export default function EditBook() {
                       <Input
                         placeholder="Prefix"
                         value={contributor.prefix || ""}
-                        onChange={(e) => updateContributor(contributor.id, 'prefix', e.target.value)}
+                        onChange={ (e) => updateContributor(contributor.id, 'prefix', e.target.value }
                       />
                       <Input
                         placeholder="First name"
                         value={contributor.firstName}
-                        onChange={(e) => updateContributor(contributor.id, 'firstName', e.target.value)}
+                        onChange={ (e) => updateContributor(contributor.id, 'firstName', e.target.value }
                       />
                       <Input
                         placeholder="Middle name"
                         value={contributor.middleName || ""}
-                        onChange={(e) => updateContributor(contributor.id, 'middleName', e.target.value)}
+                        onChange={ (e) => updateContributor(contributor.id, 'middleName', e.target.value }
                       />
                       <Input
                         placeholder="Last name"
                         value={contributor.lastName}
-                        onChange={(e) => updateContributor(contributor.id, 'lastName', e.target.value)}
+                        onChange={ (e) => updateContributor(contributor.id, 'lastName', e.target.value }
                       />
                       <Input
                         placeholder="Suffix"
                         value={contributor.suffix || ""}
-                        onChange={(e) => updateContributor(contributor.id, 'suffix', e.target.value)}
+                        onChange={ (e) => updateContributor(contributor.id, 'suffix', e.target.value }
                       />
                       <Button 
                         type="button" 
                         variant="outline" 
                         size="sm" 
-                        onClick={() => removeContributor(contributor.id)}
+                        onClick={ () => removeContributor(contributor.id }
                         className="text-gray-600 hover:text-red-600"
                       >
                         Remove
@@ -2644,7 +2632,7 @@ export default function EditBook() {
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm text-gray-600 mt-1">
-                      Provide a description that will entice readers to buy your book. What is your book about? What makes it interesting? What should readers expect? This can be copied from the back cover of your book. Maximum {maxDescriptionCharacters.toLocaleString()} characters.
+                      Provide a description that will entice readers to buy your book. What is your book about? What makes it interesting? What should readers expect? This can be copied from the back cover of your book. Maximum { maxDescriptionCharacters.toLocaleString( } characters.
                     </p>
                   </div>
                 
@@ -2662,19 +2650,19 @@ export default function EditBook() {
                     </SelectContent>
                   </Select>
                   
-                  <Button type="button" variant="outline" size="sm" onClick={() => applyDescriptionFormatting('bold')}>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('bold' }>
                     <strong>B</strong>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={() => applyDescriptionFormatting('italic')}>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('italic' }>
                     <em>I</em>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={() => applyDescriptionFormatting('underline')}>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('underline' }>
                     <u>U</u>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={() => applyDescriptionFormatting('insertUnorderedList')}>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('insertUnorderedList' }>
                     • List
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={() => applyDescriptionFormatting('insertOrderedList')}>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('insertOrderedList' }>
                     1. List
                   </Button>
                   
@@ -2692,10 +2680,10 @@ export default function EditBook() {
                         <Input
                           placeholder="Enter URL"
                           value={linkUrl}
-                          onChange={(e) => setLinkUrl(e.target.value)}
+                          onChange={ (e) => setLinkUrl(e.target.value }
                         />
                         <div className="flex justify-end space-x-2">
-                          <Button variant="outline" onClick={() => setShowLinkDialog(false)}>
+                          <Button variant="outline" onClick={ () => setShowLinkDialog(false }>
                             Cancel
                           </Button>
                           <Button 
@@ -2729,7 +2717,7 @@ export default function EditBook() {
                   />
                   <input
                     type="hidden"
-                    {...form.register('description')}
+                    { ...form.register('description' }
                   />
                   <div className="flex justify-end">
                     <span className={`text-sm ${descriptionCharacterCount > maxDescriptionCharacters ? 'text-red-600' : 'text-green-600'}`}>
@@ -2751,7 +2739,7 @@ export default function EditBook() {
                     </p>
                     <RadioGroup 
                       value={form.watch("publishingRights") || ""} 
-                      onValueChange={(value) => form.setValue("publishingRights", value as any)}
+                      onValueChange={ (value) => form.setValue("publishingRights", value as any }
                     >
                       <div className="flex items-start space-x-2">
                         <RadioGroupItem value="owned" id="owned" className="mt-1 bg-[#ffffff]" />
@@ -2784,7 +2772,7 @@ export default function EditBook() {
                     </p>
                     <RadioGroup 
                       value={form.watch("hasExplicitContent") ? "yes" : "no"} 
-                      onValueChange={(value) => form.setValue("hasExplicitContent", value === "yes")}
+                      onValueChange={ (value) => form.setValue("hasExplicitContent", value === "yes" }
                     >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="yes" id="explicit-yes" className="bg-[#ffffff]" />
@@ -2808,14 +2796,14 @@ export default function EditBook() {
                         <Label htmlFor="readingAgeMin" className="text-sm font-medium">Minimum</Label>
                         <Select 
                           value={form.watch("readingAgeMin") || ""} 
-                          onValueChange={(value) => form.setValue("readingAgeMin", value || null)}
+                          onValueChange={ (value) => form.setValue("readingAgeMin", value || null }
                           disabled={form.watch("hasExplicitContent") || false}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select one" />
                           </SelectTrigger>
                           <SelectContent>
-                            {form.watch("hasExplicitContent") ? (
+                            { form.watch("hasExplicitContent") ? (
                               <SelectItem value="18">18+</SelectItem>
                             ) : (
                               <>
@@ -2839,7 +2827,7 @@ export default function EditBook() {
                                 <SelectItem value="17">17</SelectItem>
                                 <SelectItem value="18">18+</SelectItem>
                               </>
-                            )}
+                             }
                           </SelectContent>
                         </Select>
                       </div>
@@ -2847,7 +2835,7 @@ export default function EditBook() {
                         <Label htmlFor="readingAgeMax" className="text-sm font-medium">Maximum</Label>
                         <Select 
                           value={form.watch("readingAgeMax") || ""} 
-                          onValueChange={(value) => form.setValue("readingAgeMax", value || null)}
+                          onValueChange={ (value) => form.setValue("readingAgeMax", value || null }
                           disabled={form.watch("hasExplicitContent") || false}
                         >
                           <SelectTrigger>
@@ -2944,7 +2932,7 @@ export default function EditBook() {
                             <button 
                               type="button"
                               className="ml-2 text-blue-600 hover:text-blue-800"
-                              onClick={() => removeCategory(category)}
+                              onClick={ () => removeCategory(category }
                             >
                               ✏
                             </button>
@@ -2977,7 +2965,7 @@ export default function EditBook() {
                         <Checkbox
                           id="isLowContentBook"
                           checked={form.watch("isLowContentBook") || false}
-                          onCheckedChange={(checked) => form.setValue("isLowContentBook", checked as boolean)}
+                          onCheckedChange={ (checked) => form.setValue("isLowContentBook", checked as boolean }
                           className="mt-1"
                         />
                         <div className="flex-1">
@@ -2988,7 +2976,7 @@ export default function EditBook() {
                       </div>
                       
                       {/* Info Alert for Low-content */}
-                      {form.watch("isLowContentBook") && (
+                      { form.watch("isLowContentBook") && (
                         <div className="bg-blue-50 border border-blue-200 rounded-md p-4 flex items-start space-x-3">
                           <div className="flex-shrink-0">
                             <div className="w-5 h-5 rounded-full flex items-center justify-center bg-[#ff9500]">
@@ -3001,7 +2989,7 @@ export default function EditBook() {
                             </p>
                           </div>
                         </div>
-                      )}
+                       }
                     </div>
 
                     {/* Large-print book */}
@@ -3009,7 +2997,7 @@ export default function EditBook() {
                       <Checkbox
                         id="isLargePrintBook"
                         checked={form.watch("isLargePrintBook") || false}
-                        onCheckedChange={(checked) => form.setValue("isLargePrintBook", checked as boolean)}
+                        onCheckedChange={ (checked) => form.setValue("isLargePrintBook", checked as boolean }
                         className="mt-1"
                       />
                       <div className="flex-1">
@@ -3035,7 +3023,7 @@ export default function EditBook() {
                         {keyword}
                         <X 
                           className="w-3 h-3 cursor-pointer" 
-                          onClick={() => removeKeyword(keyword)}
+                          onClick={ () => removeKeyword(keyword }
                         />
                       </Badge>
                     ))}
@@ -3087,7 +3075,7 @@ export default function EditBook() {
                           type="radio"
                           id="sameDateOption"
                           name="publicationDateOption"
-                          checked={!form.watch("previouslyPublished")}
+                          checked={ !form.watch("previouslyPublished" }
                           onChange={() => {
                             form.setValue("previouslyPublished", false);
                             form.setValue("previousPublicationDate", null);
@@ -3111,7 +3099,7 @@ export default function EditBook() {
                             id="previouslyPublishedOption"
                             name="publicationDateOption"
                             checked={form.watch("previouslyPublished") || false}
-                            onChange={() => form.setValue("previouslyPublished", true)}
+                            onChange={ () => form.setValue("previouslyPublished", true }
                             className="w-4 h-4 text-[#38b6ff] border-gray-300 focus:ring-[#38b6ff]"
                           />
                         </div>
@@ -3133,7 +3121,7 @@ export default function EditBook() {
                           <Input
                             type="date"
                             value={form.watch("previousPublicationDate") || ""}
-                            onChange={(e) => form.setValue("previousPublicationDate", e.target.value || null)}
+                            onChange={ (e) => form.setValue("previousPublicationDate", e.target.value || null }
                             max={new Date().toISOString().split('T')[0]}
                             className="max-w-xs"
                             placeholder="MM/DD/YYYY"
@@ -3150,7 +3138,7 @@ export default function EditBook() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Release Date</h3>
                 
                 {/* Not Eligible Info Box - Only show if user selects Schedule AND book was previously published */}
-                {form.watch("releaseOption") === "scheduled" && form.watch("previouslyPublished") && (
+                { form.watch("releaseOption") === "scheduled" && form.watch("previouslyPublished") && (
                   <div className="bg-cyan-100 border border-cyan-300 rounded-md p-4 mb-4 flex items-start space-x-3">
                     <div className="flex-shrink-0">
                       <svg className="w-5 h-5 text-[#38b6ff]" fill="currentColor" viewBox="0 0 20 20">
@@ -3164,7 +3152,7 @@ export default function EditBook() {
                       </p>
                     </div>
                   </div>
-                )}
+                 }
                 
                 <div className="space-y-4">
                   <p className="text-sm text-gray-700 mb-4">
@@ -3209,7 +3197,7 @@ export default function EditBook() {
                           name="releaseOption"
                           value="scheduled"
                           checked={form.watch("releaseOption") === "scheduled"}
-                          disabled={!!form.watch("previouslyPublished")}
+                          disabled={ !!form.watch("previouslyPublished" }
                           onChange={(e) => {
                             if (e.target.checked && !form.watch("previouslyPublished")) {
                               form.setValue("releaseOption", "scheduled");
@@ -3227,9 +3215,9 @@ export default function EditBook() {
                               <Input
                                 type="date"
                                 value={form.watch("scheduledReleaseDate") || ""}
-                                onChange={(e) => form.setValue("scheduledReleaseDate", e.target.value || null)}
+                                onChange={ (e) => form.setValue("scheduledReleaseDate", e.target.value || null }
                                 min={new Date().toISOString().split('T')[0]}
-                                disabled={!!form.watch("previouslyPublished")}
+                                disabled={ !!form.watch("previouslyPublished" }
                                 className={`max-w-xs ${form.watch("previouslyPublished") ? "opacity-50 cursor-not-allowed" : ""}`}
                                 placeholder="Select release date"
                               />
@@ -3317,19 +3305,19 @@ export default function EditBook() {
                               }}
                               className={`${isbnValidationError ? 'border-red-500 focus:border-red-500' : ''}`}
                             />
-                            {isCheckingIsbn && (
+                            { isCheckingIsbn && (
                               <p className="text-sm text-blue-600 mt-1 flex items-center gap-1">
                                 <span className="animate-spin inline-block w-3 h-3 border border-current border-t-transparent rounded-full"></span>
                                 Checking ISBN/ASIN availability...
                               </p>
-                            )}
+                             }
                             {isbnValidationError && (
                               <p className="text-sm text-red-600 mt-1">{isbnValidationError}</p>
                             )}
                           </div>
                           <Button
                             type="button"
-                            onClick={() => setShowIsbnContentApplyDialog(true)}
+                            onClick={ () => setShowIsbnContentApplyDialog(true }
                             className="bg-[#ef4444] hover:bg-red-600 text-white flex-shrink-0"
                             disabled={!officialIsbnContentValue?.trim() || !!isbnValidationError || isCheckingIsbn}
                           >
@@ -3393,7 +3381,7 @@ export default function EditBook() {
                           </button>
                           <button 
                             className="p-3 text-left border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
-                            onClick={() => setTrimSizeModalOpen(true)}
+                            onClick={ () => setTrimSizeModalOpen(true }
                           >
                             Select a different size
                           </button>
@@ -3629,7 +3617,7 @@ export default function EditBook() {
                 <div className="space-y-2">
                   <Select 
                     value={form.watch("primaryMarketplace") || ""} 
-                    onValueChange={(value) => form.setValue("primaryMarketplace", value)}
+                    onValueChange={ (value) => form.setValue("primaryMarketplace", value }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select primary marketplace" />
@@ -3717,7 +3705,7 @@ export default function EditBook() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setLocation("/projects")}
+              onClick={ () => setLocation("/projects" }
             >
               Cancel
             </Button>
@@ -3741,14 +3729,14 @@ export default function EditBook() {
                 }}
                 disabled={saveBook.isPending || descriptionCharacterCount > maxDescriptionCharacters}
               >
-                {saveBook.isPending ? (
+                { saveBook.isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Saving...
                   </>
                 ) : (
                   "Save as Draft"
-                )}
+                 }
               </Button>
               {activeTab !== "pricing" && (
                 <Button
@@ -3760,14 +3748,14 @@ export default function EditBook() {
                   disabled={saveBook.isPending || descriptionCharacterCount > maxDescriptionCharacters}
                   className="bg-[#ff9500] hover:bg-orange-700"
                 >
-                  {saveBook.isPending ? (
+                  { saveBook.isPending ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       Saving...
                     </>
                   ) : (
                     "Save and Continue"
-                  )}
+                   }
                 </Button>
               )}
               {activeTab === "pricing" && (
@@ -3800,7 +3788,7 @@ export default function EditBook() {
           <ContentRecommendationSidebar
             bookId={bookId}
             isVisible={showAISidebar}
-            onToggle={() => setShowAISidebar(!showAISidebar)}
+            onToggle={ () => setShowAISidebar(!showAISidebar }
           />
         )}
       </div>
@@ -3844,12 +3832,12 @@ export default function EditBook() {
               </div>
 
               {/* Loading State */}
-              {loadingCategories && (
+              { loadingCategories && (
                 <div className="flex justify-center items-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin" />
                   <span className="ml-2">Loading categories...</span>
                 </div>
-              )}
+               }
 
 
 
@@ -3857,7 +3845,7 @@ export default function EditBook() {
               {!loadingCategories && marketplaceCategories.length > 0 && (
                 <div className="space-y-4">
                   {/* Multiple Category Selectors */}
-                  {Array.from({ length: Math.max(1, tempUISelections.length + (tempUISelections.length < 3 ? 1 : 0)) }, (_, index) => (
+                  { Array.from({ length: Math.max(1, tempUISelections.length + (tempUISelections.length < 3 ? 1 : 0 }, (_, index) => (
                     <div key={index} className="border border-gray-200 rounded">
                       <div 
                         className="flex items-center justify-between p-3 bg-gray-50 cursor-pointer hover:bg-gray-100"
@@ -3869,7 +3857,7 @@ export default function EditBook() {
                           </div>
                           <span className="font-medium">
                             Category {index + 1} 
-                            {tempUISelections[index] && ` - ${tempUISelections[index].split(' › ').pop()}`}
+                            { tempUISelections[index] && ` - ${tempUISelections[index].split(' › ').pop( }`}
                           </span>
                         </div>
                         <div className="flex space-x-2">
@@ -3940,13 +3928,13 @@ export default function EditBook() {
               )}
 
               {/* No Categories Available Message */}
-              {!loadingCategories && marketplaceCategories.length === 0 && (
+              { !loadingCategories && marketplaceCategories.length === 0 && (
                 <div className="text-center py-8">
                   <p className="text-gray-600">No categories available for the selected marketplace.</p>
                   <p className="text-sm text-gray-500 mt-2">Try selecting a different Primary Marketplace.</p>
 
                 </div>
-              )}
+               }
 
               {/* Selected Categories Summary */}
               <div className="space-y-4 bg-gray-50 rounded p-4">
@@ -4056,7 +4044,7 @@ export default function EditBook() {
                 {trimSizes.mostPopular.map((size) => (
                   <button
                     key={size.id}
-                    onClick={() => setSelectedTrimSize(size.id)}
+                    onClick={ () => setSelectedTrimSize(size.id }
                     className={`p-3 text-center border rounded-md text-sm transition-colors ${
                       selectedTrimSize === size.id
                         ? 'border-2 border-teal-500 bg-teal-50 font-medium'
@@ -4079,7 +4067,7 @@ export default function EditBook() {
                 {trimSizes.moreStandard.map((size) => (
                   <button
                     key={size.id}
-                    onClick={() => setSelectedTrimSize(size.id)}
+                    onClick={ () => setSelectedTrimSize(size.id }
                     className={`p-3 text-center border rounded-md text-sm transition-colors ${
                       selectedTrimSize === size.id
                         ? 'border-2 border-teal-500 bg-teal-50 font-medium'
@@ -4103,7 +4091,7 @@ export default function EditBook() {
                 {trimSizes.nonStandard.map((size) => (
                   <button
                     key={size.id}
-                    onClick={() => setSelectedTrimSize(size.id)}
+                    onClick={ () => setSelectedTrimSize(size.id }
                     className={`p-3 text-center border rounded-md text-sm transition-colors ${
                       selectedTrimSize === size.id
                         ? 'border-2 border-teal-500 bg-teal-50 font-medium'
@@ -4160,7 +4148,7 @@ export default function EditBook() {
           
           {/* Modal Footer */}
           <div className="flex justify-end space-x-2 pt-4 border-t">
-            <Button variant="outline" onClick={() => setTrimSizeModalOpen(false)}>
+            <Button variant="outline" onClick={ () => setTrimSizeModalOpen(false }>
               Cancel
             </Button>
             <Button 

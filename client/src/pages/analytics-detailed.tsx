@@ -116,7 +116,7 @@ export default function AnalyticsDetailed() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.totalRecords.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{ data.totalRecords.toLocaleString( }</div>
             <p className="text-xs text-muted-foreground">
               De {data.totalCurrencies} devises
             </p>
@@ -156,7 +156,7 @@ export default function AnalyticsDetailed() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-800">
-              {formatCurrency(data.totalInEUR, 'EUR')}
+              { formatCurrency(data.totalInEUR, 'EUR' }
             </div>
             <p className="text-xs text-green-600">
               Taux BCE (1er août 2025)
@@ -191,10 +191,10 @@ export default function AnalyticsDetailed() {
                 </div>
                 <div className="text-right">
                   <div className="font-bold text-lg">
-                    {formatCurrency(curr.totalRoyalty, curr.currency)}
+                    { formatCurrency(curr.totalRoyalty, curr.currency }
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {curr.formats.join(', ')}
+                    { curr.formats.join(', ' }
                   </div>
                 </div>
               </div>
@@ -222,16 +222,16 @@ export default function AnalyticsDetailed() {
                   <Badge className="font-mono">{conv.currency}</Badge>
                   <div className="text-sm">
                     <div className="font-medium">
-                      {formatCurrency(conv.originalAmount, conv.currency)}
+                      { formatCurrency(conv.originalAmount, conv.currency }
                     </div>
                     <div className="text-muted-foreground">
-                      Taux: 1 EUR = {conv.exchangeRate.toFixed(4)} {conv.currency}
+                      Taux: 1 EUR = { conv.exchangeRate.toFixed(4 } {conv.currency}
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="font-bold text-green-700">
-                    {formatCurrency(conv.amountInEUR, 'EUR')}
+                    { formatCurrency(conv.amountInEUR, 'EUR' }
                   </div>
                   <div className="text-xs text-muted-foreground">
                     {conv.transactionCount} trans. • {conv.formatsCount} formats
@@ -251,10 +251,10 @@ export default function AnalyticsDetailed() {
               </div>
               <div className="text-right">
                 <div className="text-3xl font-bold text-green-900">
-                  {formatCurrency(data.totalInEUR, 'EUR')}
+                  { formatCurrency(data.totalInEUR, 'EUR' }
                 </div>
                 <div className="text-sm text-green-700">
-                  {data.totalTransactions.toLocaleString()} transactions
+                  { data.totalTransactions.toLocaleString( } transactions
                 </div>
               </div>
             </div>
@@ -303,7 +303,7 @@ export default function AnalyticsDetailed() {
               </div>
               <div>
                 <span className="text-green-700">Total EUR converti:</span>
-                <span className="font-mono ml-2">{data.totalInEUR.toFixed(2)} EUR</span>
+                <span className="font-mono ml-2">{ data.totalInEUR.toFixed(2 } EUR</span>
               </div>
             </div>
           </div>

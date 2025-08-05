@@ -57,7 +57,7 @@ export default function ExchangeRates() {
     new Date(rates[0].updatedAt) : new Date();
   
   // Add USD with rate 1.0 since it's our base currency and filter out duplicate
-  const usdRate = { currency: 'USD', rate: '1.00000000', updatedAt: lastUpdated.toISOString() };
+  const usdRate = { currency: 'USD', rate: '1.00000000', updatedAt: lastUpdated.toISOString( };
   const filteredRates = rates.filter((rate: any) => rate.currency !== 'USD');
   const allRates = [usdRate, ...filteredRates];
   const majorRates = allRates.filter((rate: any) => majorCurrencies.includes(rate.currency));
@@ -151,7 +151,7 @@ export default function ExchangeRates() {
                           <div>
                             <p className="font-semibold text-lg">{rate.currency}</p>
                             <p className="text-sm text-muted-foreground">
-                              1 USD = {parseFloat(rate.rate).toFixed(4)} {rate.currency}
+                              1 USD = { parseFloat(rate.rate).toFixed(4 } {rate.currency}
                             </p>
                           </div>
                         </div>
@@ -161,7 +161,7 @@ export default function ExchangeRates() {
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">Rate:</span>
                           <span className="font-mono font-bold">
-                            {parseFloat(rate.rate).toFixed(4)}
+                            { parseFloat(rate.rate).toFixed(4 }
                           </span>
                         </div>
 
@@ -199,7 +199,7 @@ export default function ExchangeRates() {
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-semibold">{rate.currency}</span>
                           <Badge variant="outline" className="text-xs">
-                            {parseFloat(rate.rate).toFixed(4)}
+                            { parseFloat(rate.rate).toFixed(4 }
                           </Badge>
                         </div>
 
