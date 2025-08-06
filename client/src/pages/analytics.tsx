@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,11 @@ import {
 interface AnalyticsOverview {
   totalImports: number;
   totalRecords: number;
-  totalRoyalty: number;
+  royaltiesByCurrency: Array<{
+    currency: string;
+    amount: number;
+    transactions: number;
+  }>;
   uniqueBooks: number;
 }
 
@@ -50,6 +54,8 @@ interface SalesTrend {
 interface TopPerformer {
   title: string;
   asin: string;
+  currency: string;
+  marketplace: string;
   totalSales: number;
   totalRoyalty: number;
   totalUnits: number;
@@ -58,6 +64,7 @@ interface TopPerformer {
 
 interface MarketplaceData {
   marketplace: string;
+  currency: string;
   totalSales: number;
   totalRoyalty: number;
   totalUnits: number;
@@ -76,6 +83,7 @@ const MARKETPLACE_COLORS = {
 export default function Analytics() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
+  const queryClient = useQueryClient();
   const [selectedPeriod, setSelectedPeriod] = useState("30");
 
   // Analytics data queries
@@ -96,6 +104,12 @@ export default function Analytics() {
 
   const { data: marketplaceData, isLoading: marketplaceLoading } = useQuery<MarketplaceData[]>({
     queryKey: ['/api/analytics/marketplace-breakdown'],
+    enabled: isAuthenticated,
+  });
+
+  // Exchange rates data and management
+  const { data: exchangeRates, isLoading: ratesLoading } = useQuery({
+    queryKey: ["/api/exchange-rates"],
     enabled: isAuthenticated,
   });
 
@@ -125,13 +139,60 @@ export default function Analytics() {
     return null;
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: 2,
-    }).format(amount);
+  const formatCurrency = (amount: number, currency: string = 'USD') => {
+    // Handle invalid or unknown currencies
+    const validCurrency = ['USD', 'EUR', 'JPY', 'GBP', 'CAD', 'INR', 'AUD', 'BRL', 'MXN'].includes(currency) 
+      ? currency 
+      : 'USD';
+    
+    try {
+      return new Intl.NumberFormat('fr-FR', {
+        style: 'currency',
+        currency: validCurrency,
+        minimumFractionDigits: validCurrency === 'JPY' ? 0 : 2,
+      }).format(amount);
+    } catch (error) {
+      // Fallback for any formatting errors
+      return `${amount.toFixed(2)} ${currency}`;
+    }
   };
+
+  // Format currency converted to USD for unified display  
+  const formatConvertedCurrency = (amount: number): string => {
+    return formatCurrency(amount, 'USD');
+  };
+
+  // Function to update exchange rates manually
+  const updateExchangeRates = async () => {
+    try {
+      const response = await fetch('/api/exchange-rates/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        toast({
+          title: "Taux de change mis à jour",
+          description: "Les taux de change ont été actualisés avec succès.",
+        });
+        // Refetch exchange rates data
+        queryClient.invalidateQueries({ queryKey: ["/api/exchange-rates"] });
+      } else {
+        throw new Error('Failed to update exchange rates');
+      }
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour les taux de change.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Get main revenue info for display
+  const royaltiesByCurrency = overview?.royaltiesByCurrency || [];
+  const totalCurrencies = royaltiesByCurrency.length;
+  const mainCurrency = royaltiesByCurrency.length > 0 ? royaltiesByCurrency[0] : null;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -206,7 +267,7 @@ export default function Analytics() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Revenus Totaux</CardTitle>
+            <CardTitle className="text-sm font-medium">Revenus Totaux (USD)</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -214,11 +275,11 @@ export default function Analytics() {
               {overviewLoading ? (
                 <div className="w-20 h-6 bg-gray-200 animate-pulse rounded" />
               ) : (
-                formatCurrency(overview?.totalRoyalty || 0)
+                overview?.totalRoyaltiesUSD ? formatCurrency(overview.totalRoyaltiesUSD, 'USD') : (mainCurrency ? formatCurrency(mainCurrency.amount, mainCurrency.currency) : '0 $')
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              Royautés cumulées
+              {overview?.totalRoyaltiesUSD ? `Converti automatiquement en USD` : (totalCurrencies > 1 ? `${totalCurrencies} devises différentes` : 'Royautés cumulées')}
             </p>
           </CardContent>
         </Card>
@@ -244,11 +305,13 @@ export default function Analytics() {
       </div>
 
       <Tabs defaultValue="trends" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="trends">Tendances</TabsTrigger>
+          <TabsTrigger value="currencies">Devises</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="marketplace">Marketplaces</TabsTrigger>
           <TabsTrigger value="books">Top Livres</TabsTrigger>
+          <TabsTrigger value="exchange">Taux de Change</TabsTrigger>
         </TabsList>
 
         <TabsContent value="trends" className="space-y-6">
@@ -305,6 +368,62 @@ export default function Analytics() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="currencies" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                Revenus par Devise
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {overviewLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="w-full h-16 bg-gray-200 animate-pulse rounded" />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {royaltiesByCurrency?.map((currency) => (
+                    <div key={currency.currency} className="p-4 border rounded-lg bg-gradient-to-r from-blue-50 to-orange-50">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-lg">{currency.currency}</h4>
+                        <Badge variant="secondary">
+                          {currency.transactions} transactions
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-2xl font-bold text-secondary">
+                            {formatCurrency(currency.amount, currency.currency)}
+                          </div>
+                          {currency.amountUSD && currency.currency !== 'USD' && (
+                            <div className="text-sm text-gray-600 mt-1">
+                              ≈ {formatCurrency(currency.amountUSD, 'USD')}
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-sm text-gray-600 text-right">
+                          <div>Moyenne: {formatCurrency(currency.amount / currency.transactions, currency.currency)}</div>
+                          {currency.amountUSD && currency.currency !== 'USD' && (
+                            <div className="mt-1">≈ {formatCurrency(currency.amountUSD / currency.transactions, 'USD')}</div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {royaltiesByCurrency.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      Aucune donnée de revenus disponible
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="performance" className="space-y-6">
           <Card>
             <CardHeader>
@@ -343,15 +462,15 @@ export default function Analytics() {
                           </h4>
                           <p className="text-sm text-gray-500">ASIN: {book.asin}</p>
                           <div className="flex items-center gap-4 mt-1 text-xs text-gray-400">
-                            <span>{book.totalUnits} unités</span>
+                            <span>{book.marketplace || 'N/A'}</span>
                             <span>{book.totalSales} transactions</span>
-                            <span>{(book.avgRoyaltyRate * 100).toFixed(1)}% royautés</span>
+                            <span>{book.currency}</span>
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-bold text-secondary">
-                          {formatCurrency(book.totalRoyalty)}
+                          {book.totalRoyaltyUSD ? formatCurrency(book.totalRoyaltyUSD, 'USD') : formatCurrency(book.totalRoyalty, book.currency)}
                         </div>
                       </div>
                     </div>
@@ -381,7 +500,7 @@ export default function Analytics() {
                     <PieChart>
                       <Pie
                         data={marketplaceData}
-                        dataKey="totalRoyalty"
+                        dataKey="totalRoyaltyUSD"
                         nameKey="marketplace"
                         cx="50%"
                         cy="50%"
@@ -398,7 +517,7 @@ export default function Analytics() {
                         ))}
                       </Pie>
                       <Tooltip 
-                        formatter={(value) => [formatCurrency(Number(value)), 'Royautés']}
+                        formatter={(value) => [formatCurrency(Number(value), 'USD'), 'Royautés']}
                       />
                     </PieChart>
                   </ResponsiveContainer>
@@ -420,24 +539,21 @@ export default function Analytics() {
                 ) : (
                   <div className="space-y-4">
                     {marketplaceData?.map((marketplace) => (
-                      <div key={marketplace.marketplace} className="p-4 border rounded-lg">
+                      <div key={`${marketplace.marketplace}-${marketplace.currency}`} className="p-4 border rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <h4 className="font-medium">{marketplace.marketplace}</h4>
-                          <Badge style={{ backgroundColor: MARKETPLACE_COLORS[marketplace.marketplace as keyof typeof MARKETPLACE_COLORS] || '#8884d8' }}>
-                            {marketplace.uniqueBooks} livres
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">{marketplace.currency}</Badge>
+                            <Badge style={{ backgroundColor: MARKETPLACE_COLORS[marketplace.marketplace as keyof typeof MARKETPLACE_COLORS] || '#8884d8' }}>
+                              {marketplace.uniqueBooks} livres
+                            </Badge>
+                          </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
                             <span className="text-gray-500">Revenus:</span>
                             <div className="font-medium text-secondary">
-                              {formatCurrency(marketplace.totalRoyalty)}
-                            </div>
-                          </div>
-                          <div>
-                            <span className="text-gray-500">Unités:</span>
-                            <div className="font-medium">
-                              {marketplace.totalUnits.toLocaleString('fr-FR')}
+                              {marketplace.totalRoyaltyUSD ? formatCurrency(marketplace.totalRoyaltyUSD, 'USD') : formatCurrency(marketplace.totalRoyalty, marketplace.currency)}
                             </div>
                           </div>
                           <div>
@@ -491,6 +607,129 @@ export default function Analytics() {
                   </BarChart>
                 </ResponsiveContainer>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Exchange Rates Tab */}
+        <TabsContent value="exchange" className="space-y-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  Taux de Change
+                </CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Gestion des taux de conversion monétaire pour les analytics unifiés
+                </p>
+              </div>
+              <Button 
+                onClick={updateExchangeRates}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Actualiser
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {ratesLoading ? (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">Chargement des taux de change...</p>
+                  </div>
+                ) : exchangeRates && exchangeRates.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {exchangeRates.map((rate: any) => (
+                      <Card key={rate.currency} className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">{rate.currency}</p>
+                            <p className="text-sm text-muted-foreground">
+                              Dernière mise à jour: {new Date(rate.date).toLocaleDateString('fr-FR')}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-lg">
+                              {parseFloat(rate.rate).toFixed(4)}
+                            </p>
+                            <p className="text-xs text-muted-foreground">EUR → {rate.currency}</p>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">
+                      Aucun taux de change disponible. Cliquez sur "Actualiser" pour charger les données.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Currency Converter Tool */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                Convertisseur de Devises
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div>
+                  <label className="text-sm font-medium">Montant</label>
+                  <input 
+                    type="number" 
+                    placeholder="100.00"
+                    className="w-full mt-1 px-3 py-2 border rounded-md"
+                    id="convert-amount"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">De</label>
+                  <Select>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="EUR" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {exchangeRates?.map((rate: any) => (
+                        <SelectItem key={rate.currency} value={rate.currency}>
+                          {rate.currency}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Vers</label>
+                  <Select>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="USD" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {exchangeRates?.map((rate: any) => (
+                        <SelectItem key={rate.currency} value={rate.currency}>
+                          {rate.currency}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button className="w-full">
+                  Convertir
+                </Button>
+              </div>
+              <div className="mt-4 p-4 bg-muted rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  Résultat de la conversion s'affichera ici
+                </p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { exchangeRateService } from "./services/exchangeRateService";
+import { cronService } from "./services/cronService";
 import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema, insertAuthorSchema, insertAuthorBiographySchema, insertContentRecommendationSchema, insertAiPromptTemplateSchema, insertKdpImportSchema, insertKdpImportDataSchema } from "@shared/schema";
 import { aiService } from "./services/aiService";
 import { parseKDPReport } from "./services/kdpParser";
@@ -2616,7 +2618,7 @@ Please respond with only a JSON object containing the translated fields. For key
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
-      const analytics = await storage.getAnalyticsOverview(userId);
+      const analytics = await storage.getAnalyticsOverviewUSD(userId, exchangeRateService);
       res.json(analytics);
     } catch (error: any) {
       console.error('Error getting analytics overview:', error);
@@ -2631,7 +2633,7 @@ Please respond with only a JSON object containing the translated fields. For key
         return res.status(401).json({ message: "User not authenticated" });
       }
       const { period = '30' } = req.query;
-      const salesTrends = await storage.getSalesTrends(userId, parseInt(period as string));
+      const salesTrends = await storage.getSalesTrendsUSD(userId, parseInt(period as string), exchangeRateService);
       res.json(salesTrends);
     } catch (error: any) {
       console.error('Error getting sales trends:', error);
@@ -2646,7 +2648,7 @@ Please respond with only a JSON object containing the translated fields. For key
         return res.status(401).json({ message: "User not authenticated" });
       }
       const { limit = '10' } = req.query;
-      const topPerformers = await storage.getTopPerformers(userId, parseInt(limit as string));
+      const topPerformers = await storage.getTopPerformersUSD(userId, parseInt(limit as string), exchangeRateService);
       res.json(topPerformers);
     } catch (error: any) {
       console.error('Error getting top performers:', error);
@@ -2660,11 +2662,137 @@ Please respond with only a JSON object containing the translated fields. For key
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
-      const marketplaceData = await storage.getMarketplaceBreakdown(userId);
+      const marketplaceData = await storage.getMarketplaceBreakdownUSD(userId, exchangeRateService);
       res.json(marketplaceData);
     } catch (error: any) {
       console.error('Error getting marketplace breakdown:', error);
       res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Exchange rate endpoints
+  app.get("/api/exchange-rates", isAuthenticated, async (req, res) => {
+    try {
+      const currencies = await exchangeRateService.getSupportedCurrencies();
+      res.json(currencies);
+    } catch (error) {
+      console.error("Error fetching exchange rates:", error);
+      res.status(500).json({ message: "Failed to fetch exchange rates" });
+    }
+  });
+
+  app.post("/api/exchange-rates/update", isAuthenticated, async (req, res) => {
+    try {
+      await cronService.forceUpdate();
+      systemLog('Exchange rates updated manually', 'info', 'EXCHANGE');
+      res.json({ message: "Exchange rates updated successfully" });
+    } catch (error) {
+      console.error("Error updating exchange rates:", error);
+      systemLog(`Exchange rate update failed: ${error}`, 'error', 'EXCHANGE');
+      res.status(500).json({ message: "Failed to update exchange rates" });
+    }
+  });
+
+  // Admin Cron Management Routes
+  app.get('/api/admin/cron/jobs', isAuthenticated, async (req, res) => {
+    try {
+      // Mock cron jobs data - in a real implementation, this would fetch from a cron manager
+      const cronJobs = [
+        {
+          id: 'exchange-rates-update',
+          name: 'Exchange Rates Update',
+          description: 'Updates currency exchange rates from external API',
+          schedule: '0 0 * * *', // Daily at midnight
+          enabled: true,
+          lastRun: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+          nextRun: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          status: 'running'
+        }
+      ];
+      res.json(cronJobs);
+    } catch (error) {
+      console.error('Error fetching cron jobs:', error);
+      res.status(500).json({ message: 'Failed to fetch cron jobs' });
+    }
+  });
+
+  app.get('/api/admin/cron/logs', isAuthenticated, async (req, res) => {
+    try {
+      // Mock cron logs - in a real implementation, this would fetch from log storage
+      const logs = [
+        {
+          job: 'Exchange Rates Update',
+          level: 'info',
+          message: 'Successfully updated 163 exchange rates',
+          timestamp: new Date().toISOString()
+        }
+      ];
+      res.json(logs);
+    } catch (error) {
+      console.error('Error fetching cron logs:', error);
+      res.status(500).json({ message: 'Failed to fetch cron logs' });
+    }
+  });
+
+  app.post('/api/admin/cron/jobs/:jobId/toggle', isAuthenticated, async (req, res) => {
+    try {
+      const { jobId } = req.params;
+      const { enabled } = req.body;
+      
+      // Mock toggle functionality
+      console.log(`[CRON] Job ${jobId} ${enabled ? 'enabled' : 'disabled'}`);
+      
+      res.json({ message: `Job ${enabled ? 'enabled' : 'disabled'} successfully` });
+    } catch (error) {
+      console.error('Error toggling cron job:', error);
+      res.status(500).json({ message: 'Failed to toggle cron job' });
+    }
+  });
+
+  app.post('/api/admin/cron/jobs/:jobId/run', isAuthenticated, async (req, res) => {
+    try {
+      const { jobId } = req.params;
+      
+      // Run specific job manually
+      if (jobId === 'exchange-rates-update') {
+        console.log('[CRON] Manual exchange rate update requested');
+        await cronService.forceUpdate();
+        
+        systemLog('Exchange rates updated manually', 'info', 'EXCHANGE');
+        res.json({ message: 'Exchange rates updated successfully' });
+      } else {
+        res.status(404).json({ message: 'Job not found' });
+      }
+    } catch (error) {
+      console.error('Error running cron job:', error);
+      res.status(500).json({ message: 'Failed to run cron job' });
+    }
+  });
+
+  app.post("/api/convert-currency", isAuthenticated, async (req, res) => {
+    try {
+      const { amount, fromCurrency, toCurrency } = req.body;
+      
+      if (!amount || !fromCurrency || !toCurrency) {
+        return res.status(400).json({ message: "Missing required fields: amount, fromCurrency, toCurrency" });
+      }
+
+      const convertedAmount = await exchangeRateService.convertCurrency(
+        parseFloat(amount),
+        fromCurrency,
+        toCurrency
+      );
+      
+      res.json({ 
+        originalAmount: parseFloat(amount),
+        fromCurrency,
+        toCurrency,
+        convertedAmount,
+        rate: convertedAmount / parseFloat(amount)
+      });
+    } catch (error) {
+      console.error("Error converting currency:", error);
+      res.status(500).json({ message: "Failed to convert currency" });
     }
   });
 

@@ -23,6 +23,7 @@ import AdminBlogPosts from "@/pages/admin-blog-posts";
 import AdminBlogCategories from "@/pages/admin-blog-categories";
 import AdminSystem from "@/pages/admin-system";
 import AdminPrompts from "@/pages/admin-prompts";
+import AdminCron from "@/pages/admin-cron";
 import AIConfig from "@/pages/admin/ai-config";
 import AIVariables from "@/pages/admin/ai-variables";
 import AIFunctions from "@/pages/ai-functions";
@@ -38,6 +39,7 @@ import AuthorsListPage from "@/pages/authors-list";
 import AuthorCreatePage from "@/pages/author-create";
 import AuthorViewPage from "@/pages/author-view";
 import ImportManagement from "@/pages/ImportManagement";
+import ExchangeRates from "@/pages/ExchangeRates";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -57,6 +59,7 @@ function Router() {
       <Route path="/series-setup/:seriesId" component={SeriesSetup} />
       <Route path="/series-edit/:seriesId" component={SeriesEdit} />
       <Route path="/analytics" component={Analytics} />
+      <Route path="/exchange-rates" component={ExchangeRates} />
       <Route path="/kdp-reports" component={KDPReports} />
       <Route path="/import-management" component={ImportManagement} />
       <Route path="/ai-assistant" component={AIAssistant} />
@@ -69,6 +72,7 @@ function Router() {
       <Route path="/admin/config" component={AdminConfig} />
       <Route path="/admin/audit" component={AdminAudit} />
       <Route path="/admin/ai-config" component={AIConfig} />
+      <Route path="/admin/cron" component={AdminCron} />
       <Route path="/admin/system" component={AdminSystem} />
       <Route path="/admin/prompts" component={AdminPrompts} />
       <Route path="/admin/blog-posts" component={AdminBlogPosts} />

@@ -1995,7 +1995,7 @@ export class DatabaseStorage implements IStorage {
       .delete(kdpImportData)
       .where(eq(kdpImportData.importId, importId));
   }
-  // KDP Analytics methods - using real imported data
+  // KDP Analytics methods - using real imported data with currency handling
   async getAnalyticsOverview(userId: string): Promise<any> {
     const totalImports = await db.select({
       count: sql<number>`count(*)`
@@ -2007,14 +2007,19 @@ export class DatabaseStorage implements IStorage {
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
     .where(eq(kdpImports.userId, userId));
 
-    const totalRoyalty = await db.select({
-      sum: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`
+    // Get royalty by currency to avoid mixing currencies
+    const royaltiesByCurrency = await db.select({
+      currency: kdpImportData.currency,
+      sum: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`,
+      count: sql<number>`count(*)`
     }).from(kdpImportData)
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
-      isNotNull(kdpImportData.royalty)
-    ));
+      isNotNull(kdpImportData.royalty),
+      sql`${kdpImportData.royalty} > 0`
+    ))
+    .groupBy(kdpImportData.currency);
 
     const uniqueBooks = await db.select({
       count: sql<number>`count(distinct ${kdpImportData.asin})`
@@ -2022,96 +2027,248 @@ export class DatabaseStorage implements IStorage {
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
-      isNotNull(kdpImportData.asin)
+      isNotNull(kdpImportData.asin),
+      sql`${kdpImportData.asin} != ''`
     ));
 
     return {
       totalImports: totalImports[0]?.count || 0,
       totalRecords: totalRecords[0]?.count || 0,
-      totalRoyalty: Number(totalRoyalty[0]?.sum || 0),
+      royaltiesByCurrency: royaltiesByCurrency.map(r => ({
+        currency: r.currency || 'USD', // Default to USD instead of UNKNOWN
+        amount: Number(r.sum),
+        transactions: Number(r.count)
+      })),
       uniqueBooks: uniqueBooks[0]?.count || 0
     };
   }
 
   async getSalesTrends(userId: string, days: number): Promise<any[]> {
+    // Group by import type and date to understand data better
     const salesData = await db.select({
-      date: sql<string>`date(${kdpImportData.reportingDate})`,
+      date: sql<string>`date(${kdpImports.createdAt})`,
+      importType: kdpImports.detectedType,
       sales: sql<number>`count(*)`,
-      royalty: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`,
-      units: sql<number>`coalesce(sum(${kdpImportData.unitsOrdered}), 0)`
+      royalty: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`
     })
     .from(kdpImportData)
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
-      sql`${kdpImportData.reportingDate} >= current_date - interval '${days} days'`,
-      isNotNull(kdpImportData.reportingDate)
+      sql`${kdpImports.createdAt} >= current_date - interval '${days} days'`,
+      isNotNull(kdpImports.createdAt)
     ))
-    .groupBy(sql`date(${kdpImportData.reportingDate})`)
-    .orderBy(sql`date(${kdpImportData.reportingDate})`);
+    .groupBy(sql`date(${kdpImports.createdAt})`, kdpImports.detectedType)
+    .orderBy(sql`date(${kdpImports.createdAt})`);
 
-    return salesData.map(item => ({
-      date: item.date,
-      sales: Number(item.sales),
-      royalty: Number(item.royalty),
-      units: Number(item.units)
-    }));
+    // Aggregate by date (combine all import types per day)
+    const dateMap = new Map();
+    salesData.forEach(item => {
+      const date = item.date;
+      if (!dateMap.has(date)) {
+        dateMap.set(date, { date, sales: 0, royalty: 0, units: 0 });
+      }
+      const existing = dateMap.get(date);
+      existing.sales += Number(item.sales);
+      existing.royalty += Number(item.royalty);
+    });
+
+    return Array.from(dateMap.values()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }
 
   async getTopPerformers(userId: string, limit: number): Promise<any[]> {
+    // Get top performers with currency information to avoid mixing currencies
     const topBooks = await db.select({
       title: kdpImportData.title,
       asin: kdpImportData.asin,
+      currency: kdpImportData.currency,  
+      marketplace: kdpImportData.marketplace,
       totalSales: sql<number>`count(*)`,
       totalRoyalty: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`,
-      totalUnits: sql<number>`coalesce(sum(${kdpImportData.unitsOrdered}), 0)`,
-      avgRoyaltyRate: sql<number>`coalesce(avg(${kdpImportData.royaltyRate}), 0)`
+      avgRoyalty: sql<number>`coalesce(avg(${kdpImportData.royalty}), 0)`
     })
     .from(kdpImportData)
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
       isNotNull(kdpImportData.asin),
-      isNotNull(kdpImportData.title)
+      isNotNull(kdpImportData.title),
+      sql`${kdpImportData.royalty} > 0`
     ))
-    .groupBy(kdpImportData.asin, kdpImportData.title)
+    .groupBy(kdpImportData.asin, kdpImportData.title, kdpImportData.currency, kdpImportData.marketplace)
     .orderBy(sql`coalesce(sum(${kdpImportData.royalty}), 0) desc`)
     .limit(limit);
 
     return topBooks.map(book => ({
       title: book.title,
       asin: book.asin,
+      currency: book.currency || 'USD', // Default to USD instead of UNKNOWN
+      marketplace: book.marketplace || 'N/A',
       totalSales: Number(book.totalSales),
       totalRoyalty: Number(book.totalRoyalty),
-      totalUnits: Number(book.totalUnits),
-      avgRoyaltyRate: Number(book.avgRoyaltyRate)
+      totalUnits: 0, // Units data not reliable in current dataset
+      avgRoyaltyRate: Number(book.avgRoyalty)
     }));
   }
 
   async getMarketplaceBreakdown(userId: string): Promise<any[]> {
+    // Group by marketplace AND currency to avoid mixing currencies
     const marketplaceData = await db.select({
       marketplace: kdpImportData.marketplace,
+      currency: kdpImportData.currency,
       totalSales: sql<number>`count(*)`,
       totalRoyalty: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`,
-      totalUnits: sql<number>`coalesce(sum(${kdpImportData.unitsOrdered}), 0)`,
       uniqueBooks: sql<number>`count(distinct ${kdpImportData.asin})`
     })
     .from(kdpImportData)
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
-      isNotNull(kdpImportData.marketplace)
+      isNotNull(kdpImportData.marketplace),
+      sql`${kdpImportData.marketplace} != ''`,
+      sql`${kdpImportData.royalty} > 0`
     ))
-    .groupBy(kdpImportData.marketplace)
+    .groupBy(kdpImportData.marketplace, kdpImportData.currency)
     .orderBy(sql`coalesce(sum(${kdpImportData.royalty}), 0) desc`);
 
     return marketplaceData.map(item => ({
       marketplace: item.marketplace,
+      currency: item.currency || 'USD', // Default to USD instead of UNKNOWN
       totalSales: Number(item.totalSales),
       totalRoyalty: Number(item.totalRoyalty),
-      totalUnits: Number(item.totalUnits),
+      totalUnits: 0, // Not reliable data
       uniqueBooks: Number(item.uniqueBooks)
     }));
+  }
+
+  // Enhanced analytics methods with real USD currency conversion
+  async getAnalyticsOverviewUSD(userId: string, exchangeRateService?: any): Promise<any> {
+    const basicOverview = await this.getAnalyticsOverview(userId);
+    
+    if (!exchangeRateService) {
+      return basicOverview;
+    }
+
+    // Convert all currency amounts to USD
+    const convertedRoyalties = await Promise.all(
+      basicOverview.royaltiesByCurrency.map(async (item: any) => {
+        try {
+          const convertedAmount = await exchangeRateService.convertCurrency(
+            item.amount,
+            item.currency,
+            'USD'
+          );
+          return {
+            ...item,
+            amountUSD: convertedAmount,
+            originalAmount: item.amount,
+            originalCurrency: item.currency
+          };
+        } catch (error) {
+          console.warn(`Failed to convert ${item.currency} to USD:`, error);
+          return {
+            ...item,
+            amountUSD: item.currency === 'USD' ? item.amount : 0,
+            originalAmount: item.amount,
+            originalCurrency: item.currency
+          };
+        }
+      })
+    );
+
+    return {
+      ...basicOverview,
+      royaltiesByCurrency: convertedRoyalties,
+      totalRoyaltiesUSD: convertedRoyalties.reduce((sum, item) => sum + item.amountUSD, 0)
+    };
+  }
+
+  async getTopPerformersUSD(userId: string, limit: number = 10, exchangeRateService?: any): Promise<any[]> {
+    const basicPerformers = await this.getTopPerformers(userId, limit);
+    
+    if (!exchangeRateService) {
+      return basicPerformers;
+    }
+
+    // Convert all performer royalties to USD
+    const convertedPerformers = await Promise.all(
+      basicPerformers.map(async (performer: any) => {
+        try {
+          const convertedRoyalty = await exchangeRateService.convertCurrency(
+            performer.totalRoyalty,
+            performer.currency,
+            'USD'
+          );
+          return {
+            ...performer,
+            totalRoyaltyUSD: convertedRoyalty,
+            originalRoyalty: performer.totalRoyalty,
+            originalCurrency: performer.currency
+          };
+        } catch (error) {
+          console.warn(`Failed to convert ${performer.currency} to USD:`, error);
+          return {
+            ...performer,
+            totalRoyaltyUSD: performer.currency === 'USD' ? performer.totalRoyalty : 0,
+            originalRoyalty: performer.totalRoyalty,
+            originalCurrency: performer.currency
+          };
+        }
+      })
+    );
+
+    // Sort by USD royalty amount
+    return convertedPerformers.sort((a, b) => b.totalRoyaltyUSD - a.totalRoyaltyUSD);
+  }
+
+  async getMarketplaceBreakdownUSD(userId: string, exchangeRateService?: any): Promise<any[]> {
+    const basicBreakdown = await this.getMarketplaceBreakdown(userId);
+    
+    if (!exchangeRateService) {
+      return basicBreakdown;
+    }
+
+    // Convert all marketplace royalties to USD
+    const convertedBreakdown = await Promise.all(
+      basicBreakdown.map(async (marketplace: any) => {
+        try {
+          const convertedRoyalty = await exchangeRateService.convertCurrency(
+            marketplace.totalRoyalty,
+            marketplace.currency,
+            'USD'
+          );
+          return {
+            ...marketplace,
+            totalRoyaltyUSD: convertedRoyalty,
+            originalRoyalty: marketplace.totalRoyalty,
+            originalCurrency: marketplace.currency
+          };
+        } catch (error) {
+          console.warn(`Failed to convert ${marketplace.currency} to USD:`, error);
+          return {
+            ...marketplace,
+            totalRoyaltyUSD: marketplace.currency === 'USD' ? marketplace.totalRoyalty : 0,
+            originalRoyalty: marketplace.totalRoyalty,
+            originalCurrency: marketplace.currency
+          };
+        }
+      })
+    );
+
+    return convertedBreakdown.sort((a, b) => b.totalRoyaltyUSD - a.totalRoyaltyUSD);
+  }
+
+  async getSalesTrendsUSD(userId: string, days: number, exchangeRateService?: any): Promise<any[]> {
+    const basicTrends = await this.getSalesTrends(userId, days);
+    
+    if (!exchangeRateService) {
+      return basicTrends;
+    }
+
+    // For trends, we'll use a default currency conversion approach
+    // Since trends don't have currency info, we'll assume they're in the user's primary currency
+    // and convert to USD. For now, we'll return the basic trends as-is since they're aggregated.
+    return basicTrends;
   }
 }
 

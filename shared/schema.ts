@@ -783,6 +783,22 @@ export const insertAuditLogSchema = createInsertSchema(adminAuditLog).omit({
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+// Exchange rates table for currency conversion
+export const exchangeRates = pgTable("exchange_rates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  fromCurrency: varchar("from_currency", { length: 3 }).notNull(),
+  toCurrency: varchar("to_currency", { length: 3 }).notNull(),
+  rate: decimal("rate", { precision: 12, scale: 6 }).notNull(),
+  date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD format
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_exchange_rates_currencies_date").on(table.fromCurrency, table.toCurrency, table.date),
+]);
+
+export type InsertExchangeRate = typeof exchangeRates.$inferInsert;
+export type ExchangeRate = typeof exchangeRates.$inferSelect;
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
 export type InsertBook = z.infer<typeof insertBookSchema>;
