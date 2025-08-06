@@ -25,18 +25,17 @@ export default function AIAssistant() {
   const { data: generations } = useQuery({
     queryKey: ["/api/ai/generations"],
     enabled: isAuthenticated,
-  });
+  };
 
   const generateMutation = useMutation({
-    mutationFn: async (data: { type: string; prompt: string; title?: string }) => {
-      return await apiRequest("POST", "/api/ai/generate", data);
+    mutationFn: async (data: { type: string; prompt: string; title?: string)} => { return await apiRequest("/api/ai/generate", { method: "POST", body: JSON.stringify(data)};
     },
     onSuccess: async (response) => {
       const result = await response.json();
       setGeneratedContent(result.content);
       toast({
         title: "Content Generated",
-        description: `Used ${result.tokensUsed} tokens`,
+        description: `Used ${result.tokensUsed)} tokens`,
       });
     },
     onError: (error) => {
@@ -44,8 +43,7 @@ export default function AIAssistant() {
         toast({
           title: "Unauthorized",
           description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
+          variant: "destructive",)};
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
@@ -55,7 +53,7 @@ export default function AIAssistant() {
         title: "Generation Failed",
         description: error.message || "Failed to generate content",
         variant: "destructive",
-      });
+      };
     },
   });
 
@@ -64,8 +62,7 @@ export default function AIAssistant() {
       toast({
         title: "Unauthorized",
         description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
+        variant: "destructive",)};
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
@@ -78,8 +75,7 @@ export default function AIAssistant() {
       toast({
         title: "Missing Information",
         description: "Please select a content type and enter a prompt",
-        variant: "destructive",
-      });
+        variant: "destructive",)};
       return;
     }
 
@@ -89,22 +85,21 @@ export default function AIAssistant() {
     //     title: "Premium Feature",
     //     description: "AI content generation requires a premium subscription",
     //     variant: "destructive",
-    //   });
+    //)};
     //   return;
     // }
 
     generateMutation.mutate({
       type: selectedType,
       prompt,
-    });
+    };
   };
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(generatedContent);
     toast({
       title: "Copied",
-      description: "Content copied to clipboard",
-    });
+      description: "Content copied to clipboard",)};
   };
 
   if (isLoading) {
@@ -154,7 +149,7 @@ export default function AIAssistant() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Generation Form */}
+              {/* Generation Form */)}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
@@ -186,7 +181,7 @@ export default function AIAssistant() {
                     </label>
                     <Textarea
                       value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
+                      onChange={ (e) => setPrompt(e.target.value )}
                       placeholder="Describe what you want the AI to generate..."
                       rows={6}
                       className="resize-none"
@@ -195,10 +190,10 @@ export default function AIAssistant() {
 
                   <Button
                     onClick={handleGenerate}
-                    disabled={generateMutation.isPending || !selectedType || !prompt.trim()}
+                    disabled={ generateMutation.isPending || !selectedType || !prompt.trim()}
                     className="w-full bg-primary hover:bg-primary/90"
                   >
-                    {generateMutation.isPending ? (
+                    { generateMutation.isPending ? (
                       <>
                         <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
                         Generating...
@@ -207,8 +202,7 @@ export default function AIAssistant() {
                       <>
                         <Sparkles className="w-4 h-4 mr-2" />
                         Generate Content
-                      </>
-                    )}
+                      </>)}
                   </Button>
                 </CardContent>
               </Card>
@@ -222,7 +216,7 @@ export default function AIAssistant() {
                   {generatedContent ? (
                     <div className="space-y-4">
                       <div className="bg-gray-50 p-4 rounded-lg">
-                        <pre className="whitespace-pre-wrap text-sm">{generatedContent}</pre>
+                        <pre className="whitespace-pre-wrap text-sm">{generatedContent)}</pre>
                       </div>
                       <div className="flex space-x-2">
                         <Button onClick={copyToClipboard} variant="outline" size="sm">
@@ -255,16 +249,16 @@ export default function AIAssistant() {
               <CardContent>
                 <div className="space-y-4">
                   {(generations as any[]).slice(0, 5).map((generation: any) => (
-                    <div key={generation.id} className="border-b border-gray-200 pb-4 last:border-b-0">
+                    <div key={generation.id)} className="border-b border-gray-200 pb-4 last:border-b-0">
                       <div className="flex items-center justify-between mb-2">
                         <Badge variant="outline">{generation.type}</Badge>
                         <span className="text-xs text-gray-500">
-                          {new Date(generation.createdAt).toLocaleDateString()}
+                          { new Date(generation.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                       <p className="text-sm text-gray-600 mb-2">{generation.prompt}</p>
                       <div className="bg-gray-50 p-3 rounded text-xs">
-                        {generation.response.substring(0, 200)}...
+                        { generation.response.substring(0, 200)}...
                       </div>
                     </div>
                   ))}
