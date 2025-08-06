@@ -16,6 +16,7 @@ import {
   Users,
   Filter
 } from 'lucide-react';
+import Layout from '@/components/Layout';
 
 interface MasterBook {
   id: string;
@@ -113,8 +114,8 @@ const MasterBooksPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-        <div className="max-w-7xl mx-auto">
+      <Layout>
+        <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             {[...Array(4)].map((_, i) => (
               <Card key={i} className="animate-pulse">
@@ -126,34 +127,36 @@ const MasterBooksPage: React.FC = () => {
             ))}
           </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 flex items-center justify-center">
-        <Card className="max-w-md w-full">
-          <CardContent className="p-6 text-center">
-            <h2 className="text-xl font-semibold mb-2">Erreur de chargement</h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Impossible de charger les données des livres maîtres.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <Layout>
+        <div className="p-6 flex items-center justify-center">
+          <Card className="max-w-md w-full">
+            <CardContent className="p-6 text-center">
+              <h2 className="text-xl font-semibold mb-2">Erreur de chargement</h2>
+              <p className="text-gray-600 dark:text-gray-400">
+                Impossible de charger les données des livres maîtres.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-      <div className="max-w-7xl mx-auto">
+    <Layout>
+      <div className="p-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             Livres Maîtres - Vue d'ensemble ASIN
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-muted-foreground">
             Analyse consolidée de tous vos livres par ASIN avec données de ventes et paiements
           </p>
         </div>
@@ -165,10 +168,10 @@ const MasterBooksPage: React.FC = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    <p className="text-sm font-medium text-muted-foreground">
                       Livres totaux
                     </p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-2xl font-bold text-foreground">
                       {aggregateStats.totalBooks}
                     </p>
                   </div>
@@ -181,7 +184,7 @@ const MasterBooksPage: React.FC = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    <p className="text-sm font-medium text-muted-foreground">
                       Revenus totaux (USD)
                     </p>
                     <p className="text-2xl font-bold text-green-600">
@@ -197,7 +200,7 @@ const MasterBooksPage: React.FC = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    <p className="text-sm font-medium text-muted-foreground">
                       Ventes totales
                     </p>
                     <p className="text-2xl font-bold text-orange-600">
@@ -213,7 +216,7 @@ const MasterBooksPage: React.FC = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    <p className="text-sm font-medium text-muted-foreground">
                       Pages KENP lues
                     </p>
                     <p className="text-2xl font-bold text-purple-600">
@@ -247,7 +250,7 @@ const MasterBooksPage: React.FC = () => {
                 <select 
                   value={selectedFormat} 
                   onChange={(e) => setSelectedFormat(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
+                  className="px-3 py-2 border border-input rounded-md bg-background text-foreground"
                 >
                   <option value="all">Tous formats</option>
                   {aggregateStats?.formats.map(format => (
@@ -258,7 +261,7 @@ const MasterBooksPage: React.FC = () => {
                 <select 
                   value={sortBy} 
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
+                  className="px-3 py-2 border border-input rounded-md bg-background text-foreground"
                 >
                   <option value="revenue">Trier par revenus</option>
                   <option value="sales">Trier par ventes</option>
@@ -279,11 +282,11 @@ const MasterBooksPage: React.FC = () => {
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                        <h3 className="text-lg font-semibold text-foreground mb-1">
                           {book.title}
                         </h3>
                         {book.authorName && (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                          <p className="text-sm text-muted-foreground mb-2">
                             par {book.authorName}
                           </p>
                         )}
@@ -311,14 +314,14 @@ const MasterBooksPage: React.FC = () => {
                         <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                           {book.netUnitsSold}
                         </p>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">Ventes nettes</p>
+                        <p className="text-xs text-muted-foreground">Ventes nettes</p>
                       </div>
                       
                       <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                         <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                           ${parseFloat(book.totalRoyaltiesUSD).toFixed(2)}
                         </p>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">Revenus USD</p>
+                        <p className="text-xs text-muted-foreground">Revenus USD</p>
                       </div>
 
                       {book.totalKenpRead > 0 && (
@@ -326,20 +329,20 @@ const MasterBooksPage: React.FC = () => {
                           <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                             {book.totalKenpRead.toLocaleString()}
                           </p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400">Pages KENP</p>
+                          <p className="text-xs text-muted-foreground">Pages KENP</p>
                         </div>
                       )}
 
-                      <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                      <div className="text-center p-3 bg-muted rounded-lg">
+                        <p className="text-lg font-semibold text-foreground">
                           {Object.keys(book.marketplaceBreakdown || {}).length}
                         </p>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">Marketplaces</p>
+                        <p className="text-xs text-muted-foreground">Marketplaces</p>
                       </div>
                     </div>
 
                     {/* Dates */}
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                       {book.firstSaleDate && (
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
@@ -358,14 +361,14 @@ const MasterBooksPage: React.FC = () => {
                   {/* Original Currencies */}
                   {book.totalRoyaltiesOriginal && Object.keys(book.totalRoyaltiesOriginal).length > 0 && (
                     <div className="min-w-[200px]">
-                      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <h4 className="text-sm font-medium text-foreground mb-2">
                         Revenus par devise
                       </h4>
                       <div className="space-y-2">
                         {Object.entries(book.totalRoyaltiesOriginal).map(([currency, amount]) => (
                           <div key={currency} className="flex justify-between text-sm">
-                            <span className="text-gray-600 dark:text-gray-400">{currency}:</span>
-                            <span className="font-medium">{amount.toFixed(2)}</span>
+                            <span className="text-muted-foreground">{currency}:</span>
+                            <span className="font-medium text-foreground">{amount.toFixed(2)}</span>
                           </div>
                         ))}
                       </div>
@@ -380,11 +383,11 @@ const MasterBooksPage: React.FC = () => {
         {filteredAndSortedBooks.length === 0 && (
           <Card>
             <CardContent className="p-12 text-center">
-              <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">
                 Aucun livre trouvé
               </h3>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-muted-foreground">
                 {searchTerm 
                   ? `Aucun livre ne correspond à "${searchTerm}"`
                   : "Aucun livre master trouvé. Importez des données KDP pour commencer."}
@@ -393,7 +396,7 @@ const MasterBooksPage: React.FC = () => {
           </Card>
         )}
       </div>
-    </div>
+    </Layout>
   );
 };
 
