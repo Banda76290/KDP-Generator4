@@ -1,18 +1,23 @@
 #!/usr/bin/env node
+const { spawn } = require('child_process');
 
-// Simple production runner using require
-const { execSync } = require('child_process');
+// Set environment variables
+process.env.NODE_ENV = 'development';
 
-console.log('🚀 Starting KDP Generator in production mode...');
-process.env.NODE_ENV = 'production';
+// Run the server using npx
+const server = spawn('npx', ['tsx', 'server/index.ts'], {
+  stdio: 'inherit',
+  env: process.env
+});
 
-try {
-  // Use tsx from node_modules directly
-  execSync('./node_modules/.bin/tsx server/index.ts', {
-    stdio: 'inherit',
-    env: process.env
-  });
-} catch (error) {
-  console.error('Server crashed:', error.message);
+server.on('error', (err) => {
+  console.error('Failed to start server:', err);
   process.exit(1);
-}
+});
+
+server.on('exit', (code) => {
+  if (code !== 0) {
+    console.error(`Server exited with code ${code}`);
+    process.exit(code);
+  }
+});

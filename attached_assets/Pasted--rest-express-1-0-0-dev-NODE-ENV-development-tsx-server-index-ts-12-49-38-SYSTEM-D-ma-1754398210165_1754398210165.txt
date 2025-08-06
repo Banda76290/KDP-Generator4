@@ -1,0 +1,33 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+[12:49:38] ℹ️ [SYSTEM] 🚀 Démarrage du serveur KDP Generator
+[12:49:38] ℹ️ [SYSTEM] 🔧 Configuration des routes API...
+Setting up development auth - REPLIT_DOMAINS not configured
+Development user created with superadmin privileges
+[12:49:38] ℹ️ [AUTH] 🔐 Authentification configurée
+[CRON] Starting exchange rate update service
+[EXCHANGE] Updating exchange rates...
+[EXCHANGE] Fetching rates from: https://api.exchangerate-api.com/v4/latest/USD
+[CRON] Exchange rate updates scheduled every 24 hours
+12:49:38 PM [express] serving on port 5000
+[EXCHANGE] Response status: 200
+[EXCHANGE] Successfully fetched 163 exchange rates
+12:49:40 PM [vite] (client) Pre-transform error: /home/runner/workspace/client/src/pages/projects.tsx: Unexpected token, expected "}" (501:89)
+
+  499 |                                       <h4 
+  500 |                                         className="text-sm font-medium text-gray-900 leading-tight break-words cursor-pointer hover:!text-blue-600 transition-colors"
+> 501 |                                         onClick={() => setLocation(`/books/edit/${book.id)}`)}
+      |                                                                                          ^
+  502 |                                       >
+  503 |                                         {book.title}
+  504 |                                       </h4>
+  Plugin: vite:react-babel
+  File: /home/runner/workspace/client/src/pages/projects.tsx:501:89
+  499|                                        <h4 
+  500|                                          className="text-sm font-medium text-gray-900 leading-tight break-words cursor-pointer hover:!text-blue-600 transition-colors"
+  501|                                          onClick={() => setLocation(`/books/edit/${book.id)}`)}
+     |                                                                                           ^
+  502|                                        >
+  503|   

@@ -45,6 +45,7 @@ The application follows a modern full-stack architecture with clear separation b
 - **AI Prompt Integration System**: Complete integration between AI prompt administration and execution systems. Database-configured prompts automatically appear in AI Functions interface and are used for content generation. Hybrid system combines database templates with static fallback functions, with database templates taking priority.
 - **Security Enhancements**: XSS vulnerability patched in author biography editor (August 2025). Replaced unsafe innerHTML assignment with DOMParser for secure HTML sanitization without script execution risk.
 - **Expert Analytics Method**: Implemented advanced KDP revenue analysis using detailed sheet extraction method (August 2025). New system extracts data from eBook Royalty + Paperback Royalty + Hardcover Royalty sheets only, excluding Combined Sales duplicates. Preserves original currency amounts and converts to EUR using official BCE exchange rates. Results validated against external expert analysis showing ~9,757 EUR total vs previous incorrect ~3,042 calculations.
+- **API Call Bug Fix**: Fixed critical API calling pattern across entire codebase (August 2025). Corrected multiple apiRequest() calls that used incorrect parameter order, causing "Unexpected token JSON" errors. All functions now use proper signature: apiRequest(url, {method, body}) instead of apiRequest(method, url). Fixed in admin system, book operations (delete, duplicate, translate), and marketplace category handling.
 
 ## External Dependencies
 

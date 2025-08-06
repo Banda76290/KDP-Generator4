@@ -46,8 +46,7 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
     monthlyTokenLimit: limit.monthlyTokenLimit,
     dailyRequestLimit: limit.dailyRequestLimit,
     maxTokensPerRequest: limit.maxTokensPerRequest || 1000,
-    allowedModels: limit.allowedModels || []
-  });
+    allowedModels: limit.allowedModels || [])};
 
   const [unlimitedTokens, setUnlimitedTokens] = useState(limit.monthlyTokenLimit === null);
   const [unlimitedRequests, setUnlimitedRequests] = useState(limit.dailyRequestLimit === null);
@@ -70,8 +69,7 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
       ...prev,
       allowedModels: prev.allowedModels.includes(modelName)
         ? prev.allowedModels.filter(m => m !== modelName)
-        : [...prev.allowedModels, modelName]
-    }));
+        : [...prev.allowedModels, modelName])});
   };
 
   const selectedTier = SUBSCRIPTION_TIERS.find(tier => tier.value === formData.subscriptionTier);
@@ -94,14 +92,14 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
                 <Label htmlFor="tier">Niveau</Label>
                 <Select 
                   value={formData.subscriptionTier} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, subscriptionTier: value }))}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, subscriptionTier: value)}}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {SUBSCRIPTION_TIERS.map(tier => (
-                      <SelectItem key={tier.value} value={tier.value}>
+                      <SelectItem key={tier.value)} value={tier.value}>
                         <div className="flex items-center gap-2">
                           <div className={`w-3 h-3 rounded-full ${tier.color}`} />
                           {tier.label}
@@ -139,7 +137,7 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
                     onChange={(e) => setFormData(prev => ({ 
                       ...prev, 
                       monthlyTokenLimit: parseInt(e.target.value) || 0 
-                    }))}
+                    ))}}
                     placeholder="Ex: 50000"
                   />
                 </div>
@@ -164,7 +162,7 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
                     onChange={(e) => setFormData(prev => ({ 
                       ...prev, 
                       dailyRequestLimit: parseInt(e.target.value) || 0 
-                    }))}
+                    ))}}
                     placeholder="Ex: 100"
                   />
                 </div>
@@ -180,7 +178,7 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
                     onChange={(e) => setFormData(prev => ({ 
                       ...prev, 
                       maxTokensPerRequest: parseInt(e.target.value) || 1000 
-                    }))}
+                    ))}}
                   />
                 </div>
               </div>
@@ -193,7 +191,7 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
               
               <div className="space-y-3">
                 {AVAILABLE_MODELS.map(model => (
-                  <div key={model} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div key={model)} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
                       <span className="font-medium">{model}</span>
                       <p className="text-sm text-muted-foreground">
@@ -204,8 +202,8 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
                       </p>
                     </div>
                     <Switch
-                      checked={formData.allowedModels.includes(model)}
-                      onCheckedChange={() => toggleModel(model)}
+                      checked={ formData.allowedModels.includes(model)}
+                      onCheckedChange={ () => toggleModel(model)}
                     />
                   </div>
                 ))}
@@ -215,10 +213,10 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
                 <Label className="text-sm font-medium">Modèles sélectionnés:</Label>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {formData.allowedModels.map(model => (
-                    <Badge key={model} variant="secondary" className="flex items-center gap-1">
+                    <Badge key={model)} variant="secondary" className="flex items-center gap-1">
                       {model}
                       <button
-                        onClick={() => toggleModel(model)}
+                        onClick={ () => toggleModel(model )}
                         className="ml-1 hover:bg-gray-300 rounded-full p-0.5"
                       >
                         <X className="w-3 h-3" />
@@ -243,11 +241,11 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
                 </div>
                 <div>
                   <span className="font-medium">Tokens/mois:</span>
-                  <p className="mt-1">{unlimitedTokens ? 'Illimité' : (formData.monthlyTokenLimit?.toLocaleString() || '0')}</p>
+                  <p className="mt-1">{ unlimitedTokens ? 'Illimité' : (formData.monthlyTokenLimit?.toLocaleString() || '0')}</p>
                 </div>
                 <div>
                   <span className="font-medium">Requêtes/jour:</span>
-                  <p className="mt-1">{unlimitedRequests ? 'Illimité' : (formData.dailyRequestLimit?.toLocaleString() || '0')}</p>
+                  <p className="mt-1">{ unlimitedRequests ? 'Illimité' : (formData.dailyRequestLimit?.toLocaleString() || '0')}</p>
                 </div>
                 <div>
                   <span className="font-medium">Modèles:</span>

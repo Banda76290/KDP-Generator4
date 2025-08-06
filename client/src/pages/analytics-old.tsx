@@ -90,36 +90,35 @@ export default function Analytics() {
   const { data: overview, isLoading: overviewLoading } = useQuery<AnalyticsOverview>({
     queryKey: ['/api/analytics/overview'],
     enabled: isAuthenticated,
-  });
+  };
 
   const { data: salesTrends, isLoading: trendsLoading } = useQuery<SalesTrend[]>({
     queryKey: ['/api/analytics/sales-trends', selectedPeriod],
     enabled: isAuthenticated,
-  });
+  };
 
   const { data: topPerformers, isLoading: performersLoading } = useQuery<TopPerformer[]>({
     queryKey: ['/api/analytics/top-performers'],
     enabled: isAuthenticated,
-  });
+  };
 
   const { data: marketplaceData, isLoading: marketplaceLoading } = useQuery<MarketplaceData[]>({
     queryKey: ['/api/analytics/marketplace-breakdown'],
     enabled: isAuthenticated,
-  });
+  };
 
   // Exchange rates data and management
   const { data: exchangeRates, isLoading: ratesLoading } = useQuery({
     queryKey: ["/api/exchange-rates"],
     enabled: isAuthenticated,
-  });
+  };
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       toast({
         title: "Unauthorized",
         description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
+        variant: "destructive",)};
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
@@ -149,10 +148,8 @@ export default function Analytics() {
       return new Intl.NumberFormat('fr-FR', {
         style: 'currency',
         currency: validCurrency,
-        minimumFractionDigits: validCurrency === 'JPY' ? 0 : 2,
-      }).format(amount);
-    } catch (error) {
-      // Fallback for any formatting errors
+        minimumFractionDigits: validCurrency === 'JPY' ? 0 : 2,)}.format(amount);
+    } catch (error) { // Fallback for any formatting errors
       return `${amount.toFixed(2)} ${currency}`;
     }
   };
@@ -167,16 +164,15 @@ export default function Analytics() {
     try {
       const response = await fetch('/api/exchange-rates/update', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json')}
       });
       
       if (response.ok) {
         toast({
           title: "Taux de change mis à jour",
-          description: "Les taux de change ont été actualisés avec succès.",
-        });
+          description: "Les taux de change ont été actualisés avec succès.",)};
         // Refetch exchange rates data
-        queryClient.invalidateQueries({ queryKey: ["/api/exchange-rates"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/exchange-rates"] };
       } else {
         throw new Error('Failed to update exchange rates');
       }
@@ -184,8 +180,7 @@ export default function Analytics() {
       toast({
         title: "Erreur",
         description: "Impossible de mettre à jour les taux de change.",
-        variant: "destructive",
-      });
+        variant: "destructive",)};
     }
   };
 
@@ -197,8 +192,7 @@ export default function Analytics() {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
       month: 'short',
-      day: 'numeric',
-    });
+      day: 'numeric',)};
   };
 
   return (
@@ -234,11 +228,10 @@ export default function Analytics() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-primary">
-              {overviewLoading ? (
+              { overviewLoading ? (
                 <div className="w-16 h-6 bg-gray-200 animate-pulse rounded" />
               ) : (
-                overview?.totalImports || 0
-              )}
+                overview?.totalImports || 0)}
             </div>
             <p className="text-xs text-muted-foreground">
               Fichiers KDP importés
@@ -253,11 +246,10 @@ export default function Analytics() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-primary">
-              {overviewLoading ? (
+              { overviewLoading ? (
                 <div className="w-16 h-6 bg-gray-200 animate-pulse rounded" />
               ) : (
-                overview?.totalRecords?.toLocaleString('fr-FR') || 0
-              )}
+                overview?.totalRecords?.toLocaleString('fr-FR') || 0)}
             </div>
             <p className="text-xs text-muted-foreground">
               Transactions importées
@@ -272,14 +264,13 @@ export default function Analytics() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-secondary">
-              {overviewLoading ? (
+              { overviewLoading ? (
                 <div className="w-20 h-6 bg-gray-200 animate-pulse rounded" />
               ) : (
-                overview?.totalRoyaltiesUSD ? formatCurrency(overview.totalRoyaltiesUSD, 'USD') : (mainCurrency ? formatCurrency(mainCurrency.amount, mainCurrency.currency) : '0 $')
-              )}
+                overview?.totalRoyaltiesUSD ? formatCurrency(overview.totalRoyaltiesUSD, 'USD') : (mainCurrency ? formatCurrency(mainCurrency.amount, mainCurrency.currency) : '0 $')}
             </div>
             <p className="text-xs text-muted-foreground">
-              {overview?.totalRoyaltiesUSD ? `Converti automatiquement en USD` : (totalCurrencies > 1 ? `${totalCurrencies} devises différentes` : 'Royautés cumulées')}
+              {overview?.totalRoyaltiesUSD ? `Converti automatiquement en USD` : (totalCurrencies > 1 ? `${totalCurrencies)} devises différentes` : 'Royautés cumulées')}
             </p>
           </CardContent>
         </Card>
@@ -291,11 +282,10 @@ export default function Analytics() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-primary">
-              {overviewLoading ? (
+              { overviewLoading ? (
                 <div className="w-12 h-6 bg-gray-200 animate-pulse rounded" />
               ) : (
-                overview?.uniqueBooks || 0
-              )}
+                overview?.uniqueBooks || 0)}
             </div>
             <p className="text-xs text-muted-foreground">
               ASINs différents
@@ -328,7 +318,7 @@ export default function Analytics() {
                   <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
                 </div>
               ) : (
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={300)}>
                   <LineChart data={salesTrends}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 
@@ -338,7 +328,7 @@ export default function Analytics() {
                     <YAxis yAxisId="left" />
                     <YAxis yAxisId="right" orientation="right" />
                     <Tooltip 
-                      labelFormatter={(label) => formatDate(label)}
+                      labelFormatter={ (label) => formatDate(label)}
                       formatter={(value, name) => [
                         name === 'royalty' ? formatCurrency(Number(value)) : value,
                         name === 'royalty' ? 'Royautés' : 
@@ -380,13 +370,13 @@ export default function Analytics() {
               {overviewLoading ? (
                 <div className="space-y-4">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="w-full h-16 bg-gray-200 animate-pulse rounded" />
+                    <div key={i)} className="w-full h-16 bg-gray-200 animate-pulse rounded" />
                   ))}
                 </div>
               ) : (
                 <div className="space-y-4">
                   {royaltiesByCurrency?.map((currency) => (
-                    <div key={currency.currency} className="p-4 border rounded-lg bg-gradient-to-r from-blue-50 to-orange-50">
+                    <div key={currency.currency)} className="p-4 border rounded-lg bg-gradient-to-r from-blue-50 to-orange-50">
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="font-medium text-lg">{currency.currency}</h4>
                         <Badge variant="secondary">
@@ -396,28 +386,27 @@ export default function Analytics() {
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="text-2xl font-bold text-secondary">
-                            {formatCurrency(currency.amount, currency.currency)}
+                            { formatCurrency(currency.amount, currency.currency)}
                           </div>
-                          {currency.amountUSD && currency.currency !== 'USD' && (
+                          { currency.amountUSD && currency.currency !== 'USD' && (
                             <div className="text-sm text-gray-600 mt-1">
                               ≈ {formatCurrency(currency.amountUSD, 'USD')}
                             </div>
                           )}
                         </div>
                         <div className="text-sm text-gray-600 text-right">
-                          <div>Moyenne: {formatCurrency(currency.amount / currency.transactions, currency.currency)}</div>
-                          {currency.amountUSD && currency.currency !== 'USD' && (
+                          <div>Moyenne: { formatCurrency(currency.amount / currency.transactions, currency.currency)}</div>
+                          { currency.amountUSD && currency.currency !== 'USD' && (
                             <div className="mt-1">≈ {formatCurrency(currency.amountUSD / currency.transactions, 'USD')}</div>
                           )}
                         </div>
                       </div>
                     </div>
                   ))}
-                  {royaltiesByCurrency.length === 0 && (
+                  { royaltiesByCurrency.length === 0 && (
                     <div className="text-center py-8 text-gray-500">
                       Aucune donnée de revenus disponible
-                    </div>
-                  )}
+                    </div>)}
                 </div>
               )}
             </CardContent>
@@ -436,7 +425,7 @@ export default function Analytics() {
               {performersLoading ? (
                 <div className="space-y-4">
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="flex items-center space-x-4">
+                    <div key={i)} className="flex items-center space-x-4">
                       <div className="w-8 h-8 bg-gray-200 animate-pulse rounded" />
                       <div className="flex-1 space-y-2">
                         <div className="w-3/4 h-4 bg-gray-200 animate-pulse rounded" />
@@ -449,7 +438,7 @@ export default function Analytics() {
               ) : (
                 <div className="space-y-4">
                   {topPerformers?.slice(0, 10).map((book, index) => (
-                    <div key={book.asin} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                    <div key={book.asin)} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
                       <div className="flex items-center space-x-4">
                         <div className="flex-shrink-0">
                           <Badge variant={index < 3 ? "default" : "secondary"} className="w-8 h-8 flex items-center justify-center p-0">
@@ -470,7 +459,7 @@ export default function Analytics() {
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-bold text-secondary">
-                          {book.totalRoyaltyUSD ? formatCurrency(book.totalRoyaltyUSD, 'USD') : formatCurrency(book.totalRoyalty, book.currency)}
+                          { book.totalRoyaltyUSD ? formatCurrency(book.totalRoyaltyUSD, 'USD') : formatCurrency(book.totalRoyalty, book.currency)}
                         </div>
                       </div>
                     </div>
@@ -496,7 +485,7 @@ export default function Analytics() {
                     <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
                   </div>
                 ) : (
-                  <ResponsiveContainer width="100%" height={250}>
+                  <ResponsiveContainer width="100%" height={250)}>
                     <PieChart>
                       <Pie
                         data={marketplaceData}
@@ -505,13 +494,13 @@ export default function Analytics() {
                         cx="50%"
                         cy="50%"
                         outerRadius={80}
-                        label={({ marketplace, percent }) => 
-                          `${marketplace} (${(percent * 100).toFixed(1)}%)`
+                        label={({ marketplace, percent)} => 
+                          `${marketplace} (${ (percent * 100).toFixed(1)}%)`
                         }
                       >
                         {marketplaceData?.map((entry, index) => (
                           <Cell 
-                            key={`cell-${index}`} 
+                            key={`cell-${index)}`} 
                             fill={MARKETPLACE_COLORS[entry.marketplace as keyof typeof MARKETPLACE_COLORS] || '#8884d8'} 
                           />
                         ))}
@@ -533,13 +522,13 @@ export default function Analytics() {
                 {marketplaceLoading ? (
                   <div className="space-y-4">
                     {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="w-full h-16 bg-gray-200 animate-pulse rounded" />
+                      <div key={i)} className="w-full h-16 bg-gray-200 animate-pulse rounded" />
                     ))}
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {marketplaceData?.map((marketplace) => (
-                      <div key={`${marketplace.marketplace}-${marketplace.currency}`} className="p-4 border rounded-lg">
+                      <div key={`${marketplace.marketplace)}-${marketplace.currency}`} className="p-4 border rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <h4 className="font-medium">{marketplace.marketplace}</h4>
                           <div className="flex items-center gap-2">
@@ -553,13 +542,13 @@ export default function Analytics() {
                           <div>
                             <span className="text-gray-500">Revenus:</span>
                             <div className="font-medium text-secondary">
-                              {marketplace.totalRoyaltyUSD ? formatCurrency(marketplace.totalRoyaltyUSD, 'USD') : formatCurrency(marketplace.totalRoyalty, marketplace.currency)}
+                              { marketplace.totalRoyaltyUSD ? formatCurrency(marketplace.totalRoyaltyUSD, 'USD') : formatCurrency(marketplace.totalRoyalty, marketplace.currency)}
                             </div>
                           </div>
                           <div>
                             <span className="text-gray-500">Transactions:</span>
                             <div className="font-medium">
-                              {marketplace.totalSales.toLocaleString('fr-FR')}
+                              { marketplace.totalSales.toLocaleString('fr-FR')}
                             </div>
                           </div>
                         </div>
@@ -583,8 +572,8 @@ export default function Analytics() {
                   <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
                 </div>
               ) : (
-                <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={topPerformers?.slice(0, 10)}>
+                <ResponsiveContainer width="100%" height={400)}>
+                  <BarChart data={ topPerformers?.slice(0, 10)}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 
                       dataKey="title" 
@@ -593,7 +582,7 @@ export default function Analytics() {
                       height={100}
                       interval={0}
                       fontSize={10}
-                      tickFormatter={(value) => value.length > 20 ? `${value.substring(0, 20)}...` : value}
+                      tickFormatter={ (value) => value.length > 20 ? `${value.substring(0, 20)}...` : value}
                     />
                     <YAxis />
                     <Tooltip 
@@ -643,17 +632,17 @@ export default function Analytics() {
                 ) : exchangeRates && exchangeRates.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {exchangeRates.map((rate: any) => (
-                      <Card key={rate.currency} className="p-4">
+                      <Card key={rate.currency)} className="p-4">
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="font-medium">{rate.currency}</p>
                             <p className="text-sm text-muted-foreground">
-                              Dernière mise à jour: {new Date(rate.date).toLocaleDateString('fr-FR')}
+                              Dernière mise à jour: { new Date(rate.date).toLocaleDateString('fr-FR')}
                             </p>
                           </div>
                           <div className="text-right">
                             <p className="font-bold text-lg">
-                              {parseFloat(rate.rate).toFixed(4)}
+                              { parseFloat(rate.rate).toFixed(4)}
                             </p>
                             <p className="text-xs text-muted-foreground">EUR → {rate.currency}</p>
                           </div>
@@ -699,7 +688,7 @@ export default function Analytics() {
                     </SelectTrigger>
                     <SelectContent>
                       {exchangeRates?.map((rate: any) => (
-                        <SelectItem key={rate.currency} value={rate.currency}>
+                        <SelectItem key={rate.currency)} value={rate.currency}>
                           {rate.currency}
                         </SelectItem>
                       ))}
@@ -714,7 +703,7 @@ export default function Analytics() {
                     </SelectTrigger>
                     <SelectContent>
                       {exchangeRates?.map((rate: any) => (
-                        <SelectItem key={rate.currency} value={rate.currency}>
+                        <SelectItem key={rate.currency)} value={rate.currency}>
                           {rate.currency}
                         </SelectItem>
                       ))}

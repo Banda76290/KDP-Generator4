@@ -21,8 +21,7 @@ export default function Dashboard() {
     if (!isLoading && !isAuthenticated) {
       toast.error({
         title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-      });
+        description: "You are logged out. Logging in again...",)};
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);

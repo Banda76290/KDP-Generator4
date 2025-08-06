@@ -34,7 +34,7 @@ interface Contributor {
 
 const bookFormSchema = insertBookSchema.extend({
   projectId: z.string().min(1, "Project selection is required"),
-});
+};
 type BookFormData = z.infer<typeof bookFormSchema>;
 
 const languages = [
@@ -183,8 +183,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
   onCategoryRemove?: (categoryPath: string) => void;
   resetTrigger?: number;
   instanceId?: string;
-}) => {
-  // Calculate maximum depth dynamically from marketplace categories
+} => { // Calculate maximum depth dynamically from marketplace categories
   const maxDepth = useMemo(() => {
     if (marketplaceCategories.length === 0) return 3; // Default fallback
     
@@ -198,8 +197,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
         const cleanPath = cat.categoryPath.replace(/^Books > /, '').replace(/kindle_ebook > |print_kdp_paperback > /, '');
         const segments = cleanPath.split(' > ');
         for (let i = 1; i <= segments.length; i++) {
-          pathDepths.add(i + 1); // +1 because we start from level 2 (after Books > discriminant)
-        }
+          pathDepths.add(i + 1); // +1 because we start from level 2 (after Books > discriminant)}
       });
       return Math.max(...pathDepths) - 1; // Convert to dropdown count
     }
@@ -323,8 +321,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
         // Add each progressive path segment
         for (let i = 1; i <= segments.length; i++) {
           const partialPath = 'Books > ' + (cat.categoryPath.includes('kindle_ebook') ? 'kindle_ebook > ' : 'print_kdp_paperback > ') + segments.slice(0, i).join(' > ');
-          pathSegments.add(partialPath);
-        }
+          pathSegments.add(partialPath);)}
       });
       
       // Convert to array and filter by the requested level and parent
@@ -346,13 +343,15 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
       
       // Filter by level and parent
       if (level === 2) { // Root level for virtual hierarchy
-        return allVirtualCategories
+        const result = allVirtualCategories
           .filter(cat => cat.level === 2)
           .sort((a, b) => a.displayName.localeCompare(b.displayName));
+        return result;
       } else {
-        return allVirtualCategories
+        const result = allVirtualCategories
           .filter(cat => cat.level === level && cat.parentPath === parentPath)
           .sort((a, b) => a.displayName.localeCompare(b.displayName));
+        return result;
       }
     }
     
@@ -417,7 +416,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
       {/* Left side: Dynamic Category dropdowns */}
       <div className="space-y-4">
         {/* Generate dropdowns dynamically based on maxDepth */}
-        {Array.from({ length: maxDepth }, (_, index) => {
+        {Array.from({ length: maxDepth)}, (_, index) => {
           // Calculate the actual level based on whether we're using virtual hierarchy or real levels
           const minLevel = marketplaceCategories.length > 0 ? Math.min(...marketplaceCategories.map(cat => cat.level)) : 3;
           const level = minLevel >= 4 ? index + 2 : index + minLevel; // Start from level 2 for virtual hierarchy, or minLevel for real
@@ -432,7 +431,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
           if (categories.length === 0) return null;
           
           return (
-            <div key={`level-${level}`} className="space-y-2">
+            <div key={`level-${level)}`} className="space-y-2">
               <Label className="text-sm font-medium">
                 {index === 0 ? "Category" : "Subcategory"}
               </Label>
@@ -453,7 +452,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.categoryPath}>
+                    <SelectItem key={category.id)} value={category.categoryPath}>
                       <span className="text-left">{category.displayName}</span>
                     </SelectItem>
                   ))}
@@ -475,12 +474,12 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
               const thisInstanceCategory = tempUISelections[instanceIndex];
               
               return (
-                <div key={category.id} className="flex items-start space-x-2">
+                <div key={category.id)} className="flex items-start space-x-2">
                   <Checkbox
                     id={`leaf-category-${category.id}`}
                     checked={thisInstanceCategory === category.categoryPath}
                     onCheckedChange={(checked) => {
-                    console.log('Placement checkbox clicked:', { checked, categoryPath: category.categoryPath, tempUISelections });
+                    console.log('Placement checkbox clicked:', { checked, categoryPath: category.categoryPath, tempUISelections)};
                     
                     const instanceIndex = instanceId ? parseInt(instanceId.split('-')[1]) : 0;
                     
@@ -522,14 +521,14 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
                               const discriminant = categoryData.categoryPath.includes('kindle_ebook') ? 'kindle_ebook' : 'print_kdp_paperback';
                               const levelPath = 'Books > ' + discriminant + ' > ' + cleanSegments.slice(0, i + 1).join(' > ');
                               newLevels[i] = levelPath;
-                              console.log(`Virtual hierarchy level ${i + 2}:`, levelPath);
+                              console.log(`Virtual hierarchy level ${i + 2)}:`, levelPath);
                             }
                           } else {
                             // Original logic for normal level-based categories
                             for (let i = 0; i < Math.min(pathParts.length - 1, maxDepth); i++) {
                               const levelPath = pathParts.slice(0, i + 2).join(' > ');
                               newLevels[i] = levelPath;
-                              console.log(`Setting level ${i + 2}:`, levelPath);
+                              console.log(`Setting level ${i + 2)}:`, levelPath);
                             }
                           }
                           
@@ -556,7 +555,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
                     <div className="flex flex-col">
                       <span className="font-medium">{category.displayName}</span>
                       <span className="text-xs text-gray-500 mt-0.5">
-                        {category.categoryPath.replace(/^Books > /, '').replace(/kindle_ebook > |print_kdp_paperback > /, '')}
+                        { category.categoryPath.replace(/^Books > /, '').replace(/kindle_ebook > |print_kdp_paperback > /, '')}
                       </span>
                     </div>
                   </Label>
@@ -569,8 +568,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
               <div className="text-center py-4 text-gray-500 text-sm">
                 {selectedLevels.some(level => level !== "") 
                   ? "No final categories available in this branch."
-                  : "Navigate through categories to see placement options."
-                }
+                  : "Navigate through categories to see placement options.")}
               </div>
             )}
           </div>
@@ -599,7 +597,7 @@ export default function EditBook() {
   const [authorExplicitlyRemoved, setAuthorExplicitlyRemoved] = useState<boolean>(false);
   const [marketplaceCategories, setMarketplaceCategories] = useState<MarketplaceCategory[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
-  const [resetTriggers, setResetTriggers] = useState<{ [key: number]: number }>({});
+  const [resetTriggers, setResetTriggers] = useState<{ [key: number]: number }>({};
   const [showMarketplaceConflictDialog, setShowMarketplaceConflictDialog] = useState(false);
   const [pendingMarketplace, setPendingMarketplace] = useState<string>("");
   const [incompatibleCategories, setIncompatibleCategories] = useState<string[]>([]);
@@ -649,20 +647,20 @@ export default function EditBook() {
       // Check if execCommand is supported
       if (typeof document.execCommand !== 'function') {
         console.error('execCommand is not supported in this browser');
-        toast({ title: "Erreur", description: "Cette fonctionnalité n'est pas supportée dans votre navigateur", variant: "destructive" });
+        toast({ title: "Erreur", description: "Cette fonctionnalité n'est pas supportée dans votre navigateur", variant: "destructive")};
         return;
       }
 
       // Apply the formatting command
       const success = document.execCommand(command, false, value);
       if (!success) {
-        console.warn(`execCommand failed for command: ${command}`);
+        console.warn(`execCommand failed for command: ${command)}`);
       }
       
       updateDescriptionFromHTML();
     } catch (error) {
       console.error('Error applying description formatting:', error);
-      toast({ title: "Erreur", description: "Erreur lors de l'application du formatage", variant: "destructive" });
+      toast({ title: "Erreur", description: "Erreur lors de l'application du formatage", variant: "destructive")};
     }
   };
 
@@ -736,8 +734,7 @@ export default function EditBook() {
             .split(';')
             .filter(style => {
               const prop = style.trim().split(':')[0]?.trim();
-              return ['color', 'font-weight', 'font-style', 'text-decoration'].includes(prop);
-            })
+              return ['color', 'font-weight', 'font-style', 'text-decoration'].includes(prop);)}
             .join('; ');
           
           if (cleanStyles) {
@@ -791,7 +788,7 @@ export default function EditBook() {
       }
     } catch (error) {
       console.error('Error in handleDescriptionFormatChange:', error);
-      toast({ title: "Erreur", description: "Erreur lors du changement de format", variant: "destructive" });
+      toast({ title: "Erreur", description: "Erreur lors du changement de format", variant: "destructive")};
     }
   };
 
@@ -814,7 +811,7 @@ export default function EditBook() {
     preSelectedProjectId,
     fullUrl: window.location.href,
     search: window.location.search
-  });
+  };
 
   // Fetch existing book data (only if editing)
   const { data: book, isLoading: bookLoading, error } = useQuery<Book>({
@@ -825,7 +822,7 @@ export default function EditBook() {
     staleTime: 0, // Always consider data stale for immediate updates
   });
   
-  console.log('Query State:', { book, bookLoading, error, isCreating });
+  console.log('Query State:', { book, bookLoading, error, isCreating };
 
   const form = useForm<BookFormData>({
     resolver: zodResolver(bookFormSchema),
@@ -881,9 +878,8 @@ export default function EditBook() {
   }, []);
 
   // Save current form state to session storage (for navigation to series creation only)
-  const saveFormDataToSession = () => {
-    const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
-    console.log('saveFormDataToSession called:', { returnToBookEdit, bookId: bookId || 'new', shouldSave: returnToBookEdit === (bookId || 'new') });
+  const saveFormDataToSession = () => { const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
+    console.log('saveFormDataToSession called:', { returnToBookEdit, bookId: bookId || 'new', shouldSave: returnToBookEdit === (bookId || 'new')};
     
     const watchedFormData = form.watch();
     const currentFormData = {
@@ -897,18 +893,17 @@ export default function EditBook() {
     };
     
     const storageKey = `bookFormData_${bookId || 'new'}`;
-    console.log('Saving form data to sessionStorage:', { storageKey, data: currentFormData });
+    console.log('Saving form data to sessionStorage:', { storageKey, data: currentFormData };
     sessionStorage.setItem(storageKey, JSON.stringify(currentFormData));
   };
 
   // Real-time auto-save: Save form data automatically when any field changes
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+  useEffect(() => { let timeoutId: NodeJS.Timeout;
     
     const autoSave = () => {
       // Only auto-save if we are about to navigate to series creation
       const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
-      console.log('Auto-save check:', { returnToBookEdit, currentBookId: bookId || 'new', shouldSave: returnToBookEdit === (bookId || 'new') });
+      console.log('Auto-save check:', { returnToBookEdit, currentBookId: bookId || 'new', shouldSave: returnToBookEdit === (bookId || 'new')};
       if (returnToBookEdit === (bookId || 'new')) {
         saveFormDataToSession();
         console.log('Auto-saved form data to sessionStorage');
@@ -919,7 +914,7 @@ export default function EditBook() {
     const subscription = form.watch(() => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(autoSave, 500);
-    });
+    };
 
     // Also save when state arrays change
     timeoutId = setTimeout(autoSave, 500);
@@ -965,7 +960,7 @@ export default function EditBook() {
     const returnFromSeries = sessionStorage.getItem('returnToBookEdit');
     const newlyCreatedSeries = sessionStorage.getItem('newlyCreatedSeries');
     
-    console.log('Restoration check:', { returnFromSeries, bookId: bookId || 'new', hasStorageData: !!savedFormData, shouldRestore: savedFormData && returnFromSeries === (bookId || 'new') });
+    console.log('Restoration check:', { returnFromSeries, bookId: bookId || 'new', hasStorageData: !!savedFormData, shouldRestore: savedFormData && returnFromSeries === (bookId || 'new')};
     
     if (savedFormData && returnFromSeries === (bookId || 'new')) {
       console.log('Restoring form data from sessionStorage');
@@ -989,8 +984,7 @@ export default function EditBook() {
         if (formFields.seriesTitle) {
           setOriginalSeriesData({
             seriesTitle: formFields.seriesTitle,
-            seriesNumber: formFields.seriesNumber || null
-          });
+            seriesNumber: formFields.seriesNumber || null)};
         }
         
         // Immediate form reset - same as buttons "Create series" and "Edit series details"
@@ -1029,8 +1023,7 @@ export default function EditBook() {
             if (editor) {
               // Clear editor first
               while (editor.firstChild) {
-                editor.removeChild(editor.firstChild);
-              }
+                editor.removeChild(editor.firstChild);)}
               
               // Use cleanHTML function to safely set content
               const cleanedContent = cleanHTML(formFields.description);
@@ -1072,7 +1065,7 @@ export default function EditBook() {
     }
     
     // Only load book data if we didn't restore from sessionStorage
-    console.log('Book loading check:', { book: !!book, hasRestoredFromStorage, shouldLoadBook: book && !hasRestoredFromStorage });
+    console.log('Book loading check:', { book: !!book, hasRestoredFromStorage, shouldLoadBook: book && !hasRestoredFromStorage };
     if (book && !hasRestoredFromStorage) {
       // Load description into WYSIWYG editor safely
       if (book.description) {
@@ -1089,8 +1082,7 @@ export default function EditBook() {
           if (editor) {
             // Clear editor first
             while (editor.firstChild) {
-              editor.removeChild(editor.firstChild);
-            }
+              editor.removeChild(editor.firstChild);)}
             
             // Use cleanHTML function to safely set content
             const cleanedContent = cleanHTML(book.description);
@@ -1145,15 +1137,14 @@ export default function EditBook() {
         editionNumber: book.editionNumber || null,
         readingAgeMin: book.readingAgeMin ? book.readingAgeMin.toString() : null,
         readingAgeMax: book.readingAgeMax ? book.readingAgeMax.toString() : null,
-      });
+      };
 
       // Set series checkbox state and store original series data
       setIsPartOfSeries(!!book.seriesTitle);
       if (book.seriesTitle) {
         setOriginalSeriesData({
           seriesTitle: book.seriesTitle,
-          seriesNumber: book.seriesNumber || null
-        });
+          seriesNumber: book.seriesNumber || null)};
       }
 
       // Auto-detect matching author and set states accordingly
@@ -1203,8 +1194,7 @@ export default function EditBook() {
           firstName: contrib.firstName,
           middleName: contrib.middleName || "",
           lastName: contrib.lastName,
-          suffix: contrib.suffix || "",
-        }));
+          suffix: contrib.suffix || "",)});
         setContributors(loadedContributors);
       } else {
         setContributors([]);
@@ -1238,17 +1228,17 @@ export default function EditBook() {
   // Fetch projects for selection
   const { data: projects = [] } = useQuery({
     queryKey: ["/api/projects"],
-  });
+  };
 
   // Fetch series for selection
   const { data: userSeries = [] } = useQuery<any[]>({
     queryKey: ["/api/series"],
-  });
+  };
 
   // Load existing authors
   const { data: authors = [], isLoading: loadingAuthors } = useQuery<any[]>({
     queryKey: ["/api/authors"],
-  });
+  };
 
   // Auto-detect author from book data when authors and book are loaded
   useEffect(() => {
@@ -1258,7 +1248,7 @@ export default function EditBook() {
       
       if (bookAuthorName && bookAuthorName !== '') {
         const matchingAuthor = authors.find(author => {
-          const authorFullName = `${author.prefix || ''} ${author.firstName || ''} ${author.middleName || ''} ${author.lastName || ''} ${author.suffix || ''}`.trim();
+          const authorFullName = `${author.prefix || '')} ${author.firstName || ''} ${author.middleName || ''} ${author.lastName || ''} ${author.suffix || ''}`.trim();
           return authorFullName === bookAuthorName;
         });
         
@@ -1273,7 +1263,7 @@ export default function EditBook() {
   }, [authors, book, hasRestoredFromStorage, selectedAuthorId, authorExplicitlyRemoved]);
 
   const saveBook = useMutation({
-    mutationFn: async (data: { bookData: BookFormData; shouldNavigate?: boolean; nextTab?: string }) => {
+    mutationFn: async (data: { bookData: BookFormData; shouldNavigate?: boolean; nextTab?: string)} => {
       const formattedData = {
         ...data.bookData,
         categories,
@@ -1286,40 +1276,41 @@ export default function EditBook() {
       console.log(isCreating ? 'Creating book data:' : 'Updating book data:', formattedData);
       console.log('ProjectId being sent:', formattedData.projectId);
       
-      if (isCreating) {
-        const createdBook = await apiRequest("POST", `/api/books`, formattedData);
+      if (isCreating) { const createdBook = await apiRequest(`/api/books`, { method: "POST", body: JSON.stringify(formattedData)};
         console.log('Received created book response:', createdBook);
         
         // Save contributors after book creation
         if (contributors.length > 0) {
           for (const contributor of contributors) {
-            await apiRequest("POST", "/api/contributors", {
-              bookId: createdBook.id,
-              projectId: formattedData.projectId, // Add projectId for database compatibility
-              name: `${contributor.firstName} ${contributor.lastName}`.trim(), // Add name field for database compatibility
-              role: contributor.role,
-              prefix: contributor.prefix || null,
-              firstName: contributor.firstName,
-              middleName: contributor.middleName || null,
-              lastName: contributor.lastName,
-              suffix: contributor.suffix || null,
+            await apiRequest("/api/contributors", {
+              method: "POST",
+              body: JSON.stringify({ bookId: createdBook.id,
+                projectId: formattedData.projectId, // Add projectId for database compatibility
+                name: `${contributor.firstName)} ${contributor.lastName}`.trim(), // Add name field for database compatibility
+                role: contributor.role,
+                prefix: contributor.prefix || null,
+                firstName: contributor.firstName,
+                middleName: contributor.middleName || null,
+                lastName: contributor.lastName,
+                suffix: contributor.suffix || null,
+              }
             });
           }
         }
         
         return { book: createdBook, shouldNavigate: data.shouldNavigate, nextTab: data.nextTab };
       } else {
-        const updatedBook = await apiRequest("PATCH", `/api/books/${bookId}`, formattedData);
+        const updatedBook = await apiRequest(`/api/books/${bookId)}`, { method: "PATCH", body: JSON.stringify(formattedData)};
         console.log('Received updated book response:', updatedBook);
         
         // Update contributors - first delete existing ones, then add new ones
         if (bookId) {
           // Get existing contributors to delete them
           try {
-            const existingContributors = await apiRequest("GET", `/api/contributors/book/${bookId}`);
+            const existingContributors = await apiRequest(`/api/contributors/book/${bookId)}`, { method: "GET" };
             if (existingContributors && existingContributors.length > 0) {
               for (const contrib of existingContributors) {
-                await apiRequest("DELETE", `/api/contributors/${contrib.id}/${bookId}`);
+                await apiRequest(`/api/contributors/${contrib.id)}/${bookId}`, { method: "DELETE" };
               }
             }
           } catch (error) {
@@ -1343,7 +1334,7 @@ export default function EditBook() {
                 suffix: contributor.suffix || null,
               };
               console.log('Sending contributor data:', contributorData);
-              await apiRequest("POST", "/api/contributors", contributorData);
+              await apiRequest("/api/contributors", { method: "POST", body: JSON.stringify(contributorData)};
             }
           }
         }
@@ -1354,14 +1345,14 @@ export default function EditBook() {
     onSuccess: (result) => {
       // Update the current book query cache with the latest data
       if (result.book && !isCreating) {
-        queryClient.setQueryData([`/api/books/${bookId}`], result.book);
+        queryClient.setQueryData([`/api/books/${bookId)}`], result.book);
       }
       
       // Invalidate all related queries to ensure fresh data
-      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/books"] };
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
       if (!isCreating) {
-        queryClient.invalidateQueries({ queryKey: [`/api/books/${bookId}`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/books/${bookId)}`] });
       }
       
       toast.success({
@@ -1372,11 +1363,11 @@ export default function EditBook() {
       if (isCreating && result.book) {
         // After creation, redirect to edit mode with the new book ID
         if (result.nextTab) {
-          setLocation(`/books/edit/${result.book.id}?tab=${result.nextTab}`);
+          setLocation(`/books/edit/${result.book.id)}?tab=${result.nextTab}`);
         } else if (result.shouldNavigate) {
           setLocation("/projects");
         } else {
-          setLocation(`/books/edit/${result.book.id}`);
+          setLocation(`/books/edit/${result.book.id)}`);
         }
       } else {
         if (result.nextTab) {
@@ -1390,7 +1381,7 @@ export default function EditBook() {
       console.error(isCreating ? 'Book creation error:' : 'Book update error:', error);
       toast({
         title: "Error",
-        description: error.message || `Failed to ${isCreating ? 'create' : 'update'} book`,
+        description: error.message || `Failed to ${isCreating ? 'create' : 'update')} book`,
         variant: "destructive",
       });
     },
@@ -1398,15 +1389,15 @@ export default function EditBook() {
 
   const deleteBook = useMutation({
     mutationFn: async () => {
-      return await apiRequest("DELETE", `/api/books/${bookId}`);
+      return await apiRequest(`/api/books/${bookId)}`, { method: "DELETE" };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/books"])};
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
       toast({
         title: "Book Deleted",
         description: "Your book has been deleted successfully.",
-      });
+      };
       setLocation("/projects");
     },
     onError: (error) => {
@@ -1414,8 +1405,7 @@ export default function EditBook() {
       toast({
         title: "Error",
         description: error.message || "Failed to delete book",
-        variant: "destructive",
-      });
+        variant: "destructive",)};
     },
   });
 
@@ -1434,7 +1424,7 @@ export default function EditBook() {
 
   const updateContributor = (id: string, field: keyof Contributor, value: string) => {
     setContributors(contributors.map(c => 
-      c.id === id ? { ...c, [field]: value } : c
+      c.id === id ? { ...c, [field]: value)} : c
     ));
   };
 
@@ -1468,13 +1458,12 @@ export default function EditBook() {
     }
 
     setIsCheckingIsbn(true);
-    try {
-      // Only exclude current book if it doesn't already have this ISBN
+    try { // Only exclude current book if it doesn't already have this ISBN
       // If the current book already has this ISBN, we don't exclude it to allow proper duplicate detection
       const shouldExclude = book?.isbn !== isbn.trim();
       const url = shouldExclude 
-        ? `/api/books/check-isbn/${encodeURIComponent(isbn.trim())}?excludeBookId=${bookId}`
-        : `/api/books/check-isbn/${encodeURIComponent(isbn.trim())}`;
+        ? `/api/books/check-isbn/${encodeURIComponent(isbn.trim()}?excludeBookId=${bookId}`
+        : `/api/books/check-isbn/${ encodeURIComponent(isbn.trim()}`;
         
       const response = await fetch(url, {
         method: 'GET',
@@ -1505,8 +1494,7 @@ export default function EditBook() {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (officialIsbnContentValue.trim()) {
-        checkIsbnUniqueness(officialIsbnContentValue);
-      }
+        checkIsbnUniqueness(officialIsbnContentValue);)}
     }, 1000); // 1 second delay
 
     return () => clearTimeout(timer);
@@ -1522,21 +1510,20 @@ export default function EditBook() {
     if (isbnValidationError) {
       toast.error({
         title: "Cannot apply ISBN/ASIN",
-        description: "Please resolve the validation error first."
-      });
+        description: "Please resolve the validation error first.")};
       return;
     }
 
     try {
-      const response = await apiRequest("PATCH", `/api/books/${bookId}`, {
-        isbn: officialIsbnContentValue.trim()
+      const response = await apiRequest(`/api/books/${bookId)}`, {
+        method: "PATCH",
+        body: JSON.stringify({ isbn: officialIsbnContentValue.trim()} })
       });
 
       if (response) {
         toast.success({
           title: "ISBN/ASIN Applied Successfully",
-          description: "The Official ISBN/ASIN has been permanently applied to this book."
-        });
+          description: "The Official ISBN/ASIN has been permanently applied to this book.")};
         // Reset the input value and close dialog
         setOfficialIsbnContentValue("");
         setShowIsbnContentApplyDialog(false);
@@ -1548,8 +1535,7 @@ export default function EditBook() {
       console.error('Error applying ISBN:', error);
       toast.error({
         title: "Error",
-        description: "Failed to apply ISBN/ASIN. Please try again."
-      });
+        description: "Failed to apply ISBN/ASIN. Please try again.")};
     }
   };
 
@@ -1603,7 +1589,7 @@ export default function EditBook() {
     const isLargePrintBook = form.watch("isLargePrintBook");
     const isLowContentBook = form.watch("isLowContentBook");
     
-    console.log('Format derivation inputs:', { format, isLargePrintBook, isLowContentBook });
+    console.log('Format derivation inputs:', { format, isLargePrintBook, isLowContentBook)};
     
     // If format is explicitly set, use it
     if (format) {
@@ -1613,7 +1599,7 @@ export default function EditBook() {
     
     // Derive format from boolean flags - large print and low content are typically paperback
     if (isLargePrintBook || isLowContentBook) {
-      console.log('Deriving paperback from flags:', { isLargePrintBook, isLowContentBook });
+      console.log('Deriving paperback from flags:', { isLargePrintBook, isLowContentBook)};
       return "paperback";
     }
     
@@ -1622,9 +1608,22 @@ export default function EditBook() {
     return "ebook";
   };
 
+  // Function to normalize marketplace names to match database format
+  const normalizeMarketplaceName = (marketplace: string): string => {
+    const normalizedMap: { [key: string]: string } = {
+      'Amazon.com': 'Amazon.com', // Already correct
+      'Amazon.fr': 'amazon.fr',   // Convert to lowercase
+      'Amazon.de': 'amazon.de',   // Convert to lowercase  
+      'Amazon.es': 'amazon.es',   // Convert to lowercase
+      'Amazon.it': 'amazon.it',   // Convert to lowercase
+      'Amazon.co.uk': 'amazon.co.uk', // Convert to lowercase
+    };
+    
+    return normalizedMap[marketplace] || marketplace;
+  };
+
   // Function to load categories for a specific marketplace
-  const loadMarketplaceCategories = async (marketplace: string) => {
-    if (!marketplace) return;
+  const loadMarketplaceCategories = async (marketplace: string) => { if (!marketplace) return;
     
     console.log('Loading categories for marketplace:', marketplace);
     
@@ -1633,8 +1632,12 @@ export default function EditBook() {
       const derivedFormat = deriveBookFormat();
       console.log('Derived format:', derivedFormat);
       
+      // Normalize marketplace name to match database format
+      const normalizedMarketplace = normalizeMarketplaceName(marketplace);
+      console.log('Normalized marketplace:', normalizedMarketplace);
+      
       const formatParam = derivedFormat ? `?format=${encodeURIComponent(derivedFormat)}` : '';
-      const response = await apiRequest("GET", `/api/marketplace-categories/${encodeURIComponent(marketplace)}${formatParam}`);
+      const response = await apiRequest(`/api/marketplace-categories/${ encodeURIComponent(normalizedMarketplace)}${formatParam}`, { method: "GET" };
       setMarketplaceCategories(response || []);
     } catch (error) {
       console.error("Error loading marketplace categories:", error);
@@ -1643,21 +1646,20 @@ export default function EditBook() {
       toast({
         title: "Error",
         description: "Failed to load categories for selected marketplace",
-        variant: "destructive"
-      });
+        variant: "destructive")};
     } finally {
       setLoadingCategories(false);
     }
   };
 
   // Function to check if categories are compatible with marketplace
-  const checkCategoryCompatibility = async (newMarketplace: string, currentCategories: string[]) => {
-    if (currentCategories.length === 0) return [];
+  const checkCategoryCompatibility = async (newMarketplace: string, currentCategories: string[]) => { if (currentCategories.length === 0) return [];
     
     try {
       const derivedFormat = deriveBookFormat();
+      const normalizedMarketplace = normalizeMarketplaceName(newMarketplace);
       const formatParam = derivedFormat ? `?format=${encodeURIComponent(derivedFormat)}` : '';
-      const response = await apiRequest("GET", `/api/marketplace-categories/${encodeURIComponent(newMarketplace)}${formatParam}`);
+      const response = await apiRequest(`/api/marketplace-categories/${ encodeURIComponent(normalizedMarketplace)}${formatParam}`, { method: "GET" };
       const newMarketplaceCategories: MarketplaceCategory[] = response || [];
       const validCategoryPaths = newMarketplaceCategories.map(cat => cat.categoryPath);
       
@@ -1679,13 +1681,12 @@ export default function EditBook() {
       newMarketplace, 
       formCategories, 
       localCategories, 
-      allCurrentCategories 
-    });
+      allCurrentCategories)};
     
     if (allCurrentCategories.length > 0) {
       const incompatible = await checkCategoryCompatibility(newMarketplace, allCurrentCategories);
       
-      console.log("Compatibility check result:", { incompatible });
+      console.log("Compatibility check result:", { incompatible)};
       
       if (incompatible.length > 0) {
         setPendingMarketplace(newMarketplace);
@@ -1724,7 +1725,7 @@ export default function EditBook() {
     
     toast.success({
       title: "Marketplace Changed",
-      description: `Marketplace changed to ${marketplaceName} and ${removedCount} incompatible categories removed`
+      description: `Marketplace changed to ${marketplaceName)} and ${removedCount} incompatible categories removed`
     });
   };
 
@@ -1744,8 +1745,7 @@ export default function EditBook() {
     // Sort by level and sort order
     const sortedCategories = [...categories].sort((a, b) => {
       if (a.level !== b.level) return a.level - b.level;
-      return a.sortOrder - b.sortOrder;
-    });
+      return a.sortOrder - b.sortOrder;)};
 
     // Build the tree structure
     sortedCategories.forEach(category => {
@@ -1770,7 +1770,6 @@ export default function EditBook() {
       }
     });
 
-    console.log("Built category tree:", tree);
     return tree;
   };
 
@@ -1821,7 +1820,7 @@ export default function EditBook() {
       readingAgeMin: data.readingAgeMin ? String(data.readingAgeMin) : null,
       readingAgeMax: data.readingAgeMax ? String(data.readingAgeMax) : null,
     };
-    saveBook.mutate({ bookData: processedData, shouldNavigate: true });
+    saveBook.mutate({ bookData: processedData, shouldNavigate: true };
   };
 
   const handleSaveAsDraft = (data: BookFormData) => {
@@ -1832,7 +1831,7 @@ export default function EditBook() {
       readingAgeMax: data.readingAgeMax ? String(data.readingAgeMax) : null,
     };
     
-    saveBook.mutate({ bookData: draftData });
+    saveBook.mutate({ bookData: draftData };
   };
 
   const handleSaveAndContinue = (data: BookFormData) => {
@@ -1849,7 +1848,7 @@ export default function EditBook() {
       readingAgeMax: data.readingAgeMax ? String(data.readingAgeMax) : null,
     };
     
-    saveBook.mutate({ bookData: processedData, nextTab });
+    saveBook.mutate({ bookData: processedData, nextTab };
   };
 
   const handleDelete = () => {
@@ -1869,13 +1868,12 @@ export default function EditBook() {
     );
   }
 
-  if (!isCreating && (error || !book)) {
-    return (
+  if (!isCreating && (error || !book)) { return (
       <Layout>
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Book Not Found</h1>
           <p className="text-gray-600 mb-4">The book you're looking for doesn't exist or you don't have permission to edit it.</p>
-          <Button onClick={() => setLocation("/projects")}>
+          <Button onClick={())} => setLocation("/projects")>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Projects
           </Button>
@@ -1895,7 +1893,7 @@ export default function EditBook() {
               <div className="flex items-center space-x-4">
                 <Button
                   variant="ghost"
-                  onClick={() => setLocation("/projects")}
+                  onClick={ () => setLocation("/projects")}
                   className="flex items-center space-x-2"
                 >
                   <ArrowLeft className="w-4 h-4" />
@@ -1910,8 +1908,8 @@ export default function EditBook() {
               {/* AI Recommendations Toggle */}
               {!isCreating && bookId && (
                 <Button
-                  variant={showAISidebar ? "default" : "outline"}
-                  onClick={() => setShowAISidebar(!showAISidebar)}
+                  variant={showAISidebar ? "default" : "outline")
+                  onClick={ () => setShowAISidebar(!showAISidebar )}
                   className="flex items-center space-x-2"
                 >
                   <Lightbulb className="w-4 h-4" />
@@ -1920,7 +1918,7 @@ export default function EditBook() {
               )}
             </div>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={ form.handleSubmit(onSubmit)} className="space-y-8">
           {/* Tab Navigation */}
           <div className="bg-white border-b border-gray-200 mb-8">
             <nav className="-mb-px flex space-x-0">
@@ -1936,7 +1934,7 @@ export default function EditBook() {
                       form.setValue('description', cleanedHtmlContent);
                       setDescriptionEditorContent(cleanedHtmlContent);
                     }
-                  }
+                  )}
                   setActiveTab("details");
                   // Restaurer le contenu de l'éditeur si on revient sur l'onglet details
                   if ("details" !== activeTab) {
@@ -1945,8 +1943,7 @@ export default function EditBook() {
                       if (editor && descriptionEditorContent) {
                         // Clear editor first
                         while (editor.firstChild) {
-                          editor.removeChild(editor.firstChild);
-                        }
+                          editor.removeChild(editor.firstChild);)}
                         
                         // Use cleanHTML function to safely set content
                         const cleanedContent = cleanHTML(descriptionEditorContent);
@@ -1996,7 +1993,7 @@ export default function EditBook() {
                       form.setValue('description', cleanedHtmlContent);
                       setDescriptionEditorContent(cleanedHtmlContent);
                     }
-                  }
+                  )}
                   setActiveTab("content");
                 }}
                 className={`relative px-6 py-2 font-semibold text-base transition-all duration-200 ease-in-out ${
@@ -2024,7 +2021,7 @@ export default function EditBook() {
                       form.setValue('description', cleanedHtmlContent);
                       setDescriptionEditorContent(cleanedHtmlContent);
                     }
-                  }
+                  )}
                   setActiveTab("pricing");
                 }}
                 className={`relative px-6 py-2 font-semibold text-base transition-all duration-200 ease-in-out ${
@@ -2056,7 +2053,7 @@ export default function EditBook() {
                       <strong>ISBN/ASIN:</strong> 
                       <span className="ml-1">
                         {book?.isbn ? (
-                          <span className="font-semibold">{book.isbn}</span>
+                          <span className="font-semibold">{book.isbn)}</span>
                         ) : book?.isbnPlaceholder ? (
                           <span className="text-amber-600">{book.isbnPlaceholder}</span>
                         ) : (
@@ -2064,7 +2061,7 @@ export default function EditBook() {
                         )}
                       </span>
                     </span>
-                    {form.watch("language") && (
+                    { form.watch("language") && (
                       <span className="flex items-center">
                         <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
@@ -2088,7 +2085,7 @@ export default function EditBook() {
               <CardTitle>Basic information about your book</CardTitle>
             </CardHeader>
             <CardContent className="space-y-8">
-              {/* Project Selection Section */}
+              {/* Project Selection Section */)}
               <div className="bg-gray-50 rounded-lg border p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Project Association</h3>
                 <div className="space-y-2">
@@ -2097,19 +2094,19 @@ export default function EditBook() {
                   </p>
                   <Select 
                     value={form.watch("projectId") || ""} 
-                    onValueChange={(value) => form.setValue("projectId", value)}
+                    onValueChange={ (value) => form.setValue("projectId", value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a project" />
                     </SelectTrigger>
                     <SelectContent>
                       {(projects as any[]).map((project: any) => (
-                        <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>
+                        <SelectItem key={project.id)} value={project.id}>{project.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   {form.formState.errors.projectId && (
-                    <p className="text-sm text-red-600">{form.formState.errors.projectId.message}</p>
+                    <p className="text-sm text-red-600">{form.formState.errors.projectId.message)}</p>
                   )}
                 </div>
               </div>
@@ -2126,14 +2123,14 @@ export default function EditBook() {
                     </p>
                     <Select 
                       value={form.watch("language") || ""} 
-                      onValueChange={(value) => form.setValue("language", value)}
+                      onValueChange={ (value) => form.setValue("language", value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select language" />
                       </SelectTrigger>
                       <SelectContent>
                         {languages.map((lang) => (
-                          <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+                          <SelectItem key={lang)} value={lang}>{lang}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -2149,10 +2146,10 @@ export default function EditBook() {
                     <Input
                       id="title"
                       placeholder="Enter your book title"
-                      {...form.register("title", { required: "Title is required" })}
+                      {...form.register("title", { required: "Title is required")}}
                     />
                     {form.formState.errors.title && (
-                      <p className="text-sm text-red-600">{form.formState.errors.title.message}</p>
+                      <p className="text-sm text-red-600">{form.formState.errors.title.message)}</p>
                     )}
                   </div>
 
@@ -2163,7 +2160,7 @@ export default function EditBook() {
                     <Input
                       id="subtitle"
                       placeholder="Enter subtitle (optional)"
-                      {...form.register("subtitle")}
+                      { ...form.register("subtitle")}
                     />
                   </div>
                 </div>
@@ -2194,8 +2191,7 @@ export default function EditBook() {
                         if (currentSeriesTitle) {
                           setOriginalSeriesData({
                             seriesTitle: currentSeriesTitle,
-                            seriesNumber: currentSeriesNumber || null
-                          });
+                            seriesNumber: currentSeriesNumber || null)};
                         }
                         form.setValue("seriesTitle", "");
                         form.setValue("seriesNumber", null);
@@ -2220,7 +2216,7 @@ export default function EditBook() {
                 </div>
 
                 {/* Series details - shown when checkbox is checked */}
-                {form.watch("seriesTitle") && (
+                { form.watch("seriesTitle") && (
                   <div className="bg-gray-50 p-4 rounded-md border space-y-4">
                     <div className="space-y-2">
                       <Label className="font-medium text-[16px] text-gray-700">Series Title</Label>
@@ -2241,7 +2237,7 @@ export default function EditBook() {
                           if (currentSeriesTitle) {
                             try {
                               // Récupérer toutes les séries pour trouver l'ID correspondant
-                              const seriesResponse = await apiRequest("GET", "/api/series");
+                              const seriesResponse = await apiRequest("/api/series", { method: "GET")};
                               const currentSeries = seriesResponse.find((s: any) => s.title === currentSeriesTitle);
                               
                               if (currentSeries) {
@@ -2286,7 +2282,7 @@ export default function EditBook() {
                                 toast.success({
                                   title: "Livre retiré de la série",
                                   description: "Le livre a été retiré de la série avec succès.",
-                                });
+                                )};
                               }}
                             >
                               Remove from series
@@ -2305,7 +2301,7 @@ export default function EditBook() {
                       <div className="flex-1">
                         <Label className="font-medium text-[16px]">Select existing series</Label>
                         <Select 
-                          value={form.watch("seriesTitle") || ""} 
+                          value={form.watch("seriesTitle") || "")} 
                           onValueChange={(value) => {
                             form.setValue("seriesTitle", value);
                             form.setValue("seriesNumber", 1);
@@ -2317,7 +2313,7 @@ export default function EditBook() {
                           <SelectContent>
                             {userSeries.length > 0 ? (
                               userSeries.map((series: any) => (
-                                <SelectItem key={series.id} value={series.title}>
+                                <SelectItem key={series.id)} value={series.title}>
                                   {series.title}
                                 </SelectItem>
                               ))
@@ -2343,7 +2339,7 @@ export default function EditBook() {
                                 // ORDRE IMPORTANT: Définir le marqueur AVANT la sauvegarde pour "Edit series details"
                                 sessionStorage.setItem('returnToBookEdit', bookId || 'new');
                                 saveFormDataToSession();
-                                window.location.href = `/series-edit/${matchingSeries.id}`;
+                                window.location.href = `/series-edit/${matchingSeries.id)}`;
                               } else {
                                 window.location.href = '/manage-series';
                               }
@@ -2372,7 +2368,7 @@ export default function EditBook() {
                           type="number"
                           min="1"
                           placeholder="1"
-                          {...form.register("seriesNumber", { valueAsNumber: true })}
+                          {...form.register("seriesNumber", { valueAsNumber: true)}}
                           className="w-32"
                         />
                       </div>
@@ -2391,7 +2387,7 @@ export default function EditBook() {
                       id="editionNumber"
                       type="text"
                       placeholder="1"
-                      {...form.register("editionNumber")}
+                      { ...form.register("editionNumber")}
                     />
                   </div>
                 </div>
@@ -2417,7 +2413,7 @@ export default function EditBook() {
                         <div className="space-y-3">
                           <Label className="font-medium text-[16px] text-gray-700">Author</Label>
                           <div className="text-lg font-medium text-gray-900">
-                            {authors.find(a => a.id === selectedAuthorId)?.fullName || "Unknown Author"}
+                            {authors.find(a => a.id === selectedAuthorId)?.fullName || "Unknown Author")}
                           </div>
                           <div className="flex gap-3">
                             <Button
@@ -2429,7 +2425,7 @@ export default function EditBook() {
                                 if (selectedAuthor) {
                                   sessionStorage.setItem('returnToBookEdit', bookId || 'new');
                                   saveFormDataToSession();
-                                  setLocation(`/authors/${selectedAuthor.id}`);
+                                  setLocation(`/authors/${selectedAuthor.id)}`);
                                 }
                               }}
                             >
@@ -2494,7 +2490,7 @@ export default function EditBook() {
                               <SelectContent>
                                 {authors.length > 0 ? (
                                   authors.map((author) => (
-                                    <SelectItem key={author.id} value={author.id}>
+                                    <SelectItem key={author.id)} value={author.id}>
                                       {author.fullName}
                                     </SelectItem>
                                   ))
@@ -2538,10 +2534,10 @@ export default function EditBook() {
                       <Label className="font-medium text-[14px]">Contributors <span className="text-sm font-normal text-gray-500">(Optional)</span></Label>
                       
                       {contributors.map((contributor, index) => (
-                    <div key={contributor.id} className="grid grid-cols-7 gap-3 mt-2 items-center">
+                    <div key={contributor.id)} className="grid grid-cols-7 gap-3 mt-2 items-center">
                       <Select 
                         value={contributor.role} 
-                        onValueChange={(value) => updateContributor(contributor.id, 'role', value)}
+                        onValueChange={ (value) => updateContributor(contributor.id, 'role', value)}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Role" />
@@ -2562,33 +2558,33 @@ export default function EditBook() {
                       <Input
                         placeholder="Prefix"
                         value={contributor.prefix || ""}
-                        onChange={(e) => updateContributor(contributor.id, 'prefix', e.target.value)}
+                        onChange={ (e) => updateContributor(contributor.id, 'prefix', e.target.value )}
                       />
                       <Input
                         placeholder="First name"
                         value={contributor.firstName}
-                        onChange={(e) => updateContributor(contributor.id, 'firstName', e.target.value)}
+                        onChange={ (e) => updateContributor(contributor.id, 'firstName', e.target.value )}
                       />
                       <Input
                         placeholder="Middle name"
                         value={contributor.middleName || ""}
-                        onChange={(e) => updateContributor(contributor.id, 'middleName', e.target.value)}
+                        onChange={ (e) => updateContributor(contributor.id, 'middleName', e.target.value )}
                       />
                       <Input
                         placeholder="Last name"
                         value={contributor.lastName}
-                        onChange={(e) => updateContributor(contributor.id, 'lastName', e.target.value)}
+                        onChange={ (e) => updateContributor(contributor.id, 'lastName', e.target.value )}
                       />
                       <Input
                         placeholder="Suffix"
                         value={contributor.suffix || ""}
-                        onChange={(e) => updateContributor(contributor.id, 'suffix', e.target.value)}
+                        onChange={ (e) => updateContributor(contributor.id, 'suffix', e.target.value )}
                       />
                       <Button 
                         type="button" 
                         variant="outline" 
                         size="sm" 
-                        onClick={() => removeContributor(contributor.id)}
+                        onClick={ () => removeContributor(contributor.id )}
                         className="text-gray-600 hover:text-red-600"
                       >
                         Remove
@@ -2601,7 +2597,7 @@ export default function EditBook() {
                       type="button" 
                       variant="outline" 
                       size="sm" 
-                      onClick={addContributor}
+                      onClick={addContributor)}
                       className="mt-3"
                     >
                       Add Another
@@ -2618,7 +2614,7 @@ export default function EditBook() {
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm text-gray-600 mt-1">
-                      Provide a description that will entice readers to buy your book. What is your book about? What makes it interesting? What should readers expect? This can be copied from the back cover of your book. Maximum {maxDescriptionCharacters.toLocaleString()} characters.
+                      Provide a description that will entice readers to buy your book. What is your book about? What makes it interesting? What should readers expect? This can be copied from the back cover of your book. Maximum { maxDescriptionCharacters.toLocaleString()} characters.
                     </p>
                   </div>
                 
@@ -2636,19 +2632,19 @@ export default function EditBook() {
                     </SelectContent>
                   </Select>
                   
-                  <Button type="button" variant="outline" size="sm" onClick={() => applyDescriptionFormatting('bold')}>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('bold' )}>
                     <strong>B</strong>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={() => applyDescriptionFormatting('italic')}>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('italic' )}>
                     <em>I</em>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={() => applyDescriptionFormatting('underline')}>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('underline' )}>
                     <u>U</u>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={() => applyDescriptionFormatting('insertUnorderedList')}>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('insertUnorderedList' )}>
                     • List
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={() => applyDescriptionFormatting('insertOrderedList')}>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyDescriptionFormatting('insertOrderedList' )}>
                     1. List
                   </Button>
                   
@@ -2666,10 +2662,10 @@ export default function EditBook() {
                         <Input
                           placeholder="Enter URL"
                           value={linkUrl}
-                          onChange={(e) => setLinkUrl(e.target.value)}
+                          onChange={ (e) => setLinkUrl(e.target.value )}
                         />
                         <div className="flex justify-end space-x-2">
-                          <Button variant="outline" onClick={() => setShowLinkDialog(false)}>
+                          <Button variant="outline" onClick={ () => setShowLinkDialog(false )}>
                             Cancel
                           </Button>
                           <Button 
@@ -2703,7 +2699,7 @@ export default function EditBook() {
                   />
                   <input
                     type="hidden"
-                    {...form.register('description')}
+                    { ...form.register('description')}
                   />
                   <div className="flex justify-end">
                     <span className={`text-sm ${descriptionCharacterCount > maxDescriptionCharacters ? 'text-red-600' : 'text-green-600'}`}>
@@ -2725,7 +2721,7 @@ export default function EditBook() {
                     </p>
                     <RadioGroup 
                       value={form.watch("publishingRights") || ""} 
-                      onValueChange={(value) => form.setValue("publishingRights", value as any)}
+                      onValueChange={ (value) => form.setValue("publishingRights", value as any)}
                     >
                       <div className="flex items-start space-x-2">
                         <RadioGroupItem value="owned" id="owned" className="mt-1 bg-[#ffffff]" />
@@ -2758,7 +2754,7 @@ export default function EditBook() {
                     </p>
                     <RadioGroup 
                       value={form.watch("hasExplicitContent") ? "yes" : "no"} 
-                      onValueChange={(value) => form.setValue("hasExplicitContent", value === "yes")}
+                      onValueChange={ (value) => form.setValue("hasExplicitContent", value === "yes")}
                     >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="yes" id="explicit-yes" className="bg-[#ffffff]" />
@@ -2782,14 +2778,14 @@ export default function EditBook() {
                         <Label htmlFor="readingAgeMin" className="text-sm font-medium">Minimum</Label>
                         <Select 
                           value={form.watch("readingAgeMin") || ""} 
-                          onValueChange={(value) => form.setValue("readingAgeMin", value || null)}
+                          onValueChange={ (value) => form.setValue("readingAgeMin", value || null)}
                           disabled={form.watch("hasExplicitContent") || false}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select one" />
                           </SelectTrigger>
                           <SelectContent>
-                            {form.watch("hasExplicitContent") ? (
+                            { form.watch("hasExplicitContent") ? (
                               <SelectItem value="18">18+</SelectItem>
                             ) : (
                               <>
@@ -2812,8 +2808,7 @@ export default function EditBook() {
                                 <SelectItem value="16">16</SelectItem>
                                 <SelectItem value="17">17</SelectItem>
                                 <SelectItem value="18">18+</SelectItem>
-                              </>
-                            )}
+                              </>)}
                           </SelectContent>
                         </Select>
                       </div>
@@ -2821,7 +2816,7 @@ export default function EditBook() {
                         <Label htmlFor="readingAgeMax" className="text-sm font-medium">Maximum</Label>
                         <Select 
                           value={form.watch("readingAgeMax") || ""} 
-                          onValueChange={(value) => form.setValue("readingAgeMax", value || null)}
+                          onValueChange={ (value) => form.setValue("readingAgeMax", value || null)}
                           disabled={form.watch("hasExplicitContent") || false}
                         >
                           <SelectTrigger>
@@ -2832,11 +2827,11 @@ export default function EditBook() {
                               <SelectItem value="18">18+</SelectItem>
                             ) : (
                               <>
-                                {/* Only show ages >= minimum selected age */}
+                                {/* Only show ages >= minimum selected age */)}
                                 {(() => {
                                   const minAge = form.watch("readingAgeMin");
                                   const ageOptions = [
-                                    { value: "0", label: "Baby" },
+                                    { value: "0", label: "Baby")},
                                     { value: "1", label: "1" },
                                     { value: "2", label: "2" },
                                     { value: "3", label: "3" },
@@ -2888,7 +2883,7 @@ export default function EditBook() {
                     </SelectTrigger>
                     <SelectContent>
                       {marketplaces.map((marketplace) => (
-                        <SelectItem key={marketplace} value={marketplace}>{marketplace}</SelectItem>
+                        <SelectItem key={marketplace)} value={marketplace}>{marketplace}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -2912,13 +2907,13 @@ export default function EditBook() {
                     <div className="space-y-2">
                       {categories.length > 0 ? (
                         categories.map((category, index) => (
-                          <div key={index} className="text-sm text-gray-700 flex items-center">
+                          <div key={index)} className="text-sm text-gray-700 flex items-center">
                             <span className="text-gray-500">Books › </span>
                             <span className="text-gray-700">{category}</span>
                             <button 
                               type="button"
                               className="ml-2 text-blue-600 hover:text-blue-800"
-                              onClick={() => removeCategory(category)}
+                              onClick={ () => removeCategory(category )}
                             >
                               ✏
                             </button>
@@ -2951,7 +2946,7 @@ export default function EditBook() {
                         <Checkbox
                           id="isLowContentBook"
                           checked={form.watch("isLowContentBook") || false}
-                          onCheckedChange={(checked) => form.setValue("isLowContentBook", checked as boolean)}
+                          onCheckedChange={ (checked) => form.setValue("isLowContentBook", checked as boolean)}
                           className="mt-1"
                         />
                         <div className="flex-1">
@@ -2962,7 +2957,7 @@ export default function EditBook() {
                       </div>
                       
                       {/* Info Alert for Low-content */}
-                      {form.watch("isLowContentBook") && (
+                      { form.watch("isLowContentBook") && (
                         <div className="bg-blue-50 border border-blue-200 rounded-md p-4 flex items-start space-x-3">
                           <div className="flex-shrink-0">
                             <div className="w-5 h-5 rounded-full flex items-center justify-center bg-[#ff9500]">
@@ -2974,8 +2969,7 @@ export default function EditBook() {
                               Low-content selection can't be changed after you've published your book.
                             </p>
                           </div>
-                        </div>
-                      )}
+                        </div>)}
                     </div>
 
                     {/* Large-print book */}
@@ -2983,7 +2977,7 @@ export default function EditBook() {
                       <Checkbox
                         id="isLargePrintBook"
                         checked={form.watch("isLargePrintBook") || false}
-                        onCheckedChange={(checked) => form.setValue("isLargePrintBook", checked as boolean)}
+                        onCheckedChange={ (checked) => form.setValue("isLargePrintBook", checked as boolean)}
                         className="mt-1"
                       />
                       <div className="flex-1">
@@ -3005,11 +2999,11 @@ export default function EditBook() {
                   </p>
                   <div className="flex flex-wrap gap-2 mb-2">
                     {keywords.map((keyword) => (
-                      <Badge key={keyword} variant="secondary" className="flex items-center gap-1">
+                      <Badge key={keyword)} variant="secondary" className="flex items-center gap-1">
                         {keyword}
                         <X 
                           className="w-3 h-3 cursor-pointer" 
-                          onClick={() => removeKeyword(keyword)}
+                          onClick={ () => removeKeyword(keyword )}
                         />
                       </Badge>
                     ))}
@@ -3034,7 +3028,7 @@ export default function EditBook() {
                           addKeyword(input.value);
                           input.value = '';
                         }
-                      }}
+                      )}}
                     >
                       Add
                     </Button>
@@ -3061,7 +3055,7 @@ export default function EditBook() {
                           type="radio"
                           id="sameDateOption"
                           name="publicationDateOption"
-                          checked={!form.watch("previouslyPublished")}
+                          checked={ !form.watch("previouslyPublished")}
                           onChange={() => {
                             form.setValue("previouslyPublished", false);
                             form.setValue("previousPublicationDate", null);
@@ -3085,7 +3079,7 @@ export default function EditBook() {
                             id="previouslyPublishedOption"
                             name="publicationDateOption"
                             checked={form.watch("previouslyPublished") || false}
-                            onChange={() => form.setValue("previouslyPublished", true)}
+                            onChange={ () => form.setValue("previouslyPublished", true )}
                             className="w-4 h-4 text-[#38b6ff] border-gray-300 focus:ring-[#38b6ff]"
                           />
                         </div>
@@ -3106,8 +3100,8 @@ export default function EditBook() {
                           
                           <Input
                             type="date"
-                            value={form.watch("previousPublicationDate") || ""}
-                            onChange={(e) => form.setValue("previousPublicationDate", e.target.value || null)}
+                            value={form.watch("previousPublicationDate") || "")}
+                            onChange={ (e) => form.setValue("previousPublicationDate", e.target.value || null )}
                             max={new Date().toISOString().split('T')[0]}
                             className="max-w-xs"
                             placeholder="MM/DD/YYYY"
@@ -3124,7 +3118,7 @@ export default function EditBook() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Release Date</h3>
                 
                 {/* Not Eligible Info Box - Only show if user selects Schedule AND book was previously published */}
-                {form.watch("releaseOption") === "scheduled" && form.watch("previouslyPublished") && (
+                { form.watch("releaseOption") === "scheduled" && form.watch("previouslyPublished") && (
                   <div className="bg-cyan-100 border border-cyan-300 rounded-md p-4 mb-4 flex items-start space-x-3">
                     <div className="flex-shrink-0">
                       <svg className="w-5 h-5 text-[#38b6ff]" fill="currentColor" viewBox="0 0 20 20">
@@ -3137,8 +3131,7 @@ export default function EditBook() {
                         Scheduled release is not available for some titles such as previously published titles.
                       </p>
                     </div>
-                  </div>
-                )}
+                  </div>)}
                 
                 <div className="space-y-4">
                   <p className="text-sm text-gray-700 mb-4">
@@ -3160,7 +3153,7 @@ export default function EditBook() {
                               form.setValue("releaseOption", "immediate");
                               form.setValue("scheduledReleaseDate", null);
                             }
-                          }}
+                          )}}
                           className="w-4 h-4 text-[#38b6ff] mt-1"
                         />
                         <div className="flex-1">
@@ -3183,12 +3176,12 @@ export default function EditBook() {
                           name="releaseOption"
                           value="scheduled"
                           checked={form.watch("releaseOption") === "scheduled"}
-                          disabled={!!form.watch("previouslyPublished")}
+                          disabled={ !!form.watch("previouslyPublished")}
                           onChange={(e) => {
                             if (e.target.checked && !form.watch("previouslyPublished")) {
                               form.setValue("releaseOption", "scheduled");
                             }
-                          }}
+                          )}}
                           className={`w-4 h-4 mt-1 ${form.watch("previouslyPublished") ? "text-gray-400 cursor-not-allowed" : "text-[#38b6ff]"}`}
                         />
                         <div className="flex-1">
@@ -3200,10 +3193,10 @@ export default function EditBook() {
                             <div className="mt-3">
                               <Input
                                 type="date"
-                                value={form.watch("scheduledReleaseDate") || ""}
-                                onChange={(e) => form.setValue("scheduledReleaseDate", e.target.value || null)}
+                                value={form.watch("scheduledReleaseDate") || "")}
+                                onChange={ (e) => form.setValue("scheduledReleaseDate", e.target.value || null )}
                                 min={new Date().toISOString().split('T')[0]}
-                                disabled={!!form.watch("previouslyPublished")}
+                                disabled={ !!form.watch("previouslyPublished")}
                                 className={`max-w-xs ${form.watch("previouslyPublished") ? "opacity-50 cursor-not-allowed" : ""}`}
                                 placeholder="Select release date"
                               />
@@ -3234,7 +3227,7 @@ export default function EditBook() {
               <CardTitle>Upload your manuscript and configure content settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-8">
-              {/* ISBN Section */}
+              {/* ISBN Section */)}
               <div className="bg-teal-50 rounded-lg border border-teal-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">ISBN/ASIN</h3>
                 <div className="space-y-4">
@@ -3250,7 +3243,7 @@ export default function EditBook() {
                       <Label htmlFor="officialIsbnContentApplied" className="text-sm font-medium">Official ISBN/ASIN</Label>
                       <Input
                         id="officialIsbnContentApplied"
-                        value={book.isbn}
+                        value={book.isbn)}
                         disabled
                         className="bg-green-50 border-green-200 text-green-800 font-medium"
                       />
@@ -3288,22 +3281,21 @@ export default function EditBook() {
                                 if (isbnValidationError) {
                                   setIsbnValidationError("");
                                 }
-                              }}
+                              )}}
                               className={`${isbnValidationError ? 'border-red-500 focus:border-red-500' : ''}`}
                             />
-                            {isCheckingIsbn && (
+                            { isCheckingIsbn && (
                               <p className="text-sm text-blue-600 mt-1 flex items-center gap-1">
                                 <span className="animate-spin inline-block w-3 h-3 border border-current border-t-transparent rounded-full"></span>
                                 Checking ISBN/ASIN availability...
-                              </p>
-                            )}
+                              </p>)}
                             {isbnValidationError && (
-                              <p className="text-sm text-red-600 mt-1">{isbnValidationError}</p>
+                              <p className="text-sm text-red-600 mt-1">{isbnValidationError)}</p>
                             )}
                           </div>
                           <Button
                             type="button"
-                            onClick={() => setShowIsbnContentApplyDialog(true)}
+                            onClick={ () => setShowIsbnContentApplyDialog(true )}
                             className="bg-[#ef4444] hover:bg-red-600 text-white flex-shrink-0"
                             disabled={!officialIsbnContentValue?.trim() || !!isbnValidationError || isCheckingIsbn}
                           >
@@ -3367,7 +3359,7 @@ export default function EditBook() {
                           </button>
                           <button 
                             className="p-3 text-left border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
-                            onClick={() => setTrimSizeModalOpen(true)}
+                            onClick={ () => setTrimSizeModalOpen(true )}
                           >
                             Select a different size
                           </button>
@@ -3577,7 +3569,7 @@ export default function EditBook() {
               <CardTitle>Set your pricing and distribution preferences</CardTitle>
             </CardHeader>
             <CardContent className="space-y-8">
-              {/* Distribution Rights Section */}
+              {/* Distribution Rights Section */)}
               <div className="bg-red-50 rounded-lg border border-red-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Territories</h3>
                 <div className="space-y-4">
@@ -3603,14 +3595,14 @@ export default function EditBook() {
                 <div className="space-y-2">
                   <Select 
                     value={form.watch("primaryMarketplace") || ""} 
-                    onValueChange={(value) => form.setValue("primaryMarketplace", value)}
+                    onValueChange={ (value) => form.setValue("primaryMarketplace", value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select primary marketplace" />
                     </SelectTrigger>
                     <SelectContent>
                       {marketplaces.map((marketplace) => (
-                        <SelectItem key={marketplace} value={marketplace}>{marketplace}</SelectItem>
+                        <SelectItem key={marketplace)} value={marketplace}>{marketplace}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -3691,7 +3683,7 @@ export default function EditBook() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setLocation("/projects")}
+              onClick={ ()} => setLocation("/projects")
             >
               Cancel
             </Button>
@@ -3699,7 +3691,7 @@ export default function EditBook() {
               {!isCreating && (
                 <Button
                   variant="destructive"
-                  onClick={handleDelete}
+                  onClick={handleDelete)}
                   disabled={deleteBook.isPending}
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
@@ -3715,45 +3707,42 @@ export default function EditBook() {
                 }}
                 disabled={saveBook.isPending || descriptionCharacterCount > maxDescriptionCharacters}
               >
-                {saveBook.isPending ? (
+                { saveBook.isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Saving...
                   </>
                 ) : (
-                  "Save as Draft"
-                )}
+                  "Save as Draft")}
               </Button>
               {activeTab !== "pricing" && (
                 <Button
                   type="button"
                   onClick={() => {
                     const formData = form.getValues();
-                    handleSaveAndContinue(formData);
-                  }}
+                    handleSaveAndContinue(formData);)}}
                   disabled={saveBook.isPending || descriptionCharacterCount > maxDescriptionCharacters}
                   className="bg-[#ff9500] hover:bg-orange-700"
                 >
-                  {saveBook.isPending ? (
+                  { saveBook.isPending ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       Saving...
                     </>
                   ) : (
-                    "Save and Continue"
-                  )}
+                    "Save and Continue")}
                 </Button>
               )}
               {activeTab === "pricing" && (
                 <Button
                   type="submit"
-                  disabled={saveBook.isPending || descriptionCharacterCount > maxDescriptionCharacters}
+                  disabled={saveBook.isPending || descriptionCharacterCount > maxDescriptionCharacters)}
                   className="bg-[#ff9500] hover:bg-orange-700"
                 >
                   {saveBook.isPending ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {isCreating ? 'Creating...' : 'Updating...'}
+                      {isCreating ? 'Creating...' : 'Updating...')}
                     </>
                   ) : (
                     <>
@@ -3772,9 +3761,9 @@ export default function EditBook() {
         {/* AI Recommendations Sidebar */}
         {!isCreating && bookId && (
           <ContentRecommendationSidebar
-            bookId={bookId}
+            bookId={bookId)}
             isVisible={showAISidebar}
-            onToggle={() => setShowAISidebar(!showAISidebar)}
+            onToggle={ () => setShowAISidebar(!showAISidebar)}
           />
         )}
       </div>
@@ -3818,24 +3807,23 @@ export default function EditBook() {
               </div>
 
               {/* Loading State */}
-              {loadingCategories && (
+              { loadingCategories && (
                 <div className="flex justify-center items-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin" />
                   <span className="ml-2">Loading categories...</span>
-                </div>
-              )}
+                </div>)}
 
 
 
               {/* Category Selection Interface */}
               {!loadingCategories && marketplaceCategories.length > 0 && (
                 <div className="space-y-4">
-                  {/* Multiple Category Selectors */}
-                  {Array.from({ length: Math.max(1, tempUISelections.length + (tempUISelections.length < 3 ? 1 : 0)) }, (_, index) => (
+                  {/* Multiple Category Selectors */)}
+                  { Array.from({ length: Math.max(1, tempUISelections.length + (tempUISelections.length < 3 ? 1 : 0)}, (_, index) => (
                     <div key={index} className="border border-gray-200 rounded">
                       <div 
                         className="flex items-center justify-between p-3 bg-gray-50 cursor-pointer hover:bg-gray-100"
-                        onClick={() => setExpandedCategory(expandedCategory === `selector-${index}` ? null : `selector-${index}`)}
+                        onClick={() => setExpandedCategory(expandedCategory === `selector-${index)}` ? null : `selector-${index}`)}
                       >
                         <div className="flex items-center space-x-2">
                           <div className="w-4 h-4 flex items-center justify-center">
@@ -3843,7 +3831,7 @@ export default function EditBook() {
                           </div>
                           <span className="font-medium">
                             Category {index + 1} 
-                            {tempUISelections[index] && ` - ${tempUISelections[index].split(' › ').pop()}`}
+                            { tempUISelections[index] && ` - ${tempUISelections[index].split(' › ').pop()}`}
                           </span>
                         </div>
                         <div className="flex space-x-2">
@@ -3859,7 +3847,7 @@ export default function EditBook() {
                                   setResetTriggers(prev => ({
                                     ...prev,
                                     [index]: (prev[index] || 0) + 1
-                                  }));
+                                  ))};
                                   // Remove the category from temp UI selections
                                   const newCategories = tempUISelections.filter((_, i) => i !== index);
                                   setTempUISelections(newCategories);
@@ -3914,13 +3902,12 @@ export default function EditBook() {
               )}
 
               {/* No Categories Available Message */}
-              {!loadingCategories && marketplaceCategories.length === 0 && (
+              { !loadingCategories && marketplaceCategories.length === 0 && (
                 <div className="text-center py-8">
                   <p className="text-gray-600">No categories available for the selected marketplace.</p>
                   <p className="text-sm text-gray-500 mt-2">Try selecting a different Primary Marketplace.</p>
 
-                </div>
-              )}
+                </div>)}
 
               {/* Selected Categories Summary */}
               <div className="space-y-4 bg-gray-50 rounded p-4">
@@ -3932,7 +3919,7 @@ export default function EditBook() {
                 
                 <div className="space-y-2">
                   {tempUISelections.map((categoryPath, index) => (
-                    <div key={index} className="flex items-center justify-between text-sm">
+                    <div key={index)} className="flex items-center justify-between text-sm">
                       <span className="text-gray-700">{categoryPath}</span>
                       <button 
                         type="button"
@@ -3984,7 +3971,7 @@ export default function EditBook() {
                   <p className="font-medium text-red-800 mb-2">Incompatible categories:</p>
                   <ul className="space-y-1 text-red-700">
                     {incompatibleCategories.map((category, index) => (
-                      <li key={index} className="flex items-start">
+                      <li key={index)} className="flex items-start">
                         <span className="text-red-500 mr-2 mt-0.5">•</span>
                         <span className="break-words">{category}</span>
                       </li>
@@ -4029,8 +4016,8 @@ export default function EditBook() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {trimSizes.mostPopular.map((size) => (
                   <button
-                    key={size.id}
-                    onClick={() => setSelectedTrimSize(size.id)}
+                    key={size.id)}
+                    onClick={ () => setSelectedTrimSize(size.id )}
                     className={`p-3 text-center border rounded-md text-sm transition-colors ${
                       selectedTrimSize === size.id
                         ? 'border-2 border-teal-500 bg-teal-50 font-medium'
@@ -4052,8 +4039,8 @@ export default function EditBook() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {trimSizes.moreStandard.map((size) => (
                   <button
-                    key={size.id}
-                    onClick={() => setSelectedTrimSize(size.id)}
+                    key={size.id)}
+                    onClick={ () => setSelectedTrimSize(size.id )}
                     className={`p-3 text-center border rounded-md text-sm transition-colors ${
                       selectedTrimSize === size.id
                         ? 'border-2 border-teal-500 bg-teal-50 font-medium'
@@ -4076,8 +4063,8 @@ export default function EditBook() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {trimSizes.nonStandard.map((size) => (
                   <button
-                    key={size.id}
-                    onClick={() => setSelectedTrimSize(size.id)}
+                    key={size.id)}
+                    onClick={ () => setSelectedTrimSize(size.id )}
                     className={`p-3 text-center border rounded-md text-sm transition-colors ${
                       selectedTrimSize === size.id
                         ? 'border-2 border-teal-500 bg-teal-50 font-medium'
@@ -4134,7 +4121,7 @@ export default function EditBook() {
           
           {/* Modal Footer */}
           <div className="flex justify-end space-x-2 pt-4 border-t">
-            <Button variant="outline" onClick={() => setTrimSizeModalOpen(false)}>
+            <Button variant="outline" onClick={ () => setTrimSizeModalOpen(false )}>
               Cancel
             </Button>
             <Button 

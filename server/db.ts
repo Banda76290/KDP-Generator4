@@ -5,22 +5,11 @@ import * as schema from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
 
-// Construct DATABASE_URL from individual PostgreSQL variables if not provided
-let databaseUrl = process.env.DATABASE_URL;
-
-if (!databaseUrl && process.env.PGHOST && process.env.PGDATABASE && process.env.PGUSER && process.env.PGPASSWORD) {
-  const { PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD } = process.env;
-  databaseUrl = `postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}:${PGPORT || 5432}/${PGDATABASE}?sslmode=require`;
-  console.log("DATABASE_URL constructed from individual PG variables");
-}
-
-if (!databaseUrl) {
-  console.error("DATABASE_URL environment variable is not set and cannot be constructed");
-  console.error("Available environment variables:", Object.keys(process.env).filter(key => key.includes('PG') || key.includes('DATABASE')));
+if (!process.env.DATABASE_URL) {
   throw new Error(
-    "DATABASE_URL must be set or PostgreSQL connection variables (PGHOST, PGDATABASE, PGUSER, PGPASSWORD) must be provided.",
+    "DATABASE_URL must be set. Did you forget to provision a database?",
   );
 }
 
-export const pool = new Pool({ connectionString: databaseUrl });
+export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 export const db = drizzle({ client: pool, schema });

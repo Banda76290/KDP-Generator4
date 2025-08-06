@@ -41,8 +41,7 @@ export default function AdminBlogPosts() {
       toast({
         title: "Accès refusé",
         description: "Vous n'avez pas les permissions d'administrateur.",
-        variant: "destructive",
-      });
+        variant: "destructive",)};
       setTimeout(() => {
         window.location.href = "/";
       }, 500);
@@ -57,41 +56,39 @@ export default function AdminBlogPosts() {
 
   const deletePostMutation = useMutation({
     mutationFn: async (postId: string) => {
-      return await apiRequest(`/api/admin/blog/posts/${postId}`, "DELETE");
+      return await apiRequest(`/api/admin/blog/posts/${postId)}`, { method: "DELETE" };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/posts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/posts"])};
       toast({
         title: "Succès",
         description: "Article supprimé avec succès.",
-      });
+      };
     },
     onError: (error: Error) => {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de supprimer l'article.",
-        variant: "destructive",
-      });
+        variant: "destructive",)};
     },
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ postId, status }: { postId: string; status: string }) => {
-      return await apiRequest(`/api/admin/blog/posts/${postId}/status`, "PUT", { status });
+    mutationFn: async ({ postId, status)}: { postId: string; status: string } => {
+      return await apiRequest(`/api/admin/blog/posts/${postId)}/status`, { method: "PUT", body: JSON.stringify({ status)} });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/posts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/posts"])};
       toast({
         title: "Succès",
         description: "Statut de l'article mis à jour.",
-      });
+      };
     },
     onError: (error: Error) => {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de mettre à jour le statut.",
-        variant: "destructive",
-      });
+        variant: "destructive",)};
     },
   });
 
@@ -139,7 +136,7 @@ export default function AdminBlogPosts() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
+          <Button variant="ghost" size="sm" onClick={ () => window.history.back( )}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
@@ -212,12 +209,12 @@ export default function AdminBlogPosts() {
                   </TableHeader>
                   <TableBody>
                     {postsData.posts.map((post) => (
-                      <TableRow key={post.id}>
+                      <TableRow key={post.id)}>
                         <TableCell>
                           <div>
                             <div className="font-medium">{post.title}</div>
                             <div className="text-sm text-muted-foreground">
-                              {post.excerpt?.substring(0, 100)}...
+                              { post.excerpt?.substring(0, 100)}...
                             </div>
                           </div>
                         </TableCell>
@@ -233,14 +230,14 @@ export default function AdminBlogPosts() {
                         </TableCell>
                         <TableCell>
                           {post.category ? (
-                            <Badge variant="outline">{post.category.name}</Badge>
+                            <Badge variant="outline">{post.category.name)}</Badge>
                           ) : (
                             <span className="text-muted-foreground">Sans catégorie</span>
                           )}
                         </TableCell>
                         <TableCell>
-                          <Badge variant={getStatusBadgeVariant(post.status)}>
-                            {getStatusLabel(post.status)}
+                          <Badge variant={ getStatusBadgeVariant(post.status)}>
+                            { getStatusLabel(post.status)}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -253,10 +250,9 @@ export default function AdminBlogPosts() {
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
                             <span className="text-sm">
-                              {post.publishedAt 
+                              { post.publishedAt 
                                 ? format(new Date(post.publishedAt), "dd/MM/yyyy")
-                                : format(new Date(post.createdAt!), "dd/MM/yyyy")
-                              }
+                                : format(new Date(post.createdAt!), "dd/MM/yyyy")}
                             </span>
                           </div>
                         </TableCell>
@@ -265,7 +261,7 @@ export default function AdminBlogPosts() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => window.location.href = `/admin/blog/posts/${post.id}/edit`}
+                              onClick={() => window.location.href = `/admin/blog/posts/${post.id)}/edit`}
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -275,7 +271,7 @@ export default function AdminBlogPosts() {
                               onChange={(e) => updateStatusMutation.mutate({ 
                                 postId: post.id, 
                                 status: e.target.value 
-                              })}
+                              )}}
                               className="px-2 py-1 text-xs border rounded"
                             >
                               <option value="draft">Brouillon</option>
@@ -301,7 +297,7 @@ export default function AdminBlogPosts() {
                                   <Button variant="outline">Annuler</Button>
                                   <Button 
                                     variant="destructive"
-                                    onClick={() => deletePostMutation.mutate(post.id)}
+                                    onClick={ () => deletePostMutation.mutate(post.id )}
                                   >
                                     Supprimer
                                   </Button>
@@ -329,14 +325,14 @@ export default function AdminBlogPosts() {
             {postsData && postsData.total > limit && (
               <div className="flex items-center justify-between">
                 <div className="text-sm text-muted-foreground">
-                  Page {currentPage + 1} sur {Math.ceil(postsData.total / limit)}
+                  Page {currentPage + 1)} sur { Math.ceil(postsData.total / limit)}
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     disabled={currentPage === 0}
-                    onClick={() => setCurrentPage(currentPage - 1)}
+                    onClick={ () => setCurrentPage(currentPage - 1 )}
                   >
                     Précédent
                   </Button>
@@ -344,7 +340,7 @@ export default function AdminBlogPosts() {
                     variant="outline"
                     size="sm"
                     disabled={currentPage >= Math.ceil(postsData.total / limit) - 1}
-                    onClick={() => setCurrentPage(currentPage + 1)}
+                    onClick={ () => setCurrentPage(currentPage + 1 )}
                   >
                     Suivant
                   </Button>
