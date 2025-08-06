@@ -44,7 +44,6 @@ The application follows a modern full-stack architecture with clear separation b
 - **Development-to-Production Sync**: Comprehensive synchronization system with multiple export options (direct sync, SQL copy-paste, SQL file download, JSON export) for transferring marketplace categories from development to production environments with detailed logging and error handling. Manual "Copier SQL" method confirmed working as reliable alternative when direct sync fails due to CORS/authentication issues.
 - **AI Prompt Integration System**: Complete integration between AI prompt administration and execution systems. Database-configured prompts automatically appear in AI Functions interface and are used for content generation. Hybrid system combines database templates with static fallback functions, with database templates taking priority.
 - **Security Enhancements**: XSS vulnerability patched in author biography editor (August 2025). Replaced unsafe innerHTML assignment with DOMParser for secure HTML sanitization without script execution risk.
-- **Expert Analytics Method**: Implemented advanced KDP revenue analysis using detailed sheet extraction method (August 2025). New system extracts data from eBook Royalty + Paperback Royalty + Hardcover Royalty sheets only, excluding Combined Sales duplicates. Preserves original currency amounts and converts to EUR using official BCE exchange rates. Results validated against external expert analysis showing ~9,757 EUR total vs previous incorrect ~3,042 calculations.
 
 ## External Dependencies
 

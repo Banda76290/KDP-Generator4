@@ -1,54 +1,54 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { TrendingUp, DollarSign, Globe, BookOpen, Users, Calendar, RefreshCw, CheckCircle2, AlertTriangle } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-import Layout from '@/components/Layout';
+import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import Layout from "@/components/Layout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell
+} from "recharts";
+import { 
+  TrendingUp, 
+  DollarSign, 
+  BookOpen, 
+  BarChart3,
+  Calendar,
+  Globe,
+  Star,
+  Download
+} from "lucide-react";
 
-interface DetailedCurrency {
-  currency: string;
-  totalRoyalty: number;
-  transactionCount: number;
-  formatsCount: number;
-  booksCount: number;
-  formats: string[];
-}
-
-interface DetailedConversion {
-  currency: string;
-  originalAmount: number;
-  exchangeRate: number;
-  amountInEUR: number;
-  transactionCount: number;
-  formatsCount: number;
-  booksCount: number;
-}
-
-interface DetailedAnalytics {
-  method: string;
-  description: string;
+interface AnalyticsOverview {
+  totalImports: number;
   totalRecords: number;
+  royaltiesByCurrency: Array<{
+    currency: string;
+    amount: number;
+    transactions: number;
+  }>;
   uniqueBooks: number;
-  uniqueMarketplaces: number;
-  uniqueFormats: number;
-  royaltiesByCurrency: DetailedCurrency[];
-  totalInEUR: number;
-  conversions: DetailedConversion[];
-  totalCurrencies: number;
-  totalTransactions: number;
 }
 
-interface LegacyOverview {
-  totalImports: string;
-  totalRecords: string;
-  totalRevenueUSD: string;
-  averageRoyaltyUSD: string;
-  uniqueBooks: string;
-  uniqueMarketplaces: string;
+interface SalesTrend {
+  date: string;
+  sales: number;
+  royalty: number;
+  units: number;
 }
 
 interface TopPerformer {
@@ -71,471 +71,669 @@ interface MarketplaceData {
   uniqueBooks: number;
 }
 
-interface SalesTrend {
-  date: string;
-  sales: number;
-  royalty: number;
-  units: number;
-}
-
-const COLORS = ['#38b6ff', '#ff9900', '#146eb4', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'];
+const MARKETPLACE_COLORS = {
+  'Amazon.com': '#38b6ff',
+  'Amazon.fr': '#ff9900',
+  'Amazon.de': '#146eb4',
+  'Amazon.ca': '#ffb347',
+  'Amazon.co.uk': '#4285f4',
+  'Amazon.it': '#34a853'
+};
 
 export default function Analytics() {
-  const [selectedPeriod, setSelectedPeriod] = useState('30');
+  const { toast } = useToast();
+  const { isAuthenticated, isLoading } = useAuth();
+  const queryClient = useQueryClient();
+  const [selectedPeriod, setSelectedPeriod] = useState("30");
 
-  // Main detailed analytics (expert method)
-  const { data: detailedData, isLoading: detailedLoading, refetch: refetchDetailed } = useQuery<DetailedAnalytics>({
-    queryKey: ['/api/analytics/detailed'],
-  });
-
-  // Legacy data for comparison
-  const { data: legacyData, isLoading: legacyLoading } = useQuery<LegacyOverview>({
+  // Analytics data queries
+  const { data: overview, isLoading: overviewLoading } = useQuery<AnalyticsOverview>({
     queryKey: ['/api/analytics/overview'],
+    enabled: isAuthenticated,
   });
 
-  // Supporting data
-  const { data: topPerformers, isLoading: topPerformersLoading } = useQuery<TopPerformer[]>({
+  const { data: salesTrends, isLoading: trendsLoading } = useQuery<SalesTrend[]>({
+    queryKey: ['/api/analytics/sales-trends', selectedPeriod],
+    enabled: isAuthenticated,
+  });
+
+  const { data: topPerformers, isLoading: performersLoading } = useQuery<TopPerformer[]>({
     queryKey: ['/api/analytics/top-performers'],
+    enabled: isAuthenticated,
   });
 
   const { data: marketplaceData, isLoading: marketplaceLoading } = useQuery<MarketplaceData[]>({
     queryKey: ['/api/analytics/marketplace-breakdown'],
+    enabled: isAuthenticated,
   });
 
-  const { data: salesTrends, isLoading: trendsLoading } = useQuery<SalesTrend[]>({
-    queryKey: [`/api/analytics/sales-trends/${selectedPeriod}`],
+  // Exchange rates data and management
+  const { data: exchangeRates, isLoading: ratesLoading } = useQuery({
+    queryKey: ["/api/exchange-rates"],
+    enabled: isAuthenticated,
   });
 
-  const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 2,
-    }).format(amount);
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      toast({
+        title: "Unauthorized",
+        description: "You are logged out. Logging in again...",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 500);
+      return;
+    }
+  }, [isAuthenticated, isLoading, toast]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  const formatCurrency = (amount: number, currency: string = 'USD') => {
+    // Handle invalid or unknown currencies
+    const validCurrency = ['USD', 'EUR', 'JPY', 'GBP', 'CAD', 'INR', 'AUD', 'BRL', 'MXN'].includes(currency) 
+      ? currency 
+      : 'USD';
+    
+    try {
+      return new Intl.NumberFormat('fr-FR', {
+        style: 'currency',
+        currency: validCurrency,
+        minimumFractionDigits: validCurrency === 'JPY' ? 0 : 2,
+      }).format(amount);
+    } catch (error) {
+      // Fallback for any formatting errors
+      return `${amount.toFixed(2)} ${currency}`;
+    }
   };
 
-  const refreshAllData = () => {
-    refetchDetailed();
-    toast({
-      title: "Données actualisées",
-      description: "Les analytics ont été mises à jour",
+  // Format currency converted to USD for unified display  
+  const formatConvertedCurrency = (amount: number): string => {
+    return formatCurrency(amount, 'USD');
+  };
+
+  // Function to update exchange rates manually
+  const updateExchangeRates = async () => {
+    try {
+      const response = await fetch('/api/exchange-rates/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        toast({
+          title: "Taux de change mis à jour",
+          description: "Les taux de change ont été actualisés avec succès.",
+        });
+        // Refetch exchange rates data
+        queryClient.invalidateQueries({ queryKey: ["/api/exchange-rates"] });
+      } else {
+        throw new Error('Failed to update exchange rates');
+      }
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour les taux de change.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Get main revenue info for display
+  const royaltiesByCurrency = overview?.royaltiesByCurrency || [];
+  const totalCurrencies = royaltiesByCurrency.length;
+  const mainCurrency = royaltiesByCurrency.length > 0 ? royaltiesByCurrency[0] : null;
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      month: 'short',
+      day: 'numeric',
     });
   };
 
-  const isLoading = detailedLoading || legacyLoading || topPerformersLoading || marketplaceLoading || trendsLoading;
-
   return (
     <Layout>
-      <div className="container mx-auto p-6 space-y-6">
+      <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <TrendingUp className="h-8 w-8 text-blue-600" />
-              Analytics KDP
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Analyse complète de vos revenus avec la méthode experte
-            </p>
-            <div className="flex gap-2 mt-2">
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                <CheckCircle2 className="h-3 w-3 mr-1" />
-                Méthode experte validée
-              </Badge>
-              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                Montants originaux préservés
-              </Badge>
-            </div>
+            <h1 className="text-2xl font-bold text-gray-900">Sales Analytics</h1>
+            <p className="text-gray-600 mt-1">Analyse détaillée de vos performances KDP basée sur vos données réelles.</p>
           </div>
-          
-          <Button onClick={refreshAllData} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Actualiser
-          </Button>
+          <div className="flex items-center gap-3">
+            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">7 derniers jours</SelectItem>
+                <SelectItem value="30">30 derniers jours</SelectItem>
+                <SelectItem value="90">90 derniers jours</SelectItem>
+                <SelectItem value="365">12 derniers mois</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
+      </div>
 
-        {isLoading ? (
-          <div className="animate-pulse space-y-6">
-            <div className="grid gap-6 md:grid-cols-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded"></div>
-              ))}
+      {/* Vue d'ensemble */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Imports</CardTitle>
+            <Download className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-primary">
+              {overviewLoading ? (
+                <div className="w-16 h-6 bg-gray-200 animate-pulse rounded" />
+              ) : (
+                overview?.totalImports || 0
+              )}
             </div>
-          </div>
-        ) : (
-          <>
-            {/* Main Overview Cards */}
-            <div className="grid gap-6 md:grid-cols-4">
-              <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-green-800">Total Revenus EUR</CardTitle>
-                  <DollarSign className="h-4 w-4 text-green-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-green-900">
-                    {detailedData ? formatCurrency(detailedData.totalInEUR, 'EUR') : '€0.00'}
-                  </div>
-                  <p className="text-xs text-green-700 mt-1">
-                    Taux BCE - Méthode experte
-                  </p>
-                </CardContent>
-              </Card>
+            <p className="text-xs text-muted-foreground">
+              Fichiers KDP importés
+            </p>
+          </CardContent>
+        </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Transactions</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {detailedData?.totalRecords.toLocaleString() || '0'}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    De {detailedData?.totalCurrencies || 0} devises
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Livres Uniques</CardTitle>
-                  <BookOpen className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {detailedData?.uniqueBooks || 0}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Sur {detailedData?.uniqueMarketplaces || 0} marchés
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Formats</CardTitle>
-                  <Globe className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {detailedData?.uniqueFormats || 0}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    eBook, Paperback, Hardcover
-                  </p>
-                </CardContent>
-              </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Enregistrements</CardTitle>
+            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-primary">
+              {overviewLoading ? (
+                <div className="w-16 h-6 bg-gray-200 animate-pulse rounded" />
+              ) : (
+                overview?.totalRecords?.toLocaleString('fr-FR') || 0
+              )}
             </div>
+            <p className="text-xs text-muted-foreground">
+              Transactions importées
+            </p>
+          </CardContent>
+        </Card>
 
-            <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-                <TabsTrigger value="currencies">Devises</TabsTrigger>
-                <TabsTrigger value="performance">Performance</TabsTrigger>
-                <TabsTrigger value="comparison">Comparaison</TabsTrigger>
-              </TabsList>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Revenus Totaux (USD)</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-secondary">
+              {overviewLoading ? (
+                <div className="w-20 h-6 bg-gray-200 animate-pulse rounded" />
+              ) : (
+                overview?.totalRoyaltiesUSD ? formatCurrency(overview.totalRoyaltiesUSD, 'USD') : (mainCurrency ? formatCurrency(mainCurrency.amount, mainCurrency.currency) : '0 $')
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {overview?.totalRoyaltiesUSD ? `Converti automatiquement en USD` : (totalCurrencies > 1 ? `${totalCurrencies} devises différentes` : 'Royautés cumulées')}
+            </p>
+          </CardContent>
+        </Card>
 
-              <TabsContent value="overview" className="space-y-6">
-                {/* Currency Distribution Chart */}
-                {detailedData?.royaltiesByCurrency && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Répartition des Revenus par Devise</CardTitle>
-                      <CardDescription>Montants originaux sans conversion</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={detailedData.royaltiesByCurrency}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="currency" />
-                          <YAxis />
-                          <Tooltip formatter={(value, name) => [value.toLocaleString(), 'Montant']} />
-                          <Bar dataKey="totalRoyalty" fill="#38b6ff" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-                )}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Livres Uniques</CardTitle>
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-primary">
+              {overviewLoading ? (
+                <div className="w-12 h-6 bg-gray-200 animate-pulse rounded" />
+              ) : (
+                overview?.uniqueBooks || 0
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              ASINs différents
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
-                {/* EUR Conversion Pie Chart */}
-                {detailedData?.conversions && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Répartition en EUR (Conversion BCE)</CardTitle>
-                      <CardDescription>Distribution des revenus convertis en euros</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <PieChart>
-                          <Pie
-                            data={detailedData.conversions}
-                            cx="50%"
-                            cy="50%"
-                            outerRadius={100}
-                            fill="#8884d8"
-                            dataKey="amountInEUR"
-                            label={({ currency, amountInEUR }) => `${currency}: ${amountInEUR.toFixed(0)}€`}
-                          >
-                            {detailedData.conversions.map((_, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip formatter={(value) => [`${Number(value).toFixed(2)}€`, 'Montant EUR']} />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
+      <Tabs defaultValue="trends" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="trends">Tendances</TabsTrigger>
+          <TabsTrigger value="currencies">Devises</TabsTrigger>
+          <TabsTrigger value="performance">Performance</TabsTrigger>
+          <TabsTrigger value="marketplace">Marketplaces</TabsTrigger>
+          <TabsTrigger value="books">Top Livres</TabsTrigger>
+          <TabsTrigger value="exchange">Taux de Change</TabsTrigger>
+        </TabsList>
 
-              <TabsContent value="currencies" className="space-y-6">
-                {/* Currency Details */}
-                {detailedData?.royaltiesByCurrency && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Détail par Devise</CardTitle>
-                      <CardDescription>Montants originaux et conversions EUR</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {detailedData.royaltiesByCurrency.map((curr, index) => {
-                          const conversion = detailedData.conversions.find(c => c.currency === curr.currency);
-                          return (
-                            <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                              <div className="flex items-center gap-4">
-                                <Badge variant="outline" className="font-mono text-lg">
-                                  {curr.currency}
-                                </Badge>
-                                <div>
-                                  <div className="font-bold text-lg">
-                                    {formatCurrency(curr.totalRoyalty, curr.currency)}
-                                  </div>
-                                  <div className="text-sm text-muted-foreground">
-                                    {curr.transactionCount} transactions • {curr.formatsCount} formats
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                {conversion && (
-                                  <>
-                                    <div className="font-bold text-green-700">
-                                      {formatCurrency(conversion.amountInEUR, 'EUR')}
-                                    </div>
-                                    <div className="text-xs text-muted-foreground">
-                                      Taux: 1 EUR = {conversion.exchangeRate.toFixed(4)} {curr.currency}
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
-
-              <TabsContent value="performance" className="space-y-6">
-                {/* Top Performers */}
-                {topPerformers && topPerformers.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Top Livres Performants</CardTitle>
-                      <CardDescription>Livres générant le plus de revenus</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {topPerformers.slice(0, 5).map((book, index) => (
-                          <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                            <div className="flex items-center gap-4">
-                              <Badge variant="secondary">#{index + 1}</Badge>
-                              <div>
-                                <div className="font-medium line-clamp-2">{book.title}</div>
-                                <div className="text-sm text-muted-foreground">
-                                  {book.marketplace} • ASIN: {book.asin}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <div className="font-bold">{book.totalRoyalty.toFixed(2)} {book.currency}</div>
-                              <div className="text-sm text-muted-foreground">
-                                {book.totalUnits} unités
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Sales Trends */}
-                {salesTrends && salesTrends.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Tendances des Ventes</CardTitle>
-                      <CardDescription>
-                        <div className="flex items-center gap-2">
-                          <span>Évolution sur {selectedPeriod} jours</span>
-                          <select 
-                            value={selectedPeriod}
-                            onChange={(e) => setSelectedPeriod(e.target.value)}
-                            className="border rounded px-2 py-1 text-sm"
-                          >
-                            <option value="7">7 jours</option>
-                            <option value="30">30 jours</option>
-                            <option value="90">90 jours</option>
-                          </select>
-                        </div>
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={salesTrends}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="date" />
-                          <YAxis />
-                          <Tooltip />
-                          <Legend />
-                          <Line type="monotone" dataKey="royalty" stroke="#38b6ff" name="Royalties" />
-                          <Line type="monotone" dataKey="units" stroke="#ff9900" name="Unités" />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
-
-              <TabsContent value="comparison" className="space-y-6">
-                {/* Method Comparison */}
-                <div className="grid gap-6 md:grid-cols-2">
-                  <Card className="border-green-200 bg-green-50">
-                    <CardHeader>
-                      <CardTitle className="text-green-900 flex items-center gap-2">
-                        <CheckCircle2 className="h-5 w-5" />
-                        Nouvelle Méthode (Experte)
-                      </CardTitle>
-                      <CardDescription className="text-green-700">
-                        Extraction des onglets détaillés uniquement
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="text-green-800">
-                      {detailedData && (
-                        <div className="space-y-3">
-                          <div className="flex justify-between">
-                            <span>Total EUR:</span>
-                            <Badge className="bg-green-200 text-green-900">
-                              {formatCurrency(detailedData.totalInEUR, 'EUR')}
-                            </Badge>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Transactions:</span>
-                            <Badge variant="outline">{detailedData.totalRecords}</Badge>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Devises:</span>
-                            <Badge variant="outline">{detailedData.totalCurrencies}</Badge>
-                          </div>
-                          <div className="text-xs space-y-1 pt-2 border-t border-green-300">
-                            <div className="flex items-center gap-1">
-                              <CheckCircle2 className="h-3 w-3" />
-                              <span>Onglets détaillés seulement</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <CheckCircle2 className="h-3 w-3" />
-                              <span>Pas de doublons</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <CheckCircle2 className="h-3 w-3" />
-                              <span>Montants originaux</span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border-orange-200 bg-orange-50">
-                    <CardHeader>
-                      <CardTitle className="text-orange-900 flex items-center gap-2">
-                        <AlertTriangle className="h-5 w-5" />
-                        Ancienne Méthode (Legacy)
-                      </CardTitle>
-                      <CardDescription className="text-orange-700">
-                        Système avec conversions et doublons
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="text-orange-800">
-                      {legacyData && (
-                        <div className="space-y-3">
-                          <div className="flex justify-between">
-                            <span>Total USD:</span>
-                            <Badge className="bg-orange-200 text-orange-900">
-                              ${legacyData.totalRevenueUSD}
-                            </Badge>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Records:</span>
-                            <Badge variant="outline">{legacyData.totalRecords}</Badge>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Imports:</span>
-                            <Badge variant="outline">{legacyData.totalImports}</Badge>
-                          </div>
-                          <div className="text-xs space-y-1 pt-2 border-t border-orange-300">
-                            <div className="flex items-center gap-1">
-                              <AlertTriangle className="h-3 w-3" />
-                              <span>Inclut données "Combined Sales"</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <AlertTriangle className="h-3 w-3" />
-                              <span>Conversions automatiques</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <AlertTriangle className="h-3 w-3" />
-                              <span>Doublons potentiels</span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
+        <TabsContent value="trends" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Évolution des Ventes
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {trendsLoading ? (
+                <div className="h-80 flex items-center justify-center">
+                  <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
                 </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={salesTrends}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="date" 
+                      tickFormatter={formatDate}
+                    />
+                    <YAxis yAxisId="left" />
+                    <YAxis yAxisId="right" orientation="right" />
+                    <Tooltip 
+                      labelFormatter={(label) => formatDate(label)}
+                      formatter={(value, name) => [
+                        name === 'royalty' ? formatCurrency(Number(value)) : value,
+                        name === 'royalty' ? 'Royautés' : 
+                        name === 'units' ? 'Unités' : 'Ventes'
+                      ]}
+                    />
+                    <Line 
+                      yAxisId="left"
+                      type="monotone" 
+                      dataKey="royalty" 
+                      stroke="#38b6ff" 
+                      strokeWidth={3}
+                      dot={{ fill: '#38b6ff', strokeWidth: 2, r: 4 }}
+                    />
+                    <Line 
+                      yAxisId="right"
+                      type="monotone" 
+                      dataKey="units" 
+                      stroke="#ff9900" 
+                      strokeWidth={2}
+                      dot={{ fill: '#ff9900', strokeWidth: 2, r: 3 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-                {/* Method Explanation */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Pourquoi la Nouvelle Méthode est Plus Précise</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4 text-sm">
-                      <div className="p-4 bg-green-50 border border-green-200 rounded">
-                        <h4 className="font-medium text-green-900 mb-2">✅ Méthode Experte</h4>
-                        <ul className="space-y-1 text-green-800">
-                          <li>• Extraction directe des onglets "eBook Royalty" + "Paperback Royalty" + "Hardcover Royalty"</li>
-                          <li>• Exclusion des données "Combined Sales" qui créent des doublons</li>
-                          <li>• Préservation des montants originaux par devise</li>
-                          <li>• Conversion EUR avec taux BCE officiels</li>
-                        </ul>
+        <TabsContent value="currencies" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                Revenus par Devise
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {overviewLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="w-full h-16 bg-gray-200 animate-pulse rounded" />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {royaltiesByCurrency?.map((currency) => (
+                    <div key={currency.currency} className="p-4 border rounded-lg bg-gradient-to-r from-blue-50 to-orange-50">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-lg">{currency.currency}</h4>
+                        <Badge variant="secondary">
+                          {currency.transactions} transactions
+                        </Badge>
                       </div>
-                      
-                      <div className="p-4 bg-orange-50 border border-orange-200 rounded">
-                        <h4 className="font-medium text-orange-900 mb-2">⚠️ Problèmes de l'Ancienne Méthode</h4>
-                        <ul className="space-y-1 text-orange-800">
-                          <li>• Inclut les données "Combined Sales" (doublons avec les détails)</li>
-                          <li>• Inclut les données "Payments" (historiques cumulatives)</li>
-                          <li>• Conversions automatiques approximatives</li>
-                          <li>• Perte des montants originaux</li>
-                        </ul>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-2xl font-bold text-secondary">
+                            {formatCurrency(currency.amount, currency.currency)}
+                          </div>
+                          {currency.amountUSD && currency.currency !== 'USD' && (
+                            <div className="text-sm text-gray-600 mt-1">
+                              ≈ {formatCurrency(currency.amountUSD, 'USD')}
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-sm text-gray-600 text-right">
+                          <div>Moyenne: {formatCurrency(currency.amount / currency.transactions, currency.currency)}</div>
+                          {currency.amountUSD && currency.currency !== 'USD' && (
+                            <div className="mt-1">≈ {formatCurrency(currency.amountUSD / currency.transactions, 'USD')}</div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </>
-        )}
-      </div>
+                  ))}
+                  {royaltiesByCurrency.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      Aucune donnée de revenus disponible
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="performance" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Star className="h-5 w-5" />
+                Livres les Plus Performants
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {performersLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="flex items-center space-x-4">
+                      <div className="w-8 h-8 bg-gray-200 animate-pulse rounded" />
+                      <div className="flex-1 space-y-2">
+                        <div className="w-3/4 h-4 bg-gray-200 animate-pulse rounded" />
+                        <div className="w-1/2 h-3 bg-gray-200 animate-pulse rounded" />
+                      </div>
+                      <div className="w-20 h-6 bg-gray-200 animate-pulse rounded" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {topPerformers?.slice(0, 10).map((book, index) => (
+                    <div key={book.asin} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center space-x-4">
+                        <div className="flex-shrink-0">
+                          <Badge variant={index < 3 ? "default" : "secondary"} className="w-8 h-8 flex items-center justify-center p-0">
+                            {index + 1}
+                          </Badge>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-900 line-clamp-2 max-w-md">
+                            {book.title}
+                          </h4>
+                          <p className="text-sm text-gray-500">ASIN: {book.asin}</p>
+                          <div className="flex items-center gap-4 mt-1 text-xs text-gray-400">
+                            <span>{book.marketplace || 'N/A'}</span>
+                            <span>{book.totalSales} transactions</span>
+                            <span>{book.currency}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-secondary">
+                          {book.totalRoyaltyUSD ? formatCurrency(book.totalRoyaltyUSD, 'USD') : formatCurrency(book.totalRoyalty, book.currency)}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="marketplace" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  Répartition par Marketplace
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {marketplaceLoading ? (
+                  <div className="h-64 flex items-center justify-center">
+                    <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={250}>
+                    <PieChart>
+                      <Pie
+                        data={marketplaceData}
+                        dataKey="totalRoyaltyUSD"
+                        nameKey="marketplace"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={80}
+                        label={({ marketplace, percent }) => 
+                          `${marketplace} (${(percent * 100).toFixed(1)}%)`
+                        }
+                      >
+                        {marketplaceData?.map((entry, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={MARKETPLACE_COLORS[entry.marketplace as keyof typeof MARKETPLACE_COLORS] || '#8884d8'} 
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        formatter={(value) => [formatCurrency(Number(value), 'USD'), 'Royautés']}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Détails par Marketplace</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {marketplaceLoading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="w-full h-16 bg-gray-200 animate-pulse rounded" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {marketplaceData?.map((marketplace) => (
+                      <div key={`${marketplace.marketplace}-${marketplace.currency}`} className="p-4 border rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium">{marketplace.marketplace}</h4>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">{marketplace.currency}</Badge>
+                            <Badge style={{ backgroundColor: MARKETPLACE_COLORS[marketplace.marketplace as keyof typeof MARKETPLACE_COLORS] || '#8884d8' }}>
+                              {marketplace.uniqueBooks} livres
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-gray-500">Revenus:</span>
+                            <div className="font-medium text-secondary">
+                              {marketplace.totalRoyaltyUSD ? formatCurrency(marketplace.totalRoyaltyUSD, 'USD') : formatCurrency(marketplace.totalRoyalty, marketplace.currency)}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Transactions:</span>
+                            <div className="font-medium">
+                              {marketplace.totalSales.toLocaleString('fr-FR')}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="books" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Analyse Détaillée des Livres</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {performersLoading ? (
+                <div className="h-64 flex items-center justify-center">
+                  <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={topPerformers?.slice(0, 10)}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="title" 
+                      angle={-45}
+                      textAnchor="end"
+                      height={100}
+                      interval={0}
+                      fontSize={10}
+                      tickFormatter={(value) => value.length > 20 ? `${value.substring(0, 20)}...` : value}
+                    />
+                    <YAxis />
+                    <Tooltip 
+                      formatter={(value, name) => [
+                        name === 'totalRoyalty' ? formatCurrency(Number(value)) : value,
+                        name === 'totalRoyalty' ? 'Royautés' : 'Unités'
+                      ]}
+                      labelFormatter={(label) => `Livre: ${label}`}
+                    />
+                    <Bar dataKey="totalRoyalty" fill="#38b6ff" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Exchange Rates Tab */}
+        <TabsContent value="exchange" className="space-y-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  Taux de Change
+                </CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Gestion des taux de conversion monétaire pour les analytics unifiés
+                </p>
+              </div>
+              <Button 
+                onClick={updateExchangeRates}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Actualiser
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {ratesLoading ? (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">Chargement des taux de change...</p>
+                  </div>
+                ) : exchangeRates && exchangeRates.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {exchangeRates.map((rate: any) => (
+                      <Card key={rate.currency} className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">{rate.currency}</p>
+                            <p className="text-sm text-muted-foreground">
+                              Dernière mise à jour: {new Date(rate.date).toLocaleDateString('fr-FR')}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-lg">
+                              {parseFloat(rate.rate).toFixed(4)}
+                            </p>
+                            <p className="text-xs text-muted-foreground">EUR → {rate.currency}</p>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">
+                      Aucun taux de change disponible. Cliquez sur "Actualiser" pour charger les données.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Currency Converter Tool */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                Convertisseur de Devises
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div>
+                  <label className="text-sm font-medium">Montant</label>
+                  <input 
+                    type="number" 
+                    placeholder="100.00"
+                    className="w-full mt-1 px-3 py-2 border rounded-md"
+                    id="convert-amount"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">De</label>
+                  <Select>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="EUR" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {exchangeRates?.map((rate: any) => (
+                        <SelectItem key={rate.currency} value={rate.currency}>
+                          {rate.currency}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Vers</label>
+                  <Select>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="USD" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {exchangeRates?.map((rate: any) => (
+                        <SelectItem key={rate.currency} value={rate.currency}>
+                          {rate.currency}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button className="w-full">
+                  Convertir
+                </Button>
+              </div>
+              <div className="mt-4 p-4 bg-muted rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  Résultat de la conversion s'affichera ici
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </Layout>
   );
 }

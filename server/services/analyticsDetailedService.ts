@@ -32,8 +32,11 @@ export class AnalyticsDetailedService {
       .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
       .where(and(
         eq(kdpImportData.userId, userId),
+        eq(kdpImportData.isDuplicate, false),
         sql`${kdpImports.fileName} LIKE '%Royalties_Estimator%'`,
-        inArray(kdpImportData.sheetName, detailedSheets)
+        inArray(kdpImportData.sheetName, detailedSheets),
+        sql`${kdpImportData.royalty} IS NOT NULL`,
+        sql`CAST(${kdpImportData.royalty} AS DECIMAL) != 0`
       ));
 
     console.log(`[ANALYTICS-DETAILED] Found ${royaltiesData.length} detailed royalty records`);
@@ -162,8 +165,11 @@ export class AnalyticsDetailedService {
       .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
       .where(and(
         eq(kdpImportData.userId, userId),
+        eq(kdpImportData.isDuplicate, false),
         sql`${kdpImports.fileName} LIKE '%Royalties_Estimator%'`,
-        inArray(kdpImportData.sheetName, ['eBook Royalty', 'Paperback Royalty', 'Hardcover Royalty'])
+        inArray(kdpImportData.sheetName, ['eBook Royalty', 'Paperback Royalty', 'Hardcover Royalty']),
+        sql`${kdpImportData.royalty} IS NOT NULL`,
+        sql`CAST(${kdpImportData.royalty} AS DECIMAL) != 0`
       ));
 
     return {
