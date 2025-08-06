@@ -92,8 +92,12 @@ export const reducer = (state: State, action: Action): State => {
 
       // ! Side effects ! - This could be extracted into a dismissToast() action,
       // but I'll keep it here for simplicity
-      if (toastId) { addToRemoveQueue(toastId)} else { state.toasts.forEach((toast) => {
-          addToRemoveQueue(toast.id)}
+      if (toastId) {
+        addToRemoveQueue(toastId)
+      } else {
+        state.toasts.forEach((toast) => {
+          addToRemoveQueue(toast.id)
+        })
       }
 
       return {
@@ -102,7 +106,8 @@ export const reducer = (state: State, action: Action): State => {
           t.id === toastId || toastId === undefined
             ? {
                 ...t,
-                open: false,)}
+                open: false,
+              }
             : t
         ),
       }
@@ -125,9 +130,11 @@ const listeners: Array<(state: State) => void> = []
 
 let memoryState: State = { toasts: [] }
 
-function dispatch(action: Action) { memoryState = reducer(memoryState, action)
+function dispatch(action: Action) {
+  memoryState = reducer(memoryState, action)
   listeners.forEach((listener) => {
-    listener(memoryState)}
+    listener(memoryState)
+  })
 }
 
 type Toast = Omit<ToasterToast, "id">
@@ -138,17 +145,19 @@ function toast({ ...props }: Toast) {
   const update = (props: ToasterToast) =>
     dispatch({
       type: "UPDATE_TOAST",
-      toast: { ...props, id)},
+      toast: { ...props, id },
     })
-  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id }
+  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
 
-  dispatch({ type: "ADD_TOAST",
+  dispatch({
+    type: "ADD_TOAST",
     toast: {
       ...props,
       id,
       open: true,
       onOpenChange: (open) => {
-        if (!open) dismiss()},
+        if (!open) dismiss()
+      },
     },
   })
 
@@ -159,27 +168,29 @@ function toast({ ...props }: Toast) {
   }
 }
 
-function useToast() { const [state, setState] = React.useState<State>(memoryState)
+function useToast() {
+  const [state, setState] = React.useState<State>(memoryState)
 
   React.useEffect(() => {
     listeners.push(setState)
     return () => {
       const index = listeners.indexOf(setState)
       if (index > -1) {
-        listeners.splice(index, 1)}
+        listeners.splice(index, 1)
+      }
     }
   }, [state])
 
   const enhancedToast = Object.assign(toast, {
-    success: (props: Omit<Toast, 'variant'>) => toast({ ...props, variant: "success")},
-    error: (props: Omit<Toast, 'variant'>) => toast({ ...props, variant: "destructive" },
-    info: (props: Omit<Toast, 'variant'>) => toast({ ...props, variant: "default" },
+    success: (props: Omit<Toast, 'variant'>) => toast({ ...props, variant: "success" }),
+    error: (props: Omit<Toast, 'variant'>) => toast({ ...props, variant: "destructive" }),
+    info: (props: Omit<Toast, 'variant'>) => toast({ ...props, variant: "default" }),
   })
 
   return {
     ...state,
     toast: enhancedToast,
-    dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId)},
+    dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
   }
 }
 

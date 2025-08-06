@@ -900,17 +900,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Marketplace parameter is required" });
       }
 
-      console.log(`[CATEGORIES] Requesting categories for marketplace: ${marketplace} with format: ${format}`);
-      
-      let categories = await storage.getMarketplaceCategoriesWithFormat(marketplace, format as string);
-      
-      // Fallback: if no categories found for Amazon.com, try amazon.com (lowercase)
-      if (categories.length === 0 && marketplace === 'Amazon.com') {
-        console.log(`[CATEGORIES] No categories found for Amazon.com, trying fallback to amazon.com`);
-        categories = await storage.getMarketplaceCategoriesWithFormat('amazon.com', format as string);
-      }
-      
-      console.log(`[CATEGORIES] Found ${categories.length} categories for ${marketplace}`);
+      const categories = await storage.getMarketplaceCategoriesWithFormat(marketplace, format as string);
       res.json(categories);
     } catch (error) {
       console.error("Error fetching marketplace categories:", error);
@@ -2685,24 +2675,6 @@ Please respond with only a JSON object containing the translated fields. For key
     } catch (error: any) {
       console.error('Error migrating analytics data:', error);
       res.status(500).json({ error: 'Failed to migrate analytics data', details: error.message });
-    }
-  });
-
-  // NEW: Detailed analytics using correct method (per-sheet extraction)
-  app.get('/api/analytics/detailed', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      
-      const { analyticsDetailedService } = await import('./services/analyticsDetailedService');
-      const overview = await analyticsDetailedService.getDetailedAnalyticsOverview(userId);
-      
-      res.json(overview);
-    } catch (error: any) {
-      console.error('Error fetching detailed analytics:', error);
-      res.status(500).json({ error: 'Failed to fetch detailed analytics', details: error.message });
     }
   });
 

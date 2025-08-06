@@ -28,20 +28,20 @@ export default function AdminCron() {
   const { data: cronJobs, isLoading } = useQuery({
     queryKey: ["/api/admin/cron/jobs"],
     refetchInterval: 30000, // Refresh every 30 seconds
-  };
+  });
 
   // Fetch cron logs
   const { data: cronLogs } = useQuery({
     queryKey: ["/api/admin/cron/logs"],
     refetchInterval: 10000, // Refresh every 10 seconds
-  };
+  });
 
   // Toggle cron job
   const toggleJobMutation = useMutation({
-    mutationFn: async ({ jobId, enabled)}: { jobId: string; enabled: boolean } => {
-      return apiRequest(`/api/admin/cron/jobs/${jobId)}/toggle`, {
+    mutationFn: async ({ jobId, enabled }: { jobId: string; enabled: boolean }) => {
+      return apiRequest(`/api/admin/cron/jobs/${jobId}/toggle`, {
         method: 'POST',
-        body: JSON.stringify({ enabled)},
+        body: JSON.stringify({ enabled }),
         headers: {
           'Content-Type': 'application/json'
         }
@@ -50,36 +50,40 @@ export default function AdminCron() {
     onSuccess: () => {
       toast({
         title: "Cron Job Updated",
-        description: "The scheduled task has been updated successfully.",)};
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/jobs"] };
+        description: "The scheduled task has been updated successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/jobs"] });
     },
     onError: () => {
       toast({
         title: "Error",
         description: "Failed to update the scheduled task.",
-        variant: "destructive",)};
+        variant: "destructive",
+      });
     },
   });
 
   // Run job manually
   const runJobMutation = useMutation({
     mutationFn: async (jobId: string) => {
-      return apiRequest(`/api/admin/cron/jobs/${jobId)}/run`, {
+      return apiRequest(`/api/admin/cron/jobs/${jobId}/run`, {
         method: 'POST'
-      };
+      });
     },
     onSuccess: () => {
       toast({
         title: "Job Started",
-        description: "The scheduled task has been started manually.",)};
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/jobs"] };
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/logs"] };
+        description: "The scheduled task has been started manually.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/jobs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/logs"] });
     },
     onError: () => {
       toast({
         title: "Error",
         description: "Failed to start the scheduled task.",
-        variant: "destructive",)};
+        variant: "destructive",
+      });
     },
   });
 
@@ -122,8 +126,8 @@ export default function AdminCron() {
           </div>
           <Button 
             onClick={() => {
-              queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/jobs"] )};
-              queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/logs"] };
+              queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/jobs"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/logs"] });
             }}
             variant="outline"
             className="flex items-center gap-2"
@@ -146,7 +150,7 @@ export default function AdminCron() {
               {isLoading ? (
                 <div className="space-y-4">
                   {[...Array(3)].map((_, i) => (
-                    <div key={i)} className="animate-pulse">
+                    <div key={i} className="animate-pulse">
                       <div className="h-4 bg-muted rounded w-1/3 mb-2"></div>
                       <div className="h-8 bg-muted rounded mb-2"></div>
                       <div className="h-3 bg-muted rounded w-2/3"></div>
@@ -156,21 +160,21 @@ export default function AdminCron() {
               ) : cronJobs && Array.isArray(cronJobs) && cronJobs.length > 0 ? (
                 <div className="space-y-4">
                   {cronJobs.map((job: CronJob) => (
-                    <div key={job.id)} className="border rounded-lg p-4">
+                    <div key={job.id} className="border rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
-                          { getStatusIcon(job.status)}
+                          {getStatusIcon(job.status)}
                           <div>
                             <h3 className="font-semibold">{job.name}</h3>
                             <p className="text-sm text-muted-foreground">{job.description}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          { getStatusBadge(job.status, job.enabled)}
+                          {getStatusBadge(job.status, job.enabled)}
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={ () => runJobMutation.mutate(job.id )}
+                            onClick={() => runJobMutation.mutate(job.id)}
                             disabled={runJobMutation.isPending}
                           >
                             <Play className="h-3 w-3 mr-1" />
@@ -182,10 +186,10 @@ export default function AdminCron() {
                             onClick={() => toggleJobMutation.mutate({
                               jobId: job.id,
                               enabled: !job.enabled
-                            )}}
+                            })}
                             disabled={toggleJobMutation.isPending}
                           >
-                            { job.enabled ? (
+                            {job.enabled ? (
                               <>
                                 <Pause className="h-3 w-3 mr-1" />
                                 Disable
@@ -194,7 +198,8 @@ export default function AdminCron() {
                               <>
                                 <Play className="h-3 w-3 mr-1" />
                                 Enable
-                              </>)}
+                              </>
+                            )}
                           </Button>
                         </div>
                       </div>
@@ -244,18 +249,19 @@ export default function AdminCron() {
               {cronLogs && Array.isArray(cronLogs) && cronLogs.length > 0 ? (
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {cronLogs.map((log: any, index: number) => (
-                    <div key={index)} className="flex items-start gap-3 p-3 bg-muted rounded-lg">
+                    <div key={index} className="flex items-start gap-3 p-3 bg-muted rounded-lg">
                       <div className="flex-shrink-0 mt-1">
-                        { log.level === 'error' ? (
+                        {log.level === 'error' ? (
                           <AlertCircle className="h-4 w-4 text-red-500" />
                         ) : (
-                          <CheckCircle className="h-4 w-4 text-green-500" />)}
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-sm font-medium">{log.job}</span>
                           <span className="text-xs text-muted-foreground">
-                            { new Date(log.timestamp).toLocaleString()}
+                            {new Date(log.timestamp).toLocaleString()}
                           </span>
                         </div>
                         <p className="text-sm text-muted-foreground">{log.message}</p>

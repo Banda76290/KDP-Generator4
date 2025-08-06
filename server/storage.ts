@@ -1383,11 +1383,9 @@ export class DatabaseStorage implements IStorage {
                         (format === 'paperback' || format === 'hardcover') ? 'print_kdp_paperback' : 
                         null;
 
-    // Keep original marketplace name for exact match (Amazon.com vs amazon.com)
-    const normalizedMarketplace = marketplace;
+    // Normalize marketplace name to lowercase for database query
+    const normalizedMarketplace = marketplace.toLowerCase();
 
-    console.log(`[STORAGE] Looking for categories: marketplace="${normalizedMarketplace}", format="${format}"`);
-    
     let categories = await db
       .select()
       .from(marketplaceCategories)
@@ -1396,8 +1394,6 @@ export class DatabaseStorage implements IStorage {
         eq(marketplaceCategories.isActive, true)
       ))
       .orderBy(marketplaceCategories.level, marketplaceCategories.sortOrder, marketplaceCategories.displayName);
-    
-    console.log(`[STORAGE] Found ${categories.length} categories for ${normalizedMarketplace}`);
 
     // If format is provided, try to filter categories based on discriminant
     if (discriminant) {

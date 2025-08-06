@@ -63,7 +63,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
               <Button variant="ghost" className="flex items-center space-x-2 p-2 hover:bg-muted">
                 <Avatar className="w-8 h-8">
                   <AvatarImage src={user?.profileImageUrl || undefined} alt="User Avatar" />
-                  <AvatarFallback>{ getUserInitials(user?.firstName || undefined, user?.lastName || undefined)}</AvatarFallback>
+                  <AvatarFallback>{getUserInitials(user?.firstName || undefined, user?.lastName || undefined)}</AvatarFallback>
                 </Avatar>
                 <span className="text-sm font-medium text-foreground">
                   {user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'User'}
