@@ -94,7 +94,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
 
   const createMutation = useMutation({
     mutationFn: async (data: ProjectFormData) => {
-      return await apiRequest("POST", "/api/projects", data);
+      return await apiRequest("/api/projects", { method: "POST", body: data });
     },
     onSuccess: async () => {
       toast({
@@ -127,7 +127,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
 
   const updateMutation = useMutation({
     mutationFn: async (data: ProjectFormData) => {
-      return await apiRequest("PUT", `/api/projects/${project?.id}`, data);
+      return await apiRequest(`/api/projects/${project?.id}`, { method: "PUT", body: data });
     },
     onSuccess: async () => {
       toast({

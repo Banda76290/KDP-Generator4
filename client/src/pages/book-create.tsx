@@ -111,7 +111,7 @@ export default function CreateBook() {
       };
       
       console.log('Creating book data:', bookData);
-      const book = await apiRequest("POST", "/api/books", bookData);
+      const book = await apiRequest("/api/books", { method: "POST", body: bookData });
       console.log('Received book response:', book);
       
       // Create contributors if any

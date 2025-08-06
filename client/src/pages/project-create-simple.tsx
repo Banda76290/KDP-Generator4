@@ -65,9 +65,12 @@ export default function CreateProject() {
       console.log('Creating project:', data);
       
       // Create the project first
-      const project = await apiRequest("POST", "/api/projects", {
-        name: data.name,
-        description: data.description,
+      const project = await apiRequest("/api/projects", {
+        method: "POST",
+        body: {
+          name: data.name,
+          description: data.description,
+        }
       });
       
       console.log('Project created:', project);
@@ -81,8 +84,11 @@ export default function CreateProject() {
         }
         
         // Attach existing book to project
-        await apiRequest("PATCH", `/api/books/${data.selectedBookId}`, {
-          projectId: project.id,
+        await apiRequest(`/api/books/${data.selectedBookId}`, {
+          method: "PATCH",
+          body: {
+            projectId: project.id,
+          }
         });
       } else if (data.createNewBook) {
         // Redirect to book creation with project pre-selected

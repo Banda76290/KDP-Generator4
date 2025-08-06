@@ -53,7 +53,7 @@ export default function Projects() {
     mutationFn: async (project: ProjectWithRelations) => {
       console.log("Starting duplication for project:", project.name);
       try {
-        const result = await apiRequest("POST", `/api/projects/${project.id}/duplicate`, {});
+        const result = await apiRequest(`/api/projects/${project.id}/duplicate`, { method: "POST" });
         console.log("Duplication successful:", result);
         return result;
       } catch (error) {
@@ -82,7 +82,7 @@ export default function Projects() {
   const deleteProject = useMutation({
     mutationFn: async ({ projectId, deleteBooks }: { projectId: string; deleteBooks: boolean }) => {
       console.log("Deleting project:", projectId, "with deleteBooks:", deleteBooks);
-      return await apiRequest("DELETE", `/api/projects/${projectId}?deleteBooks=${deleteBooks}`, {});
+      return await apiRequest(`/api/projects/${projectId}?deleteBooks=${deleteBooks}`, { method: "DELETE" });
     },
     onSuccess: (_, { deleteBooks }) => {
       toast.success({
@@ -107,7 +107,7 @@ export default function Projects() {
   const duplicateBook = useMutation({
     mutationFn: async (bookId: string) => {
       console.log("Duplicating book:", bookId);
-      return await apiRequest("POST", `/api/books/${bookId}/duplicate`, {});
+      return await apiRequest(`/api/books/${bookId}/duplicate`, { method: "POST" });
     },
     onSuccess: () => {
       toast.success({
@@ -128,7 +128,7 @@ export default function Projects() {
   // Book translation mutation
   const translateBookMutation = useMutation({
     mutationFn: async ({ bookId, targetLanguage }: { bookId: string; targetLanguage: string }) => {
-      return await apiRequest("POST", `/api/books/${bookId}/translate`, { targetLanguage });
+      return await apiRequest(`/api/books/${bookId}/translate`, { method: "POST", body: { targetLanguage } });
     },
     onSuccess: () => {
       toast.success({
