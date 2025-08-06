@@ -40,7 +40,7 @@ function useSeriesData() {
     queryKey: ['/api/series'],
     queryFn: async () => {
       const response = await fetch('/api/series', {
-        credentials: 'include' // Include cookies for authentication)};
+        credentials: 'include' // Include cookies for authentication};
       if (!response.ok) {
         throw new Error('Failed to fetch series');
       }
@@ -119,12 +119,12 @@ function useSeriesData() {
               <Input
                 placeholder="Search series..."
                 value={searchTerm}
-                onChange={ (e) => setSearchTerm(e.target.value )}
+                onChange={ (e) => setSearchTerm(e.target.value }
                 className="pl-10 w-full sm:w-80"
               />
             </div>
             
-            <Select value={sortBy} onValueChange={ (value) => setSortBy(value as typeof sortBy)}>
+            <Select value={sortBy} onValueChange={ (value) => setSortBy(value as typeof sortBy}>
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
@@ -157,17 +157,17 @@ function useSeriesData() {
         { isLoading && (
           <div className="text-center py-8">
             <div className="text-gray-600">Loading series...</div>
-          </div>)}
+          </div>}
 
         { error && (
           <div className="text-center py-8">
             <div className="text-red-600">Failed to load series. Please try again.</div>
-          </div>)}
+          </div>}
 
         {/* Results Count */}
         {!isLoading && !error && (
           <div className="text-sm text-gray-600">
-            {filteredSeries.length)} series found
+            {filteredSeries.length} series found
           </div>
         )}
 
@@ -177,10 +177,10 @@ function useSeriesData() {
             <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No series found</h3>
             <p className="text-gray-600 mb-6">
-              {searchTerm ? "Try adjusting your search terms" : "Create your first series to get started")}
+              {searchTerm ? "Try adjusting your search terms" : "Create your first series to get started"}
             </p>
             <Button 
-              onClick={ () => setLocation('/series-setup' )}
+              onClick={ () => setLocation('/series-setup' }
               style={{ backgroundColor: '#38b6ff' }} 
               className="hover:opacity-90 text-white"
             >
@@ -232,7 +232,7 @@ function useSeriesData() {
                           <AlertDialogTrigger asChild>
                             <DropdownMenuItem 
                               className="text-red-600 focus:text-red-600"
-                              onSelect={ (e) => e.preventDefault()}
+                              onSelect={ (e) => e.preventDefault(}
                             >
                               <Trash2 className="w-4 h-4 mr-2" />
                               Delete Series
@@ -249,7 +249,7 @@ function useSeriesData() {
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction 
-                                onClick={ () => handleDeleteSeries(seriesItem.id )}
+                                onClick={ () => handleDeleteSeries(seriesItem.id }
                                 className="bg-red-600 hover:bg-red-700"
                               >
                                 Delete Series
@@ -277,7 +277,7 @@ function useSeriesData() {
                       <div className="space-y-2">
                         <h4 className="text-sm font-medium text-gray-800 flex items-center">
                           <Book className="w-4 h-4 mr-1" />
-                          Books in this series ({seriesItem.books.length)}
+                          Books in this series ({seriesItem.books.length}
                         </h4>
                         <div className="space-y-2 max-h-32 overflow-y-auto">
                           {seriesItem.books
@@ -289,7 +289,7 @@ function useSeriesData() {
                                   <div className="flex items-center space-x-2 flex-1 min-w-0">
                                     {book.seriesNumber && (
                                       <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs font-medium flex-shrink-0">
-                                        #{book.seriesNumber)}
+                                        #{book.seriesNumber}
                                       </span>
                                     )}
                                     <span className="font-medium truncate">{book.title}</span>
@@ -317,7 +317,7 @@ function useSeriesData() {
                                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                                         <AlertDialogAction 
                                           className="bg-red-600 hover:bg-red-700"
-                                          onClick={ () => removeBookFromSeries.mutate(book.id )}
+                                          onClick={ () => removeBookFromSeries.mutate(book.id }
                                           disabled={removeBookFromSeries.isPending}
                                         >
                                           {removeBookFromSeries.isPending ? "Removing..." : "Remove from Series"}
@@ -340,7 +340,7 @@ function useSeriesData() {
                                   </Badge>
                                 </div>
                               </div>
-                            ))}
+                            )}
                         </div>
                       </div>
                     )}
@@ -350,7 +350,7 @@ function useSeriesData() {
                       <div className="text-xs text-gray-500 italic flex items-center">
                         <Book className="w-3 h-3 mr-1" />
                         No books in this series yet
-                      </div>)}
+                      </div>}
 
                     {/* Revenue Statistics */}
                     {seriesItem.books && seriesItem.books.length > 0 && (
@@ -362,7 +362,7 @@ function useSeriesData() {
                           <div>
                             <p className="text-xs text-gray-500">This Month</p>
                             <p className="text-sm font-semibold text-gray-900">
-                              ${calculateSeriesRevenue(seriesItem.books).monthlyRevenue)}
+                              ${calculateSeriesRevenue(seriesItem.books).monthlyRevenue}
                             </p>
                           </div>
                         </div>
@@ -382,14 +382,14 @@ function useSeriesData() {
 
                     {/* Creation Date */}
                     <div className="text-xs text-gray-500 pt-2">
-                      Created: { new Date(seriesItem.createdAt).toLocaleDateString()}
+                      Created: { new Date(seriesItem.createdAt).toLocaleDateString(}
                     </div>
 
 
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            )}
           </div>
         )}
       </div>

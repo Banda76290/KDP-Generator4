@@ -72,25 +72,25 @@ export default function AIFunctions() {
   const { data: aiFunctions, isLoading: functionsLoading } = useQuery({
     queryKey: ['/api/ai/functions'],
     enabled: isAuthenticated,
-  };
+  });
 
   // Fetch database fields for variable preview
   const { data: databaseFields } = useQuery({
     queryKey: ['/api/ai/database-fields'],
     enabled: isAuthenticated,
-  };
+  });
 
   // Fetch user's books
   const { data: books } = useQuery({
     queryKey: ['/api/books'],
     enabled: isAuthenticated,
-  };
+  });
 
   // Fetch user's projects
   const { data: projects } = useQuery({
     queryKey: ['/api/projects'],
     enabled: isAuthenticated,
-  };
+  });
 
   useEffect(() => {
     if (selectedFunction) {
@@ -137,7 +137,7 @@ export default function AIFunctions() {
       toast({
         title: 'Content Generated!',
         description: 'AI content has been generated successfully',
-      };
+      });
     } catch (error) {
       toast({
         title: 'Error',
@@ -181,7 +181,7 @@ export default function AIFunctions() {
             <p className="text-muted-foreground mb-4">
               You must be logged in to access AI functions.
             </p>
-            <Button onClick={() => window.location.href = '/api/login')}>
+            <Button onClick={() => window.location.href = '/api/login'}>
               Sign In
             </Button>
           </CardContent>
@@ -313,7 +313,7 @@ export default function AIFunctions() {
                               key={func.key}
                               variant={selectedFunction?.key === func.key ? 'default' : 'ghost'}
                               className="w-full justify-start text-left h-auto p-3"
-                              onClick={ () => setSelectedFunction(func )}
+                              onClick={ () => setSelectedFunction(func }
                             >
                               <div>
                                 <div className="font-medium">{func.name}</div>
@@ -325,11 +325,11 @@ export default function AIFunctions() {
                                     <Badge key={tier} variant="secondary" className="text-xs">
                                       {tier}
                                     </Badge>
-                                  ))}
+                                  )}
                                 </div>
                               </div>
                             </Button>
-                          ))}
+                          )}
                         </div>
                       </div>
                     );
@@ -352,7 +352,7 @@ export default function AIFunctions() {
                 <TabsContent value="configuration" className="space-y-6">
                   <Card>
                     <CardHeader>
-                      <CardTitle>{selectedFunction.name)}</CardTitle>
+                      <CardTitle>{selectedFunction.name}</CardTitle>
                       <p className="text-muted-foreground">{selectedFunction.description}</p>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -360,7 +360,7 @@ export default function AIFunctions() {
                       {selectedFunction.requiresBookContext && (
                         <div>
                           <Label htmlFor="book-select">Select a Book</Label>
-                          <Select value={selectedBook)} onValueChange={setSelectedBook}>
+                          <Select value={selectedBook} onValueChange={setSelectedBook}>
                             <SelectTrigger>
                               <SelectValue placeholder="Choose a book..." />
                             </SelectTrigger>
@@ -369,7 +369,7 @@ export default function AIFunctions() {
                                 <SelectItem key={book.id} value={book.id}>
                                   {book.title}
                                 </SelectItem>
-                              ))}
+                              )}
                             </SelectContent>
                           </Select>
                         </div>
@@ -378,7 +378,7 @@ export default function AIFunctions() {
                       {selectedFunction.requiresProjectContext && (
                         <div>
                           <Label htmlFor="project-select">Select a Project</Label>
-                          <Select value={selectedProject)} onValueChange={setSelectedProject}>
+                          <Select value={selectedProject} onValueChange={setSelectedProject}>
                             <SelectTrigger>
                               <SelectValue placeholder="Choose a project..." />
                             </SelectTrigger>
@@ -387,7 +387,7 @@ export default function AIFunctions() {
                                 <SelectItem key={project.id} value={project.id}>
                                   {project.name}
                                 </SelectItem>
-                              ))}
+                              )}
                             </SelectContent>
                           </Select>
                         </div>
@@ -404,7 +404,7 @@ export default function AIFunctions() {
                                 variant="outline"
                                 size="sm"
                                 className="h-auto p-2 text-left justify-start"
-                                onClick={() => copyToClipboard(`{${field.field)}}`)}
+                                onClick={() => copyToClipboard(`{${field.field}}`)}
                               >
                                 <div>
                                   <code className="text-xs font-mono">{`{${field.field}}`}</code>
@@ -413,7 +413,7 @@ export default function AIFunctions() {
                                   </div>
                                 </div>
                               </Button>
-                            ))}
+                            )}
                           </div>
                         </div>
                       </div>
@@ -421,7 +421,7 @@ export default function AIFunctions() {
                       {/* Generate Button */}
                       <Button 
                         onClick={generateContent} 
-                        disabled={ isGenerating || (selectedFunction.requiresBookContext && !selectedBook) || (selectedFunction.requiresProjectContext && !selectedProject)}
+                        disabled={ isGenerating || (selectedFunction.requiresBookContext && !selectedBook) || (selectedFunction.requiresProjectContext && !selectedProject}
                         className="w-full"
                       >
                         <Play className="w-4 h-4 mr-2" />
@@ -442,7 +442,7 @@ export default function AIFunctions() {
                         <Textarea
                           id="custom-prompt"
                           value={customPrompt}
-                          onChange={ (e) => setCustomPrompt(e.target.value )}
+                          onChange={ (e) => setCustomPrompt(e.target.value }
                           rows={6}
                           className="mt-2"
                         />
@@ -454,7 +454,7 @@ export default function AIFunctions() {
                           <Input
                             id="custom-model"
                             value={customModel}
-                            onChange={ (e) => setCustomModel(e.target.value )}
+                            onChange={ (e) => setCustomModel(e.target.value }
                             className="mt-2"
                           />
                         </div>
@@ -467,7 +467,7 @@ export default function AIFunctions() {
                             max="2"
                             step="0.1"
                             value={customTemperature}
-                            onChange={ (e) => setCustomTemperature(e.target.value )}
+                            onChange={ (e) => setCustomTemperature(e.target.value }
                             className="mt-2"
                           />
                         </div>
@@ -485,7 +485,7 @@ export default function AIFunctions() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => copyToClipboard(generatedContent ))}
+                            onClick={() => copyToClipboard(generatedContent )}
                           >
                             <Copy className="w-4 h-4 mr-2" />
                             Copy
@@ -497,7 +497,7 @@ export default function AIFunctions() {
                       {generatedContent ? (
                         <div className="bg-muted/50 rounded-lg p-4">
                           <pre className="whitespace-pre-wrap text-sm">
-                            {generatedContent)}
+                            {generatedContent}
                           </pre>
                         </div>
                       ) : (

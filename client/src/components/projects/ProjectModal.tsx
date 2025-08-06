@@ -72,7 +72,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
         aiPrompt: project.aiPrompt || "",
         aiContentType: project.aiContentType || "",
         formats: project.formats || [],
-        contributors: project.contributors?.map(c => ({ name: c.name, role: c.role)}) || [],
+        contributors: project.contributors?.map(c => ({ name: c.name, role: c.role}) || [],
       });
       setUseAI(project.useAI || false);
     } else {
@@ -93,7 +93,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
   }, [project, form, isOpen]);
 
   const createMutation = useMutation({ mutationFn: async (data: ProjectFormData) => {
-      return await apiRequest("/api/projects", { method: "POST", body: JSON.stringify(data)});
+      return await apiRequest("/api/projects", { method: "POST", body: JSON.stringify(data});
     },
     onSuccess: async () => {
       toast({
@@ -101,8 +101,8 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
         description: "Your project has been created successfully",
         variant: "destructive",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] };
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
       onClose();
     },
     onError: (error) => {
@@ -121,13 +121,13 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
         title: "Creation Failed",
         description: error.message || "Failed to create project",
         variant: "destructive",
-      };
+      });
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: async (data: ProjectFormData) => {
-      return await apiRequest(`/api/projects/${project?.id)}`, { method: "PUT", body: JSON.stringify(data)});
+      return await apiRequest(`/api/projects/${project?.id}`, { method: "PUT", body: JSON.stringify(data});
     },
     onSuccess: async () => {
       toast({
@@ -135,8 +135,8 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
         description: "Your project has been updated successfully",
         variant: "destructive",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] };
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
       onClose();
     },
     onError: (error) => {
@@ -155,7 +155,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
         title: "Update Failed",
         description: error.message || "Failed to update project",
         variant: "destructive",
-      };
+      });
     },
   });
 
@@ -179,7 +179,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={ form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={ form.handleSubmit(onSubmit} className="space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900">Basic Information</h3>
@@ -188,13 +188,13 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
                 <Label htmlFor="title">Title *</Label>
                 <Input
                   id="title"
-                  { ...form.register("title")}
+                  { ...form.register("title"}
                   placeholder="Enter book title"
                   className="mt-1"
                 />
                 {form.formState.errors.title && (
                   <p className="text-sm text-red-600 mt-1">
-                    {form.formState.errors.title.message)}
+                    {form.formState.errors.title.message}
                   </p>
                 )}
               </div>
@@ -202,7 +202,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
                 <Label htmlFor="subtitle">Subtitle</Label>
                 <Input
                   id="subtitle"
-                  { ...form.register("subtitle")}
+                  { ...form.register("subtitle"}
                   placeholder="Enter subtitle"
                   className="mt-1"
                 />
@@ -212,7 +212,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                { ...form.register("description")}
+                { ...form.register("description"}
                 placeholder="Enter book description"
                 rows={3}
                 className="mt-1"
@@ -250,7 +250,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
             <div className="space-y-4">
               <div>
                 <Label htmlFor="aiContentType">AI Content Type</Label>
-                <Select onValueChange={(value) => form.setValue("aiContentType", value)}>
+                <Select onValueChange={(value) => form.setValue("aiContentType", value}>
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select content type" />
                   </SelectTrigger>
@@ -266,7 +266,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
                 <Label htmlFor="aiPrompt">AI Prompt</Label>
                 <Textarea
                   id="aiPrompt"
-                  { ...form.register("aiPrompt")}
+                  { ...form.register("aiPrompt"}
                   placeholder="Describe what you want the AI to generate..."
                   rows={3}
                   className="mt-1"
@@ -279,18 +279,18 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
           <DynamicFields
             label="Contributors"
             fields={form.watch("contributors") || []}
-            onFieldsChange={ (fields) => form.setValue("contributors", fields)}
+            onFieldsChange={ (fields) => form.setValue("contributors", fields}
             renderField={(field, index, updateField, removeField) => (
               <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                 <Input
-                  value={field.name)}
-                  onChange={(e) => updateField(index, { ...field, name: e.target.value )}}
+                  value={field.name}
+                  onChange={(e) => updateField(index, { ...field, name: e.target.value }}
                   placeholder="Contributor name"
                   className="flex-1"
                 />
                 <Select
                   value={field.role}
-                  onValueChange={(value) => updateField(index, { ...field, role: value)}}
+                  onValueChange={(value) => updateField(index, { ...field, role: value}}
                 >
                   <SelectTrigger className="w-32">
                     <SelectValue placeholder="Role" />
@@ -306,7 +306,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={ () => removeField(index )}
+                  onClick={ () => removeField(index }
                   className="text-red-500 hover:text-red-700"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -344,11 +344,11 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
                     <p className="text-xs text-gray-600">{format.description}</p>
                   </div>
                 </div>
-              ))}
+              )}
             </div>
             {form.formState.errors.formats && (
               <p className="text-sm text-red-600">
-                {form.formState.errors.formats.message)}
+                {form.formState.errors.formats.message}
               </p>
             )}
           </div>
@@ -365,7 +365,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
             >
               { createMutation.isPending || updateMutation.isPending
                 ? (project ? "Updating..." : "Creating...")
-                : (project ? "Update Project" : "Create Project")}
+                : (project ? "Update Project" : "Create Project"}
             </Button>
           </div>
         </form>

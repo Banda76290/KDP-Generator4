@@ -20,7 +20,7 @@ export default function KDPReports() {
   const uploadMutation = useMutation({ mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('kdpReport', file);
-      return await apiRequest("/api/kdp-reports/upload", { method: "POST", body: JSON.stringify(formData)});
+      return await apiRequest("/api/kdp-reports/upload", { method: "POST", body: JSON.stringify(formData});
     },
     onSuccess: async (response) => {
       const result = await response.json();
@@ -199,7 +199,7 @@ export default function KDPReports() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <FileText className="w-4 h-4 text-gray-500 mr-2" />
-                        <span className="text-sm font-medium">{selectedFile.name)}</span>
+                        <span className="text-sm font-medium">{selectedFile.name}</span>
                       </div>
                       <Button
                         onClick={handleUpload}
@@ -210,7 +210,7 @@ export default function KDPReports() {
                       </Button>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
-                      Size: { (selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                      Size: { (selectedFile.size / 1024 / 1024).toFixed(2} MB
                     </p>
                   </div>
                 )}

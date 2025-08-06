@@ -40,8 +40,8 @@ interface DetailedAnalytics {
 
 export default function AnalyticsDetailed() {
   const { data, isLoading, refetch } = useQuery<DetailedAnalytics>({
-    queryKey: ['/api/analytics/detailed'],
-  };
+    queryKey: ['/api/analytics/detailed']
+  });
 
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat('fr-FR', {
@@ -68,7 +68,7 @@ export default function AnalyticsDetailed() {
           <div className="grid gap-6 md:grid-cols-3">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="h-32 bg-gray-200 rounded"></div>
-            ))}
+            )}
           </div>
         </div>
       </div>
@@ -117,7 +117,7 @@ export default function AnalyticsDetailed() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{ data.totalRecords.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{ data.totalRecords.toLocaleString(}</div>
             <p className="text-xs text-muted-foreground">
               De {data.totalCurrencies} devises
             </p>
@@ -195,11 +195,11 @@ export default function AnalyticsDetailed() {
                     { formatCurrency(curr.totalRoyalty, curr.currency)}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    { curr.formats.join(', ')}
+                    { curr.formats.join(', '}
                   </div>
                 </div>
               </div>
-            ))}
+            )}
           </div>
         </CardContent>
       </Card>
@@ -226,7 +226,7 @@ export default function AnalyticsDetailed() {
                       { formatCurrency(conv.originalAmount, conv.currency)}
                     </div>
                     <div className="text-muted-foreground">
-                      Taux: 1 EUR = { conv.exchangeRate.toFixed(4)} {conv.currency}
+                      Taux: 1 EUR = { conv.exchangeRate.toFixed(4} {conv.currency}
                     </div>
                   </div>
                 </div>
@@ -239,7 +239,7 @@ export default function AnalyticsDetailed() {
                   </div>
                 </div>
               </div>
-            ))}
+            )}
           </div>
           
           <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
@@ -255,7 +255,7 @@ export default function AnalyticsDetailed() {
                   { formatCurrency(data.totalInEUR, 'EUR')}
                 </div>
                 <div className="text-sm text-green-700">
-                  { data.totalTransactions.toLocaleString()} transactions
+                  { data.totalTransactions.toLocaleString(} transactions
                 </div>
               </div>
             </div>
@@ -304,7 +304,7 @@ export default function AnalyticsDetailed() {
               </div>
               <div>
                 <span className="text-green-700">Total EUR converti:</span>
-                <span className="font-mono ml-2">{ data.totalInEUR.toFixed(2)} EUR</span>
+                <span className="font-mono ml-2">{ data.totalInEUR.toFixed(2} EUR</span>
               </div>
             </div>
           </div>

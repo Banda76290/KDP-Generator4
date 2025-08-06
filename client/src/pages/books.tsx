@@ -204,16 +204,16 @@ function BooksContent() {
 
   // Mutation for translating book
   const translateBookMutation = useMutation({
-    mutationFn: async ({ bookId, targetLanguage)}: { bookId: string; targetLanguage: string } => {
+    mutationFn: async ({ bookId, targetLanguage }: { bookId: string; targetLanguage: string }) => {
       return apiRequest(`/api/books/${bookId}/translate`, { 
         method: "POST", 
-        body: JSON.stringify({ targetLanguage)} 
+        body: JSON.stringify({ targetLanguage })
       });
     },
     onSuccess: (data: any) => {
       toast({
         title: "Translation Complete",
-        description: `Book successfully translated to ${data.targetLanguage)}`,
+        description: `Book successfully translated to ${data.targetLanguage}`,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/books"] });
       setBookToTranslate(null);
@@ -231,7 +231,7 @@ function BooksContent() {
     if (bookToTranslate && selectedLanguage) {
       translateBookMutation.mutate({
         bookId: bookToTranslate.id,
-        targetLanguage: selectedLanguage)};
+        targetLanguage: selectedLanguage});
     }
   };
 
@@ -251,7 +251,7 @@ function BooksContent() {
       const matchesLanguage = filterLanguage === "all" || book.language === filterLanguage;
       
       return matchesSearch && matchesStatus && matchesFormat && matchesAssignment && matchesLanguage;
-    }
+    })
     .sort((a: Book, b: Book) => {
       const getLastModifiedDate = (book: Book) => {
         return new Date(book.updatedAt || book.createdAt || 0);
@@ -338,7 +338,7 @@ function BooksContent() {
             <div className="flex items-center gap-2 mt-2">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
               <span className="text-sm text-amber-600">
-                {unassignedBooksCount)} book{unassignedBooksCount !== 1 ? 's' : ''} not assigned to any project
+                {unassignedBooksCount} book{unassignedBooksCount !== 1 ? 's' : ''} not assigned to any project
               </span>
             </div>
           )}
@@ -358,7 +358,7 @@ function BooksContent() {
           <Input
             placeholder="Search books..."
             value={searchTerm}
-            onChange={ (e) => setSearchTerm(e.target.value )}
+            onChange={ (e) => setSearchTerm(e.target.value }
             className="pl-10"
           />
         </div>
@@ -409,11 +409,11 @@ function BooksContent() {
               <SelectItem key={language} value={language}>
                 {language}
               </SelectItem>
-            ))}
+            )}
           </SelectContent>
         </Select>
 
-        <Select value={sortBy} onValueChange={ (value) => setSortBy(value as SortOption)}>
+        <Select value={sortBy} onValueChange={ (value) => setSortBy(value as SortOption}>
           <SelectTrigger>
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
@@ -457,7 +457,7 @@ function BooksContent() {
                 </div>
               </CardContent>
             </Card>
-          ))}
+          )}
         </div>
       ) : filteredAndSortedBooks.length === 0 ? (
         <Card>
@@ -488,7 +488,7 @@ function BooksContent() {
                       <TooltipTrigger asChild>
                         <CardTitle 
                           className="text-lg truncate cursor-pointer hover:text-blue-600 transition-colors"
-                          onClick={() => setLocation(`/books/edit/${book.id)}`)}
+                          onClick={() => setLocation(`/books/edit/${book.id}`)}
                         >
                           {book.title}
                         </CardTitle>
@@ -500,7 +500,7 @@ function BooksContent() {
                     {book.subtitle && (
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <p className="text-sm text-muted-foreground truncate cursor-help">{book.subtitle)}</p>
+                          <p className="text-sm text-muted-foreground truncate cursor-help">{book.subtitle}</p>
                         </TooltipTrigger>
                         <TooltipContent>
                           <p>{book.subtitle}</p>
@@ -522,7 +522,7 @@ function BooksContent() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={ () => duplicateBookMutation.mutate(book.id )}
+                        onClick={ () => duplicateBookMutation.mutate(book.id }
                         disabled={duplicateBookMutation.isPending}
                       >
                         <Copy className="h-4 w-4 mr-2" />
@@ -540,7 +540,7 @@ function BooksContent() {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={ () => setBookToDelete(book )}
+                        onClick={ () => setBookToDelete(book }
                         className="text-destructive focus:text-destructive"
                         disabled={deleteBookMutation.isPending}
                       >
@@ -556,17 +556,17 @@ function BooksContent() {
                   {/* Author */}
                   { (book.authorFirstName || book.authorLastName) && (
                     <p className="text-sm text-muted-foreground">
-                      by {[book.authorFirstName, book.authorLastName].filter(Boolean).join(' ')}
+                      by {[book.authorFirstName, book.authorLastName].filter(Boolean).join(' '}
                     </p>
                   )}
 
                   {/* Status and Format */}
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant={ getStatusBadgeVariant(book.status)}>
+                    <Badge variant={ getStatusBadgeVariant(book.status}>
                       {book.status}
                     </Badge>
                     <Badge variant="outline">
-                      { getFormatIcon(book.format)} {book.format}
+                      { getFormatIcon(book.format} {book.format}
                     </Badge>
                   </div>
 
@@ -574,7 +574,7 @@ function BooksContent() {
                   {book.language && (
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <Globe className="h-4 w-4" />
-                      <span>{book.language)}</span>
+                      <span>{book.language}</span>
                     </div>
                   )}
 
@@ -583,7 +583,7 @@ function BooksContent() {
                     <span className="text-xs font-medium">ISBN/ASIN:</span>
                     <span>
                       {book.isbn ? (
-                        <span className="font-medium text-foreground">{book.isbn)}</span>
+                        <span className="font-medium text-foreground">{book.isbn}</span>
                       ) : book.isbnPlaceholder ? (
                         <span className="text-amber-600">{book.isbnPlaceholder}</span>
                       ) : (
@@ -597,10 +597,10 @@ function BooksContent() {
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <Library className="h-4 w-4" />
                       <span>
-                        Series: <span className="font-medium text-foreground">{book.seriesTitle)}</span>
+                        Series: <span className="font-medium text-foreground">{book.seriesTitle}</span>
                         {book.seriesNumber && (
                           <span className="ml-1 bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs font-medium">
-                            #{book.seriesNumber)}
+                            #{book.seriesNumber}
                           </span>
                         )}
                       </span>
@@ -634,7 +634,7 @@ function BooksContent() {
                               <SelectItem key={project.id} value={project.id}>
                                 {project.name}
                               </SelectItem>
-                            ))}
+                            )}
                           </SelectContent>
                         </Select>
                       </div>
@@ -663,12 +663,12 @@ function BooksContent() {
                 </div>
               </CardContent>
             </Card>
-          ))}
+          )}
         </div>
       )}
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!bookToDelete} onOpenChange={ () => setBookToDelete(null)}>
+      <AlertDialog open={!!bookToDelete} onOpenChange={ () => setBookToDelete(null}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Book</AlertDialogTitle>
@@ -728,7 +728,7 @@ function BooksContent() {
                       <SelectItem key={language} value={language}>
                         {language}
                       </SelectItem>
-                    ))}
+                    )}
                 </SelectContent>
               </Select>
             </div>
@@ -757,7 +757,7 @@ function BooksContent() {
                 <>
                   <Languages className="h-4 w-4 mr-2" />
                   Translate Book
-                </>)}
+                </>}
             </Button>
           </DialogFooter>
         </DialogContent>

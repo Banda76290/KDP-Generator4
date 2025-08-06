@@ -135,18 +135,18 @@ export default function Subscription() {
                   { plan.popular && (
                     <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground">
                       Most Popular
-                    </Badge>)}
+                    </Badge>}
                   { plan.current && (
                     <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-secondary text-secondary-foreground">
                       Current Plan
-                    </Badge>)}
+                    </Badge>}
                   
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">{plan.name}</CardTitle>
                     <div className="text-3xl font-bold">
                       {plan.price}
                       {plan.period !== "forever" && (
-                        <span className="text-sm text-muted-foreground">/{plan.period)}</span>
+                        <span className="text-sm text-muted-foreground">/{plan.period}</span>
                       )}
                     </div>
                     <CardDescription>{plan.description}</CardDescription>
@@ -159,26 +159,26 @@ export default function Subscription() {
                           <Check className="h-4 w-4 text-success" />
                           <span className="text-sm">{feature}</span>
                         </div>
-                      ))}
+                      )}
                       {plan.limitations.map((limitation) => (
                         <div key={limitation} className="flex items-center gap-2">
                           <X className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm text-muted-foreground">{limitation}</span>
                         </div>
-                      ))}
+                      )}
                     </div>
                     
                     <Button 
                       className="w-full" 
                       variant={plan.buttonVariant}
-                      onClick={ () => handleUpgrade(plan.name )}
+                      onClick={ () => handleUpgrade(plan.name }
                       disabled={plan.current}
                     >
                       {plan.buttonText}
                     </Button>
                   </CardContent>
                 </Card>
-              ))}
+              )}
             </div>
 
             {/* Feature Comparison */}

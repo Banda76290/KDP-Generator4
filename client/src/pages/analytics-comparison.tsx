@@ -43,7 +43,7 @@ export default function AnalyticsComparison() {
     try {
       const response = await fetch('/api/analytics/migrate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json')}
+        headers: { 'Content-Type': 'application/json'}
       });
       const result = await response.json();
       
@@ -125,7 +125,7 @@ export default function AnalyticsComparison() {
                   <>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Total Records:</span>
-                      <Badge variant="outline">{legacyData.totalRecords)}</Badge>
+                      <Badge variant="outline">{legacyData.totalRecords}</Badge>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Revenue (USD):</span>
@@ -172,7 +172,7 @@ export default function AnalyticsComparison() {
                   <>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Total Records:</span>
-                      <Badge variant="outline">{normalizedData.totalRecords)}</Badge>
+                      <Badge variant="outline">{normalizedData.totalRecords}</Badge>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Livres uniques:</span>
@@ -225,7 +225,7 @@ export default function AnalyticsComparison() {
                         </div>
                       </div>
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -246,7 +246,7 @@ export default function AnalyticsComparison() {
                   <div className="space-y-2">
                     <h4 className="font-medium">Métriques Principales</h4>
                     <div className="text-2xl font-bold text-green-600">
-                      ${legacyData.totalRevenueUSD)}
+                      ${legacyData.totalRevenueUSD}
                     </div>
                     <p className="text-sm text-muted-foreground">
                       Revenue total en USD (après conversion)
@@ -290,7 +290,7 @@ export default function AnalyticsComparison() {
                 <div className="space-y-6">
                   <div className="grid gap-4 md:grid-cols-3">
                     <div className="text-center p-4 border rounded-lg">
-                      <div className="text-2xl font-bold">{normalizedData.totalRecords)}</div>
+                      <div className="text-2xl font-bold">{normalizedData.totalRecords}</div>
                       <p className="text-sm text-muted-foreground">Transactions</p>
                     </div>
                     <div className="text-center p-4 border rounded-lg">
@@ -318,7 +318,7 @@ export default function AnalyticsComparison() {
                             { formatCurrency(curr.originalAmount, curr.currency)}
                           </div>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
                 </div>

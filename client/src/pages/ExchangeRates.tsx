@@ -24,7 +24,7 @@ export default function ExchangeRates() {
     try {
       const response = await fetch('/api/exchange-rates/update', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json')}
+        headers: { 'Content-Type': 'application/json'}
       });
       
       if (response.ok) {
@@ -34,7 +34,7 @@ export default function ExchangeRates() {
         variant: "destructive",
       });
         // Refetch exchange rates data
-        queryClient.invalidateQueries({ queryKey: ["/api/exchange-rates"] };
+        queryClient.invalidateQueries({ queryKey: ["/api/exchange-rates"] });
       } else {
         throw new Error('Failed to update exchange rates');
       }
@@ -58,7 +58,7 @@ export default function ExchangeRates() {
     new Date(rates[0].updatedAt) : new Date();
   
   // Add USD with rate 1.0 since it's our base currency and filter out duplicate
-  const usdRate = { currency: 'USD', rate: '1.00000000', updatedAt: lastUpdated.toISOString()};
+  const usdRate = { currency: 'USD', rate: '1.00000000', updatedAt: lastUpdated.toISOString(};
   const filteredRates = rates.filter((rate: any) => rate.currency !== 'USD');
   const allRates = [usdRate, ...filteredRates];
   const majorRates = allRates.filter((rate: any) => majorCurrencies.includes(rate.currency));
@@ -74,7 +74,7 @@ export default function ExchangeRates() {
             <p className="text-muted-foreground mb-4">
               Unable to load exchange rate data. Please try again.
             </p>
-            <Button onClick={updateExchangeRates)} disabled={isUpdating}>
+            <Button onClick={updateExchangeRates} disabled={isUpdating}>
               <RefreshCw className={`h-4 w-4 mr-2 ${isUpdating ? 'animate-spin' : ''}`} />
               Retry
             </Button>
@@ -115,7 +115,7 @@ export default function ExchangeRates() {
                   <div className="h-3 bg-muted rounded w-2/3"></div>
                 </CardContent>
               </Card>
-            ))}
+            )}
           </div>
         ) : rates.length > 0 ? (
           <div className="space-y-8">
@@ -133,7 +133,7 @@ export default function ExchangeRates() {
                     month: 'short',
                     day: 'numeric',
                     hour: '2-digit',
-                    minute: '2-digit')}}</span>
+                    minute: '2-digit'}}</span>
                 </div>
               </div>
               
@@ -151,7 +151,7 @@ export default function ExchangeRates() {
                           <div>
                             <p className="font-semibold text-lg">{rate.currency}</p>
                             <p className="text-sm text-muted-foreground">
-                              1 USD = { parseFloat(rate.rate).toFixed(4)} {rate.currency}
+                              1 USD = { parseFloat(rate.rate).toFixed(4} {rate.currency}
                             </p>
                           </div>
                         </div>
@@ -161,14 +161,14 @@ export default function ExchangeRates() {
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">Rate:</span>
                           <span className="font-mono font-bold">
-                            { parseFloat(rate.rate).toFixed(4)}
+                            { parseFloat(rate.rate).toFixed(4}
                           </span>
                         </div>
 
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                )}
               </div>
             </div>
 
@@ -179,7 +179,7 @@ export default function ExchangeRates() {
                   <div className="flex items-center gap-2">
                     <Globe className="h-5 w-5" />
                     <h2 className="text-xl font-semibold">Other Currencies</h2>
-                    <Badge variant="secondary">{otherRates.length)}</Badge>
+                    <Badge variant="secondary">{otherRates.length}</Badge>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Clock className="h-4 w-4" />
@@ -187,7 +187,7 @@ export default function ExchangeRates() {
                       month: 'short',
                       day: 'numeric',
                       hour: '2-digit',
-                      minute: '2-digit')}}</span>
+                      minute: '2-digit'}}</span>
                   </div>
                 </div>
                 
@@ -198,13 +198,13 @@ export default function ExchangeRates() {
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-semibold">{rate.currency}</span>
                           <Badge variant="outline" className="text-xs">
-                            { parseFloat(rate.rate).toFixed(4)}
+                            { parseFloat(rate.rate).toFixed(4}
                           </Badge>
                         </div>
 
                       </CardContent>
                     </Card>
-                  ))}
+                  )}
                 </div>
               </div>
             )}

@@ -46,7 +46,7 @@ export default function SeriesSetupPage() {
     queryKey: ['/api/series', seriesId],
     queryFn: async () => {
       if (!seriesId) return null;
-      const response = await fetch(`/api/series/${seriesId)}`, {
+      const response = await fetch(`/api/series/${seriesId}`, {
         credentials: 'include'
       };
       if (!response.ok) {
@@ -84,7 +84,7 @@ export default function SeriesSetupPage() {
           if (editor) {
             // Clear editor first
             while (editor.firstChild) {
-              editor.removeChild(editor.firstChild);)}
+              editor.removeChild(editor.firstChild);}
             
             // Use the cleanHTML function to safely set content
             const cleanedContent = cleanHTML(existingSeries.description);
@@ -121,7 +121,7 @@ export default function SeriesSetupPage() {
     if (characterCount > maxCharacters) {
       toast({
         title: "Error",
-        description: `Description exceeds ${maxCharacters)} character limit.`,
+        description: `Description exceeds ${maxCharacters} character limit.`,
         variant: "destructive"
       });
       return;
@@ -148,13 +148,13 @@ export default function SeriesSetupPage() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Unknown error')});
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error'});
         console.error('API Error:', errorData);
         throw new Error(errorData.message || `Failed to ${isEditing ? 'update' : 'create'} series`);
       }
 
       // Invalidate and refetch series data
-      await queryClient.invalidateQueries({ queryKey: ['/api/series'] };
+      await queryClient.invalidateQueries({ queryKey: ['/api/series'] });
       
       const responseData = await response.json();
       
@@ -173,7 +173,7 @@ export default function SeriesSetupPage() {
         if (returnToBookEdit === 'new') {
           setLocation('/books/create');
         } else {
-          setLocation(`/books/edit/${returnToBookEdit)}`);
+          setLocation(`/books/edit/${returnToBookEdit}`);
         }
       } else {
         setLocation('/manage-series');
@@ -182,7 +182,7 @@ export default function SeriesSetupPage() {
       console.error('Error saving series:', error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : `Failed to ${isEditing ? 'update' : 'create')} series. Please try again.`,
+        description: error instanceof Error ? error.message : `Failed to ${isEditing ? 'update' : 'create'} series. Please try again.`,
         variant: "destructive",
       });
     }
@@ -279,7 +279,7 @@ export default function SeriesSetupPage() {
             .split(';')
             .filter(style => {
               const prop = style.trim().split(':')[0]?.trim();
-              return ['color', 'font-weight', 'font-style', 'text-decoration'].includes(prop);)}
+              return ['color', 'font-weight', 'font-style', 'text-decoration'].includes(prop);}
             .join('; ');
           
           if (cleanStyles) {
@@ -456,8 +456,8 @@ export default function SeriesSetupPage() {
                   
                   if (returnToBookEdit === 'new') {
                     setLocation('/books/create');
-                  )} else {
-                    setLocation(`/books/edit/${returnToBookEdit)}`);
+                  } else {
+                    setLocation(`/books/edit/${returnToBookEdit}`);
                   }
                 } else {
                   setLocation('/manage-series');
@@ -477,7 +477,7 @@ export default function SeriesSetupPage() {
           </h1>
         </div>
 
-        <form onSubmit={ form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={ form.handleSubmit(onSubmit} className="space-y-6">
           {/* Language Section */}
           <Card>
             <CardHeader>
@@ -489,8 +489,8 @@ export default function SeriesSetupPage() {
                   Choose the primary language for this series.
                 </p>
                 <Select 
-                  value={ form.watch('language')} 
-                  onValueChange={ (value) => form.setValue('language', value)}
+                  value={ form.watch('language'} 
+                  onValueChange={ (value) => form.setValue('language', value}
                 >
                   <SelectTrigger className="w-full max-w-md">
                     <SelectValue />
@@ -500,7 +500,7 @@ export default function SeriesSetupPage() {
                       <SelectItem key={lang.value} value={lang.value}>
                         {lang.label}
                       </SelectItem>
-                    ))}
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -521,11 +521,11 @@ export default function SeriesSetupPage() {
                 <Input
                   id="title"
                   placeholder="Enter your series name"
-                  {...form.register('title', { required: 'Series title is required')}}
+                  {...form.register('title', { required: 'Series title is required'}}
                   className="w-full"
                 />
                 {form.formState.errors.title && (
-                  <p className="text-sm text-red-600">{form.formState.errors.title.message)}</p>
+                  <p className="text-sm text-red-600">{form.formState.errors.title.message}</p>
                 )}
               </div>
             </CardContent>
@@ -542,8 +542,8 @@ export default function SeriesSetupPage() {
                   Choose how you want to display titles in your series.
                 </p>
                 <RadioGroup 
-                  value={ form.watch('readingOrder')} 
-                  onValueChange={ (value: 'ordered' | 'unordered') => form.setValue('readingOrder', value)}
+                  value={ form.watch('readingOrder'} 
+                  onValueChange={ (value: 'ordered' | 'unordered') => form.setValue('readingOrder', value}
                 >
                   <div className="space-y-4">
                     <div className="flex items-start space-x-2">
@@ -613,7 +613,7 @@ export default function SeriesSetupPage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={ () => applyFormatting('bold' )}
+                    onClick={ () => applyFormatting('bold' }
                     title="Bold"
                   >
                     <strong>B</strong>
@@ -623,7 +623,7 @@ export default function SeriesSetupPage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={ () => applyFormatting('italic' )}
+                    onClick={ () => applyFormatting('italic' }
                     title="Italic"
                   >
                     <em>I</em>
@@ -633,7 +633,7 @@ export default function SeriesSetupPage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={ () => applyFormatting('underline' )}
+                    onClick={ () => applyFormatting('underline' }
                     title="Underline"
                   >
                     <u>U</u>
@@ -644,7 +644,7 @@ export default function SeriesSetupPage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={ () => applyFormatting('insertUnorderedList' )}
+                    onClick={ () => applyFormatting('insertUnorderedList' }
                     title="Bullet List"
                   >
                     •
@@ -654,13 +654,13 @@ export default function SeriesSetupPage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={ () => applyFormatting('insertOrderedList' )}
+                    onClick={ () => applyFormatting('insertOrderedList' }
                     title="Numbered List"
                   >
                     1.
                   </Button>
                   <div className="w-px h-6 bg-gray-300"></div>
-                  <Select defaultValue="normal" onValueChange={ (value) => handleFormatChange(value)}>
+                  <Select defaultValue="normal" onValueChange={ (value) => handleFormatChange(value}>
                     <SelectTrigger className="w-24 h-8">
                       <SelectValue />
                     </SelectTrigger>
@@ -698,7 +698,7 @@ export default function SeriesSetupPage() {
                             type="url"
                             placeholder="https://example.com"
                             value={linkUrl}
-                            onChange={ (e) => setLinkUrl(e.target.value )}
+                            onChange={ (e) => setLinkUrl(e.target.value }
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
                                 e.preventDefault();
@@ -761,7 +761,7 @@ export default function SeriesSetupPage() {
                   />
                   <input
                     type="hidden"
-                    { ...form.register('description')}
+                    { ...form.register('description'}
                   />
                   <div className="flex justify-end">
                     <span className={`text-sm ${characterCount > maxCharacters ? 'text-red-600' : 'text-green-600'}`}>
@@ -787,8 +787,8 @@ export default function SeriesSetupPage() {
                   
                   if (returnToBookEdit === 'new') {
                     setLocation('/books/create');
-                  )} else {
-                    setLocation(`/books/edit/${returnToBookEdit)}`);
+                  } else {
+                    setLocation(`/books/edit/${returnToBookEdit}`);
                   }
                 } else {
                   setLocation('/manage-series');

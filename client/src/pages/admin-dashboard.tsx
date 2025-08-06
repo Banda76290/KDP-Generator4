@@ -38,7 +38,7 @@ export default function AdminDashboard() {
   const { data: stats, isLoading: statsLoading } = useQuery<SystemStats>({
     queryKey: ["/api/admin/stats"],
     enabled: isAdmin,
-  };
+  });
 
   if (isLoading || statsLoading) {
     return (

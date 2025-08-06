@@ -70,7 +70,7 @@ export default function AdminSystem() {
 
     return () => {
       events.forEach(event => {
-        document.removeEventListener(event, handleUserActivity);)};
+        document.removeEventListener(event, handleUserActivity);};
       if (interactionTimeoutRef.current) {
         clearTimeout(interactionTimeoutRef.current);
       }
@@ -80,7 +80,7 @@ export default function AdminSystem() {
   // Auto-scroll logs to bottom only if user is not actively using the page
   const scrollToBottom = () => {
     if (autoScrollEnabled && !isPaused && !userIsInteracting) {
-      logsEndRef.current?.scrollIntoView({ behavior: "smooth")};
+      logsEndRef.current?.scrollIntoView({ behavior: "smooth"};
     }
   };
 
@@ -121,12 +121,12 @@ export default function AdminSystem() {
   useEffect(() => {
     try {
       if (systemLogsData && typeof systemLogsData === 'object' && 'logs' in systemLogsData) {
-        const logsData = systemLogsData as { logs: any[] };
+        const logsData = systemLogsData as { logs: any[] });
         if (Array.isArray(logsData.logs)) {
           const formattedLogs = logsData.logs.map((log: any) => {
             const timestamp = new Date(log.timestamp).toLocaleTimeString('fr-FR');
             const prefix = log.level === 'error' ? '❌' : log.level === 'warn' ? '⚠️' : log.level === 'debug' ? '🔍' : 'ℹ️';
-            const category = log.category ? `[${log.category)}] ` : '';
+            const category = log.category ? `[${log.category}] ` : '';
             return `[${timestamp}] ${prefix} ${category}${log.message}`;
           });
           setLogs(formattedLogs);
@@ -141,23 +141,23 @@ export default function AdminSystem() {
   const addLog = (message: string, type: 'info' | 'success' | 'error' | 'warning' = 'info') => {
     const timestamp = new Date().toLocaleTimeString('fr-FR');
     const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
-    setLogs(prev => [...prev, `[${timestamp)}] ${prefix} ${message}`]);
+    setLogs(prev => [...prev, `[${timestamp}] ${prefix} ${message}`]);
   };
 
   // Clear logs mutation
   const clearLogsMutation = useMutation({
-    mutationFn: () => apiRequest('/api/admin/system/logs', { method: 'DELETE')},
+    mutationFn: () => apiRequest('/api/admin/system/logs', { method: 'DELETE'},
     onSuccess: () => {
       setLogs([]);
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/system/logs'])};
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/system/logs']});
       toast({
         description: "Logs système effacés"
-      };
+      });
     },
     onError: (error) => {
       toast({
         variant: "destructive",
-        description: "Erreur lors de l'effacement des logs")};
+        description: "Erreur lors de l'effacement des logs"});
     }
   });
 
@@ -213,13 +213,13 @@ export default function AdminSystem() {
       addLog('Envoi de la requête POST /api/admin/database/seed', 'info');
       
       try {
-        const result = await apiRequest("/api/admin/database/seed", { method: "POST")};
+        const result = await apiRequest("/api/admin/database/seed", { method: "POST"};
         addLog('Réponse reçue du serveur', 'success');
-        addLog(`Résultat: ${ JSON.stringify(result, null, 2)}`, 'info');
+        addLog(`Résultat: ${ JSON.stringify(result, null, 2}`, 'info');
         return result;
       } catch (error: any) {
-        addLog(`Erreur API: ${error.message)}`, 'error');
-        addLog(`Détails de l'erreur: ${ JSON.stringify(error, null, 2)}`, 'error');
+        addLog(`Erreur API: ${error.message}`, 'error');
+        addLog(`Détails de l'erreur: ${ JSON.stringify(error, null, 2}`, 'error');
         throw error;
       }
     },
@@ -229,23 +229,23 @@ export default function AdminSystem() {
     },
     onSuccess: (data) => {
       addLog('✅ Synchronisation terminée avec succès', 'success');
-      if (data.duration) addLog(`⏱️ Durée de l'opération: ${data.duration)}`, 'info');
+      if (data.duration) addLog(`⏱️ Durée de l'opération: ${data.duration}`, 'info');
       if (data.timestamp) addLog(`🕐 Horodatage serveur: ${data.timestamp}`, 'info');
-      addLog(`📊 Données complètes: ${ JSON.stringify(data, null, 2)}`, 'info');
+      addLog(`📊 Données complètes: ${ JSON.stringify(data, null, 2}`, 'info');
       toast({
         title: "Synchronisation réussie",
         description: "La base de données a été synchronisée avec succès.",
-      };
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/system/health"] };
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/system/health"] });
     },
     onError: (error: any) => {
-      addLog(`❌ Échec de la synchronisation: ${error.message)}`, 'error');
+      addLog(`❌ Échec de la synchronisation: ${error.message}`, 'error');
       addLog(`Stack trace: ${error.stack || 'Non disponible'}`, 'error');
       toast({
         title: "Erreur de synchronisation",
         description: error.message || "Impossible de synchroniser la base de données.",
         variant: "destructive",
-      };
+      });
     },
     onSettled: () => {
       setSeedingStatus('idle');
@@ -260,13 +260,13 @@ export default function AdminSystem() {
       addLog('Envoi de la requête POST /api/admin/database/reset', 'info');
       
       try {
-        const result = await apiRequest("/api/admin/database/reset", { method: "POST")};
+        const result = await apiRequest("/api/admin/database/reset", { method: "POST"};
         addLog('Réponse reçue du serveur pour le reset', 'success');
-        addLog(`Résultat du reset: ${ JSON.stringify(result, null, 2)}`, 'info');
+        addLog(`Résultat du reset: ${ JSON.stringify(result, null, 2}`, 'info');
         return result;
       } catch (error: any) {
-        addLog(`Erreur lors du reset: ${error.message)}`, 'error');
-        addLog(`Détails de l'erreur reset: ${ JSON.stringify(error, null, 2)}`, 'error');
+        addLog(`Erreur lors du reset: ${error.message}`, 'error');
+        addLog(`Détails de l'erreur reset: ${ JSON.stringify(error, null, 2}`, 'error');
         throw error;
       }
     },
@@ -277,23 +277,23 @@ export default function AdminSystem() {
     },
     onSuccess: (data) => {
       addLog('✅ Reset et re-synchronisation terminés avec succès', 'success');
-      if (data.duration) addLog(`⏱️ Durée totale du reset: ${data.duration)}`, 'info');
+      if (data.duration) addLog(`⏱️ Durée totale du reset: ${data.duration}`, 'info');
       if (data.timestamp) addLog(`🕐 Horodatage serveur: ${data.timestamp}`, 'info');
-      addLog(`📊 Données complètes du reset: ${ JSON.stringify(data, null, 2)}`, 'info');
+      addLog(`📊 Données complètes du reset: ${ JSON.stringify(data, null, 2}`, 'info');
       toast({
         title: "Reset réussi",
         description: "La base de données a été remise à zéro et re-synchronisée.",
-      };
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/system/health"] };
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/system/health"] });
     },
     onError: (error: any) => {
-      addLog(`❌ Échec du reset: ${error.message)}`, 'error');
+      addLog(`❌ Échec du reset: ${error.message}`, 'error');
       addLog(`Stack trace du reset: ${error.stack || 'Non disponible'}`, 'error');
       toast({
         title: "Erreur de reset",
         description: error.message || "Impossible de remettre à zéro la base de données.",
         variant: "destructive",
-      };
+      });
     },
     onSettled: () => {
       setSeedingStatus('idle');
@@ -324,18 +324,18 @@ export default function AdminSystem() {
     mutationFn: async () => {
       addLog('📤 Début de l\'export des catégories...', 'info');
       try {
-        const result = await apiRequest("/api/admin/categories/export", { method: "GET")};
+        const result = await apiRequest("/api/admin/categories/export", { method: "GET"};
         addLog(`✅ Export réussi: ${result.count} catégories`, 'success');
         return result;
       } catch (error: any) {
-        addLog(`❌ Erreur lors de l\'export: ${error.message)}`, 'error');
+        addLog(`❌ Erreur lors de l\'export: ${error.message}`, 'error');
         throw error;
       }
     },
     onSuccess: (data) => {
       toast({
         title: "Export réussi",
-        description: `${data.count)} catégories exportées avec succès.`,
+        description: `${data.count} catégories exportées avec succès.`,
       });
     },
     onError: (error: any) => {
@@ -349,20 +349,20 @@ export default function AdminSystem() {
 
   // Sync to production mutation
   const syncToProduction = useMutation({
-    mutationFn: async ({ productionUrl, categories)}: { productionUrl: string, categories: any[] } => {
-      addLog(`🔄 Début de la synchronisation vers: ${productionUrl)}`, 'info');
+    mutationFn: async ({ productionUrl, categories}: { productionUrl: string, categories: any[] } => {
+      addLog(`🔄 Début de la synchronisation vers: ${productionUrl}`, 'info');
       addLog(`📊 ${categories.length} catégories à synchroniser`, 'info');
       
       try {
         const result = await apiRequest("/api/admin/categories/sync-to-production", {
           method: "POST",
           body: JSON.stringify({ productionUrl,
-            categories)}
+            categories}
         });
         addLog('✅ Synchronisation réussie', 'success');
         return result;
       } catch (error: any) {
-        addLog(`❌ Erreur de synchronisation: ${error.message)}`, 'error');
+        addLog(`❌ Erreur de synchronisation: ${error.message}`, 'error');
         throw error;
       }
     },
@@ -371,7 +371,7 @@ export default function AdminSystem() {
       addLog('🚀 Démarrage de la synchronisation Dev → Production...', 'info');
     },
     onSuccess: (data) => {
-      addLog(`✅ ${data.syncedCount)} catégories synchronisées`, 'success');
+      addLog(`✅ ${data.syncedCount} catégories synchronisées`, 'success');
       if (data.duration) addLog(`⏱️ Durée: ${data.duration}`, 'info');
       toast({
         title: "Synchronisation réussie",
@@ -379,12 +379,12 @@ export default function AdminSystem() {
       });
     },
     onError: (error: any) => {
-      addLog(`❌ Échec de la synchronisation: ${error.message)}`, 'error');
+      addLog(`❌ Échec de la synchronisation: ${error.message}`, 'error');
       toast({
         title: "Erreur de synchronisation",
         description: error.message || "Impossible de synchroniser vers la production.",
         variant: "destructive",
-      };
+      });
     },
     onSettled: () => {
       setSeedingStatus('idle');
@@ -403,7 +403,7 @@ export default function AdminSystem() {
     }
 
     if (confirm(`Synchroniser les catégories de développement vers:\n${productionUrl}\n\nCette action remplacera toutes les catégories de production. Continuer ?`)) {
-      addLog(`👤 Utilisateur a confirmé la synchronisation vers: ${productionUrl)}`, 'info');
+      addLog(`👤 Utilisateur a confirmé la synchronisation vers: ${productionUrl}`, 'info');
       
       // First export current categories
       try {
@@ -412,7 +412,7 @@ export default function AdminSystem() {
           // Then sync to production
           syncToProduction.mutate({
             productionUrl: productionUrl.trim(),
-            categories: exportResult.categories)};
+            categories: exportResult.categories};
         }
       } catch (error) {
         addLog('❌ Impossible d\'exporter les catégories pour la synchronisation', 'error');
@@ -427,18 +427,18 @@ export default function AdminSystem() {
     if (exportResult.categories && exportResult.categories.length > 0) {
       const categories = exportResult.categories;
       let sqlContent = `-- Export SQL des catégories KDP Generator\n`;
-      sqlContent += `-- Généré le ${new Date().toLocaleString('fr-FR')}\n`;
+      sqlContent += `-- Généré le ${new Date().toLocaleString('fr-FR'}\n`;
       sqlContent += `-- ${categories.length} catégories exportées\n\n`;
       
       sqlContent += `-- Vider et recréer la table\n`;
       sqlContent += `TRUNCATE TABLE marketplace_categories CASCADE;\n\n`;
       
       categories.forEach((cat: any) => { const values = [
-          `'${cat.marketplace.replace(/'/g, "''")}'`,
-          `'${ cat.categoryPath.replace(/'/g, "''")}'`,
-          cat.parentPath ? `'${ cat.parentPath.replace(/'/g, "''")}'` : 'NULL',
+          `'${cat.marketplace.replace(/'/g, "''"}'`,
+          `'${ cat.categoryPath.replace(/'/g, "''"}'`,
+          cat.parentPath ? `'${ cat.parentPath.replace(/'/g, "''"}'` : 'NULL',
           cat.level,
-          `'${ cat.displayName.replace(/'/g, "''")}'`,
+          `'${ cat.displayName.replace(/'/g, "''"}'`,
           cat.isSelectable,
           cat.sortOrder,
           cat.isActive,
@@ -446,7 +446,7 @@ export default function AdminSystem() {
           'NOW()'
         ];
         
-        sqlContent += `INSERT INTO marketplace_categories (marketplace, category_path, parent_path, level, display_name, is_selectable, sort_order, is_active, created_at, updated_at) VALUES (${ values.join(', ')};\n`;
+        sqlContent += `INSERT INTO marketplace_categories (marketplace, category_path, parent_path, level, display_name, is_selectable, sort_order, is_active, created_at, updated_at) VALUES (${ values.join(', '};\n`;
       });
       
       return { sqlContent, count: categories.length };
@@ -467,12 +467,12 @@ export default function AdminSystem() {
         description: `Le code SQL pour ${count} catégories a été copié dans le presse-papiers. Allez dans l'onglet Database de Replit et collez-le dans le SQL runner.`,
       });
     } catch (error: any) {
-      addLog(`❌ Erreur lors de la copie SQL: ${error.message)}`, 'error');
+      addLog(`❌ Erreur lors de la copie SQL: ${error.message}`, 'error');
       toast({
         title: "Erreur de copie",
         description: error.message || "Impossible de copier le SQL.",
         variant: "destructive",
-      };
+      });
     }
   };
 
@@ -498,12 +498,12 @@ export default function AdminSystem() {
         description: `${count} catégories exportées vers un fichier SQL.`,
       });
     } catch (error: any) {
-      addLog(`❌ Erreur lors de l'export SQL: ${error.message)}`, 'error');
+      addLog(`❌ Erreur lors de l'export SQL: ${error.message}`, 'error');
       toast({
         title: "Erreur d'export SQL",
         description: error.message || "Impossible d'exporter en SQL.",
         variant: "destructive",
-      };
+      });
     }
   };
 
@@ -538,12 +538,12 @@ export default function AdminSystem() {
         });
       }
     } catch (error: any) {
-      addLog(`❌ Erreur lors de l'export JSON: ${error.message)}`, 'error');
+      addLog(`❌ Erreur lors de l'export JSON: ${error.message}`, 'error');
       toast({
         title: "Erreur d'export JSON",
         description: error.message || "Impossible d'exporter en JSON.",
         variant: "destructive",
-      };
+      });
     }
   };
 
@@ -551,7 +551,7 @@ export default function AdminSystem() {
   useEffect(() => {
     if (isAdmin && logs.length === 0) {
       addLog('🚀 Interface d\'administration système chargée', 'success');
-      addLog(`👤 Utilisateur administrateur connecté: ${systemHealth?.totalUsers || 0)} utilisateurs au total`, 'info');
+      addLog(`👤 Utilisateur administrateur connecté: ${systemHealth?.totalUsers || 0} utilisateurs au total`, 'info');
     }
   }, [isAdmin, systemHealth]);
 
@@ -602,7 +602,7 @@ export default function AdminSystem() {
       <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={ () => window.history.back( )}>
+            <Button variant="ghost" size="sm" onClick={ () => window.history.back( }>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Retour
             </Button>
@@ -622,7 +622,7 @@ export default function AdminSystem() {
         <Card className="border-l-4 border-l-blue-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div className="flex items-center space-x-3">
-              { getStatusIcon(systemHealth?.database || 'error')}
+              { getStatusIcon(systemHealth?.database || 'error'}
               <div>
                 <CardTitle className="text-lg">État du Système</CardTitle>
                 <CardDescription>
@@ -630,7 +630,7 @@ export default function AdminSystem() {
                 </CardDescription>
               </div>
             </div>
-            { getStatusBadge(systemHealth?.database || 'error')}
+            { getStatusBadge(systemHealth?.database || 'error'}
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -673,7 +673,7 @@ export default function AdminSystem() {
                 <div className="w-full bg-blue-200 rounded-full h-2">
                   <div 
                     className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                    style={{ width: `${systemHealth.memoryUsage.percentage)}%` }}
+                    style={{ width: `${systemHealth.memoryUsage.percentage}%` }}
                   ></div>
                 </div>
               )}
@@ -723,7 +723,7 @@ export default function AdminSystem() {
                     <>
                       <Database className="h-4 w-4 mr-2" />
                       Synchroniser
-                    </>)}
+                    </>}
                 </Button>
               </div>
 
@@ -747,7 +747,7 @@ export default function AdminSystem() {
                     <>
                       <AlertTriangle className="h-4 w-4 mr-2" />
                       Reset & Re-synchroniser
-                    </>)}
+                    </>}
                 </Button>
               </div>
             </div>
@@ -848,7 +848,7 @@ export default function AdminSystem() {
                       id="production-url"
                       type="url"
                       value={productionUrl}
-                      onChange={ (e) => setProductionUrl(e.target.value )}
+                      onChange={ (e) => setProductionUrl(e.target.value }
                       placeholder="https://votre-site.replit.app"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
@@ -862,7 +862,7 @@ export default function AdminSystem() {
               <div className="pt-4 border-t space-y-3">
                 <Button 
                   onClick={handleSyncToProduction}
-                  disabled={ seedingStatus !== 'idle' || !productionUrl.trim()}
+                  disabled={ seedingStatus !== 'idle' || !productionUrl.trim(}
                   className="w-full bg-orange-600 hover:bg-orange-700"
                 >
                   { seedingStatus === 'syncing' ? (
@@ -874,7 +874,7 @@ export default function AdminSystem() {
                     <>
                       <ArrowRight className="h-4 w-4 mr-2" />
                       Synchroniser vers Production
-                    </>)}
+                    </>}
                 </Button>
 
                 <div className="space-y-2">
@@ -911,7 +911,7 @@ export default function AdminSystem() {
                 { !productionUrl.trim() && (
                   <p className="text-xs text-muted-foreground mt-2 text-center">
                     Veuillez saisir l'URL de production pour la synchronisation directe
-                  </p>)}
+                  </p>}
               </div>
             </div>
           </CardContent>
@@ -948,7 +948,7 @@ export default function AdminSystem() {
                     toast({
                       title: "Cache vidé",
                       description: "Le cache applicatif a été vidé avec succès.",
-                    )};
+                    });
                   }}
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
@@ -971,7 +971,7 @@ export default function AdminSystem() {
                     toast({
                       title: "Optimisation lancée",
                       description: "Le système optimise automatiquement les performances.",
-                    )};
+                    });
                   }}
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
@@ -1010,7 +1010,7 @@ export default function AdminSystem() {
                       const response = await fetch('/api/admin/database/stats');
                       if (response.ok) {
                         const stats = await response.json();
-                        queryClient.invalidateQueries({ queryKey: ["/api/admin/system/health"])};
+                        queryClient.invalidateQueries({ queryKey: ["/api/admin/system/health"]});
                         toast({
                           title: "Statistiques mises à jour",
                           description: `${stats.categories} catégories, ${stats.users} utilisateurs, ${stats.projects} projets, ${stats.books} livres`,
@@ -1041,11 +1041,11 @@ export default function AdminSystem() {
                   variant="outline" 
                   className="w-full"
                   onClick={() => {
-                    queryClient.invalidateQueries({ queryKey: ["/api/admin/system/health"] )};
+                    queryClient.invalidateQueries({ queryKey: ["/api/admin/system/health"] });
                     toast({
                       title: "Vérification lancée",
                       description: "État du système mis à jour.",
-                    };
+                    });
                   }}
                 >
                   <Server className="h-4 w-4 mr-2" />
@@ -1102,7 +1102,7 @@ export default function AdminSystem() {
                 <Button 
                   variant={isPaused ? "destructive" : "outline"} 
                   size="sm" 
-                  onClick={ () => setIsPaused(!isPaused )}
+                  onClick={ () => setIsPaused(!isPaused }
                 >
                   { isPaused ? (
                     <>
@@ -1113,12 +1113,12 @@ export default function AdminSystem() {
                     <>
                       <Pause className="h-4 w-4 mr-2" />
                       Pause
-                    </>)}
+                    </>}
                 </Button>
                 <Button 
                   variant={autoRefreshLogs ? "default" : "outline"} 
                   size="sm" 
-                  onClick={ () => setAutoRefreshLogs(!autoRefreshLogs )}
+                  onClick={ () => setAutoRefreshLogs(!autoRefreshLogs }
                   disabled={isPaused}
                 >
                   <RefreshCw className={`h-4 w-4 mr-2 ${autoRefreshLogs && !isPaused ? 'animate-spin' : ''}`} />
@@ -1127,7 +1127,7 @@ export default function AdminSystem() {
                 <Button 
                   variant={autoScrollEnabled ? "default" : "destructive"} 
                   size="sm" 
-                  onClick={ () => setAutoScrollEnabled(!autoScrollEnabled )}
+                  onClick={ () => setAutoScrollEnabled(!autoScrollEnabled }
                   title={autoScrollEnabled ? "Désactiver le défilement automatique" : "Activer le défilement automatique"}
                 >
                   <Terminal className="h-4 w-4 mr-2" />
@@ -1151,14 +1151,14 @@ export default function AdminSystem() {
                   { clearLogsMutation.isPending ? (
                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
-                    <Trash2 className="h-4 w-4 mr-2" />)}
+                    <Trash2 className="h-4 w-4 mr-2" />}
                   {clearLogsMutation.isPending ? 'Effacement...' : 'Effacer'}
                 </Button>
                 <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={() => {
-                    queryClient.invalidateQueries({ queryKey: ['/api/admin/system/logs'] )};
+                    queryClient.invalidateQueries({ queryKey: ['/api/admin/system/logs'] });
                     setAutoScrollEnabled(true);
                   }}
                   disabled={isPaused}
@@ -1183,7 +1183,7 @@ export default function AdminSystem() {
                       <span>Chargement des logs système...</span>
                     </div>
                   ) : (
-                    "Aucun log disponible. Effectuez une opération pour voir les logs...")}
+                    "Aucun log disponible. Effectuez une opération pour voir les logs..."}
                 </div>
               ) : (
                 <div className="space-y-1">
@@ -1191,7 +1191,7 @@ export default function AdminSystem() {
                     <div key={index} className="break-all hover:bg-gray-800 px-1 rounded">
                       {log}
                     </div>
-                  ))}
+                  )}
                   <div ref={logsEndRef} />
                 </div>
               )}
@@ -1201,23 +1201,23 @@ export default function AdminSystem() {
               <div>
                 {logs.length > 0 && (
                   <span>
-                    {logs.length)} entrées • 
+                    {logs.length} entrées • 
                     { isPaused ? (
                       <span className="text-red-600"> ⏸️ En pause</span>
                     ) : autoRefreshLogs ? (
                       <span className="text-green-600"> 🔄 Auto-actualisation active</span>
                     ) : (
-                      <span className="text-orange-600"> ✋ Mode manuel</span>)}
+                      <span className="text-orange-600"> ✋ Mode manuel</span>}
                     { userIsInteracting && (
-                      <span className="text-blue-600"> • 👤 Utilisateur actif</span>)}
+                      <span className="text-blue-600"> • 👤 Utilisateur actif</span>}
                     { !autoScrollEnabled && !isPaused && (
-                      <span className="text-purple-600"> • 📜 Défilement désactivé</span>)}
+                      <span className="text-purple-600"> • 📜 Défilement désactivé</span>}
                   </span>
                 )}
               </div>
               <div>
                 {systemLogsData && typeof systemLogsData === 'object' && 'total' in systemLogsData && (
-                  <span>Total serveur: {String((systemLogsData as { total: number)}.total)}</span>
+                  <span>Total serveur: {String((systemLogsData as { total: number}.total)}</span>
                 )}
               </div>
             </div>

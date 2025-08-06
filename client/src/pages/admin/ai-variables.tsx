@@ -83,11 +83,11 @@ export default function AIVariables() {
   const { data: categorizedFields, isLoading: fieldsLoading } = useQuery<CategorizedFields>({
     queryKey: ['/api/ai/database-fields'],
     enabled: isAuthenticated && isAdmin,
-  };
+  });
 
   const copyToClipboard = async (fieldName: string) => {
     try {
-      await navigator.clipboard.writeText(`{${fieldName)}}`);
+      await navigator.clipboard.writeText(`{${fieldName}}`);
       setCopiedField(fieldName);
       toast({
         title: "Variable copiée",
@@ -186,7 +186,7 @@ export default function AIVariables() {
                           <div className="flex items-center gap-2 mb-1">
                             <code 
                               className="text-sm font-mono bg-gray-100 text-gray-800 px-2 py-1 rounded cursor-pointer hover:bg-blue-100 transition-colors"
-                              onClick={ () => copyToClipboard(field.field )}
+                              onClick={ () => copyToClipboard(field.field }
                             >
                               {"{"}
                               {field.field}
@@ -196,12 +196,12 @@ export default function AIVariables() {
                               size="sm"
                               variant="ghost"
                               className="h-6 w-6 p-0 hover:bg-blue-50"
-                              onClick={ () => copyToClipboard(field.field )}
+                              onClick={ () => copyToClipboard(field.field }
                             >
                               { copiedField === field.field ? (
                                 <CheckCircle className="w-3 h-3 text-green-600" />
                               ) : (
-                                <Copy className="w-3 h-3 text-gray-600" />)}
+                                <Copy className="w-3 h-3 text-gray-600" />}
                             </Button>
                           </div>
                           <h4 className="font-semibold text-sm text-gray-900 mb-1">
@@ -225,7 +225,7 @@ export default function AIVariables() {
                             variant="secondary" 
                             className="text-xs bg-[#38b6ff]/10 text-[#38b6ff] border-[#38b6ff]/20"
                           >
-                            {field.options.length)} options
+                            {field.options.length} options
                           </Badge>
                         )}
                       </div>
@@ -241,17 +241,17 @@ export default function AIVariables() {
                               >
                                 {option}
                               </span>
-                            ))}
+                            )}
                             {field.options.length > 3 && (
                               <span className="text-xs text-gray-600">
-                                +{field.options.length - 3)}
+                                +{field.options.length - 3}
                               </span>
                             )}
                           </div>
                         </div>
                       )}
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -267,7 +267,7 @@ export default function AIVariables() {
                 <p className="text-sm">Vérifiez la configuration de la base de données</p>
               </div>
             </CardContent>
-          </Card>)}
+          </Card>}
       </div>
     </Layout>
   );

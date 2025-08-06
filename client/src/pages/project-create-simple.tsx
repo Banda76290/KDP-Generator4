@@ -46,7 +46,7 @@ export default function CreateProject() {
   const { data: existingBooks = [] } = useQuery({
     queryKey: ["/api/books"],
     enabled: showBookOptions,
-  };
+  });
 
   // Separate available and attached books
   const sortedBooks = (existingBooks as any[]).sort((a, b) => {
@@ -84,18 +84,18 @@ export default function CreateProject() {
       })});
       } else if (data.createNewBook) {
         // Redirect to book creation with project pre-selected
-        setLocation(`/books/create?projectId=${project.id)}`);
+        setLocation(`/books/create?projectId=${project.id}`);
         return project;
       }
       
       return project;
     },
     onSuccess: (project) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"])};
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"]});
       toast({
         title: "Project Created",
         description: "Your project has been created successfully.",
-      };
+      });
       
       // Only redirect to projects if we're not going to book creation
       if (!form.getValues("createNewBook")) {
@@ -130,7 +130,7 @@ export default function CreateProject() {
             <div className="mb-6">
               <Button
                 variant="ghost"
-                onClick={ () => setLocation("/projects")} className="mb-4"
+                onClick={ () => setLocation("/projects"} className="mb-4"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Projects
@@ -154,18 +154,18 @@ export default function CreateProject() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={ form.handleSubmit((data) => createProject.mutate(data)} className="space-y-6">
+                <form onSubmit={ form.handleSubmit((data) => createProject.mutate(data} className="space-y-6">
                   {/* Project Name */}
                   <div>
                     <Label htmlFor="name">Project Name *</Label>
                     <Input
-                      { ...form.register("name")}
+                      { ...form.register("name"}
                       placeholder="Ex: Google Analytics Guide, Fantasy Romance Series..."
-                      onChange={ (e) => handleNameChange(e.target.value )}
+                      onChange={ (e) => handleNameChange(e.target.value }
                       className="mt-1"
                     />
                     {form.formState.errors.name && (
-                      <p className="text-red-500 text-sm mt-1">{form.formState.errors.name.message)}</p>
+                      <p className="text-red-500 text-sm mt-1">{form.formState.errors.name.message}</p>
                     )}
                   </div>
 
@@ -173,7 +173,7 @@ export default function CreateProject() {
                   <div>
                     <Label htmlFor="description">Description (Optional)</Label>
                     <Textarea
-                      { ...form.register("description")}
+                      { ...form.register("description"}
                       placeholder="Briefly describe your project..."
                       rows={3}
                       className="resize-none mt-1"
@@ -193,13 +193,13 @@ export default function CreateProject() {
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {/* Attach Existing Book */)}
+                        {/* Attach Existing Book */}
                         { Array.isArray(existingBooks) && existingBooks.length > 0 && (
                           <div className="space-y-2">
                             <div className="flex items-center space-x-2">
                               <Checkbox
                                 id="attachExisting"
-                                checked={form.watch("attachExistingBook")}
+                                checked={form.watch("attachExistingBook"}
                                 onCheckedChange={(checked) => {
                                   form.setValue("attachExistingBook", !!checked);
                                   if (checked) {
@@ -212,8 +212,8 @@ export default function CreateProject() {
                             
                             {form.watch("attachExistingBook") && (
                               <Select 
-                                value={form.watch("selectedBookId") || "")} 
-                                onValueChange={ (value) => form.setValue("selectedBookId", value)}
+                                value={form.watch("selectedBookId") || ""} 
+                                onValueChange={ (value) => form.setValue("selectedBookId", value}
                               >
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select a book" />
@@ -222,7 +222,7 @@ export default function CreateProject() {
                                   {sortedBooks.map((book: any) => {
                                     const isAttached = !!book.projectId;
                                     const displayText = isAttached 
-                                      ? `${book.title)} (Already attached to a project)` 
+                                      ? `${book.title} (Already attached to a project)` 
                                       : `${book.title} (${book.format}`;
                                     
                                     return (
@@ -246,7 +246,7 @@ export default function CreateProject() {
                         <div className="flex items-center space-x-2">
                           <Checkbox
                             id="createNew"
-                            checked={ form.watch("createNewBook")}
+                            checked={ form.watch("createNewBook"}
                             onCheckedChange={(checked) => {
                               form.setValue("createNewBook", !!checked);
                               if (checked) {
@@ -261,7 +261,7 @@ export default function CreateProject() {
                         { !form.watch("attachExistingBook") && !form.watch("createNewBook") && (
                           <div className="text-sm text-muted-foreground p-3 bg-muted/50 rounded">
                             💡 You can add books later from the project page
-                          </div>)}
+                          </div>}
                       </CardContent>
                     </Card>
                   )}
@@ -270,7 +270,7 @@ export default function CreateProject() {
                     <Button 
                       type="button" 
                       variant="outline" 
-                      onClick={ ()} => setLocation("/projects")
+                      onClick={ (} => setLocation("/projects")
                     >
                       Cancel
                     </Button>
@@ -287,7 +287,7 @@ export default function CreateProject() {
                       ) : (
                         <>
                           <Plus className="mr-2 h-4 w-4" />
-                          {form.watch("createNewBook") ? "Create and Add Book" : "Create Project")}
+                          {form.watch("createNewBook") ? "Create and Add Book" : "Create Project"}
                         </>
                       )}
                     </Button>

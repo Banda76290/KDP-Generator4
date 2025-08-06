@@ -176,7 +176,7 @@ export default function Projects() {
                   <Plus className="w-4 h-4 mr-2" />
                   Create Project
                 </Button>
-                <Button onClick={ () => setLocation("/books/create")} className="bg-primary hover:bg-primary/90">
+                <Button onClick={() => setLocation("/books/create")} className="bg-primary hover:bg-primary/90">
                   <Plus className="w-4 h-4 mr-2" />
                   Create Book
                 </Button>
@@ -260,7 +260,7 @@ export default function Projects() {
                     <Plus className="w-4 h-4 mr-2" />
                     Create Your First Project
                   </Button>
-                  <Button onClick={ () => setLocation("/books/create")} className="bg-primary hover:bg-primary/90">
+                  <Button onClick={() => setLocation("/books/create")} className="bg-primary hover:bg-primary/90">
                     <Plus className="w-4 h-4 mr-2" />
                     Create Your First Book
                   </Button>
@@ -309,11 +309,11 @@ export default function Projects() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={ () => handleEditProject(project )}>
+                          <DropdownMenuItem onClick={ () => handleEditProject(project)}>
                             <Edit className="w-4 h-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={ () => handleDuplicateProject(project )}>
+                          <DropdownMenuItem onClick={ () => handleDuplicateProject(project)}>
                             <Copy className="w-4 h-4 mr-2" />
                             Duplicate
                           </DropdownMenuItem>
@@ -323,7 +323,7 @@ export default function Projects() {
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             className="text-red-600"
-                            onClick={ () => handleDeleteProject(project )}
+                            onClick={ () => handleDeleteProject(project)}
                           >
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
@@ -339,7 +339,7 @@ export default function Projects() {
                         <div className="space-y-3">
                           <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
                             <BookOpen className="w-4 h-4" />
-                            Books ({project.books.length)}
+                            Books ({project.books.length})
                           </div>
                           {project.books
                             .slice(0, expandedProjects.has(project.id) ? project.books.length : 3)
@@ -351,7 +351,7 @@ export default function Projects() {
                                     <TooltipTrigger asChild>
                                       <h4 
                                         className="text-sm font-medium text-gray-900 leading-tight break-words cursor-pointer hover:!text-blue-600 transition-colors"
-                                        onClick={() => setLocation(`/books/edit/${book.id)}`)}
+                                        onClick={() => setLocation(`/books/edit/${book.id}`)}
                                       >
                                         {book.title}
                                       </h4>
@@ -371,7 +371,7 @@ export default function Projects() {
                                     <div className="flex items-center gap-1 text-xs text-gray-500 flex-shrink-0">
                                       <span className="font-medium">ISBN/ASIN:</span>
                                       {book.isbn ? (
-                                        <span className="font-medium text-gray-700">{book.isbn)}</span>
+                                        <span className="font-medium text-gray-700">{book.isbn}</span>
                                       ) : book.isbnPlaceholder ? (
                                         <span className="text-amber-600">{book.isbnPlaceholder}</span>
                                       ) : (
@@ -381,8 +381,8 @@ export default function Projects() {
                                   </div>
                                 </div>
                                 <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                                  <Badge className={getStatusColor(book.status || 'draft')}>
-                                    {(book.status || 'draft').replace('_', ' ')}
+                                  <Badge className={getStatusColor(book.status || 'draft'}>
+                                    {(book.status || 'draft').replace('_', ' '}
                                   </Badge>
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -391,15 +391,15 @@ export default function Projects() {
                                       </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                      <DropdownMenuItem onClick={() => setLocation(`/books/edit/${book.id)}`)}>
+                                      <DropdownMenuItem onClick={() => setLocation(`/books/edit/${book.id}`)}>
                                         <Edit className="w-3 h-3 mr-2" />
                                         Edit
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem onClick={ () => handleDuplicateBook(book.id )}>
+                                      <DropdownMenuItem onClick={ () => handleDuplicateBook(book.id }>
                                         <Copy className="w-3 h-3 mr-2" />
                                         Duplicate
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem onClick={ () => handleTranslateBook(book )}>
+                                      <DropdownMenuItem onClick={ () => handleTranslateBook(book }>
                                         <Languages className="w-3 h-3 mr-2" />
                                         Create Translated Copy
                                       </DropdownMenuItem>
@@ -428,13 +428,13 @@ export default function Projects() {
                                 </div>
                               </div>
                             </div>
-                          ))}
+                          )}
                           
                           {/* See More / Show Less Button */}
                           { project.books.length > 3 && (
                             <div className="text-center pt-2">
                               <button
-                                onClick={() => toggleProjectExpansion(project.id ))}
+                                onClick={() => toggleProjectExpansion(project.id )}
                                 className="text-sm text-gray-600 hover:text-blue-600 transition-colors cursor-pointer"
                               >
                                 {expandedProjects.has(project.id) ? 'Show Less' : 'See More'}
@@ -450,7 +450,7 @@ export default function Projects() {
                             variant="outline" 
                             size="sm" 
                             className="mt-2"
-                            onClick={() => setLocation(`/books/create?projectId=${project.id)}`)}
+                            onClick={() => setLocation(`/books/create?projectId=${project.id}`)}
                           >
                             <Plus className="w-3 h-3 mr-1" />
                             Add Book
@@ -486,7 +486,7 @@ export default function Projects() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              )}
             </div>
           )}
 
@@ -502,7 +502,7 @@ export default function Projects() {
               Are you sure you want to delete this project? This action cannot be undone.
               {projectToDelete?.books && projectToDelete.books.length > 0 && (
                 <span className="block mt-2 text-sm">
-                  This project has {projectToDelete.books.length)} associated book(s).
+                  This project has {projectToDelete.books.length} associated book(s).
                 </span>
               )}
             </AlertDialogDescription>
@@ -514,8 +514,8 @@ export default function Projects() {
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="delete-books"
-                  checked={deleteAssociatedBooks)}
-                  onCheckedChange={ (checked) => setDeleteAssociatedBooks(checked as boolean)}
+                  checked={deleteAssociatedBooks}
+                  onCheckedChange={ (checked) => setDeleteAssociatedBooks(checked as boolean}
                 />
                 <label
                   htmlFor="delete-books"
@@ -541,7 +541,7 @@ export default function Projects() {
                   deleteProject.mutate({ 
                     projectId: projectToDelete.id, 
                     deleteBooks: deleteAssociatedBooks 
-                  )};
+                  });
                   setProjectToDelete(null);
                   setDeleteAssociatedBooks(false);
                 }
@@ -587,7 +587,7 @@ export default function Projects() {
                     <SelectItem key={language} value={language}>
                       {language}
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
             </div>

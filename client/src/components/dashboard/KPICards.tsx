@@ -42,7 +42,7 @@ export default function KPICards() {
               </div>
             </CardContent>
           </Card>
-        ))}
+        )}
       </div>
     );
   }
@@ -58,7 +58,7 @@ export default function KPICards() {
       iconColor: "text-primary",
     },
     { title: "Monthly Revenue",
-      value: `$${(stats?.monthlyRevenue || 0).toLocaleString()}`,
+      value: `$${(stats?.monthlyRevenue || 0).toLocaleString(}`,
       change: "+18.2%",
       changeType: "positive" as const,
       icon: DollarSign,
@@ -100,7 +100,7 @@ export default function KPICards() {
                   { kpi.changeType === "positive" ? (
                     <ArrowUp className="w-4 h-4 mr-1" />
                   ) : (
-                    <ArrowDown className="w-4 h-4 mr-1" />)}
+                    <ArrowDown className="w-4 h-4 mr-1" />}
                   {kpi.change}
                 </p>
               </div>
@@ -110,7 +110,7 @@ export default function KPICards() {
             </div>
           </CardContent>
         </Card>
-      ))}
+      )}
     </div>
   );
 }

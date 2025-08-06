@@ -42,7 +42,7 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
     outputPricePer1kTokens: model.outputPricePer1kTokens || 0,
     maxTokens: model.maxTokens || 4096,
     contextWindow: model.contextWindow || 128000,
-    isAvailable: model.isAvailable ?? true)};
+    isAvailable: model.isAvailable ?? true};
 
   const handleSave = () => {
     const dataToSave = { ...formData };
@@ -75,7 +75,7 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value ))}}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value )}}
                     placeholder="gpt-4o"
                   />
                 </div>
@@ -84,7 +84,7 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
                   <Input
                     id="displayName"
                     value={formData.displayName}
-                    onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value ))}}
+                    onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value )}}
                     placeholder="GPT-4o"
                   />
                 </div>
@@ -92,7 +92,7 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
 
               <div>
                 <Label htmlFor="provider">Fournisseur</Label>
-                <Select value={formData.provider} onValueChange={(value) => setFormData(prev => ({ ...prev, provider: value)}}>
+                <Select value={formData.provider} onValueChange={(value) => setFormData(prev => ({ ...prev, provider: value}}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -101,7 +101,7 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
                       <SelectItem key={provider.value} value={provider.value}>
                         {provider.label}
                       </SelectItem>
-                    ))}
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -109,7 +109,7 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
               <div className="flex items-center space-x-2">
                 <Switch
                   checked={formData.isAvailable}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isAvailable: checked)}}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isAvailable: checked}}
                 />
                 <Label>Modèle disponible</Label>
               </div>
@@ -128,7 +128,7 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
                     type="number"
                     min="100"
                     value={formData.maxTokens}
-                    onChange={(e) => setFormData(prev => ({ ...prev, maxTokens: parseInt(e.target.value) || 4096 ))}}
+                    onChange={(e) => setFormData(prev => ({ ...prev, maxTokens: parseInt(e.target.value) || 4096 )}}
                   />
                 </div>
                 <div>
@@ -138,7 +138,7 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
                     type="number"
                     min="1000"
                     value={formData.contextWindow}
-                    onChange={(e) => setFormData(prev => ({ ...prev, contextWindow: parseInt(e.target.value) || 128000 ))}}
+                    onChange={(e) => setFormData(prev => ({ ...prev, contextWindow: parseInt(e.target.value) || 128000 )}}
                   />
                 </div>
               </div>
@@ -158,10 +158,10 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
                     step="0.000001"
                     min="0"
                     value={formData.inputPricePer1kTokens}
-                    onChange={ (e) => setFormData(prev => ({ ...prev, inputPricePer1kTokens: parseFloat(e.target.value) || 0  ))}
+                    onChange={ (e) => setFormData(prev => ({ ...prev, inputPricePer1kTokens: parseFloat(e.target.value) || 0  )}
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    ${ costPer1MTokensInput.toFixed(2)} per 1M tokens
+                    ${ costPer1MTokensInput.toFixed(2} per 1M tokens
                   </p>
                 </div>
                 <div>
@@ -172,10 +172,10 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
                     step="0.000001"
                     min="0"
                     value={formData.outputPricePer1kTokens}
-                    onChange={ (e) => setFormData(prev => ({ ...prev, outputPricePer1kTokens: parseFloat(e.target.value) || 0  ))}
+                    onChange={ (e) => setFormData(prev => ({ ...prev, outputPricePer1kTokens: parseFloat(e.target.value) || 0  )}
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    ${ costPer1MTokensOutput.toFixed(2)} per 1M tokens
+                    ${ costPer1MTokensOutput.toFixed(2} per 1M tokens
                   </p>
                 </div>
               </div>
@@ -183,7 +183,7 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
               <div className="bg-blue-50 p-3 rounded-lg">
                 <p className="text-sm text-blue-900">
                   <strong>Exemple de coût:</strong> Pour 1000 tokens input + 500 tokens output = 
-                  ${ ((formData.inputPricePer1kTokens * 1) + (formData.outputPricePer1kTokens * 0.5)).toFixed(4)}
+                  ${ ((formData.inputPricePer1kTokens * 1) + (formData.outputPricePer1kTokens * 0.5)).toFixed(4}
                 </p>
               </div>
             </CardContent>

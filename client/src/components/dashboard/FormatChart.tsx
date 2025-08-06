@@ -44,7 +44,7 @@ export default function FormatChart() {
               >
                 {dataWithColors.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
+                )}
               </Pie>
               <Tooltip 
                 formatter={(value) => [`${value}%`, 'Sales']}

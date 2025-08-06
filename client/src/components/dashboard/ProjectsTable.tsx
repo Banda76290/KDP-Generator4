@@ -78,7 +78,7 @@ export default function ProjectsTable() {
                 <div className="h-6 bg-gray-200 rounded w-16"></div>
                 <div className="h-6 bg-gray-200 rounded w-12"></div>
               </div>
-            ))}
+            )}
           </div>
         </CardContent>
       </Card>
@@ -138,8 +138,8 @@ export default function ProjectsTable() {
                   <tr key={project.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className={ `w-10 h-10 ${getGradientClass(index)} rounded-lg flex items-center justify-center text-white font-semibold text-sm`}>
-                          { generateProjectInitials(project.title || 'Untitled')}
+                        <div className={ `w-10 h-10 ${getGradientClass(index} rounded-lg flex items-center justify-center text-white font-semibold text-sm`}>
+                          { generateProjectInitials(project.title || 'Untitled'}
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
@@ -147,15 +147,15 @@ export default function ProjectsTable() {
                           </div>
                           {project.subtitle && (
                             <div className="text-sm text-gray-500">
-                              {project.subtitle)}
+                              {project.subtitle}
                             </div>
                           )}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge className={ `${getStatusBadgeClass(project.status || 'draft')} text-xs font-semibold`}>
-                        { (project.status || 'draft').replace('_', ' ')}
+                      <Badge className={ `${getStatusBadgeClass(project.status || 'draft'} text-xs font-semibold`}>
+                        { (project.status || 'draft').replace('_', ' '}
                       </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -196,7 +196,7 @@ export default function ProjectsTable() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
