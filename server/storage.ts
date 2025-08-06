@@ -2018,10 +2018,11 @@ export class DatabaseStorage implements IStorage {
     .where(and(
       eq(kdpImports.userId, userId),
       eq(kdpImportData.isDuplicate, false),
-      sql`${kdpImports.detectedType} != 'payments'`
+      sql`${kdpImports.detectedType} = 'payments'`
     ));
 
-    // Get royalty by currency to avoid mixing currencies
+    // CORRECTION: Utiliser uniquement les fichiers "payments" qui contiennent les vrais totaux cumulés
+    // Les autres fichiers peuvent contenir des estimations ou des données partielles/dupliquées
     const royaltiesByCurrency = await db.select({
       currency: kdpImportData.currency,
       sum: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`,
@@ -2031,8 +2032,8 @@ export class DatabaseStorage implements IStorage {
     .where(and(
       eq(kdpImports.userId, userId),
       eq(kdpImportData.isDuplicate, false),
-      // Exclure les fichiers "payments" qui contiennent des données cumulées historiques
-      sql`${kdpImports.detectedType} != 'payments'`,
+      // INCLURE uniquement les fichiers "payments" qui contiennent les vrais totaux
+      sql`${kdpImports.detectedType} = 'payments'`,
       isNotNull(kdpImportData.royalty),
       sql`${kdpImportData.royalty} > 0`
     ))
@@ -2045,7 +2046,7 @@ export class DatabaseStorage implements IStorage {
     .where(and(
       eq(kdpImports.userId, userId),
       eq(kdpImportData.isDuplicate, false),
-      sql`${kdpImports.detectedType} != 'payments'`,
+      sql`${kdpImports.detectedType} = 'payments'`,
       isNotNull(kdpImportData.asin),
       sql`${kdpImportData.asin} != ''`
     ));
