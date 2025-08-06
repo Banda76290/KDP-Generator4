@@ -1,0 +1,50 @@
+voici le cumul **en euros** après conversion des royalties par devise en utilisant les taux de référence de la banque centrale européenne au **1er août 2025** (EUR 1 = X) :
+
+### 1. taux utilisés (EUR 1 = …)
+
+* JPY : 171,61. ([European Central Bank][1])
+* USD : 1,1404. ([European Central Bank][2])
+* GBP : 0,8665. ([European Central Bank][3])
+* CAD : 1,5822. ([European Central Bank][4])
+* AUD : 1,7756. ([European Central Bank][5])
+* INR : 99,79. ([European Central Bank][6])
+* MXN : 21,6158. ([European Central Bank][7])
+* BRL : 6,4129. ([oenb.at][8])
+* EUR : base 1 (pas de conversion).
+
+### 2. conversion des royalties en EUR
+
+| devise | montant original | taux (1 EUR = ...) | équivalent en EUR (approx.) |
+| ------ | ---------------: | -----------------: | --------------------------: |
+| EUR    |         7 914,57 |             1,0000 |                    7 914,57 |
+| JPY    |        13 505,00 |             171,61 |                       78,70 |
+| CAD    |           352,96 |             1,5822 |                      223,08 |
+| USD    |         1 377,56 |             1,1404 |                    1 207,96 |
+| GBP    |           253,13 |             0,8665 |                      292,13 |
+| INR    |           893,63 |              99,79 |                        8,96 |
+| AUD    |            42,90 |             1,7756 |                       24,16 |
+| MXN    |           104,29 |            21,6158 |                        4,82 |
+| BRL    |            17,40 |             6,4129 |                        2,71 |
+
+(toutes les conversions faites en divisant le montant dans la devise par le taux EUR→devise, ex. 13 505 JPY / 171,61 ≈ 78,70 EUR)
+
+### 3. total cumulé en euros
+
+**9 757,09 EUR** (arrondi au centime).
+
+### 4. remarques
+
+* les taux sont les taux de référence publiés par la BCE au 1er août 2025. ([European Central Bank][1], [European Central Bank][3], [European Central Bank][2], [European Central Bank][4], [European Central Bank][5], [European Central Bank][6], [European Central Bank][7], [oenb.at][8])
+* il s’agit d’une conversion “spot” à cette date ; si tu préfères une conversion avec moyenne pondérée par date de génération des royalties (par ex. selon la date de chaque ligne de vente), il faudrait remonter les taux historiques correspondants et appliquer ligne à ligne.
+* les faibles montants (INR, MXN, BRL) pèsent très peu dans le total consolidé.
+
+veux-tu que je produise un tableau détaillé ligne à ligne avec conversion (en corrélant chaque entrée de devise avec sa date et en appliquant potentiellement une moyenne mobile de taux) ou est-ce suffisant pour le reporting agrégé ?
+
+[1]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-jpy.en.html?utm_source=chatgpt.com "Japanese yen (JPY) - European Central Bank"
+[2]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-usd.en.html?utm_source=chatgpt.com "US dollar (USD) - European Central Bank"
+[3]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-gbp.en.html?utm_source=chatgpt.com "Pound sterling (GBP) - European Central Bank"
+[4]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-cad.en.html?utm_source=chatgpt.com "Canadian dollar (CAD) - European Central Bank"
+[5]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-aud.en.html?utm_source=chatgpt.com "Australian dollar (AUD) - European Central Bank"
+[6]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-inr.en.html?utm_source=chatgpt.com "Indian rupee (INR) - European Central Bank"
+[7]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-mxn.en.html?utm_source=chatgpt.com "Mexican peso (MXN) - European Central Bank"
+[8]: https://www.oenb.at/en/Services/Interest-Rates-and-Exchange-Rates/Euro-Reference-and-Exchange-Rates.html?utm_source=chatgpt.com "Euro Reference and Exchange Rates"
