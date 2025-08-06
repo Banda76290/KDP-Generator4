@@ -146,7 +146,7 @@ function BooksContent() {
       return apiRequest(`/api/books/${bookId}`, { method: "PUT", body: { projectId } });
     },
     onSuccess: () => {
-      toast({
+      toast.success({
         title: "Success",
         description: "Book assigned to project successfully",
       });
@@ -154,10 +154,9 @@ function BooksContent() {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
     },
     onError: (error: Error) => {
-      toast({
+      toast.error({
         title: "Error",
         description: error.message,
-        variant: "destructive",
       });
     },
   });
