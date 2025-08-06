@@ -40,6 +40,15 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  log("🚀 Démarrage du serveur KDP Generator");
+  log("🔧 Configuration des routes API...");
+  
+  // Vérification des variables d'environnement critiques
+  if (!process.env.DATABASE_URL && !process.env.PGDATABASE) {
+    log("❌ Variables de base de données manquantes");
+    log("Variables disponibles: " + Object.keys(process.env).filter(key => key.includes('PG') || key.includes('DATABASE')).join(', '));
+  }
+  
   // Database seeding is now manual-only via Admin System page
   // await seedDatabase(); // Disabled automatic seeding - use Admin System page for manual control
   
