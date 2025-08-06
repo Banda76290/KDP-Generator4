@@ -275,7 +275,7 @@ const MasterBooksPage: React.FC = () => {
         {/* Books List */}
         <div className="grid grid-cols-1 gap-6">
           {filteredAndSortedBooks.map((book) => (
-            <Card key={book.asin} className="hover:shadow-lg transition-shadow">
+            <Card key={book.id} className="hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row gap-6">
                   {/* Book Info */}
