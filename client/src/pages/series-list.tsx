@@ -66,9 +66,12 @@ export default function SeriesListPage() {
   // Mutation to remove book from series
   const removeBookFromSeries = useMutation({
     mutationFn: async (bookId: string) => {
-      return await apiRequest("PATCH", `/api/books/${bookId}`, {
-        seriesTitle: "",
-        seriesNumber: null
+      return await apiRequest(`/api/books/${bookId}`, {
+        method: "PATCH",
+        body: {
+          seriesTitle: "",
+          seriesNumber: null
+        }
       });
     },
     onSuccess: () => {
@@ -85,7 +88,7 @@ export default function SeriesListPage() {
   // Mutation to delete series
   const deleteSeries = useMutation({
     mutationFn: async (seriesId: string) => {
-      return await apiRequest("DELETE", `/api/series/${seriesId}`);
+      return await apiRequest(`/api/series/${seriesId}`, { method: "DELETE" });
     },
     onSuccess: () => {
       // Invalidate queries to refresh the data
