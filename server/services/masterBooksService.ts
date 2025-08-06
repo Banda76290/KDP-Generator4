@@ -224,7 +224,14 @@ export class MasterBooksService {
     aggregations: any,
     importId: string
   ): Promise<void> {
-    // Fusionner les données existantes avec les nouvelles
+    // Vérifier si cet import a déjà été traité pour éviter les doublons
+    const sourceImportIds = existingMaster.sourceImportIds || [];
+    if (sourceImportIds.includes(importId)) {
+      console.log(`[MASTER_BOOKS] Import ${importId.slice(0, 8)} déjà traité pour ${existingMaster.asin}, ignoré`);
+      return; // Ne pas traiter les imports déjà inclus
+    }
+
+    // Fusionner les données existantes avec les nouvelles SEULEMENT si nouveau import
     const mergedRoyaltiesOriginal = { ...existingMaster.totalRoyaltiesOriginal as any };
     
     for (const [currency, amount] of Object.entries(aggregations.totalRoyaltiesOriginal)) {
@@ -238,9 +245,9 @@ export class MasterBooksService {
     const totalRoyaltiesUSD = await this.calculateTotalUSD(mergedRoyaltiesOriginal);
 
     // Fusionner les source import IDs
-    const sourceImportIds = [...(existingMaster.sourceImportIds || [])];
-    if (!sourceImportIds.includes(importId)) {
-      sourceImportIds.push(importId);
+    const updatedSourceImportIds = [...sourceImportIds];
+    if (!updatedSourceImportIds.includes(importId)) {
+      updatedSourceImportIds.push(importId);
     }
 
     await db.update(masterBooks)
@@ -265,7 +272,7 @@ export class MasterBooksService {
         currentOfferPrice: aggregations.currentOfferPrice?.toString(),
         currentCurrency: aggregations.currentCurrency,
         lastImportDate: new Date().toISOString().split('T')[0],
-        sourceImportIds: sourceImportIds,
+        sourceImportIds: updatedSourceImportIds,
         updatedAt: new Date(),
       })
       .where(eq(masterBooks.id, existingMaster.id));
