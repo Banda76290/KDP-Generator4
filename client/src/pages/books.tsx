@@ -164,7 +164,7 @@ function BooksContent() {
   // Mutation for duplicating book
   const duplicateBookMutation = useMutation({
     mutationFn: async (bookId: string) => {
-      return apiRequest("POST", `/api/books/${bookId}/duplicate`);
+      return apiRequest(`/api/books/${bookId}/duplicate`, { method: "POST" });
     },
     onSuccess: () => {
       toast.success({
@@ -184,7 +184,7 @@ function BooksContent() {
   // Mutation for deleting book
   const deleteBookMutation = useMutation({
     mutationFn: async (bookId: string) => {
-      return apiRequest("DELETE", `/api/books/${bookId}`);
+      return apiRequest(`/api/books/${bookId}`, { method: "DELETE" });
     },
     onSuccess: () => {
       toast.success({
@@ -205,7 +205,7 @@ function BooksContent() {
   // Mutation for translating book
   const translateBookMutation = useMutation({
     mutationFn: async ({ bookId, targetLanguage }: { bookId: string; targetLanguage: string }) => {
-      return apiRequest("POST", `/api/books/${bookId}/translate`, { targetLanguage });
+      return apiRequest(`/api/books/${bookId}/translate`, { method: "POST", body: { targetLanguage } });
     },
     onSuccess: (data: any) => {
       toast.success({
