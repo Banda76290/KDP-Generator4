@@ -92,8 +92,12 @@ export class MasterBooksService {
       // Créer une clé même pour les enregistrements sans ASIN
       let asin = record.asin;
       if (!asin || asin.trim() === '') {
-        // Créer un ASIN virtuel basé sur le titre ou un identifiant unique
-        asin = record.title ? `NO_ASIN_${record.title.substring(0, 20).replace(/[^a-zA-Z0-9]/g, '')}` : `NO_ASIN_${record.id}`;
+        // Pour les enregistrements sans ASIN, grouper par marketplace + currency + montant de royalty
+        // Cela permet de regrouper les revenus du même livre sur le même marketplace
+        const royaltyStr = record.royalty ? record.royalty.toString().replace('.', '_') : '0';
+        const marketplace = record.marketplace || 'UNKNOWN_MARKETPLACE';
+        const currency = record.currency || 'UNKNOWN_CURRENCY';
+        asin = `NO_ASIN_${marketplace}_${currency}_${royaltyStr}`;
       }
       
       // Normaliser le format : utiliser 'ebook' par défaut pour les formats vides/inconnus
