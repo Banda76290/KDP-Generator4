@@ -37,6 +37,7 @@ import SeriesSetup from "@/pages/series-setup";
 import AuthorsListPage from "@/pages/authors-list";
 import AuthorCreatePage from "@/pages/author-create";
 import AuthorViewPage from "@/pages/author-view";
+import ImportManagement from "@/pages/ImportManagement";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -57,6 +58,7 @@ function Router() {
       <Route path="/series-edit/:seriesId" component={SeriesEdit} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/kdp-reports" component={KDPReports} />
+      <Route path="/import-management" component={ImportManagement} />
       <Route path="/ai-assistant" component={AIAssistant} />
       <Route path="/ai-functions" component={AIFunctions} />
       <Route path="/admin/ai-variables" component={AIVariables} />

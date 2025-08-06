@@ -429,6 +429,100 @@ export const authorBiographies = pgTable("author_biographies", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// KDP Import status enum
+export const importStatusEnum = pgEnum("import_status", [
+  "pending",
+  "processing", 
+  "completed",
+  "failed"
+]);
+
+// KDP Import file type enum
+export const importFileTypeEnum = pgEnum("import_file_type", [
+  "payments",
+  "prior_month_royalties",
+  "kenp_read", 
+  "dashboard",
+  "royalties_estimator",
+  "orders",
+  "unknown"
+]);
+
+// KDP Imports table - Main import tracking
+export const kdpImports = pgTable("kdp_imports", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  fileName: varchar("file_name").notNull(),
+  fileType: varchar("file_type").notNull(), // MIME type
+  fileSize: integer("file_size").notNull(), // in bytes
+  detectedType: importFileTypeEnum("detected_type"),
+  status: importStatusEnum("status").default("pending"),
+  progress: integer("progress").default(0), // 0-100 percentage
+  totalRecords: integer("total_records").default(0),
+  processedRecords: integer("processed_records").default(0),
+  errorRecords: integer("error_records").default(0),
+  duplicateRecords: integer("duplicate_records").default(0),
+  rawData: jsonb("raw_data"), // Store original file data
+  mappingConfig: jsonb("mapping_config"), // Column mappings and transformation rules
+  errorLog: text("error_log").array().default([]), // Array of error messages
+  summary: jsonb("summary"), // Import summary statistics
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+// KDP Import Data table - Normalized import data
+export const kdpImportData = pgTable("kdp_import_data", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  importId: varchar("import_id").notNull().references(() => kdpImports.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  // Universal identifiers
+  asin: varchar("asin"), // Amazon Standard Identification Number
+  isbn: varchar("isbn"), // International Standard Book Number
+  title: text("title"),
+  authorName: varchar("author_name"),
+  
+  // Sales data
+  marketplace: varchar("marketplace"), // Amazon.com, Amazon.co.uk, etc.
+  salesDate: date("sales_date"),
+  unitsSold: integer("units_sold").default(0),
+  unitsRefunded: integer("units_refunded").default(0),
+  netUnitsSold: integer("net_units_sold").default(0),
+  
+  // Financial data  
+  currency: varchar("currency"), // USD, EUR, GBP, etc.
+  listPrice: decimal("list_price", { precision: 10, scale: 2 }),
+  offerPrice: decimal("offer_price", { precision: 10, scale: 2 }),
+  royalty: decimal("royalty", { precision: 10, scale: 2 }),
+  royaltyRate: varchar("royalty_rate"), // 35%, 70%, etc.
+  earnings: decimal("earnings", { precision: 10, scale: 2 }),
+  
+  // KDP specific data
+  kenpRead: integer("kenp_read").default(0), // Kindle Edition Normalized Pages
+  transactionType: varchar("transaction_type"), // Standard, Expanded Distribution
+  paymentStatus: varchar("payment_status"), // Paid, Pending
+  
+  // Format information
+  format: formatEnum("format"), // ebook, paperback, hardcover
+  fileSize: decimal("file_size", { precision: 6, scale: 2 }), // in MB
+  deliveryCost: decimal("delivery_cost", { precision: 10, scale: 2 }),
+  manufacturingCost: decimal("manufacturing_cost", { precision: 10, scale: 2 }),
+  
+  // Raw data reference
+  rowIndex: integer("row_index"), // Position in original file
+  sheetName: varchar("sheet_name"), // Excel sheet name
+  rawRowData: jsonb("raw_row_data"), // Original row data for debugging
+  
+  // Processing metadata
+  isProcessed: boolean("is_processed").default(false),
+  isDuplicate: boolean("is_duplicate").default(false),
+  matchedBookId: varchar("matched_book_id").references(() => books.id),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   projects: many(projects),
@@ -440,6 +534,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   series: many(series),
   authors: many(authors),
   contentRecommendations: many(contentRecommendations),
+  kdpImports: many(kdpImports),
+  kdpImportData: many(kdpImportData),
 }));
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
@@ -576,6 +672,30 @@ export const contentRecommendationsRelations = relations(contentRecommendations,
   }),
   book: one(books, {
     fields: [contentRecommendations.bookId],
+    references: [books.id],
+  }),
+}));
+
+// KDP Import relations
+export const kdpImportsRelations = relations(kdpImports, ({ one, many }) => ({
+  user: one(users, {
+    fields: [kdpImports.userId],
+    references: [users.id],
+  }),
+  importData: many(kdpImportData),
+}));
+
+export const kdpImportDataRelations = relations(kdpImportData, ({ one }) => ({
+  user: one(users, {
+    fields: [kdpImportData.userId],
+    references: [users.id],
+  }),
+  import: one(kdpImports, {
+    fields: [kdpImportData.importId],
+    references: [kdpImports.id],
+  }),
+  matchedBook: one(books, {
+    fields: [kdpImportData.matchedBookId],
     references: [books.id],
   }),
 }));
@@ -773,4 +893,30 @@ export type BlogPostWithRelations = BlogPost & {
   author: User;
   category?: BlogCategory;
   comments: BlogComment[];
+};
+
+// KDP Import Zod schemas
+export const insertKdpImportSchema = createInsertSchema(kdpImports).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  completedAt: true,
+});
+
+export const insertKdpImportDataSchema = createInsertSchema(kdpImportData).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// KDP Import types
+export type KdpImport = typeof kdpImports.$inferSelect;
+export type InsertKdpImport = z.infer<typeof insertKdpImportSchema>;
+export type KdpImportData = typeof kdpImportData.$inferSelect;
+export type InsertKdpImportData = z.infer<typeof insertKdpImportDataSchema>;
+
+// KDP Import with relations
+export type KdpImportWithRelations = KdpImport & {
+  user: User;
+  importData: KdpImportData[];
 };

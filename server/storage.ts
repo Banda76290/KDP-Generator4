@@ -16,6 +16,8 @@ import {
   authorBiographies,
   contentRecommendations,
   aiPromptTemplates,
+  kdpImports,
+  kdpImportData,
   type User,
   type UpsertUser,
   type Project,
@@ -52,6 +54,11 @@ import {
   type InsertContentRecommendation,
   type AiPromptTemplate,
   type InsertAiPromptTemplate,
+  type KdpImport,
+  type InsertKdpImport,
+  type KdpImportData,
+  type InsertKdpImportData,
+  type KdpImportWithRelations,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, sum, count, like, or, isNotNull } from "drizzle-orm";
@@ -185,6 +192,17 @@ export interface IStorage {
   updateBlogPost(id: string, post: Partial<InsertBlogPost>): Promise<BlogPost>;
   deleteBlogPost(id: string): Promise<void>;
   updateBlogPostStatus(id: string, status: string): Promise<BlogPost>;
+
+  // KDP Import operations
+  getUserKdpImports(userId: string): Promise<KdpImportWithRelations[]>;
+  getKdpImport(importId: string, userId: string): Promise<KdpImportWithRelations | undefined>;
+  createKdpImport(importData: InsertKdpImport): Promise<KdpImport>;
+  updateKdpImport(importId: string, updates: Partial<InsertKdpImport>): Promise<KdpImport>;
+  deleteKdpImport(importId: string, userId: string): Promise<void>;
+  
+  createKdpImportData(data: InsertKdpImportData[]): Promise<KdpImportData[]>;
+  getKdpImportData(importId: string): Promise<KdpImportData[]>;
+  deleteKdpImportData(importId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1884,6 +1902,216 @@ export class DatabaseStorage implements IStorage {
       .orderBy(aiPromptTemplates.isDefault ? sql`1` : sql`2`, aiPromptTemplates.name)
       .limit(1);
     return template;
+  }
+
+  // KDP Import operations
+  async getUserKdpImports(userId: string): Promise<KdpImportWithRelations[]> {
+    const userImports = await db
+      .select()
+      .from(kdpImports)
+      .where(eq(kdpImports.userId, userId))
+      .orderBy(desc(kdpImports.createdAt));
+
+    return await Promise.all(userImports.map(async (importRecord) => {
+      const [user] = await db.select().from(users).where(eq(users.id, importRecord.userId));
+      const importData = await db.select().from(kdpImportData).where(eq(kdpImportData.importId, importRecord.id));
+      
+      return {
+        ...importRecord,
+        user,
+        importData,
+      };
+    }));
+  }
+
+  async getKdpImport(importId: string, userId: string): Promise<KdpImportWithRelations | undefined> {
+    const [importRecord] = await db
+      .select()
+      .from(kdpImports)
+      .where(and(eq(kdpImports.id, importId), eq(kdpImports.userId, userId)));
+
+    if (!importRecord) return undefined;
+
+    const [user] = await db.select().from(users).where(eq(users.id, importRecord.userId));
+    const importData = await db.select().from(kdpImportData).where(eq(kdpImportData.importId, importRecord.id));
+
+    return {
+      ...importRecord,
+      user,
+      importData,
+    };
+  }
+
+  async createKdpImport(importData: InsertKdpImport): Promise<KdpImport> {
+    const [newImport] = await db
+      .insert(kdpImports)
+      .values(importData)
+      .returning();
+    return newImport;
+  }
+
+  async updateKdpImport(importId: string, updates: Partial<InsertKdpImport>): Promise<KdpImport> {
+    const [updatedImport] = await db
+      .update(kdpImports)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(kdpImports.id, importId))
+      .returning();
+    return updatedImport;
+  }
+
+  async deleteKdpImport(importId: string, userId: string): Promise<void> {
+    // Delete related import data first
+    await db.delete(kdpImportData).where(eq(kdpImportData.importId, importId));
+    
+    // Delete the main import record
+    await db
+      .delete(kdpImports)
+      .where(and(eq(kdpImports.id, importId), eq(kdpImports.userId, userId)));
+  }
+
+  async createKdpImportData(data: InsertKdpImportData[]): Promise<KdpImportData[]> {
+    if (data.length === 0) return [];
+    
+    const insertedData = await db
+      .insert(kdpImportData)
+      .values(data)
+      .returning();
+    return insertedData;
+  }
+
+  async getKdpImportData(importId: string): Promise<KdpImportData[]> {
+    return await db
+      .select()
+      .from(kdpImportData)
+      .where(eq(kdpImportData.importId, importId))
+      .orderBy(kdpImportData.rowIndex);
+  }
+
+  async deleteKdpImportData(importId: string): Promise<void> {
+    await db
+      .delete(kdpImportData)
+      .where(eq(kdpImportData.importId, importId));
+  }
+  // KDP Analytics methods - using real imported data
+  async getAnalyticsOverview(userId: string): Promise<any> {
+    const totalImports = await db.select({
+      count: sql<number>`count(*)`
+    }).from(kdpImports).where(eq(kdpImports.userId, userId));
+
+    const totalRecords = await db.select({
+      count: sql<number>`count(*)`
+    }).from(kdpImportData)
+    .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
+    .where(eq(kdpImports.userId, userId));
+
+    const totalRoyalty = await db.select({
+      sum: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`
+    }).from(kdpImportData)
+    .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
+    .where(and(
+      eq(kdpImports.userId, userId),
+      isNotNull(kdpImportData.royalty)
+    ));
+
+    const uniqueBooks = await db.select({
+      count: sql<number>`count(distinct ${kdpImportData.asin})`
+    }).from(kdpImportData)
+    .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
+    .where(and(
+      eq(kdpImports.userId, userId),
+      isNotNull(kdpImportData.asin)
+    ));
+
+    return {
+      totalImports: totalImports[0]?.count || 0,
+      totalRecords: totalRecords[0]?.count || 0,
+      totalRoyalty: Number(totalRoyalty[0]?.sum || 0),
+      uniqueBooks: uniqueBooks[0]?.count || 0
+    };
+  }
+
+  async getSalesTrends(userId: string, days: number): Promise<any[]> {
+    const salesData = await db.select({
+      date: sql<string>`date(${kdpImportData.reportingDate})`,
+      sales: sql<number>`count(*)`,
+      royalty: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`,
+      units: sql<number>`coalesce(sum(${kdpImportData.unitsOrdered}), 0)`
+    })
+    .from(kdpImportData)
+    .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
+    .where(and(
+      eq(kdpImports.userId, userId),
+      sql`${kdpImportData.reportingDate} >= current_date - interval '${days} days'`,
+      isNotNull(kdpImportData.reportingDate)
+    ))
+    .groupBy(sql`date(${kdpImportData.reportingDate})`)
+    .orderBy(sql`date(${kdpImportData.reportingDate})`);
+
+    return salesData.map(item => ({
+      date: item.date,
+      sales: Number(item.sales),
+      royalty: Number(item.royalty),
+      units: Number(item.units)
+    }));
+  }
+
+  async getTopPerformers(userId: string, limit: number): Promise<any[]> {
+    const topBooks = await db.select({
+      title: kdpImportData.title,
+      asin: kdpImportData.asin,
+      totalSales: sql<number>`count(*)`,
+      totalRoyalty: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`,
+      totalUnits: sql<number>`coalesce(sum(${kdpImportData.unitsOrdered}), 0)`,
+      avgRoyaltyRate: sql<number>`coalesce(avg(${kdpImportData.royaltyRate}), 0)`
+    })
+    .from(kdpImportData)
+    .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
+    .where(and(
+      eq(kdpImports.userId, userId),
+      isNotNull(kdpImportData.asin),
+      isNotNull(kdpImportData.title)
+    ))
+    .groupBy(kdpImportData.asin, kdpImportData.title)
+    .orderBy(sql`coalesce(sum(${kdpImportData.royalty}), 0) desc`)
+    .limit(limit);
+
+    return topBooks.map(book => ({
+      title: book.title,
+      asin: book.asin,
+      totalSales: Number(book.totalSales),
+      totalRoyalty: Number(book.totalRoyalty),
+      totalUnits: Number(book.totalUnits),
+      avgRoyaltyRate: Number(book.avgRoyaltyRate)
+    }));
+  }
+
+  async getMarketplaceBreakdown(userId: string): Promise<any[]> {
+    const marketplaceData = await db.select({
+      marketplace: kdpImportData.marketplace,
+      totalSales: sql<number>`count(*)`,
+      totalRoyalty: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`,
+      totalUnits: sql<number>`coalesce(sum(${kdpImportData.unitsOrdered}), 0)`,
+      uniqueBooks: sql<number>`count(distinct ${kdpImportData.asin})`
+    })
+    .from(kdpImportData)
+    .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
+    .where(and(
+      eq(kdpImports.userId, userId),
+      isNotNull(kdpImportData.marketplace)
+    ))
+    .groupBy(kdpImportData.marketplace)
+    .orderBy(sql`coalesce(sum(${kdpImportData.royalty}), 0) desc`);
+
+    return marketplaceData.map(item => ({
+      marketplace: item.marketplace,
+      totalSales: Number(item.totalSales),
+      totalRoyalty: Number(item.totalRoyalty),
+      totalUnits: Number(item.totalUnits),
+      uniqueBooks: Number(item.uniqueBooks)
+    }));
   }
 }
 
