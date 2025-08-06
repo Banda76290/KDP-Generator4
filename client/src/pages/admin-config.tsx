@@ -51,7 +51,7 @@ export default function AdminConfig() {
 
   const updateConfigMutation = useMutation({
     mutationFn: async (configData: { key: string; value: string; description?: string }) => {
-      return await apiRequest("/api/admin/config", "PUT", configData);
+      return await apiRequest("/api/admin/config", { method: "PUT", body: configData });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/config"] });
