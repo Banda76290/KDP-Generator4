@@ -1,5 +1,4 @@
 import { sql } from 'drizzle-orm';
-import { unique } from 'drizzle-orm/pg-core';
 import {
   index,
   jsonb,
@@ -472,111 +471,7 @@ export const kdpImports = pgTable("kdp_imports", {
   completedAt: timestamp("completed_at"),
 });
 
-// Normalized marketplaces table
-export const marketplaces = pgTable("marketplaces", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  rawName: varchar("raw_name").notNull().unique(), // Amazon.de, Amazon.com, etc.
-  code: varchar("code").notNull().unique(), // DE, US, FR, etc.
-  country: varchar("country"), // Germany, United States, France
-  languageHint: varchar("language_hint"), // de, en, fr
-  currency: varchar("currency"), // EUR, USD, GBP
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-// Book identifiers table (ASIN and ISBN separated)
-export const bookIdentifiers = pgTable("book_identifiers", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  bookId: varchar("book_id").references(() => books.id, { onDelete: "cascade" }),
-  type: varchar("type").notNull(), // "ASIN" or "ISBN"
-  value: varchar("value").notNull(),
-  marketplaceId: varchar("marketplace_id").references(() => marketplaces.id),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-}, (table) => ({
-  uniqueIdentifier: unique("unique_identifier").on(table.type, table.value),
-}));
-
-// Product variants table (book + format + marketplace combination)
-export const productVariants = pgTable("product_variants", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  bookId: varchar("book_id").notNull().references(() => books.id, { onDelete: "cascade" }),
-  format: formatEnum("format").notNull(), // ebook, paperback, hardcover
-  marketplaceId: varchar("marketplace_id").references(() => marketplaces.id),
-  asin: varchar("asin"), // Redundant for performance
-  isbn: varchar("isbn"), // Redundant for performance
-  price: decimal("price", { precision: 10, scale: 2 }),
-  currency: varchar("currency"),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-}, (table) => ({
-  uniqueVariant: unique("unique_variant").on(table.bookId, table.format, table.marketplaceId),
-}));
-
-// Sales events table (individual sales with preserved original amounts)
-export const salesEvents = pgTable("sales_events", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  variantId: varchar("variant_id").notNull().references(() => productVariants.id, { onDelete: "cascade" }),
-  importId: varchar("import_id").notNull().references(() => kdpImports.id, { onDelete: "cascade" }),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  
-  // Temporal data
-  eventDate: date("event_date"), // Sale/royalty date
-  reportingPeriod: varchar("reporting_period"), // e.g., "2025-01", "2025-Q1"
-  
-  // Sales metrics
-  unitsSold: integer("units_sold").default(0),
-  unitsRefunded: integer("units_refunded").default(0),
-  netUnitsSold: integer("net_units_sold").default(0),
-  
-  // Financial data (PRESERVED ORIGINAL AMOUNTS - no conversion)
-  originalCurrency: varchar("original_currency").notNull(),
-  originalRoyalty: decimal("original_royalty", { precision: 12, scale: 4 }),
-  originalListPrice: decimal("original_list_price", { precision: 10, scale: 2 }),
-  originalOfferPrice: decimal("original_offer_price", { precision: 10, scale: 2 }),
-  
-  // Additional costs
-  deliveryCost: decimal("delivery_cost", { precision: 10, scale: 2 }),
-  manufacturingCost: decimal("manufacturing_cost", { precision: 10, scale: 2 }),
-  
-  // Metadata
-  royaltyRate: varchar("royalty_rate"), // 35%, 70%
-  transactionType: varchar("transaction_type"),
-  fileSize: decimal("file_size", { precision: 6, scale: 2 }),
-  
-  // Source tracking
-  sourceType: importFileTypeEnum("source_type"), // prior_month_royalties, etc.
-  sheetName: varchar("sheet_name"),
-  rowIndex: integer("row_index"),
-  
-  // Processing metadata
-  isDuplicate: boolean("is_duplicate").default(false),
-  duplicateOfId: varchar("duplicate_of_id").references(() => salesEvents.id),
-  
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-// KENP reads table (separate from sales)
-export const kenpReads = pgTable("kenp_reads", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  variantId: varchar("variant_id").notNull().references(() => productVariants.id, { onDelete: "cascade" }),
-  importId: varchar("import_id").notNull().references(() => kdpImports.id, { onDelete: "cascade" }),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  
-  readDate: date("read_date"),
-  reportingPeriod: varchar("reporting_period"),
-  
-  kenpPages: integer("kenp_pages").default(0),
-  originalCurrency: varchar("original_currency"),
-  originalRoyalty: decimal("original_royalty", { precision: 12, scale: 4 }),
-  
-  sourceType: importFileTypeEnum("source_type"),
-  isDuplicate: boolean("is_duplicate").default(false),
-  
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-// Legacy KDP Import Data table - kept for backward compatibility but deprecated
+// KDP Import Data table - Normalized import data
 export const kdpImportData = pgTable("kdp_import_data", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   importId: varchar("import_id").notNull().references(() => kdpImports.id, { onDelete: "cascade" }),
@@ -641,8 +536,6 @@ export const usersRelations = relations(users, ({ many }) => ({
   contentRecommendations: many(contentRecommendations),
   kdpImports: many(kdpImports),
   kdpImportData: many(kdpImportData),
-  salesEvents: many(salesEvents),
-  kenpReads: many(kenpReads),
 }));
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
@@ -652,66 +545,6 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
   }),
   books: many(books),
   aiGenerations: many(aiGenerations),
-}));
-
-// New relations for normalized tables
-export const marketplacesRelations = relations(marketplaces, ({ many }) => ({
-  bookIdentifiers: many(bookIdentifiers),
-  productVariants: many(productVariants),
-}));
-
-export const bookIdentifiersRelations = relations(bookIdentifiers, ({ one }) => ({
-  book: one(books, {
-    fields: [bookIdentifiers.bookId],
-    references: [books.id],
-  }),
-  marketplace: one(marketplaces, {
-    fields: [bookIdentifiers.marketplaceId],
-    references: [marketplaces.id],
-  }),
-}));
-
-export const productVariantsRelations = relations(productVariants, ({ one, many }) => ({
-  book: one(books, {
-    fields: [productVariants.bookId],
-    references: [books.id],
-  }),
-  marketplace: one(marketplaces, {
-    fields: [productVariants.marketplaceId],
-    references: [marketplaces.id],
-  }),
-  salesEvents: many(salesEvents),
-  kenpReads: many(kenpReads),
-}));
-
-export const salesEventsRelations = relations(salesEvents, ({ one }) => ({
-  variant: one(productVariants, {
-    fields: [salesEvents.variantId],
-    references: [productVariants.id],
-  }),
-  import: one(kdpImports, {
-    fields: [salesEvents.importId],
-    references: [kdpImports.id],
-  }),
-  user: one(users, {
-    fields: [salesEvents.userId],
-    references: [users.id],
-  }),
-}));
-
-export const kenpReadsRelations = relations(kenpReads, ({ one }) => ({
-  variant: one(productVariants, {
-    fields: [kenpReads.variantId],
-    references: [productVariants.id],
-  }),
-  import: one(kdpImports, {
-    fields: [kenpReads.importId],
-    references: [kdpImports.id],
-  }),
-  user: one(users, {
-    fields: [kenpReads.userId],
-    references: [users.id],
-  }),
 }));
 
 export const booksRelations = relations(books, ({ one, many }) => ({
@@ -725,8 +558,6 @@ export const booksRelations = relations(books, ({ one, many }) => ({
   }),
   contributors: many(contributors),
   salesData: many(salesData),
-  bookIdentifiers: many(bookIdentifiers),
-  productVariants: many(productVariants),
   aiGenerations: many(aiGenerations),
   contentRecommendations: many(contentRecommendations),
 }));
