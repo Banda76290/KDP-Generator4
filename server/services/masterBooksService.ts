@@ -34,7 +34,12 @@ export class MasterBooksService {
     importData.forEach(record => {
       if (!record.asin) return;
       
-      const format = record.format || 'unknown';
+      // Normaliser le format : utiliser 'ebook' par défaut pour les formats vides/inconnus
+      let format = record.format;
+      if (!format || format.trim() === '' || format === 'unknown') {
+        format = 'ebook'; // Par défaut, supposer ebook pour les formats vides
+      }
+      
       const key = `${record.asin}|${format}`;
       
       if (!asinFormatGroups.has(key)) {

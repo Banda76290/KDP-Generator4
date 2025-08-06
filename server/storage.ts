@@ -201,6 +201,7 @@ export interface IStorage {
 
   // KDP Import operations
   getUserKdpImports(userId: string): Promise<KdpImportWithRelations[]>;
+  getAllKdpImportsForUser(userId: string): Promise<KdpImport[]>;
   getKdpImport(importId: string, userId: string): Promise<KdpImportWithRelations | undefined>;
   createKdpImport(importData: InsertKdpImport): Promise<KdpImport>;
   updateKdpImport(importId: string, updates: Partial<InsertKdpImport>): Promise<KdpImport>;
@@ -1939,6 +1940,14 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
+  async getAllKdpImportsForUser(userId: string): Promise<KdpImport[]> {
+    return await db
+      .select()
+      .from(kdpImports)
+      .where(eq(kdpImports.userId, userId))
+      .orderBy(desc(kdpImports.createdAt));
+  }
+
   async getKdpImport(importId: string, userId: string): Promise<KdpImportWithRelations | undefined> {
     const [importRecord] = await db
       .select()
@@ -2347,6 +2356,9 @@ export class DatabaseStorage implements IStorage {
 
     for (const data of rawData) {
       try {
+        // Créer une clé unique pour les paiements agrégés
+        const consolidatedKey = `PAYMENTS_${data.currency}_${data.marketplace || 'UNKNOWN'}`;
+        
         // Calculer la conversion USD si un service de taux de change est disponible
         let royaltyUSD = data.totalRoyalty;
         let exchangeRate = 1.0;
@@ -2363,15 +2375,11 @@ export class DatabaseStorage implements IStorage {
             console.warn(`[CONSOLIDATION] Échec conversion ${data.currency} -> USD pour ${consolidatedKey}:`, error);
           }
         }
-
-        // Créer une clé unique pour les paiements agrégés
-        const consolidatedKey = `PAYMENTS_${data.currency}_${data.marketplace || 'UNKNOWN'}`;
         
         // Upsert dans la table consolidée
         await db
           .insert(consolidatedSalesData)
           .values({
-            userId: userId,
             asin: consolidatedKey,
             title: `Paiements agrégés ${data.currency}`,
             authorName: 'Données de paiement',

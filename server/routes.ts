@@ -2910,6 +2910,41 @@ Please respond with only a JSON object containing the translated fields. For key
     }
   });
 
+  // Rebuild master books from all existing imports
+  app.post('/api/test/rebuild-master-books', async (req, res) => {
+    try {
+      const { MasterBooksService } = await import('./services/masterBooksService');
+      await MasterBooksService.init();
+      
+      // Get all imports for the user
+      const imports = await storage.getAllKdpImportsForUser('dev-user-123');
+      
+      systemLog(`Rebuilding master books from ${imports.length} imports`, 'info', 'REBUILD');
+      
+      for (const importRecord of imports) {
+        try {
+          await MasterBooksService.updateFromImportData('dev-user-123', importRecord.id);
+          systemLog(`Processed import ${importRecord.id.slice(0, 8)}`, 'info', 'REBUILD');
+        } catch (error) {
+          systemLog(`Error processing import ${importRecord.id.slice(0, 8)}: ${error}`, 'error', 'REBUILD');
+        }
+      }
+      
+      // Get final count
+      const masterBooks = await storage.getMasterBooksForUser('dev-user-123');
+      systemLog(`Rebuild complete: ${masterBooks.length} master books created`, 'info', 'REBUILD');
+      
+      res.json({ 
+        message: 'Master books rebuilt successfully',
+        importCount: imports.length,
+        masterBooksCount: masterBooks.length
+      });
+    } catch (error) {
+      systemLog(`Rebuild failed: ${error}`, 'error', 'REBUILD');
+      res.status(500).json({ error: 'Failed to rebuild master books' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
