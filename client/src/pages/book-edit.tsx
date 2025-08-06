@@ -1624,52 +1624,30 @@ export default function EditBook() {
 
   // Function to load categories for a specific marketplace
   const loadMarketplaceCategories = async (marketplace: string) => {
-    if (!marketplace) {
-      console.log('No marketplace provided to loadMarketplaceCategories');
-      return;
-    }
-    
-    console.log('Loading categories for marketplace:', marketplace);
+    if (!marketplace) return;
     
     setLoadingCategories(true);
     try {
       const derivedFormat = deriveBookFormat();
-      console.log('Derived format:', derivedFormat);
-      
       const formatParam = derivedFormat ? `?format=${encodeURIComponent(derivedFormat)}` : '';
       const fullUrl = `/api/marketplace-categories/${encodeURIComponent(marketplace)}${formatParam}`;
-      console.log('Making API request to:', fullUrl);
       
       const response = await apiRequest(fullUrl);
-      console.log('API response received:', response);
-      console.log('Response type:', typeof response);
-      console.log('Response length:', response?.length);
-      
       setMarketplaceCategories(response || []);
       
       if (!response || response.length === 0) {
-        console.warn('No categories returned from API');
         toast({
           title: "Warning",
           description: `No categories found for ${marketplace}`,
           variant: "destructive"
         });
-      } else {
-        console.log(`Successfully loaded ${response.length} categories`);
       }
     } catch (error) {
       console.error("Error loading marketplace categories:", error);
-      console.error("Error details:", {
-        message: error?.message,
-        status: error?.status,
-        stack: error?.stack
-      });
-      
-      // Fallback to empty array if error
       setMarketplaceCategories([]);
       toast({
         title: "Error",
-        description: `Failed to load categories for ${marketplace}: ${error?.message || 'Unknown error'}`,
+        description: `Failed to load categories for ${marketplace}`,
         variant: "destructive"
       });
     } finally {
