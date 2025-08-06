@@ -42,30 +42,30 @@ interface PromptTemplateModalProps {
 }
 
 const AI_FUNCTIONS = [
-  { value: 'structure', label: 'Structure de Livre', description: 'Génère la structure et plan du livre' });
-  { value: 'description', label: 'Description de Livre', description: 'Crée des descriptions marketing attractives' });
-  { value: 'marketing', label: 'Contenu Marketing', description: 'Génère du contenu promotionnel' });
-  { value: 'chapters', label: 'Contenu de Chapitres', description: 'Développe le contenu des chapitres' });
-  { value: 'title', label: 'Titre de Livre', description: 'Propose des titres accrocheurs' });
-  { value: 'keywords', label: 'Mots-clés', description: 'Génère des mots-clés pour le référencement' });
-  { value: 'synopsis', label: 'Synopsis', description: 'Crée un résumé professionnel' });
+  { value: 'structure', label: 'Structure de Livre', description: 'Génère la structure et plan du livre' },
+  { value: 'description', label: 'Description de Livre', description: 'Crée des descriptions marketing attractives' },
+  { value: 'marketing', label: 'Contenu Marketing', description: 'Génère du contenu promotionnel' },
+  { value: 'chapters', label: 'Contenu de Chapitres', description: 'Développe le contenu des chapitres' },
+  { value: 'title', label: 'Titre de Livre', description: 'Propose des titres accrocheurs' },
+  { value: 'keywords', label: 'Mots-clés', description: 'Génère des mots-clés pour le référencement' },
+  { value: 'synopsis', label: 'Synopsis', description: 'Crée un résumé professionnel' },
   { value: 'blurb', label: 'Quatrième de Couverture', description: 'Texte pour la couverture arrière' }
 ];
 
 const AI_MODELS = [
-  { value: 'gpt-4o', label: 'GPT-4o', maxTokens: 4096 });
-  { value: 'gpt-4o-mini', label: 'GPT-4o Mini', maxTokens: 4096 });
-  { value: 'gpt-4', label: 'GPT-4', maxTokens: 8192 });
+  { value: 'gpt-4o', label: 'GPT-4o', maxTokens: 4096 },
+  { value: 'gpt-4o-mini', label: 'GPT-4o Mini', maxTokens: 4096 },
+  { value: 'gpt-4', label: 'GPT-4', maxTokens: 8192 },
   { value: 'claude-3-sonnet', label: 'Claude 3 Sonnet', maxTokens: 4096 }
 ];
 
 const COMMON_VARIABLES: Variable[] = [
-  { name: 'title', description: 'Titre du livre', type: 'text', required: true });
-  { name: 'genre', description: 'Genre du livre', type: 'select', options: ['Fiction', 'Non-fiction', 'Romance', 'Thriller', 'Sci-Fi', 'Fantasy', 'Biography', 'Self-help'], required: false });
-  { name: 'target_audience', description: 'Public cible', type: 'text', required: false });
-  { name: 'language', description: 'Langue du livre', type: 'select', options: ['Français', 'English', 'Español', 'Deutsch'], required: false });
-  { name: 'author', description: 'Nom de l\'auteur', type: 'text', required: false });
-  { name: 'pages', description: 'Nombre de pages', type: 'number', required: false });
+  { name: 'title', description: 'Titre du livre', type: 'text', required: true },
+  { name: 'genre', description: 'Genre du livre', type: 'select', options: ['Fiction', 'Non-fiction', 'Romance', 'Thriller', 'Sci-Fi', 'Fantasy', 'Biography', 'Self-help'], required: false },
+  { name: 'target_audience', description: 'Public cible', type: 'text', required: false },
+  { name: 'language', description: 'Langue du livre', type: 'select', options: ['Français', 'English', 'Español', 'Deutsch'], required: false },
+  { name: 'author', description: 'Nom de l\'auteur', type: 'text', required: false },
+  { name: 'pages', description: 'Nombre de pages', type: 'number', required: false },
   { name: 'description', description: 'Description courte', type: 'text', required: false }
 ];
 
@@ -80,7 +80,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
     temperature: template.temperature || 0.7,
     isActive: template.isActive ?? true,
     isDefault: template.isDefault ?? false,
-    variables: template.variables || []});
+    variables: template.variables || [])};
 
   const [previewPrompt, setPreviewPrompt] = useState('');
   const [activeTab, setActiveTab] = useState('config');
@@ -91,7 +91,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
     formData.variables?.forEach(variable => {
       const sampleValue = variable.type === 'number' ? '300' : 
                          variable.options ? variable.options[0] : 
-                         `[${variable.name}]`;
+                         `[${variable.name)}]`;
       preview = preview.replace(new RegExp(`{${variable.name}}`, 'g'), sampleValue);
     });
     setPreviewPrompt(preview);
@@ -103,49 +103,49 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
       description: '',
       type: 'text',
       required: false
-    });
+    };
     
     setFormData(prev => ({
       ...prev,
       variables: [...(prev.variables || []), newVariable]
     });
-  });
+  };
 
   const updateVariable = (index: number, field: keyof Variable, value: any) => {
     setFormData(prev => ({
       ...prev,
       variables: prev.variables?.map((variable, i) => 
-        i === index ? { ...variable, [field]: value} : variable
+        i === index ? { ...variable, [field]: value)} : variable
       ) || []
     }));
-  });
+  };
 
   const removeVariable = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      variables: prev.variables?.filter((_, i) => i !== index) || []});
-  });
+      variables: prev.variables?.filter((_, i) => i !== index) || [])});
+  };
 
   const insertVariableInPrompt = (variableName: string, isSystemPrompt: boolean = false) => {
     const variable = `{${variableName}}`;
     if (isSystemPrompt) {
       setFormData(prev => ({
         ...prev,
-        systemPrompt: prev.systemPrompt + variable});
+        systemPrompt: prev.systemPrompt + variable)});
     } else {
       setFormData(prev => ({
         ...prev,
-        userPromptTemplate: prev.userPromptTemplate + variable});
+        userPromptTemplate: prev.userPromptTemplate + variable)});
     }
-  });
+  };
 
   const handleSave = () => {
-    const dataToSave = { ...formData });
+    const dataToSave = { ...formData };
     if (template.id) {
       dataToSave.id = template.id;
     }
     onSave(dataToSave);
-  });
+  };
 
   const selectedModel = AI_MODELS.find(m => m.value === formData.model);
   const maxTokensLimit = selectedModel?.maxTokens || 4096;
@@ -174,19 +174,19 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value )}}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value ))}}
                   placeholder="Ex: Générateur de Description"
                 />
               </div>
               <div>
                 <Label htmlFor="type">Type de Fonction</Label>
-                <Select value={formData.type} onValueChange={(value) => setFormData(prev => ({ ...prev, type: value}}>
+                <Select value={formData.type} onValueChange={(value) => setFormData(prev => ({ ...prev, type: value)}}>
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionner un type" />
                   </SelectTrigger>
                   <SelectContent>
                     {AI_FUNCTIONS.map(func => (
-                      <SelectItem key={func.value} value={func.value}>
+                      <SelectItem key={func.value)} value={func.value}>
                         <div>
                           <div className="font-medium">{func.label}</div>
                           <div className="text-xs text-muted-foreground">{func.description}</div>
@@ -201,13 +201,13 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="model">Modèle IA</Label>
-                <Select value={formData.model} onValueChange={(value) => setFormData(prev => ({ ...prev, model: value}}>
+                <Select value={formData.model} onValueChange={(value) => setFormData(prev => ({ ...prev, model: value)}}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {AI_MODELS.map(model => (
-                      <SelectItem key={model.value} value={model.value}>
+                      <SelectItem key={model.value)} value={model.value}>
                         {model.label} (max {model.maxTokens} tokens)
                       </SelectItem>
                     ))}
@@ -222,7 +222,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                   min="100"
                   max={maxTokensLimit}
                   value={formData.maxTokens}
-                  onChange={(e) => setFormData(prev => ({ ...prev, maxTokens: parseInt(e.target.value) || 2000 )}}
+                  onChange={(e) => setFormData(prev => ({ ...prev, maxTokens: parseInt(e.target.value) || 2000 ))}}
                 />
               </div>
               <div>
@@ -234,7 +234,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                   max="2"
                   step="0.1"
                   value={formData.temperature}
-                  onChange={ (e) => setFormData(prev => ({ ...prev, temperature: parseFloat(e.target.value) || 0.7  )}
+                  onChange={ (e) => setFormData(prev => ({ ...prev, temperature: parseFloat(e.target.value) || 0.7  ))}
                 />
               </div>
             </div>
@@ -243,14 +243,14 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
               <div className="flex items-center space-x-2">
                 <Switch
                   checked={formData.isActive}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked}}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked)}}
                 />
                 <Label>Actif</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
                   checked={formData.isDefault}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isDefault: checked}}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isDefault: checked)}}
                 />
                 <Label>Par défaut</Label>
               </div>
@@ -263,10 +263,10 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
               <div className="flex gap-2 mb-2">
                 {formData.variables?.map(variable => (
                   <Button
-                    key={variable.name}
+                    key={variable.name)}
                     variant="outline"
                     size="sm"
-                    onClick={ () => insertVariableInPrompt(variable.name, true }
+                    onClick={ () => insertVariableInPrompt(variable.name, true )}
                   >
                     {variable.name}
                   </Button>
@@ -276,7 +276,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                 id="systemPrompt"
                 rows={4}
                 value={formData.systemPrompt}
-                onChange={(e) => setFormData(prev => ({ ...prev, systemPrompt: e.target.value )}}
+                onChange={(e) => setFormData(prev => ({ ...prev, systemPrompt: e.target.value ))}}
                 placeholder="Instructions pour l'IA concernant son rôle et comportement..."
               />
             </div>
@@ -286,10 +286,10 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
               <div className="flex gap-2 mb-2">
                 {formData.variables?.map(variable => (
                   <Button
-                    key={variable.name}
+                    key={variable.name)}
                     variant="outline"
                     size="sm"
-                    onClick={ () => insertVariableInPrompt(variable.name, false }
+                    onClick={ () => insertVariableInPrompt(variable.name, false )}
                   >
                     {variable.name}
                   </Button>
@@ -299,7 +299,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                 id="userPrompt"
                 rows={6}
                 value={formData.userPromptTemplate}
-                onChange={(e) => setFormData(prev => ({ ...prev, userPromptTemplate: e.target.value )}}
+                onChange={(e) => setFormData(prev => ({ ...prev, userPromptTemplate: e.target.value ))}}
                 placeholder="Template avec variables: Créez une description pour le livre '{title}' dans le genre {genre}..."
               />
             </div>
@@ -311,7 +311,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
               </div>
               <div className="flex flex-wrap gap-1">
                 {formData.variables?.map(variable => (
-                  <Badge key={variable.name} variant="secondary" className="text-xs">
+                  <Badge key={variable.name)} variant="secondary" className="text-xs">
                     {'{' + variable.name + '}'}
                   </Badge>
                 ))}
@@ -322,7 +322,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
           <TabsContent value="variables" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-medium">Variables Personnalisées</h3>
-              <Button onClick={ () => addVariable( } size="sm">
+              <Button onClick={ () => addVariable( )} size="sm">
                 <Plus className="w-4 h-4 mr-2" />
                 Nouvelle Variable
               </Button>
@@ -330,14 +330,14 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
 
             <div className="space-y-3">
               {formData.variables?.map((variable, index) => (
-                <Card key={index}>
+                <Card key={index)}>
                   <CardContent className="p-4">
                     <div className="grid grid-cols-12 gap-3 items-end">
                       <div className="col-span-3">
                         <Label className="text-xs">Nom</Label>
                         <Input
                           value={variable.name}
-                          onChange={ (e) => updateVariable(index, 'name', e.target.value }
+                          onChange={ (e) => updateVariable(index, 'name', e.target.value )}
                           placeholder="nom_variable"
                         />
                       </div>
@@ -345,7 +345,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                         <Label className="text-xs">Description</Label>
                         <Input
                           value={variable.description}
-                          onChange={ (e) => updateVariable(index, 'description', e.target.value }
+                          onChange={ (e) => updateVariable(index, 'description', e.target.value )}
                           placeholder="Description de la variable"
                         />
                       </div>
@@ -353,7 +353,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                         <Label className="text-xs">Type</Label>
                         <Select 
                           value={variable.type} 
-                          onValueChange={ (value: 'text' | 'number' | 'select') => updateVariable(index, 'type', value}
+                          onValueChange={ (value: 'text' | 'number' | 'select') => updateVariable(index, 'type', value)}
                         >
                           <SelectTrigger>
                             <SelectValue />
@@ -369,7 +369,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                         <div className="flex items-center space-x-2">
                           <Switch
                             checked={variable.required}
-                            onCheckedChange={ (checked) => updateVariable(index, 'required', checked}
+                            onCheckedChange={ (checked) => updateVariable(index, 'required', checked)}
                           />
                           <Label className="text-xs">Obligatoire</Label>
                         </div>
@@ -378,7 +378,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={ () => removeVariable(index }
+                          onClick={ () => removeVariable(index )}
                         >
                           <X className="w-4 h-4" />
                         </Button>
@@ -389,12 +389,12 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                       <div className="mt-3">
                         <Label className="text-xs">Options (séparées par des virgules)</Label>
                         <Input
-                          value={variable.options?.join(', ') || ''}
-                          onChange={ (e) => updateVariable(index, 'options', e.target.value.split(', ').filter(Boolean )}
+                          value={variable.options?.join(', ') || '')}
+                          onChange={ (e) => updateVariable(index, 'options', e.target.value.split(', ').filter(Boolean ))}
                           placeholder="Option1, Option2, Option3"
                         />
                       </div>
-                    ))}
+                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -407,11 +407,11 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
               <div className="grid grid-cols-2 gap-2">
                 {COMMON_VARIABLES.map(variable => (
                   <Button
-                    key={variable.name}
+                    key={variable.name)}
                     variant="outline"
                     size="sm"
-                    onClick={ () => addVariable(variable }
-                    disabled={ formData.variables?.some(v => v.name === variable.name}
+                    onClick={ () => addVariable(variable )}
+                    disabled={ formData.variables?.some(v => v.name === variable.name)}
                   >
                     <Plus className="w-3 h-3 mr-2" />
                     {variable.description}

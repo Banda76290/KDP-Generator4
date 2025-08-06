@@ -16,7 +16,7 @@ export default function ExchangeRates() {
   const { data: exchangeRates, isLoading, error } = useQuery({
     queryKey: ["/api/exchange-rates"],
     refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
-  });
+  };
 
   // Function to update exchange rates manually
   const updateExchangeRates = async () => {
@@ -24,17 +24,15 @@ export default function ExchangeRates() {
     try {
       const response = await fetch('/api/exchange-rates/update', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json'}
+        headers: { 'Content-Type': 'application/json')}
       });
       
       if (response.ok) {
         toast({
           title: "Exchange Rates Updated",
-          description: "Exchange rates have been successfully updated.",
-        variant: "destructive",
-      });
+          description: "Exchange rates have been successfully updated.",)};
         // Refetch exchange rates data
-        queryClient.invalidateQueries({ queryKey: ["/api/exchange-rates"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/exchange-rates"] };
       } else {
         throw new Error('Failed to update exchange rates');
       }
@@ -42,12 +40,11 @@ export default function ExchangeRates() {
       toast({
         title: "Error",
         description: "Failed to update exchange rates.",
-        variant: "destructive"
-      });
+        variant: "destructive",)};
     } finally {
       setIsUpdating(false);
     }
-  });
+  };
 
   // Group currencies by major/minor for better organization
   const majorCurrencies = ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'CHF', 'CAD', 'AUD'];
@@ -58,7 +55,7 @@ export default function ExchangeRates() {
     new Date(rates[0].updatedAt) : new Date();
   
   // Add USD with rate 1.0 since it's our base currency and filter out duplicate
-  const usdRate = { currency: 'USD', rate: '1.00000000', updatedAt: lastUpdated.toISOString(});
+  const usdRate = { currency: 'USD', rate: '1.00000000', updatedAt: lastUpdated.toISOString()};
   const filteredRates = rates.filter((rate: any) => rate.currency !== 'USD');
   const allRates = [usdRate, ...filteredRates];
   const majorRates = allRates.filter((rate: any) => majorCurrencies.includes(rate.currency));
@@ -74,7 +71,7 @@ export default function ExchangeRates() {
             <p className="text-muted-foreground mb-4">
               Unable to load exchange rate data. Please try again.
             </p>
-            <Button onClick={updateExchangeRates} disabled={isUpdating}>
+            <Button onClick={updateExchangeRates)} disabled={isUpdating}>
               <RefreshCw className={`h-4 w-4 mr-2 ${isUpdating ? 'animate-spin' : ''}`} />
               Retry
             </Button>
@@ -108,7 +105,7 @@ export default function ExchangeRates() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
-              <Card key={i} className="animate-pulse">
+              <Card key={i)} className="animate-pulse">
                 <CardContent className="p-6">
                   <div className="h-4 bg-muted rounded w-1/3 mb-2"></div>
                   <div className="h-8 bg-muted rounded w-1/2 mb-2"></div>
@@ -133,13 +130,13 @@ export default function ExchangeRates() {
                     month: 'short',
                     day: 'numeric',
                     hour: '2-digit',
-                    minute: '2-digit'}}</span>
+                    minute: '2-digit')}}</span>
                 </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {majorRates.map((rate: any) => (
-                  <Card key={rate.currency} className="hover:shadow-lg transition-shadow">
+                  <Card key={rate.currency)} className="hover:shadow-lg transition-shadow">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -151,7 +148,7 @@ export default function ExchangeRates() {
                           <div>
                             <p className="font-semibold text-lg">{rate.currency}</p>
                             <p className="text-sm text-muted-foreground">
-                              1 USD = { parseFloat(rate.rate).toFixed(4} {rate.currency}
+                              1 USD = { parseFloat(rate.rate).toFixed(4)} {rate.currency}
                             </p>
                           </div>
                         </div>
@@ -161,7 +158,7 @@ export default function ExchangeRates() {
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">Rate:</span>
                           <span className="font-mono font-bold">
-                            { parseFloat(rate.rate).toFixed(4}
+                            { parseFloat(rate.rate).toFixed(4)}
                           </span>
                         </div>
 
@@ -179,7 +176,7 @@ export default function ExchangeRates() {
                   <div className="flex items-center gap-2">
                     <Globe className="h-5 w-5" />
                     <h2 className="text-xl font-semibold">Other Currencies</h2>
-                    <Badge variant="secondary">{otherRates.length}</Badge>
+                    <Badge variant="secondary">{otherRates.length)}</Badge>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Clock className="h-4 w-4" />
@@ -187,18 +184,18 @@ export default function ExchangeRates() {
                       month: 'short',
                       day: 'numeric',
                       hour: '2-digit',
-                      minute: '2-digit'}}</span>
+                      minute: '2-digit')}}</span>
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {otherRates.map((rate: any) => (
-                    <Card key={rate.currency} className="hover:shadow-md transition-shadow">
+                    <Card key={rate.currency)} className="hover:shadow-md transition-shadow">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-semibold">{rate.currency}</span>
                           <Badge variant="outline" className="text-xs">
-                            { parseFloat(rate.rate).toFixed(4}
+                            { parseFloat(rate.rate).toFixed(4)}
                           </Badge>
                         </div>
 
@@ -256,7 +253,7 @@ export default function ExchangeRates() {
               Update Rates
             </Button>
           </div>
-        ))}
+        )}
       </div>
     </Layout>
   );

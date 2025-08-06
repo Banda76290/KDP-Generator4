@@ -53,14 +53,13 @@ const Carousel = React.forwardRef<
       className,
       children,
       ...props
-    });
+    },
     ref
   ) => {
     const [carouselRef, api] = useEmblaCarousel(
       {
         ...opts,
-        axis: orientation === "horizontal" ? "x" : "y"
-      }),
+        axis: orientation === "horizontal" ? "x" : "y",)},
       plugins
     )
     const [canScrollPrev, setCanScrollPrev] = React.useState(false)
@@ -92,7 +91,7 @@ const Carousel = React.forwardRef<
           event.preventDefault()
           scrollNext()
         }
-      });
+      },
       [scrollPrev, scrollNext]
     )
 
@@ -135,7 +134,7 @@ const Carousel = React.forwardRef<
         <div
           ref={ref}
           onKeyDownCapture={handleKeyDown}
-          className={cn("relative", className}
+          className={cn("relative", className)}
           role="region"
           aria-roledescription="carousel"
           {...props}
@@ -162,7 +161,7 @@ const CarouselContent = React.forwardRef<
           "flex",
           orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
           className
-        }
+        )}
         {...props}
       />
     </div>
@@ -185,7 +184,7 @@ const CarouselItem = React.forwardRef<
         "min-w-0 shrink-0 grow-0 basis-full",
         orientation === "horizontal" ? "pl-4" : "pt-4",
         className
-      }
+      )}
       {...props}
     />
   )
@@ -209,7 +208,7 @@ const CarouselPrevious = React.forwardRef<
           ? "-left-12 top-1/2 -translate-y-1/2"
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
         className
-      }
+      )}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
       {...props}
@@ -238,7 +237,7 @@ const CarouselNext = React.forwardRef<
           ? "-right-12 top-1/2 -translate-y-1/2"
           : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
         className
-      }
+      )}
       disabled={!canScrollNext}
       onClick={scrollNext}
       {...props}

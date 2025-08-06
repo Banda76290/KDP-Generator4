@@ -45,55 +45,191 @@ export default function Projects() {
   const { data: projects, isLoading: projectsLoading, error } = useQuery({
     queryKey: ["/api/projects"],
     enabled: isAuthenticated,
-    staleTime: 0,
+    staleTime: 0, // Always refetch to get latest book changes including ISBN
   };
 
-  // Helper functions for sorting
-  const getCurrentMonthRevenue = (project: any) => {
-    // TODO: Calculate actual current month revenue
-    return parseFloat(project.monthlyRevenue) || 0;
-  };
+  // Duplication mutation
+  const duplicateProject = useMutation({
+    mutationFn: async (project: ProjectWithRelations) => {
+      console.log("Starting duplication for project:", project.name);
+      try {
+        const result = await apiRequest(`/api/projects/${project.id)}/duplicate`, { method: "POST" };
+        console.log("Duplication successful:", result);
+        return result;
+      } catch (error) {
+        console.error("Duplication failed:", error);
+        throw error;
+      }
+    },
+    onSuccess: (data) => {
+      console.log("onSuccess called with:", data);
+      toast.success({
+        title: "Success",
+        description: "Project and all books duplicated successfully",)};
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
+    },
+    onError: (error) => {
+      console.error("onError called with:", error);
+      toast.error({
+        title: "Error",
+        description: "Failed to duplicate project",)};
+    },
+  });
 
-  const getLastModifiedDate = (project: any) => {
-    if (!project.books || !Array.isArray(project.books)) return new Date(project.updatedAt);
-    const dates = project.books.map((book: any) => new Date(book.updatedAt));
-    dates.push(new Date(project.updatedAt));
-    return new Date(Math.max(...dates.map((d: Date) => d.getTime())));
-  };
+  // Delete mutation
+  const deleteProject = useMutation({
+    mutationFn: async ({ projectId, deleteBooks)}: { projectId: string; deleteBooks: boolean } => {
+      console.log("Deleting project:", projectId, "with deleteBooks:", deleteBooks);
+      return await apiRequest(`/api/projects/${projectId)}?deleteBooks=${deleteBooks}`, { method: "DELETE" };
+    },
+    onSuccess: (_, { deleteBooks } => {
+      toast.success({
+        title: "Success",
+        description: deleteBooks 
+          ? "Project and associated books deleted successfully" 
+          : "Project deleted successfully, books have been unlinked",)};
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
+      queryClient.invalidateQueries({ queryKey: ["/api/books"] };
+    },
+    onError: (error) => {
+      console.error("Delete failed:", error);
+      toast.error({
+        title: "Error",
+        description: "Failed to delete project",)};
+    },
+  });
 
-  const getTotalRevenue = (project: any) => {
-    return parseFloat(project.totalRevenue) || 0;
-  };
+  // Book duplication mutation
+  const duplicateBook = useMutation({
+    mutationFn: async (bookId: string) => {
+      console.log("Duplicating book:", bookId);
+      return await apiRequest(`/api/books/${bookId)}/duplicate`, { method: "POST" };
+    },
+    onSuccess: () => {
+      toast.success({
+        title: "Success",
+        description: "Book duplicated successfully",)};
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
+    },
+    onError: (error) => {
+      console.error("Book duplication failed:", error);
+      toast.error({
+        title: "Error",
+        description: "Failed to duplicate book",)};
+    },
+  });
 
-  // Filter projects
-  const filteredProjects = projects ? projects.filter((project: ProjectWithRelations) => {
-    const matchesSearch = project.name?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || project.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  }).sort((a: any, b: any) => {
-    switch (sortBy) {
-      case "alphabetical":
-        return (a.name || "").localeCompare(b.name || "");
-      case "alphabetical-desc":
-        return (b.name || "").localeCompare(a.name || "");
-      case "createdAt":
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      case "createdAt-asc":
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      case "lastModified":
-        return getLastModifiedDate(b).getTime() - getLastModifiedDate(a).getTime();
-      case "monthlyRevenue":
-        return getCurrentMonthRevenue(b) - getCurrentMonthRevenue(a);
-      case "totalRevenue":
-        return getTotalRevenue(b) - getTotalRevenue(a);
-      case "status-asc":
-        return (a.status || '').localeCompare(b.status || '');
-      case "status-desc":
-        return (b.status || '').localeCompare(a.status || '');
-      default:
-        return 0;
+  // Book translation mutation
+  const translateBookMutation = useMutation({
+    mutationFn: async ({ bookId, targetLanguage)}: { bookId: string; targetLanguage: string } => {
+      return await apiRequest(`/api/books/${bookId)}/translate`, { method: "POST", body: JSON.stringify({ targetLanguage)} });
+    },
+    onSuccess: () => {
+      toast.success({
+        title: "Success",
+        description: "Book translated successfully",)};
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
+      queryClient.invalidateQueries({ queryKey: ["/api/books"] };
+      setBookToTranslate(null);
+      setSelectedLanguage("");
+    },
+    onError: (error) => {
+      console.error("Book translation failed:", error);
+      toast.error({
+        title: "Error", 
+        description: "Failed to translate book",)};
+    },
+  });
+
+  // Redirect to home if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      toast.error({
+        title: "Unauthorized",
+        description: "You are logged out. Logging in again...",)};
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 500);
+      return;
     }
-  }) : [];
+  }, [isAuthenticated, isLoading, toast]);
+
+  useEffect(() => {
+    if (error && isUnauthorizedError(error as Error)) {
+      toast.error({
+        title: "Unauthorized",
+        description: "You are logged out. Logging in again...",)};
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 500);
+      return;
+    }
+  }, [error, toast]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  // Filter and sort projects
+  const filteredProjects = Array.isArray(projects) ? projects
+    .filter((project: any) => {
+      const matchesSearch = project.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           project.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = statusFilter === "all" || project.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    }
+    .sort((a: any, b: any) => {
+      const getCurrentMonthRevenue = (project: any) => {
+        if (!project.books || !Array.isArray(project.books)) return 0;
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        return project.books.reduce((total: number, book: any) => {
+          // For now, we'll use monthlyRevenue field if available
+          return total + (parseFloat(book.monthlyRevenue) || 0);)}, 0);
+      };
+
+      const getLastModifiedDate = (project: any) => {
+        if (!project.books || !Array.isArray(project.books)) return new Date(project.updatedAt);
+        const dates = project.books.map((book: any) => new Date(book.updatedAt));
+        dates.push(new Date(project.updatedAt));
+        return new Date(Math.max(...dates.map((d: Date) => d.getTime())));
+      };
+
+      const getTotalRevenue = (project: any) => {
+        return parseFloat(project.totalRevenue) || 0;
+      };
+
+      switch (sortBy) {
+        case "alphabetical":
+          return (a.name || "").localeCompare(b.name || "");
+        case "alphabetical-desc":
+          return (b.name || "").localeCompare(a.name || "");
+        case "createdAt":
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case "createdAt-asc":
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case "lastModified":
+          return getLastModifiedDate(b).getTime() - getLastModifiedDate(a).getTime();
+        case "monthlyRevenue":
+          return getCurrentMonthRevenue(b) - getCurrentMonthRevenue(a);
+        case "totalRevenue":
+          return getTotalRevenue(b) - getTotalRevenue(a);
+        case "status-asc":
+          return (a.status || '').localeCompare(b.status || '');
+        case "status-desc":
+          return (b.status || '').localeCompare(a.status || '');
+        default:
+          return 0;
+      }
+    }) : [];
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -118,7 +254,7 @@ export default function Projects() {
   };
 
   const handleEditProject = (project: ProjectWithRelations) => {
-    setLocation(`/projects/edit/${project.id}`);
+    setLocation(`/projects/edit/${project.id)}`);
   };
 
   const handleDuplicateProject = (project: ProjectWithRelations) => {
@@ -144,8 +280,7 @@ export default function Projects() {
     if (bookToTranslate && selectedLanguage) {
       translateBookMutation.mutate({
         bookId: bookToTranslate.id,
-        targetLanguage: selectedLanguage
-  };
+        targetLanguage: selectedLanguage)};
     }
   };
 
@@ -153,12 +288,11 @@ export default function Projects() {
     setExpandedProjects(prev => {
       const newSet = new Set(prev);
       if (newSet.has(projectId)) {
-        newSet.delete(projectId);
-      } else {
+        newSet.delete(projectId);)} else {
         newSet.add(projectId);
       }
       return newSet;
-  };
+    });
   };
 
   return (
@@ -176,7 +310,7 @@ export default function Projects() {
                   <Plus className="w-4 h-4 mr-2" />
                   Create Project
                 </Button>
-                <Button onClick={() => setLocation("/books/create")} className="bg-primary hover:bg-primary/90">
+                <Button onClick={ () => setLocation("/books/create")} className="bg-primary hover:bg-primary/90">
                   <Plus className="w-4 h-4 mr-2" />
                   Create Book
                 </Button>
@@ -230,7 +364,7 @@ export default function Projects() {
           {projectsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <Card key={i} className="animate-pulse">
+                <Card key={i)} className="animate-pulse">
                   <CardHeader>
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
@@ -241,7 +375,7 @@ export default function Projects() {
                     </div>
                   </CardHeader>
                 </Card>
-              ))}}
+              ))}
             </div>
           ) : filteredProjects.length === 0 ? (
             <div className="text-center py-12">
@@ -256,26 +390,26 @@ export default function Projects() {
               </p>
               { (!searchTerm && statusFilter === "all") && (
                 <div className="flex gap-2 justify-center">
-                  <Button onClick={() => setLocation("/project-create-simple")} variant="outline">
+                  <Button onClick={() => setLocation("/project-create-simple"))} variant="outline">
                     <Plus className="w-4 h-4 mr-2" />
                     Create Your First Project
                   </Button>
-                  <Button onClick={() => setLocation("/books/create")} className="bg-primary hover:bg-primary/90">
+                  <Button onClick={ () => setLocation("/books/create")} className="bg-primary hover:bg-primary/90">
                     <Plus className="w-4 h-4 mr-2" />
                     Create Your First Book
                   </Button>
                 </div>
-              ))
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredProjects.map((project: ProjectWithRelations) => (
-                <Card key={project.id} className="hover:shadow-lg transition-shadow h-fit">
+                <Card key={project.id)} className="hover:shadow-lg transition-shadow h-fit">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start space-x-3 flex-1 min-w-0">
                         <div className="w-12 h-12 gradient-blue-purple rounded-lg flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
-                          {generateProjectInitials(project.name || 'Project'))}
+                          {generateProjectInitials(project.name || 'Project')}
                         </div>
                         <div className="flex-1 min-w-0">
                           <Tooltip>
@@ -292,14 +426,14 @@ export default function Projects() {
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <p className="text-sm text-gray-600 leading-relaxed break-words cursor-help">
-                                  {project.description}
+                                  {project.description)}
                                 </p>
                               </TooltipTrigger>
                               <TooltipContent>
                                 <p>{project.description}</p>
                               </TooltipContent>
                             </Tooltip>
-                          ))}
+                          )}
                         </div>
                       </div>
                       <DropdownMenu>
@@ -309,11 +443,11 @@ export default function Projects() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={ () => handleEditProject(project)}>
+                          <DropdownMenuItem onClick={ () => handleEditProject(project )}>
                             <Edit className="w-4 h-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={ () => handleDuplicateProject(project)}>
+                          <DropdownMenuItem onClick={ () => handleDuplicateProject(project )}>
                             <Copy className="w-4 h-4 mr-2" />
                             Duplicate
                           </DropdownMenuItem>
@@ -323,7 +457,7 @@ export default function Projects() {
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             className="text-red-600"
-                            onClick={ () => handleDeleteProject(project)}
+                            onClick={ () => handleDeleteProject(project )}
                           >
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
@@ -339,19 +473,19 @@ export default function Projects() {
                         <div className="space-y-3">
                           <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
                             <BookOpen className="w-4 h-4" />
-                            Books ({project.books.length})
+                            Books ({project.books.length)}
                           </div>
                           {project.books
                             .slice(0, expandedProjects.has(project.id) ? project.books.length : 3)
                             .map((book: any) => (
-                            <div key={book.id} className="border rounded-lg p-3 bg-gray-50 space-y-2">
+                            <div key={book.id)} className="border rounded-lg p-3 bg-gray-50 space-y-2">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <h4 
                                         className="text-sm font-medium text-gray-900 leading-tight break-words cursor-pointer hover:!text-blue-600 transition-colors"
-                                        onClick={() => setLocation(`/books/edit/${book.id}`)}
+                                        onClick={() => setLocation(`/books/edit/${book.id)}`)}
                                       >
                                         {book.title}
                                       </h4>
@@ -371,18 +505,18 @@ export default function Projects() {
                                     <div className="flex items-center gap-1 text-xs text-gray-500 flex-shrink-0">
                                       <span className="font-medium">ISBN/ASIN:</span>
                                       {book.isbn ? (
-                                        <span className="font-medium text-gray-700">{book.isbn}</span>
+                                        <span className="font-medium text-gray-700">{book.isbn)}</span>
                                       ) : book.isbnPlaceholder ? (
                                         <span className="text-amber-600">{book.isbnPlaceholder}</span>
                                       ) : (
                                         <span>No ISBN/ASIN</span>
-                                      ))}
+                                      )}
                                     </div>
                                   </div>
                                 </div>
                                 <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                                  <Badge className={getStatusColor(book.status || 'draft'}>
-                                    {(book.status || 'draft').replace('_', ' '}
+                                  <Badge className={getStatusColor(book.status || 'draft')}>
+                                    {(book.status || 'draft').replace('_', ' ')}
                                   </Badge>
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -391,15 +525,15 @@ export default function Projects() {
                                       </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                      <DropdownMenuItem onClick={() => setLocation(`/books/edit/${book.id}`)}>
+                                      <DropdownMenuItem onClick={() => setLocation(`/books/edit/${book.id)}`)}>
                                         <Edit className="w-3 h-3 mr-2" />
                                         Edit
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem onClick={ () => handleDuplicateBook(book.id }>
+                                      <DropdownMenuItem onClick={ () => handleDuplicateBook(book.id )}>
                                         <Copy className="w-3 h-3 mr-2" />
                                         Duplicate
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem onClick={ () => handleTranslateBook(book }>
+                                      <DropdownMenuItem onClick={ () => handleTranslateBook(book )}>
                                         <Languages className="w-3 h-3 mr-2" />
                                         Create Translated Copy
                                       </DropdownMenuItem>
@@ -415,7 +549,7 @@ export default function Projects() {
                                     <TrendingUp className="w-3 h-3" />
                                     This Month
                                   </div>
-                                  <div className="font-medium">${ parseFloat(book.monthlyRevenue || '0').toFixed(2))}</div>
+                                  <div className="font-medium">${ parseFloat(book.monthlyRevenue || '0').toFixed(2)}</div>
                                   <div className="text-gray-500">{book.monthlySales || 0} sales</div>
                                 </div>
                                 <div>
@@ -423,24 +557,24 @@ export default function Projects() {
                                     <DollarSign className="w-3 h-3" />
                                     Total
                                   </div>
-                                  <div className="font-medium">${ parseFloat(book.totalRevenue || '0').toFixed(2))}</div>
+                                  <div className="font-medium">${ parseFloat(book.totalRevenue || '0').toFixed(2)}</div>
                                   <div className="text-gray-500">{book.totalSales || 0} sales</div>
                                 </div>
                               </div>
                             </div>
-                          )}
+                          ))}
                           
                           {/* See More / Show Less Button */}
                           { project.books.length > 3 && (
                             <div className="text-center pt-2">
                               <button
-                                onClick={() => toggleProjectExpansion(project.id )}
+                                onClick={() => toggleProjectExpansion(project.id ))}
                                 className="text-sm text-gray-600 hover:text-blue-600 transition-colors cursor-pointer"
                               >
                                 {expandedProjects.has(project.id) ? 'Show Less' : 'See More'}
                               </button>
                             </div>
-                          ))}
+                          )}
                         </div>
                       ) : (
                         <div className="text-center py-4 text-gray-500">
@@ -450,7 +584,7 @@ export default function Projects() {
                             variant="outline" 
                             size="sm" 
                             className="mt-2"
-                            onClick={() => setLocation(`/books/create?projectId=${project.id}`)}
+                            onClick={() => setLocation(`/books/create?projectId=${project.id)}`)}
                           >
                             <Plus className="w-3 h-3 mr-1" />
                             Add Book
@@ -477,7 +611,7 @@ export default function Projects() {
                               Total Revenue  
                             </div>
                             <div className="font-semibold text-blue-600">
-                              ${ parseFloat(project.totalRevenue || '0').toFixed(2))}
+                              ${ parseFloat(project.totalRevenue || '0').toFixed(2)}
                             </div>
                             <div className="text-xs text-gray-500">{project.totalSales || 0} sales</div>
                           </div>
@@ -502,9 +636,9 @@ export default function Projects() {
               Are you sure you want to delete this project? This action cannot be undone.
               {projectToDelete?.books && projectToDelete.books.length > 0 && (
                 <span className="block mt-2 text-sm">
-                  This project has {projectToDelete.books.length} associated book(s).
+                  This project has {projectToDelete.books.length)} associated book(s).
                 </span>
-              ))}
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           
@@ -514,8 +648,8 @@ export default function Projects() {
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="delete-books"
-                  checked={deleteAssociatedBooks}
-                  onCheckedChange={ (checked) => setDeleteAssociatedBooks(checked as boolean}
+                  checked={deleteAssociatedBooks)}
+                  onCheckedChange={ (checked) => setDeleteAssociatedBooks(checked as boolean)}
                 />
                 <label
                   htmlFor="delete-books"
@@ -541,7 +675,7 @@ export default function Projects() {
                   deleteProject.mutate({ 
                     projectId: projectToDelete.id, 
                     deleteBooks: deleteAssociatedBooks 
-  };
+                  )};
                   setProjectToDelete(null);
                   setDeleteAssociatedBooks(false);
                 }
@@ -584,7 +718,7 @@ export default function Projects() {
                   {LANGUAGE_OPTIONS
                     .filter(lang => lang !== bookToTranslate?.language)
                     .map((language) => (
-                    <SelectItem key={language} value={language}>
+                    <SelectItem key={language)} value={language}>
                       {language}
                     </SelectItem>
                   ))}

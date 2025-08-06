@@ -29,7 +29,7 @@ export default function ImportManagementPage() {
   // Fetch import history
   const { data: imports = [], isLoading: importsLoading } = useQuery({
     queryKey: ["/api/imports"],
-    queryFn: () => apiRequest("/api/imports", { method: "GET"});
+    queryFn: () => apiRequest("/api/imports", { method: "GET")},
   });
 
   // Upload mutation
@@ -39,22 +39,21 @@ export default function ImportManagementPage() {
       formData.append("file", file);
       return fetch("/api/imports/upload", {
         method: "POST",
-        body: formData
-      }).then(res => res.json());
-    });
+        body: formData,)}.then(res => res.json());
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/imports"]});
+      queryClient.invalidateQueries({ queryKey: ["/api/imports"])};
       setSelectedFile(null);
-    });
+    },
   });
 
   // Delete import mutation
   const deleteMutation = useMutation({
     mutationFn: (importId: string) => 
-      apiRequest(`/api/imports/${importId}`, { method: "DELETE" });
+      apiRequest(`/api/imports/${importId)}`, { method: "DELETE" },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/imports"]});
-    });
+      queryClient.invalidateQueries({ queryKey: ["/api/imports"])};
+    },
   });
 
   const handleFileSelect = (file: File) => {
@@ -65,20 +64,20 @@ export default function ImportManagementPage() {
     } else {
       alert("Please select an Excel (.xlsx, .xls) or CSV file");
     }
-  });
+  };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files[0];
     if (file) handleFileSelect(file);
-  });
+  };
 
   const handleUpload = () => {
     if (selectedFile) {
       uploadMutation.mutate(selectedFile);
     }
-  });
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -87,7 +86,7 @@ export default function ImportManagementPage() {
       case "processing": return <Clock className="w-4 h-4 text-blue-500" />;
       default: return <Clock className="w-4 h-4 text-gray-500" />;
     }
-  });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -96,11 +95,11 @@ export default function ImportManagementPage() {
       case "processing": return "bg-blue-100 text-blue-800";
       default: return "bg-gray-100 text-gray-800";
     }
-  });
+  };
 
   const getFileTypeIcon = (fileType: string) => {
     return <FileSpreadsheet className="w-4 h-4" />;
-  });
+  };
 
   return (
     <Layout>
@@ -133,15 +132,15 @@ export default function ImportManagementPage() {
                 e.preventDefault();
                 setIsDragging(true);
               }}
-              onDragLeave={ () => setIsDragging(false}
+              onDragLeave={ () => setIsDragging(false)}
               onDrop={handleDrop}
             >
               <FileSpreadsheet className="w-12 h-12 mx-auto mb-4 text-gray-400" />
               {selectedFile ? (
                 <div className="space-y-2">
-                  <p className="text-lg font-medium">{selectedFile.name}</p>
+                  <p className="text-lg font-medium">{selectedFile.name)}</p>
                   <p className="text-sm text-gray-500">
-                    { (selectedFile.size / 1024 / 1024).toFixed(2} MB
+                    { (selectedFile.size / 1024 / 1024).toFixed(2)} MB
                   </p>
                   <Button onClick={handleUpload} disabled={uploadMutation.isPending}>
                     {uploadMutation.isPending ? "Uploading..." : "Upload File"}
@@ -171,7 +170,7 @@ export default function ImportManagementPage() {
                     </label>
                   </Button>
                 </div>
-              ))}
+              )}
             </div>
 
             {/* Supported File Types */}
@@ -208,16 +207,16 @@ export default function ImportManagementPage() {
               <div className="space-y-4">
                 {imports.map((importRecord: KdpImport) => (
                   <div 
-                    key={importRecord.id} 
+                    key={importRecord.id)} 
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50"
                   >
                     <div className="flex items-center space-x-4">
-                      { getFileTypeIcon(importRecord.fileType}
+                      { getFileTypeIcon(importRecord.fileType)}
                       <div>
                         <div className="flex items-center space-x-2">
                           <h4 className="font-medium">{importRecord.fileName}</h4>
-                          <Badge className={ getStatusColor(importRecord.status}>
-                            { getStatusIcon(importRecord.status}
+                          <Badge className={ getStatusColor(importRecord.status)}>
+                            { getStatusIcon(importRecord.status)}
                             <span className="ml-1 capitalize">{importRecord.status}</span>
                           </Badge>
                         </div>
@@ -225,15 +224,15 @@ export default function ImportManagementPage() {
                           <span>Type: {importRecord.detectedType || "Unknown"}</span>
                           <span>Records: {importRecord.totalRecords}</span>
                           <span>
-                            { new Date(importRecord.createdAt).toLocaleDateString(}
+                            { new Date(importRecord.createdAt).toLocaleDateString()}
                           </span>
                         </div>
                         {importRecord.status === "processing" && (
                           <Progress 
-                            value={importRecord.progress || 0} 
+                            value={importRecord.progress || 0)} 
                             className="w-48 mt-2" 
                           />
-                        ))}
+                        )}
                       </div>
                     </div>
                     
@@ -241,7 +240,7 @@ export default function ImportManagementPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setLocation(`/imports/${importRecord.id}`)}
+                        onClick={() => setLocation(`/imports/${importRecord.id)}`)}
                       >
                         <Eye className="w-4 h-4 mr-1" />
                         View
@@ -251,7 +250,7 @@ export default function ImportManagementPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            window.open(`/api/imports/${importRecord.id)}/export`, '_blank');
+                            window.open(`/api/imports/${importRecord.id))}/export`, '_blank');
                           }}
                         >
                           <Download className="w-4 h-4 mr-1" />
@@ -261,7 +260,7 @@ export default function ImportManagementPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={ () => deleteMutation.mutate(importRecord.id }
+                        onClick={ () => deleteMutation.mutate(importRecord.id )}
                         disabled={deleteMutation.isPending}
                       >
                         <Trash2 className="w-4 h-4 mr-1" />
@@ -271,7 +270,7 @@ export default function ImportManagementPage() {
                   </div>
                 ))}
               </div>
-            ))}
+            )}
           </CardContent>
         </Card>
       </div>

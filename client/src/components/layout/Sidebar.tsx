@@ -20,13 +20,13 @@ export default function Sidebar() {
         {navigation.map((item) => {
           const isActive = location === item.href;
           return (
-            <Link key={item.name} href={item.href}>
+            <Link key={item.name)} href={item.href}>
               <span
                 className={ cn(
                   "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",
                   isActive
                     ? "text-white"
-                    : "text-foreground hover:bg-muted"}
+                    : "text-foreground hover:bg-muted")}
                 style={isActive ? { backgroundColor: '#38b6ff' } : {}}
               >
                 <item.icon className="w-5 h-5" />
@@ -37,11 +37,11 @@ export default function Sidebar() {
                       "text-xs",
                       isActive 
                         ? "bg-white text-primary" 
-                        : "bg-secondary text-secondary-foreground"}
+                        : "bg-secondary text-secondary-foreground")}
                   >
                     {item.badge}
                   </Badge>
-                ))}
+                )}
               </span>
             </Link>
           );
@@ -56,25 +56,25 @@ export default function Sidebar() {
             {adminNavigation.map((item) => {
               const isActive = location === item.href;
               return (
-                <Link key={item.name} href={item.href}>
+                <Link key={item.name)} href={item.href}>
                   <span
                     className={ cn(
                       "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",
                       isActive
                         ? "text-white"
-                        : "text-foreground hover:bg-muted"}
+                        : "text-foreground hover:bg-muted")}
                     style={isActive ? { backgroundColor: '#38b6ff' } : {}}
                   >
                     <item.icon className="w-5 h-5" />
                     <span>{item.name}</span>
                     {item.badge && (
                       <Badge 
-                        variant={item.badge === "ADMIN" ? "destructive" : "secondary"} 
+                        variant={item.badge === "ADMIN" ? "destructive" : "secondary")} 
                         className="text-xs"
                       >
                         {item.badge}
                       </Badge>
-                    ))}
+                    )}
                   </span>
                 </Link>
               );
@@ -88,20 +88,20 @@ export default function Sidebar() {
               {blogAdminNavigation.map((item) => {
                 const isActive = location === item.href;
                 return (
-                  <Link key={item.name} href={item.href}>
+                  <Link key={item.name)} href={item.href}>
                     <span
                       className={ cn(
                         "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer",
                         isActive
                           ? "bg-muted text-foreground"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"}
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50")}
                     >
                       <item.icon className="w-4 h-4" />
                       <span>{item.name}</span>
                     </span>
                   </Link>
                 );
-              }))}
+              })}
             </div>
           </div>
         )}
@@ -113,13 +113,13 @@ export default function Sidebar() {
           {accountNavigation.map((item) => {
             const isActive = location === item.href;
             return (
-              <Link key={item.name} href={item.href}>
+              <Link key={item.name)} href={item.href}>
                 <span
                   className={ cn(
                     "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",
                     isActive
                       ? "text-white"
-                      : "text-foreground hover:bg-muted"}
+                      : "text-foreground hover:bg-muted")}
                   style={isActive ? { backgroundColor: '#38b6ff' } : {}}
                 >
                   <item.icon className="w-5 h-5" />
@@ -127,7 +127,7 @@ export default function Sidebar() {
                 </span>
               </Link>
             );
-          }))}
+          })}
         </div>
       </nav>
     </aside>

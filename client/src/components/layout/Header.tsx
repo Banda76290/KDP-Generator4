@@ -12,12 +12,12 @@ interface HeaderProps {
 }
 
 export default function Header({ onMenuClick }: HeaderProps) {
-  const { user } = useAuth() as { user: User | undefined });
+  const { user } = useAuth() as { user: User | undefined };
 
   const getUserInitials = (firstName?: string, lastName?: string) => {
     if (!firstName && !lastName) return "U";
     return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
-  });
+  };
 
   return (
     <header className="bg-white border-b border-border fixed top-0 left-0 right-0 z-50 h-16">
@@ -63,7 +63,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
               <Button variant="ghost" className="flex items-center space-x-2 p-2 hover:bg-muted">
                 <Avatar className="w-8 h-8">
                   <AvatarImage src={user?.profileImageUrl || undefined} alt="User Avatar" />
-                  <AvatarFallback>{ getUserInitials(user?.firstName || undefined, user?.lastName || undefined}</AvatarFallback>
+                  <AvatarFallback>{ getUserInitials(user?.firstName || undefined, user?.lastName || undefined)}</AvatarFallback>
                 </Avatar>
                 <span className="text-sm font-medium text-foreground">
                   {user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'User'}

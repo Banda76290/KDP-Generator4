@@ -16,7 +16,7 @@ import { insertProjectSchema, type InsertProject } from "@shared/schema";
 import { z } from "zod";
 import Layout from "@/components/Layout";
 
-const projectFormSchema = insertProjectSchema.pick({ name: true, description: true });
+const projectFormSchema = insertProjectSchema.pick({ name: true, description: true };
 
 type ProjectFormData = z.infer<typeof projectFormSchema>;
 
@@ -33,22 +33,21 @@ export default function EditProject() {
     defaultValues: {
       name: "",
       description: "",
-    });
+    },
   });
 
   // Fetch project data
   const { data: project, isLoading: projectLoading } = useQuery({
     queryKey: ["/api/projects", projectId],
     enabled: !!projectId,
-  });
+  };
 
   // Populate form when project data is loaded
   useEffect(() => {
     if (project) {
       form.reset({
         name: (project as any).name || "",
-        description: (project as any).description || ""
-      });
+        description: (project as any).description || "",)};
     }
   }, [project, form]);
 
@@ -56,29 +55,27 @@ export default function EditProject() {
     mutationFn: async (data: ProjectFormData) => {
       console.log('Updating project:', projectId, data);
       
-      const updatedProject = await apiRequest(`/api/projects/${projectId}`, { method: "PUT", body: JSON.stringify({ name: data.name,
-        description: data.description
-      })});
+      const updatedProject = await apiRequest(`/api/projects/${projectId)}`, { method: "PUT", body: JSON.stringify({ name: data.name,
+        description: data.description,)}});
       
       console.log('Project updated:', updatedProject);
       return updatedProject;
-    });
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"]});
-      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId] });
-      toast({
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"])};
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId] };
+      toast.success({
         title: "Project Updated",
         description: "Your project has been updated successfully.",
-      });
+      };
       setLocation("/projects");
-    });
+    },
     onError: (error) => {
       console.error('Project update error:', error);
-      toast({
+      toast.error({
         title: "Error",
-        description: error.message || "Failed to update project"
-      });
-    });
+        description: error.message || "Failed to update project",)};
+    },
   });
 
   if (projectLoading) {
@@ -95,7 +92,7 @@ export default function EditProject() {
       <Layout>
         <div className="text-center py-12">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Project Not Found</h1>
-          <Button onClick={() => setLocation("/projects")} variant="outline">
+          <Button onClick={() => setLocation("/projects"))} variant="outline">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Projects
           </Button>
@@ -121,7 +118,7 @@ export default function EditProject() {
 
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border">
               <div className="p-6">
-                <form onSubmit={ form.handleSubmit((data) => updateProject.mutate(data )}>
+                <form onSubmit={ form.handleSubmit((data) => updateProject.mutate(data ))}>
                   <div className="space-y-6">
                     {/* Basic Information */}
                     <Card>
@@ -136,31 +133,31 @@ export default function EditProject() {
                           <Label htmlFor="name">Project Name</Label>
                           <Input
                             id="name"
-                            { ...form.register("name"}
+                            { ...form.register("name")}
                             placeholder="Enter project name..."
                             className="mt-1"
                           />
                           {form.formState.errors.name && (
                             <p className="text-sm text-red-600 mt-1">
-                              {form.formState.errors.name.message}
+                              {form.formState.errors.name.message)}
                             </p>
-                          ))}
+                          )}
                         </div>
 
                         <div>
                           <Label htmlFor="description">Description</Label>
                           <Textarea
                             id="description"
-                            { ...form.register("description"}
+                            { ...form.register("description")}
                             placeholder="Describe your project..."
                             rows={4}
                             className="mt-1"
                           />
                           {form.formState.errors.description && (
                             <p className="text-sm text-red-600 mt-1">
-                              {form.formState.errors.description.message}
+                              {form.formState.errors.description.message)}
                             </p>
-                          ))}
+                          )}
                         </div>
 
 
@@ -169,7 +166,7 @@ export default function EditProject() {
                   </div>
 
                   <div className="flex justify-between items-center pt-6 border-t mt-6">
-                    <Button type="button" variant="outline" onClick={ (} => setLocation("/projects")>
+                    <Button type="button" variant="outline" onClick={ ()} => setLocation("/projects")>
                       Cancel
                     </Button>
                     <Button 
@@ -183,7 +180,7 @@ export default function EditProject() {
                           Updating...
                         </>
                       ) : (
-                        "Update Project"}
+                        "Update Project")}
                     </Button>
                   </div>
                 </form>

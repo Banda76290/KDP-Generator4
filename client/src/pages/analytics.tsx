@@ -104,22 +104,20 @@ export default function Analytics() {
 
   const { data: salesTrends, isLoading: trendsLoading } = useQuery<SalesTrend[]>({
     queryKey: [`/api/analytics/sales-trends/${selectedPeriod}`],
-  };
+  });
 
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: currency,
-      minimumFractionDigits: 2
-    }).format(amount);
+      minimumFractionDigits: 2,)}.format(amount);
   };
 
   const refreshAllData = () => {
     refetchDetailed();
     toast({
       title: "Données actualisées",
-      description: "Les analytics ont été mises à jour"
-  };
+      description: "Les analytics ont été mises à jour",)};
   };
 
   const isLoading = detailedLoading || legacyLoading || topPerformersLoading || marketplaceLoading || trendsLoading;
@@ -157,8 +155,8 @@ export default function Analytics() {
           <div className="animate-pulse space-y-6">
             <div className="grid gap-6 md:grid-cols-4">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded"></div>
-              )))}
+                <div key={i)} className="h-32 bg-gray-200 rounded"></div>
+              ))}
             </div>
           </div>
         ) : (
@@ -243,7 +241,7 @@ export default function Analytics() {
                       <CardDescription>Montants originaux sans conversion</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
+                      <ResponsiveContainer width="100%" height={300)}>
                         <BarChart data={detailedData.royaltiesByCurrency}>
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="currency" />
@@ -254,7 +252,7 @@ export default function Analytics() {
                       </ResponsiveContainer>
                     </CardContent>
                   </Card>
-                ))}
+                )}
 
                 {/* EUR Conversion Pie Chart */}
                 {detailedData?.conversions && (
@@ -264,7 +262,7 @@ export default function Analytics() {
                       <CardDescription>Distribution des revenus convertis en euros</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
+                      <ResponsiveContainer width="100%" height={300)}>
                         <PieChart>
                           <Pie
                             data={detailedData.conversions}
@@ -273,18 +271,18 @@ export default function Analytics() {
                             outerRadius={100}
                             fill="#8884d8"
                             dataKey="amountInEUR"
-                            label={({ currency, amountInEUR }) => `${currency}: ${amountInEUR.toFixed(0))}€`}
+                            label={({ currency, amountInEUR)} => `${currency}: ${ amountInEUR.toFixed(0)}€`}
                           >
                             {detailedData.conversions.map((_, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            )))}
+                              <Cell key={`cell-${index)}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
                           </Pie>
-                          <Tooltip formatter={ (value) => [`${Number(value).toFixed(2))}€`, 'Montant EUR']} />
+                          <Tooltip formatter={ (value) => [`${Number(value).toFixed(2)}€`, 'Montant EUR']} />
                         </PieChart>
                       </ResponsiveContainer>
                     </CardContent>
                   </Card>
-                )))}
+                )}
               </TabsContent>
 
               <TabsContent value="currencies" className="space-y-6">
@@ -300,14 +298,14 @@ export default function Analytics() {
                         {detailedData.royaltiesByCurrency.map((curr, index) => {
                           const conversion = detailedData.conversions.find(c => c.currency === curr.currency);
                           return (
-                            <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div key={index)} className="flex items-center justify-between p-4 border rounded-lg">
                               <div className="flex items-center gap-4">
                                 <Badge variant="outline" className="font-mono text-lg">
                                   {curr.currency}
                                 </Badge>
                                 <div>
                                   <div className="font-bold text-lg">
-                                    { formatCurrency(curr.totalRoyalty, curr.currency))}
+                                    { formatCurrency(curr.totalRoyalty, curr.currency)}
                                   </div>
                                   <div className="text-sm text-muted-foreground">
                                     {curr.transactionCount} transactions • {curr.formatsCount} formats
@@ -318,21 +316,21 @@ export default function Analytics() {
                                 { conversion && (
                                   <>
                                     <div className="font-bold text-green-700">
-                                      {formatCurrency(conversion.amountInEUR, 'EUR'))}
+                                      {formatCurrency(conversion.amountInEUR, 'EUR')}
                                     </div>
                                     <div className="text-xs text-muted-foreground">
-                                      Taux: 1 EUR = { conversion.exchangeRate.toFixed(4))} {curr.currency}
+                                      Taux: 1 EUR = { conversion.exchangeRate.toFixed(4)} {curr.currency}
                                     </div>
                                   </>
-                                )))}
+                                )}
                               </div>
                             </div>
                           );
-                        })))}
+                        })}
                       </div>
                     </CardContent>
                   </Card>
-                )))}
+                )}
               </TabsContent>
 
               <TabsContent value="performance" className="space-y-6">
@@ -346,7 +344,7 @@ export default function Analytics() {
                     <CardContent>
                       <div className="space-y-4">
                         {topPerformers.slice(0, 5).map((book, index) => (
-                          <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div key={index)} className="flex items-center justify-between p-4 border rounded-lg">
                             <div className="flex items-center gap-4">
                               <Badge variant="secondary">#{index + 1}</Badge>
                               <div>
@@ -357,17 +355,17 @@ export default function Analytics() {
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="font-bold">{ book.totalRoyalty.toFixed(2))} {book.currency}</div>
+                              <div className="font-bold">{ book.totalRoyalty.toFixed(2)} {book.currency}</div>
                               <div className="text-sm text-muted-foreground">
                                 {book.totalUnits} unités
                               </div>
                             </div>
                           </div>
-                        )))}
+                        ))}
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                )}
 
                 {/* Sales Trends */}
                 {salesTrends && salesTrends.length > 0 && (
@@ -376,10 +374,10 @@ export default function Analytics() {
                       <CardTitle>Tendances des Ventes</CardTitle>
                       <CardDescription>
                         <div className="flex items-center gap-2">
-                          <span>Évolution sur {selectedPeriod} jours</span>
+                          <span>Évolution sur {selectedPeriod)} jours</span>
                           <select 
                             value={selectedPeriod}
-                            onChange={ (e) => setSelectedPeriod(e.target.value }
+                            onChange={ (e) => setSelectedPeriod(e.target.value )}
                             className="border rounded px-2 py-1 text-sm"
                           >
                             <option value="7">7 jours</option>
@@ -403,7 +401,7 @@ export default function Analytics() {
                       </ResponsiveContainer>
                     </CardContent>
                   </Card>
-                )))}
+                )}
               </TabsContent>
 
               <TabsContent value="comparison" className="space-y-6">
@@ -425,7 +423,7 @@ export default function Analytics() {
                           <div className="flex justify-between">
                             <span>Total EUR:</span>
                             <Badge className="bg-green-200 text-green-900">
-                              {formatCurrency(detailedData.totalInEUR, 'EUR'))}
+                              {formatCurrency(detailedData.totalInEUR, 'EUR')}
                             </Badge>
                           </div>
                           <div className="flex justify-between">
@@ -451,7 +449,7 @@ export default function Analytics() {
                             </div>
                           </div>
                         </div>
-                      )))}
+                      )}
                     </CardContent>
                   </Card>
 
@@ -471,7 +469,7 @@ export default function Analytics() {
                           <div className="flex justify-between">
                             <span>Total USD:</span>
                             <Badge className="bg-orange-200 text-orange-900">
-                              ${legacyData.totalRevenueUSD}
+                              ${legacyData.totalRevenueUSD)}
                             </Badge>
                           </div>
                           <div className="flex justify-between">
@@ -497,7 +495,7 @@ export default function Analytics() {
                             </div>
                           </div>
                         </div>
-                      )))}
+                      )}
                     </CardContent>
                   </Card>
                 </div>
@@ -534,7 +532,7 @@ export default function Analytics() {
               </TabsContent>
             </Tabs>
           </>
-        )))}
+        )}
       </div>
     </Layout>
   );

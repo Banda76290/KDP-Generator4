@@ -31,7 +31,7 @@ interface Contributor {
 
 const bookFormSchema = insertBookSchema.extend({
   projectId: z.string().optional(),
-});
+};
 
 type BookFormData = z.infer<typeof bookFormSchema>;
 
@@ -89,18 +89,18 @@ export default function CreateBook() {
       projectId: preSelectedProjectId || "",
       categories: [],
       keywords: [],
-    });
+    },
   });
 
   // Fetch projects for selection
   const { data: projects = [] } = useQuery({
     queryKey: ["/api/projects"],
-  });
+  };
 
   // Load existing authors
   const { data: authors = [], isLoading: loadingAuthors } = useQuery<any[]>({
     queryKey: ["/api/authors"],
-  });
+  };
 
   const createBook = useMutation({
     mutationFn: async (data: BookFormData) => {
@@ -108,40 +108,39 @@ export default function CreateBook() {
         ...data,
         categories,
         keywords,
-      });
+      };
       
       console.log('Creating book data:', bookData);
-      const book = await apiRequest("/api/books", { method: "POST", body: JSON.stringify(bookData});
+      const book = await apiRequest("/api/books", { method: "POST", body: JSON.stringify(bookData)};
       console.log('Received book response:', book);
       
       // Create contributors if any
       if (contributors.length > 0) {
         for (const contributor of contributors) {
           await apiRequest("/api/contributors", { method: "POST", body: JSON.stringify({ bookId: book.id,
-            name: `${contributor.firstName} ${contributor.lastName}`.trim(),
+            name: `${contributor.firstName)} ${contributor.lastName}`.trim(),
             role: contributor.role,
           }});
         }
       }
       
       return book;
-    });
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/books"]});
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
-      toast({
+      queryClient.invalidateQueries({ queryKey: ["/api/books"])};
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
+      toast.success({
         title: "Book Created",
         description: "Your book has been created successfully.",
-      });
+      };
       setLocation("/projects");
-    });
+    },
     onError: (error) => {
       console.error('Book creation error:', error);
-      toast({
+      toast.error({
         title: "Error",
-        description: error.message || "Failed to create book"
-      });
-    });
+        description: error.message || "Failed to create book",)};
+    },
   });
 
   const addContributor = () => {
@@ -153,19 +152,19 @@ export default function CreateBook() {
       middleName: "",
       lastName: "",
       suffix: "",
-    });
+    };
     setContributors([...contributors, newContributor]);
-  });
+  };
 
   const updateContributor = (id: string, field: keyof Contributor, value: string) => {
     setContributors(contributors.map(c => 
-      c.id === id ? { ...c, [field]: value} : c
+      c.id === id ? { ...c, [field]: value)} : c
     ));
-  });
+  };
 
   const removeContributor = (id: string) => {
     setContributors(contributors.filter(c => c.id !== id));
-  });
+  };
 
   // Function to handle author selection from dropdown
   const handleAuthorSelection = (authorId: string) => {
@@ -181,27 +180,27 @@ export default function CreateBook() {
         setSelectedAuthorId(authorId);
       }
     }
-  });
+  };
 
   const addKeyword = (keyword: string) => {
     if (keyword.trim() && !keywords.includes(keyword.trim()) && keywords.length < 7) {
       setKeywords([...keywords, keyword.trim()]);
     }
-  });
+  };
 
   const removeKeyword = (keyword: string) => {
     setKeywords(keywords.filter(k => k !== keyword));
-  });
+  };
 
   const addCategory = (category: string) => {
     if (category.trim() && !categories.includes(category.trim()) && categories.length < 3) {
       setCategories([...categories, category.trim()]);
     }
-  });
+  };
 
   const removeCategory = (category: string) => {
     setCategories(categories.filter(c => c !== category));
-  });
+  };
 
   return (
     <Layout>
@@ -209,7 +208,7 @@ export default function CreateBook() {
             <div className="mb-6">
               <Button
                 variant="ghost"
-                onClick={ () => setLocation("/projects"} className="mb-4"
+                onClick={ () => setLocation("/projects")} className="mb-4"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Projects
@@ -227,7 +226,7 @@ export default function CreateBook() {
 
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border">
               <div className="p-6">
-                <form onSubmit={ form.handleSubmit((data) => createBook.mutate(data}>
+                <form onSubmit={ form.handleSubmit((data) => createBook.mutate(data)}>
                   <div className="space-y-6">
                     {/* Project Selection */}
                     <Card>
@@ -240,14 +239,14 @@ export default function CreateBook() {
                       <CardContent>
                         <Select 
                           value={form.watch("projectId") || ""} 
-                          onValueChange={ (value) => form.setValue("projectId", value}
+                          onValueChange={ (value) => form.setValue("projectId", value)}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select a project (optional)" />
                           </SelectTrigger>
                           <SelectContent>
                             {(projects as any[]).map((project: any) => (
-                              <SelectItem key={project.id} value={project.id}>
+                              <SelectItem key={project.id)} value={project.id}>
                                 {project.name}
                               </SelectItem>
                             ))}
@@ -267,7 +266,7 @@ export default function CreateBook() {
                       <CardContent>
                         <RadioGroup
                           value={form.watch("format") || "ebook"}
-                          onValueChange={ (value) => form.setValue("format", value as "ebook" | "paperback" | "hardcover"}
+                          onValueChange={ (value) => form.setValue("format", value as "ebook" | "paperback" | "hardcover")}
                         >
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="ebook" id="ebook" />
@@ -296,13 +295,13 @@ export default function CreateBook() {
                         {/* Language */}
                         <div>
                           <Label htmlFor="language">Language</Label>
-                          <Select value={form.watch("language") ?? ""} onValueChange={ (value) => form.setValue("language", value}>
+                          <Select value={form.watch("language") ?? ""} onValueChange={ (value) => form.setValue("language", value)}>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                               {languages.map((lang) => (
-                                <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+                                <SelectItem key={lang)} value={lang}>{lang}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -312,20 +311,20 @@ export default function CreateBook() {
                         <div>
                           <Label htmlFor="title">Book Title</Label>
                           <Input
-                            { ...form.register("title"}
+                            { ...form.register("title")}
                             placeholder="From Zero to Hero with Google Analytics"
                             className="mt-1"
                           />
                           {form.formState.errors.title && (
-                            <p className="text-red-500 text-sm mt-1">{form.formState.errors.title.message}</p>
-                          ))}
+                            <p className="text-red-500 text-sm mt-1">{form.formState.errors.title.message)}</p>
+                          )}
                         </div>
 
                         {/* Subtitle */}
                         <div>
                           <Label htmlFor="subtitle">Sous-titre (Optionnel)</Label>
                           <Input
-                            { ...form.register("subtitle"}
+                            { ...form.register("subtitle")}
                             placeholder="Turn statistics into winning strategies"
                             className="mt-1"
                           />
@@ -336,7 +335,7 @@ export default function CreateBook() {
                           <div>
                             <Label htmlFor="seriesTitle">Titre de Série (Optionnel)</Label>
                             <Input
-                              { ...form.register("seriesTitle"}
+                              { ...form.register("seriesTitle")}
                               placeholder="From Zero to Hero"
                               className="mt-1"
                             />
@@ -344,7 +343,7 @@ export default function CreateBook() {
                           <div>
                             <Label htmlFor="seriesNumber">Numéro de Série</Label>
                             <Input
-                              {...form.register("seriesNumber", { valueAsNumber: true}}
+                              {...form.register("seriesNumber", { valueAsNumber: true)}}
                               type="number"
                               placeholder="1"
                               className="mt-1"
@@ -356,7 +355,7 @@ export default function CreateBook() {
                         <div>
                           <Label htmlFor="editionNumber">Numéro d'Édition (Optionnel)</Label>
                           <Input
-                            { ...form.register("editionNumber"}
+                            { ...form.register("editionNumber")}
                             placeholder="1"
                             className="mt-1"
                           />
@@ -379,7 +378,7 @@ export default function CreateBook() {
                               </SelectTrigger>
                               <SelectContent>
                                 {authors.map((author) => (
-                                  <SelectItem key={author.id} value={author.id}>
+                                  <SelectItem key={author.id)} value={author.id}>
                                     {author.fullName}
                                   </SelectItem>
                                 ))}
@@ -388,7 +387,7 @@ export default function CreateBook() {
                             <Button
                               type="button"
                               variant="outline"
-                              onClick={ () => setLocation('/authors/create' }
+                              onClick={ () => setLocation('/authors/create' )}
                             >
                               Créer un Auteur
                             </Button>
@@ -433,11 +432,11 @@ export default function CreateBook() {
                       <CardContent className="space-y-4">
                         <div className="flex flex-wrap gap-2">
                           {categories.map((category) => (
-                            <Badge key={category} variant="secondary" className="flex items-center gap-1">
+                            <Badge key={category)} variant="secondary" className="flex items-center gap-1">
                               {category}
                               <X
                                 className="h-3 w-3 cursor-pointer"
-                                onClick={ () => removeCategory(category }
+                                onClick={ () => removeCategory(category )}
                               />
                             </Badge>
                           ))}
@@ -450,11 +449,11 @@ export default function CreateBook() {
                                 if (e.key === "Enter") {
                                   e.preventDefault();
                                   addCategory(e.currentTarget.value);
-                                  e.currentTarget.value = "";}
+                                  e.currentTarget.value = "";)}
                               }}
                             />
                           </div>
-                        ))}
+                        )}
                       </CardContent>
                     </Card>
 
@@ -469,11 +468,11 @@ export default function CreateBook() {
                       <CardContent className="space-y-4">
                         <div className="flex flex-wrap gap-2">
                           {keywords.map((keyword) => (
-                            <Badge key={keyword} variant="secondary" className="flex items-center gap-1">
+                            <Badge key={keyword)} variant="secondary" className="flex items-center gap-1">
                               {keyword}
                               <X
                                 className="h-3 w-3 cursor-pointer"
-                                onClick={ () => removeKeyword(keyword }
+                                onClick={ () => removeKeyword(keyword )}
                               />
                             </Badge>
                           ))}
@@ -486,7 +485,7 @@ export default function CreateBook() {
                                 if (e.key === "Enter") {
                                   e.preventDefault();
                                   addKeyword(e.currentTarget.value);
-                                  e.currentTarget.value = "";}
+                                  e.currentTarget.value = "";)}
                               }}
                             />
                             <Input
@@ -509,7 +508,7 @@ export default function CreateBook() {
                   </div>
 
                   <div className="flex justify-between items-center pt-6 border-t mt-6">
-                    <Button type="button" variant="outline" onClick={ (} => setLocation("/projects")>
+                    <Button type="button" variant="outline" onClick={ ()} => setLocation("/projects")>
                       Annuler
                     </Button>
                     <div className="flex gap-2">
@@ -518,7 +517,7 @@ export default function CreateBook() {
                         variant="outline"
                         onClick={() => {
                           const formData = form.getValues();
-                          createBook.mutate({ ...formData, status: 'draft' });
+                          createBook.mutate({ ...formData, status: 'draft' )};
                         }}
                         disabled={createBook.isPending}
                       >
@@ -535,7 +534,7 @@ export default function CreateBook() {
                             Création...
                           </>
                         ) : (
-                          "Créer le Livre"}
+                          "Créer le Livre")}
                       </Button>
                     </div>
                   </div>

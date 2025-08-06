@@ -44,14 +44,14 @@ export default function SeriesEditPage() {
   const { data: existingSeries, isLoading: isLoadingSeries } = useQuery({
     queryKey: ['/api/series', seriesId],
     queryFn: async () => {
-      const response = await fetch(`/api/series/${seriesId}`, {
+      const response = await fetch(`/api/series/${seriesId)}`, {
         credentials: 'include'
-      });
+      };
       if (!response.ok) {
         throw new Error('Failed to fetch series');
       }
       return response.json();
-    });
+    },
     enabled: !!seriesId
   });
 
@@ -76,7 +76,7 @@ export default function SeriesEditPage() {
           if (editor) {
             // Clear editor first
             while (editor.firstChild) {
-              editor.removeChild(editor.firstChild);}
+              editor.removeChild(editor.firstChild);)}
             
             // Use cleanHTML function to safely set content
             const cleanedContent = cleanHTML(existingSeries.description);
@@ -107,7 +107,7 @@ export default function SeriesEditPage() {
     if (characterCount > maxCharacters) {
       toast({
         title: "Error",
-        description: `Description exceeds ${maxCharacters} character limit.`,
+        description: `Description exceeds ${maxCharacters)} character limit.`,
         variant: "destructive"
       });
       return;
@@ -119,13 +119,13 @@ export default function SeriesEditPage() {
         language: data.language,
         readingOrder: data.readingOrder,
         description: editorContent
-      });
+      };
 
       const response = await fetch(`/api/series/${seriesId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-        });
+        },
         body: JSON.stringify(formData),
         credentials: 'include'
       });
@@ -139,13 +139,13 @@ export default function SeriesEditPage() {
       const responseData = await response.json();
 
       // Invalidate and refetch series data
-      await queryClient.invalidateQueries({ queryKey: ['/api/series'] });
-      await queryClient.invalidateQueries({ queryKey: ['/api/series', seriesId] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/series'] };
+      await queryClient.invalidateQueries({ queryKey: ['/api/series', seriesId] };
       
       toast({
         title: "Series updated",
         description: "Your series has been successfully updated.",
-      });
+      };
 
       // Check if we need to return to book edit page
       const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
@@ -154,7 +154,7 @@ export default function SeriesEditPage() {
         if (returnToBookEdit === 'new') {
           setLocation('/books/create');
         } else {
-          setLocation(`/books/edit/${returnToBookEdit}`);
+          setLocation(`/books/edit/${returnToBookEdit)}`);
         }
       } else {
         setLocation('/manage-series');
@@ -164,10 +164,9 @@ export default function SeriesEditPage() {
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to update series. Please try again.",
-        variant: "destructive"
-      });
+        variant: "destructive",)};
     }
-  });
+  };
 
   useEffect(() => {
     // Add CSS for the editor placeholder
@@ -191,13 +190,13 @@ export default function SeriesEditPage() {
     
     return () => {
       document.head.removeChild(style);
-    });
+    };
   }, []);
 
   const applyFormatting = (command: string, value?: string) => {
     document.execCommand(command, false, value);
     updateDescriptionFromHTML();
-  });
+  };
 
   // Function to clean HTML and remove unnecessary styles
   const cleanHTML = (html: string): string => {
@@ -239,7 +238,7 @@ export default function SeriesEditPage() {
           }
         }
       }
-    });
+    };
     
     // Copy body content to tempDiv safely
     for (let child of Array.from(doc.body.childNodes)) {
@@ -260,7 +259,7 @@ export default function SeriesEditPage() {
             .split(';')
             .filter(style => {
               const prop = style.trim().split(':')[0]?.trim();
-              return ['color', 'font-weight', 'font-style', 'text-decoration'].includes(prop);}
+              return ['color', 'font-weight', 'font-style', 'text-decoration'].includes(prop);)}
             .join('; ');
           
           if (cleanStyles) {
@@ -278,7 +277,7 @@ export default function SeriesEditPage() {
     });
     
     return tempDiv.innerHTML;
-  });
+  };
 
   const updateDescriptionFromHTML = () => {
     const editor = document.getElementById('description-editor') as HTMLDivElement;
@@ -291,7 +290,7 @@ export default function SeriesEditPage() {
     setCharacterCount(textContent.length);
     setEditorContent(cleanedHtmlContent);
     form.setValue('description', cleanedHtmlContent);
-  });
+  };
 
   const handleFormatChange = (format: string) => {
     switch (format) {
@@ -308,7 +307,7 @@ export default function SeriesEditPage() {
         applyFormatting('formatBlock', 'div');
         break;
     }
-  });
+  };
 
   const insertLink = () => {
     if (linkUrl) {
@@ -316,7 +315,7 @@ export default function SeriesEditPage() {
       setLinkUrl('');
       setShowLinkDialog(false);
     }
-  });
+  };
 
   if (isLoadingSeries) {
     return (
@@ -346,8 +345,8 @@ export default function SeriesEditPage() {
                     
                     if (returnToBookEdit === 'new') {
                       setLocation('/books/create');
-                    } else {
-                      setLocation(`/books/edit/${returnToBookEdit}`);
+                    )} else {
+                      setLocation(`/books/edit/${returnToBookEdit)}`);
                     }
                   } else {
                     setLocation('/manage-series');
@@ -361,7 +360,7 @@ export default function SeriesEditPage() {
             </div>
           </div>
 
-          <form onSubmit={ form.handleSubmit(onSubmit} className="space-y-8">
+          <form onSubmit={ form.handleSubmit(onSubmit)} className="space-y-8">
             {/* Language Selection */}
             <Card>
               <CardHeader>
@@ -369,8 +368,8 @@ export default function SeriesEditPage() {
               </CardHeader>
               <CardContent>
                 <Select
-                  value={ form.watch('language'}
-                  onValueChange={ (value) => form.setValue('language', value}
+                  value={ form.watch('language')}
+                  onValueChange={ (value) => form.setValue('language', value)}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select language" />
@@ -429,13 +428,13 @@ export default function SeriesEditPage() {
               </CardHeader>
               <CardContent>
                 <Input
-                  {...form.register('title', { required: 'Series title is required'}}
+                  {...form.register('title', { required: 'Series title is required')}}
                   placeholder="Enter your series title"
                   className="w-full"
                 />
                 {form.formState.errors.title && (
-                  <p className="text-red-500 text-sm mt-1">{form.formState.errors.title.message}</p>
-                ))}
+                  <p className="text-red-500 text-sm mt-1">{form.formState.errors.title.message)}</p>
+                )}
               </CardContent>
             </Card>
 
@@ -446,8 +445,8 @@ export default function SeriesEditPage() {
               </CardHeader>
               <CardContent>
                 <RadioGroup
-                  value={ form.watch('readingOrder'}
-                  onValueChange={ (value: 'ordered' | 'unordered') => form.setValue('readingOrder', value}
+                  value={ form.watch('readingOrder')}
+                  onValueChange={ (value: 'ordered' | 'unordered') => form.setValue('readingOrder', value)}
                   className="space-y-4"
                 >
                   <div className="flex items-start space-x-3">
@@ -500,7 +499,7 @@ export default function SeriesEditPage() {
               <CardHeader>
                 <CardTitle>Description</CardTitle>
                 <p className="text-sm text-gray-600">
-                  Describe your series to help readers understand what to expect. Maximum { maxCharacters.toLocaleString(} characters.
+                  Describe your series to help readers understand what to expect. Maximum { maxCharacters.toLocaleString()} characters.
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -518,19 +517,19 @@ export default function SeriesEditPage() {
                     </SelectContent>
                   </Select>
                   
-                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('bold' }>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('bold' )}>
                     <strong>B</strong>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('italic' }>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('italic' )}>
                     <em>I</em>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('underline' }>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('underline' )}>
                     <u>U</u>
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('insertUnorderedList' }>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('insertUnorderedList' )}>
                     • List
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('insertOrderedList' }>
+                  <Button type="button" variant="outline" size="sm" onClick={ () => applyFormatting('insertOrderedList' )}>
                     1. List
                   </Button>
                   
@@ -548,10 +547,10 @@ export default function SeriesEditPage() {
                         <Input
                           placeholder="Enter URL"
                           value={linkUrl}
-                          onChange={ (e) => setLinkUrl(e.target.value }
+                          onChange={ (e) => setLinkUrl(e.target.value )}
                         />
                         <div className="flex justify-end space-x-2">
-                          <Button variant="outline" onClick={ () => setShowLinkDialog(false }>
+                          <Button variant="outline" onClick={ () => setShowLinkDialog(false )}>
                             Cancel
                           </Button>
                           <Button onClick={insertLink} style={{ backgroundColor: '#38b6ff', borderColor: '#38b6ff' }}>
@@ -580,13 +579,13 @@ export default function SeriesEditPage() {
                 {/* Character Counter */}
                 <div className="flex justify-between items-center text-sm">
                   <span className={characterCount > maxCharacters ? 'text-red-500' : 'text-gray-600'}>
-                    { characterCount.toLocaleString(} / { maxCharacters.toLocaleString(} characters
+                    { characterCount.toLocaleString()} / { maxCharacters.toLocaleString()} characters
                   </span>
                   { characterCount > maxCharacters && (
                     <span className="text-red-500 font-medium">
-                      Exceeds limit by {(characterCount - maxCharacters).toLocaleString(} characters
+                      Exceeds limit by {(characterCount - maxCharacters).toLocaleString()} characters
                     </span>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -605,8 +604,8 @@ export default function SeriesEditPage() {
                     
                     if (returnToBookEdit === 'new') {
                       setLocation('/books/create');
-                    } else {
-                      setLocation(`/books/edit/${returnToBookEdit}`);
+                    )} else {
+                      setLocation(`/books/edit/${returnToBookEdit)}`);
                     }
                   } else {
                     setLocation('/manage-series');

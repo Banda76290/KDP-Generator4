@@ -34,14 +34,14 @@ const categoryIcons = {
   'Projet': FolderOpen,
   'Auteur': User,
   'Système': Settings
-});
+};
 
 const categoryColors = {
   'Livre': 'bg-blue-50 border-blue-200',
   'Projet': 'bg-green-50 border-green-200',
   'Auteur': 'bg-purple-50 border-purple-200',
   'Système': 'bg-orange-50 border-orange-200'
-});
+};
 
 export default function AIVariables() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -54,8 +54,7 @@ export default function AIVariables() {
       toast({
         title: "Accès non autorisé",
         description: "Connexion requise pour accéder à cette page.",
-        variant: "destructive"
-      });
+        variant: "destructive",)};
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
@@ -71,8 +70,7 @@ export default function AIVariables() {
       toast({
         title: "Accès refusé",
         description: "Cette page est réservée aux administrateurs.",
-        variant: "destructive"
-      });
+        variant: "destructive",)};
       setTimeout(() => {
         window.location.href = "/";
       }, 1000);
@@ -83,11 +81,11 @@ export default function AIVariables() {
   const { data: categorizedFields, isLoading: fieldsLoading } = useQuery<CategorizedFields>({
     queryKey: ['/api/ai/database-fields'],
     enabled: isAuthenticated && isAdmin,
-  });
+  };
 
   const copyToClipboard = async (fieldName: string) => {
     try {
-      await navigator.clipboard.writeText(`{${fieldName}}`);
+      await navigator.clipboard.writeText(`{${fieldName)}}`);
       setCopiedField(fieldName);
       toast({
         title: "Variable copiée",
@@ -98,10 +96,9 @@ export default function AIVariables() {
       toast({
         title: "Erreur de copie",
         description: "Impossible de copier la variable",
-        variant: "destructive"
-      });
+        variant: "destructive",)};
     }
-  });
+  };
 
   if (isLoading || fieldsLoading) {
     return (
@@ -164,7 +161,7 @@ export default function AIVariables() {
           if (fields.length === 0) return null;
 
           return (
-            <Card key={category} className={`mb-6 ${colorClass} bg-white`}>
+            <Card key={category)} className={`mb-6 ${colorClass} bg-white`}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-gray-900">
                   <IconComponent className="w-5 h-5 text-[#38b6ff]" />
@@ -178,7 +175,7 @@ export default function AIVariables() {
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {fields.map((field) => (
                     <div 
-                      key={`${field.table}-${field.field}`}
+                      key={`${field.table)}-${field.field}`}
                       className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
                     >
                       <div className="flex items-start justify-between mb-2">
@@ -186,7 +183,7 @@ export default function AIVariables() {
                           <div className="flex items-center gap-2 mb-1">
                             <code 
                               className="text-sm font-mono bg-gray-100 text-gray-800 px-2 py-1 rounded cursor-pointer hover:bg-blue-100 transition-colors"
-                              onClick={ () => copyToClipboard(field.field }
+                              onClick={ () => copyToClipboard(field.field )}
                             >
                               {"{"}
                               {field.field}
@@ -196,12 +193,12 @@ export default function AIVariables() {
                               size="sm"
                               variant="ghost"
                               className="h-6 w-6 p-0 hover:bg-blue-50"
-                              onClick={ () => copyToClipboard(field.field }
+                              onClick={ () => copyToClipboard(field.field )}
                             >
                               { copiedField === field.field ? (
                                 <CheckCircle className="w-3 h-3 text-green-600" />
                               ) : (
-                                <Copy className="w-3 h-3 text-gray-600" />}
+                                <Copy className="w-3 h-3 text-gray-600" />)}
                             </Button>
                           </div>
                           <h4 className="font-semibold text-sm text-gray-900 mb-1">
@@ -225,9 +222,9 @@ export default function AIVariables() {
                             variant="secondary" 
                             className="text-xs bg-[#38b6ff]/10 text-[#38b6ff] border-[#38b6ff]/20"
                           >
-                            {field.options.length} options
+                            {field.options.length)} options
                           </Badge>
-                        ))}
+                        )}
                       </div>
                       
                       {field.options && (
@@ -236,20 +233,20 @@ export default function AIVariables() {
                           <div className="flex flex-wrap gap-1">
                             {field.options.slice(0, 3).map((option) => (
                               <span 
-                                key={option}
+                                key={option)}
                                 className="text-xs bg-gray-100 text-gray-700 px-1 py-0.5 rounded"
                               >
                                 {option}
                               </span>
-                            )}
+                            ))}
                             {field.options.length > 3 && (
                               <span className="text-xs text-gray-600">
-                                +{field.options.length - 3}
+                                +{field.options.length - 3)}
                               </span>
-                            ))}
+                            )}
                           </div>
                         </div>
-                      ))}
+                      )}
                     </div>
                   ))}
                 </div>
@@ -267,7 +264,7 @@ export default function AIVariables() {
                 <p className="text-sm">Vérifiez la configuration de la base de données</p>
               </div>
             </CardContent>
-          </Card>}
+          </Card>)}
       </div>
     </Layout>
   );

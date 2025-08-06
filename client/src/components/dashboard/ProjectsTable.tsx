@@ -15,15 +15,14 @@ export default function ProjectsTable() {
   
   const { data: projects, isLoading, error } = useQuery({
     queryKey: ["/api/projects"],
-  });
+  };
 
   useEffect(() => {
     if (error && isUnauthorizedError(error as Error)) {
       toast({
         title: "Unauthorized",
         description: "You are logged out. Logging in again...",
-        variant: "destructive"
-      });
+        variant: "destructive",)};
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
@@ -42,11 +41,11 @@ export default function ProjectsTable() {
       default:
         return "bg-gray-100 text-gray-800";
     }
-  });
+  };
 
   const generateProjectInitials = (title: string) => {
     return title.split(' ').map(word => word[0]).join('').substring(0, 2).toUpperCase();
-  });
+  };
 
   const getGradientClass = (index: number) => {
     const gradients = [
@@ -55,7 +54,7 @@ export default function ProjectsTable() {
       "gradient-purple-pink"
     ];
     return gradients[index % gradients.length];
-  });
+  };
 
   if (isLoading) {
     return (
@@ -69,7 +68,7 @@ export default function ProjectsTable() {
         <CardContent>
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="flex items-center space-x-4 p-4 border rounded-lg animate-pulse">
+              <div key={i)} className="flex items-center space-x-4 p-4 border rounded-lg animate-pulse">
                 <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
                 <div className="flex-1 space-y-2">
                   <div className="h-4 bg-gray-200 rounded w-1/3"></div>
@@ -135,11 +134,11 @@ export default function ProjectsTable() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {recentProjects.map((project: ProjectWithRelations, index: number) => (
-                  <tr key={project.id} className="hover:bg-gray-50">
+                  <tr key={project.id)} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className={ `w-10 h-10 ${getGradientClass(index} rounded-lg flex items-center justify-center text-white font-semibold text-sm`}>
-                          { generateProjectInitials(project.title || 'Untitled'}
+                        <div className={ `w-10 h-10 ${getGradientClass(index)} rounded-lg flex items-center justify-center text-white font-semibold text-sm`}>
+                          { generateProjectInitials(project.title || 'Untitled')}
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
@@ -147,15 +146,15 @@ export default function ProjectsTable() {
                           </div>
                           {project.subtitle && (
                             <div className="text-sm text-gray-500">
-                              {project.subtitle}
+                              {project.subtitle)}
                             </div>
-                          ))}
+                          )}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge className={ `${getStatusBadgeClass(project.status || 'draft'} text-xs font-semibold`}>
-                        { (project.status || 'draft').replace('_', ' '}
+                      <Badge className={ `${getStatusBadgeClass(project.status || 'draft')} text-xs font-semibold`}>
+                        { (project.status || 'draft').replace('_', ' ')}
                       </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -200,7 +199,7 @@ export default function ProjectsTable() {
               </tbody>
             </table>
           </div>
-        ))}
+        )}
       </CardContent>
     </Card>
   );

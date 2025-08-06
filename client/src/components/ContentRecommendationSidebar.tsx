@@ -48,13 +48,13 @@ const getRecommendationIcon = (type: string) => {
     default:
       return <Lightbulb className="w-4 h-4" />;
   }
-});
+};
 
 const getConfidenceColor = (confidence: number) => {
   if (confidence >= 0.8) return "text-green-600 border-green-200 bg-green-50";
   if (confidence >= 0.6) return "text-yellow-600 border-yellow-200 bg-yellow-50";
   return "text-red-600 border-red-200 bg-red-50";
-});
+};
 
 export default function ContentRecommendationSidebar({ 
   bookId, 
@@ -68,63 +68,60 @@ export default function ContentRecommendationSidebar({
   const { data: recommendations = [], isLoading, error } = useQuery({
     queryKey: ['/api/books', bookId, 'recommendations'],
     enabled: !!bookId && isVisible,
-  });
+  };
 
   const generateMutation = useMutation({
-    mutationFn: () => apiRequest('POST', `/api/books/${bookId}/recommendations/generate`),
+    mutationFn: () => apiRequest('POST', `/api/books/${bookId)}/recommendations/generate`),
     onSuccess: (newRecommendations) => {
       queryClient.setQueryData(['/api/books', bookId, 'recommendations'], newRecommendations);
       toast({
         title: "Recommendations Generated",
-        description: `Generated ${newRecommendations.length} new recommendations using AI.`,
+        description: `Generated ${newRecommendations.length)} new recommendations using AI.`,
       });
-    });
+    },
     onError: (error: any) => {
       toast({
         title: "Generation Failed",
         description: error.message || "Failed to generate recommendations",
-        variant: "destructive"
-      });
+        variant: "destructive",)};
     }
   });
 
   const feedbackMutation = useMutation({
-    mutationFn: ({ recommendationId, isUseful, isApplied}: { 
+    mutationFn: ({ recommendationId, isUseful, isApplied)}: { 
       recommendationId: string; 
       isUseful: boolean; 
       isApplied?: boolean; 
     } => 
-      apiRequest('PUT', `/api/recommendations/${recommendationId}/feedback`, { isUseful, isApplied });
+      apiRequest('PUT', `/api/recommendations/${recommendationId}/feedback`, { isUseful, isApplied },
     onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: ['/api/books', bookId, 'recommendations']});
-    });
+        queryKey: ['/api/books', bookId, 'recommendations'])};
+    },
     onError: (error: any) => {
       toast({
         title: "Feedback Failed",
         description: error.message || "Failed to submit feedback",
-        variant: "destructive"
-      });
+        variant: "destructive",)};
     }
   });
 
   const deleteMutation = useMutation({
     mutationFn: (recommendationId: string) => 
-      apiRequest('DELETE', `/api/recommendations/${recommendationId}`),
+      apiRequest('DELETE', `/api/recommendations/${recommendationId)}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: ['/api/books', bookId, 'recommendations']});
+        queryKey: ['/api/books', bookId, 'recommendations'])};
       toast({
         title: "Recommendation Removed",
         description: "Recommendation deleted successfully.",
-      });
-    });
+      };
+    },
     onError: (error: any) => {
       toast({
         title: "Delete Failed",
         description: error.message || "Failed to delete recommendation",
-        variant: "destructive"
-      });
+        variant: "destructive",)};
     }
   });
 
@@ -132,26 +129,26 @@ export default function ContentRecommendationSidebar({
     setExpandedItems(prev => {
       const newSet = new Set(prev);
       if (newSet.has(id)) {
-        newSet.delete(id);} else {
+        newSet.delete(id);)} else {
         newSet.add(id);
       }
       return newSet;
     });
-  });
+  };
 
   const handleFeedback = (recommendation: ContentRecommendation, isUseful: boolean) => {
     feedbackMutation.mutate({
       recommendationId: recommendation.id,
       isUseful,
-      isApplied: recommendation.isApplied ?? false});
-  });
+      isApplied: recommendation.isApplied ?? false)};
+  };
 
   const handleApply = (recommendation: ContentRecommendation) => {
     feedbackMutation.mutate({
       recommendationId: recommendation.id,
       isUseful: recommendation.isUseful ?? true,
-      isApplied: true});
-  });
+      isApplied: true)};
+  };
 
   if (!isVisible) return null;
 
@@ -176,7 +173,7 @@ export default function ContentRecommendationSidebar({
           Get intelligent suggestions to improve your book's success
         </p>
         <Button
-          onClick={ () => generateMutation.mutate( }
+          onClick={ () => generateMutation.mutate( )}
           disabled={generateMutation.isPending}
           className="w-full"
           size="sm"
@@ -190,7 +187,7 @@ export default function ContentRecommendationSidebar({
             <>
               <RefreshCw className="w-4 h-4 mr-2" />
               Generate Recommendations
-            </>}
+            </>)}
         </Button>
       </div>
 
@@ -198,7 +195,7 @@ export default function ContentRecommendationSidebar({
         { isLoading && (
           <div className="flex items-center justify-center py-8">
             <RefreshCw className="w-6 h-6 animate-spin text-gray-400" />
-          </div>}
+          </div>)}
 
         { error && (
           <Card className="border-red-200 bg-red-50">
@@ -207,7 +204,7 @@ export default function ContentRecommendationSidebar({
                 Failed to load recommendations. Try generating new ones.
               </p>
             </CardContent>
-          </Card>}
+          </Card>)}
 
         { (recommendations as ContentRecommendation[]).length === 0 && !isLoading && !error && (
           <Card className="border-blue-200 bg-blue-50">
@@ -220,19 +217,19 @@ export default function ContentRecommendationSidebar({
                 Generate AI recommendations to get intelligent suggestions for improving your book.
               </p>
             </CardContent>
-          </Card>}
+          </Card>)}
 
         {(recommendations as ContentRecommendation[]).map((recommendation: ContentRecommendation) => (
-          <Card key={recommendation.id} className="border-gray-200">
+          <Card key={recommendation.id)} className="border-gray-200">
             <Collapsible
-              open={ expandedItems.has(recommendation.id}
-              onOpenChange={ () => toggleExpanded(recommendation.id}
+              open={ expandedItems.has(recommendation.id)}
+              onOpenChange={ () => toggleExpanded(recommendation.id)}
             >
               <CollapsibleTrigger asChild>
                 <CardHeader className="p-3 cursor-pointer hover:bg-gray-50 transition-colors">
                   <div className="flex items-start gap-2">
                     <div className="mt-0.5">
-                      { getRecommendationIcon(recommendation.recommendationType}
+                      { getRecommendationIcon(recommendation.recommendationType)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
@@ -242,15 +239,15 @@ export default function ContentRecommendationSidebar({
                         <div className="flex items-center gap-1 ml-2">
                           <Badge 
                             variant="outline" 
-                            className={ `text-xs ${getConfidenceColor(Number(recommendation.confidence) || 0.7}`}
+                            className={ `text-xs ${getConfidenceColor(Number(recommendation.confidence) || 0.7)}`}
                           >
                             <Star className="w-3 h-3 mr-1" />
-                            { Math.round((Number(recommendation.confidence) || 0.7) * 100}%
+                            { Math.round((Number(recommendation.confidence) || 0.7) * 100)}%
                           </Badge>
                           { expandedItems.has(recommendation.id) ? (
                             <ChevronDown className="w-4 h-4 text-gray-400" />
                           ) : (
-                            <ChevronRight className="w-4 h-4 text-gray-400" />}
+                            <ChevronRight className="w-4 h-4 text-gray-400" />)}
                         </div>
                       </div>
                       <p className="text-xs text-gray-600 mt-1 line-clamp-2">
@@ -281,7 +278,7 @@ export default function ContentRecommendationSidebar({
                           Reasoning
                         </h4>
                         <p className="text-xs text-gray-600 leading-relaxed">
-                          {recommendation.reasoning}
+                          {recommendation.reasoning)}
                         </p>
                       </div>
                     )}
@@ -292,17 +289,17 @@ export default function ContentRecommendationSidebar({
                           <Badge variant="default" className="text-xs bg-green-100 text-green-700">
                             <Check className="w-3 h-3 mr-1" />
                             Applied
-                          </Badge>}
+                          </Badge>)}
                         { recommendation.isUseful === true && (
                           <Badge variant="outline" className="text-xs border-green-200 text-green-700">
                             <ThumbsUp className="w-3 h-3 mr-1" />
                             Helpful
-                          </Badge>}
+                          </Badge>)}
                         { recommendation.isUseful === false && (
                           <Badge variant="outline" className="text-xs border-red-200 text-red-700">
                             <ThumbsDown className="w-3 h-3 mr-1" />
                             Not helpful
-                          </Badge>}
+                          </Badge>)}
                       </div>
                       
                       <div className="flex items-center gap-1">
@@ -310,7 +307,7 @@ export default function ContentRecommendationSidebar({
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleApply(recommendation )}
+                            onClick={() => handleApply(recommendation ))}
                             disabled={feedbackMutation.isPending}
                             className="h-6 px-2 text-xs"
                           >
@@ -324,7 +321,7 @@ export default function ContentRecommendationSidebar({
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleFeedback(recommendation, true )}
+                              onClick={() => handleFeedback(recommendation, true ))}
                               disabled={feedbackMutation.isPending}
                               className="h-6 w-6 p-0 text-green-600 hover:bg-green-50"
                             >
@@ -333,7 +330,7 @@ export default function ContentRecommendationSidebar({
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={ () => handleFeedback(recommendation, false }
+                              onClick={ () => handleFeedback(recommendation, false )}
                               disabled={feedbackMutation.isPending}
                               className="h-6 w-6 p-0 text-red-600 hover:bg-red-50"
                             >
@@ -345,7 +342,7 @@ export default function ContentRecommendationSidebar({
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={ () => deleteMutation.mutate(recommendation.id }
+                          onClick={ () => deleteMutation.mutate(recommendation.id )}
                           disabled={deleteMutation.isPending}
                           className="h-6 w-6 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
                         >

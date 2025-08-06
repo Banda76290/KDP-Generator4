@@ -43,8 +43,7 @@ export default function AdminUsers() {
       toast({
         title: "Accès refusé",
         description: "Vous n'avez pas les permissions d'administrateur.",
-        variant: "destructive"
-      });
+        variant: "destructive",)};
       setTimeout(() => {
         window.location.href = "/";
       }, 500);
@@ -58,64 +57,61 @@ export default function AdminUsers() {
   });
 
   const updateRoleMutation = useMutation({
-    mutationFn: async ({ userId, role}: { userId: string; role: string }) => {
-      return await apiRequest(`/api/admin/users/${userId}/role`, { method: "PUT", body: JSON.stringify({ role }) });
-    });
+    mutationFn: async ({ userId, role)}: { userId: string; role: string } => {
+      return await apiRequest(`/api/admin/users/${userId)}/role`, { method: "PUT", body: JSON.stringify({ role)} });
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"]});
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"])};
       toast({
         title: "Succès",
         description: "Rôle utilisateur mis à jour avec succès.",
-      });
+      };
       setSelectedUser(null);
-    });
+    },
     onError: (error: Error) => {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de mettre à jour le rôle.",
-        variant: "destructive"
-      });
-    });
+        variant: "destructive",)};
+    },
   });
 
   const deactivateUserMutation = useMutation({
     mutationFn: async (userId: string) => {
-      return await apiRequest(`/api/admin/users/${userId}/deactivate`, { method: "PUT" });
-    });
+      return await apiRequest(`/api/admin/users/${userId)}/deactivate`, { method: "PUT" };
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"]});
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"])};
       toast({
         title: "Succès",
         description: "Utilisateur désactivé avec succès.",
-      });
-    });
+      };
+    },
     onError: (error: Error) => {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de désactiver l'utilisateur.",
-        variant: "destructive"
-      });
-    });
+        variant: "destructive",)};
+    },
   });
 
   const reactivateUserMutation = useMutation({
     mutationFn: async (userId: string) => {
-      return await apiRequest(`/api/admin/users/${userId}/reactivate`, { method: "PUT" });
-    });
+      return await apiRequest(`/api/admin/users/${userId)}/reactivate`, { method: "PUT" };
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"]});
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"])};
       toast({
         title: "Succès",
         description: "Utilisateur réactivé avec succès.",
-      });
-    });
+      };
+    },
     onError: (error: Error) => {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de réactiver l'utilisateur.",
-        variant: "destructive"
-      });
-    });
+        variant: "destructive",)};
+    },
   });
 
   const getRoleIcon = (role: string) => {
@@ -127,7 +123,7 @@ export default function AdminUsers() {
       default:
         return <User className="h-4 w-4" />;
     }
-  });
+  };
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
@@ -138,7 +134,7 @@ export default function AdminUsers() {
       default:
         return "outline";
     }
-  });
+  };
 
   if (isLoading || usersLoading) {
     return (
@@ -157,7 +153,7 @@ export default function AdminUsers() {
   return (
     <Layout>
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={ () => window.history.back( }>
+        <Button variant="ghost" size="sm" onClick={ () => window.history.back( )}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour
         </Button>
@@ -208,10 +204,10 @@ export default function AdminUsers() {
                 </TableHeader>
                 <TableBody>
                   {usersData?.users?.map((user: User) => (
-                    <TableRow key={user.id}>
+                    <TableRow key={user.id)}>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          { getRoleIcon(user.role});
+                          { getRoleIcon(user.role)}
                           <span className="font-medium">
                             {user.firstName || user.lastName
                               ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
@@ -221,7 +217,7 @@ export default function AdminUsers() {
                       </TableCell>
                       <TableCell className="font-mono text-sm">{user.email}</TableCell>
                       <TableCell>
-                        <Badge variant={ getRoleBadgeVariant(user.role}>
+                        <Badge variant={ getRoleBadgeVariant(user.role)}>
                           {user.role === "superadmin" ? "Super Admin" : 
                            user.role === "admin" ? "Admin" : "Utilisateur"}
                         </Badge>
@@ -237,14 +233,14 @@ export default function AdminUsers() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        { format(new Date(user.createdAt), "dd/MM/yyyy"});
+                        { format(new Date(user.createdAt), "dd/MM/yyyy")}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Select onValueChange={(role) => {
                             if (role !== user.role) {
                               setSelectedUser(user);
-                              updateRoleMutation.mutate({ userId: user.id, role});
+                              updateRoleMutation.mutate({ userId: user.id, role)};
                             }
                           }}>
                             <SelectTrigger className="w-32">
@@ -254,7 +250,7 @@ export default function AdminUsers() {
                               <SelectItem value="user">Utilisateur</SelectItem>
                               <SelectItem value="admin">Admin</SelectItem>
                               { isSuperAdmin && (
-                                <SelectItem value="superadmin">Super Admin</SelectItem>}
+                                <SelectItem value="superadmin">Super Admin</SelectItem>)}
                             </SelectContent>
                           </Select>
                           
@@ -275,7 +271,7 @@ export default function AdminUsers() {
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => deactivateUserMutation.mutate(user.id )}>
+                                  <AlertDialogAction onClick={() => deactivateUserMutation.mutate(user.id ))}>
                                     Désactiver
                                   </AlertDialogAction>
                                 </AlertDialogFooter>
@@ -285,15 +281,15 @@ export default function AdminUsers() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={ () => reactivateUserMutation.mutate(user.id });
+                              onClick={ () => reactivateUserMutation.mutate(user.id )}
                             >
                               <UserCheck className="h-4 w-4" />
                             </Button>
-                          ))}
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
-                  )});
+                  ))}
                 </TableBody>
               </Table>
             </div>
@@ -301,14 +297,14 @@ export default function AdminUsers() {
             {/* Pagination */}
             <div className="flex items-center justify-between">
               <div className="text-sm text-muted-foreground">
-                Page {currentPage + 1} sur { Math.ceil((usersData?.total || 0) / limit});
+                Page {currentPage + 1} sur { Math.ceil((usersData?.total || 0) / limit)}
               </div>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   disabled={currentPage === 0}
-                  onClick={ () => setCurrentPage(currentPage - 1 });
+                  onClick={ () => setCurrentPage(currentPage - 1 )}
                 >
                   Précédent
                 </Button>
@@ -316,7 +312,7 @@ export default function AdminUsers() {
                   variant="outline"
                   size="sm"
                   disabled={currentPage >= Math.ceil((usersData?.total || 0) / limit) - 1}
-                  onClick={ () => setCurrentPage(currentPage + 1 });
+                  onClick={ () => setCurrentPage(currentPage + 1 )}
                 >
                   Suivant
                 </Button>

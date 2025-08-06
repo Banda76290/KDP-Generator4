@@ -12,12 +12,12 @@ import Layout from "@/components/Layout";
 
 
 export default function Settings() {
-  const { user, isLoading } = useAuth() as { user: User | undefined; isLoading: boolean });
+  const { user, isLoading } = useAuth() as { user: User | undefined; isLoading: boolean };
 
   const getUserInitials = (firstName?: string, lastName?: string) => {
     if (!firstName && !lastName) return "U";
     return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
-  });
+  };
 
   // Si on est en cours de chargement, afficher un état de chargement
   if (isLoading) {
@@ -59,7 +59,7 @@ export default function Settings() {
                   <Avatar className="h-20 w-20">
                     <AvatarImage src={user?.profileImageUrl || undefined} alt="Profile" />
                     <AvatarFallback className="text-lg">
-                      { getUserInitials(user?.firstName || undefined, user?.lastName || undefined}
+                      { getUserInitials(user?.firstName || undefined, user?.lastName || undefined)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="space-y-2">

@@ -27,7 +27,7 @@ export default function AdminConfig() {
     key: "",
     value: "",
     description: "",
-  });
+  };
 
   // Redirect to home if not admin
   useEffect(() => {
@@ -35,8 +35,7 @@ export default function AdminConfig() {
       toast({
         title: "Accès refusé",
         description: "Vous n'avez pas les permissions d'administrateur.",
-        variant: "destructive"
-      });
+        variant: "destructive",)};
       setTimeout(() => {
         window.location.href = "/";
       }, 500);
@@ -47,39 +46,36 @@ export default function AdminConfig() {
   const { data: config, isLoading: configLoading } = useQuery<SystemConfig[]>({
     queryKey: ["/api/admin/config"],
     enabled: isAdmin,
-  });
+  };
 
   const updateConfigMutation = useMutation({
-    mutationFn: async (configData: { key: string; value: string; description?: string} => { return await apiRequest("/api/admin/config", { method: "PUT", body: JSON.stringify(configData});
-    });
+    mutationFn: async (configData: { key: string; value: string; description?: string)} => { return await apiRequest("/api/admin/config", { method: "PUT", body: JSON.stringify(configData)};
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/config"]});
-      toast({
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/config"])};
+      toast.success({
         title: "Succès",
         description: "Configuration mise à jour avec succès.",
-      });
-      setNewConfig({ key: "", value: "", description: "" });
-    });
+      };
+      setNewConfig({ key: "", value: "", description: "" };
+    },
     onError: (error: Error) => {
-      toast({
+      toast.error({
         title: "Erreur",
-        description: error.message || "Impossible de mettre à jour la configuration."
-      });
-    });
+        description: error.message || "Impossible de mettre à jour la configuration.",)};
+    },
   });
 
   const handleAddConfig = () => {
     if (!newConfig.key || !newConfig.value) {
-      toast({
+      toast.error({
         title: "Erreur",
-        description: "La clé et la valeur sont obligatoires.",
-        variant: "destructive",
-      });
+        description: "La clé et la valeur sont obligatoires.",)};
       return;
     }
 
     updateConfigMutation.mutate(newConfig);
-  });
+  };
 
   const commonConfigs = [
     {
@@ -87,31 +83,31 @@ export default function AdminConfig() {
       label: "Nom de la plateforme",
       description: "Le nom affiché de la plateforme",
       defaultValue: "KDP Generator",
-    });
+    },
     {
       key: "support_email",
       label: "Email de support",
       description: "Adresse email pour le support client",
       defaultValue: "support@kdpgenerator.com",
-    });
+    },
     {
       key: "max_ai_requests_per_day",
       label: "Requêtes IA max par jour",
       description: "Nombre maximum de requêtes IA par utilisateur par jour",
       defaultValue: "10",
-    });
+    },
     {
       key: "free_tier_project_limit",
       label: "Limite projets gratuits",
       description: "Nombre maximum de projets pour les comptes gratuits",
       defaultValue: "3",
-    });
+    },
     {
       key: "maintenance_mode",
       label: "Mode maintenance",
       description: "Activer le mode maintenance",
       defaultValue: "false",
-    });
+    },
   ];
 
   if (isLoading || configLoading) {
@@ -131,7 +127,7 @@ export default function AdminConfig() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={ () => window.history.back( }>
+        <Button variant="ghost" size="sm" onClick={ () => window.history.back( )}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour
         </Button>
@@ -161,7 +157,7 @@ export default function AdminConfig() {
               <Input
                 id="config-key"
                 value={newConfig.key}
-                onChange={(e) => setNewConfig({ ...newConfig, key: e.target.value }}
+                onChange={(e) => setNewConfig({ ...newConfig, key: e.target.value )}}
                 placeholder="ex: platform_name"
               />
             </div>
@@ -170,7 +166,7 @@ export default function AdminConfig() {
               <Input
                 id="config-value"
                 value={newConfig.value}
-                onChange={(e) => setNewConfig({ ...newConfig, value: e.target.value }}
+                onChange={(e) => setNewConfig({ ...newConfig, value: e.target.value )}}
                 placeholder="ex: KDP Generator"
               />
             </div>
@@ -179,7 +175,7 @@ export default function AdminConfig() {
               <Textarea
                 id="config-description"
                 value={newConfig.description}
-                onChange={(e) => setNewConfig({ ...newConfig, description: e.target.value }}
+                onChange={(e) => setNewConfig({ ...newConfig, description: e.target.value )}}
                 placeholder="Description du paramètre"
                 rows={3}
               />
@@ -211,7 +207,7 @@ export default function AdminConfig() {
               {commonConfigs.map((configItem) => {
                 const existingConfig = config?.find(c => c.key === configItem.key);
                 return (
-                  <div key={configItem.key} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div key={configItem.key)} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="space-y-1">
                       <div className="font-medium">{configItem.label}</div>
                       <div className="text-sm text-muted-foreground">{configItem.description}</div>
@@ -226,13 +222,13 @@ export default function AdminConfig() {
                         key: configItem.key,
                         value: existingConfig?.value || configItem.defaultValue,
                         description: configItem.description,
-                      }}
+                      )}}
                     >
                       {existingConfig ? "Modifier" : "Ajouter"}
                     </Button>
                   </div>
                 );
-              }))}
+              })}
             </div>
           </CardContent>
         </Card>
@@ -261,12 +257,12 @@ export default function AdminConfig() {
                 </TableHeader>
                 <TableBody>
                   {config.map((configItem) => (
-                    <TableRow key={configItem.key}>
+                    <TableRow key={configItem.key)}>
                       <TableCell className="font-mono text-sm">{configItem.key}</TableCell>
                       <TableCell className="max-w-xs truncate">{configItem.value}</TableCell>
                       <TableCell className="max-w-xs truncate">{configItem.description || "-"}</TableCell>
                       <TableCell>
-                        { new Date(configItem.updatedAt).toLocaleDateString("fr-FR"}
+                        { new Date(configItem.updatedAt).toLocaleDateString("fr-FR")}
                       </TableCell>
                       <TableCell>
                         <Button
@@ -276,7 +272,7 @@ export default function AdminConfig() {
                             key: configItem.key,
                             value: configItem.value,
                             description: configItem.description || "",
-                          }}
+                          )}}
                         >
                           Modifier
                         </Button>
@@ -290,7 +286,7 @@ export default function AdminConfig() {
             <div className="text-center py-8 text-muted-foreground">
               Aucune configuration système trouvée. Ajoutez votre première configuration ci-dessus.
             </div>
-          ))}
+          )}
         </CardContent>
       </Card>
     </div>

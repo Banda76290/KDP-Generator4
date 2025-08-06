@@ -46,14 +46,14 @@ export default function SeriesSetupPage() {
     queryKey: ['/api/series', seriesId],
     queryFn: async () => {
       if (!seriesId) return null;
-      const response = await fetch(`/api/series/${seriesId}`, {
+      const response = await fetch(`/api/series/${seriesId)}`, {
         credentials: 'include'
-      });
+      };
       if (!response.ok) {
         throw new Error('Failed to fetch series');
       }
       return response.json();
-    });
+    },
     enabled: !!seriesId
   });
 
@@ -84,7 +84,7 @@ export default function SeriesSetupPage() {
           if (editor) {
             // Clear editor first
             while (editor.firstChild) {
-              editor.removeChild(editor.firstChild);}
+              editor.removeChild(editor.firstChild);)}
             
             // Use the cleanHTML function to safely set content
             const cleanedContent = cleanHTML(existingSeries.description);
@@ -121,7 +121,7 @@ export default function SeriesSetupPage() {
     if (characterCount > maxCharacters) {
       toast({
         title: "Error",
-        description: `Description exceeds ${maxCharacters} character limit.`,
+        description: `Description exceeds ${maxCharacters)} character limit.`,
         variant: "destructive"
       });
       return;
@@ -133,7 +133,7 @@ export default function SeriesSetupPage() {
         language: data.language,
         readingOrder: data.readingOrder,
         description: editorContent
-      });
+      };
 
       const url = isEditing ? `/api/series/${seriesId}` : '/api/series';
       const method = isEditing ? 'PUT' : 'POST';
@@ -142,19 +142,19 @@ export default function SeriesSetupPage() {
         method,
         headers: {
           'Content-Type': 'application/json',
-        });
+        },
         body: JSON.stringify(formData),
         credentials: 'include'
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Unknown error'});
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error')});
         console.error('API Error:', errorData);
         throw new Error(errorData.message || `Failed to ${isEditing ? 'update' : 'create'} series`);
       }
 
       // Invalidate and refetch series data
-      await queryClient.invalidateQueries({ queryKey: ['/api/series'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/series'] };
       
       const responseData = await response.json();
       
@@ -173,7 +173,7 @@ export default function SeriesSetupPage() {
         if (returnToBookEdit === 'new') {
           setLocation('/books/create');
         } else {
-          setLocation(`/books/edit/${returnToBookEdit}`);
+          setLocation(`/books/edit/${returnToBookEdit)}`);
         }
       } else {
         setLocation('/manage-series');
@@ -182,11 +182,11 @@ export default function SeriesSetupPage() {
       console.error('Error saving series:', error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : `Failed to ${isEditing ? 'update' : 'create'} series. Please try again.`,
+        description: error instanceof Error ? error.message : `Failed to ${isEditing ? 'update' : 'create')} series. Please try again.`,
         variant: "destructive",
       });
     }
-  });
+  };
 
   useEffect(() => {
     // Add CSS for the editor placeholder and formatting
@@ -210,13 +210,13 @@ export default function SeriesSetupPage() {
     
     return () => {
       document.head.removeChild(style);
-    });
+    };
   }, []);
 
   const applyFormatting = (command: string, value?: string) => {
     document.execCommand(command, false, value);
     updateDescriptionFromHTML();
-  });
+  };
 
   // Function to clean HTML and remove unnecessary styles
   const cleanHTML = (html: string): string => {
@@ -258,7 +258,7 @@ export default function SeriesSetupPage() {
           }
         }
       }
-    });
+    };
     
     // Copy body content to tempDiv safely
     for (let child of Array.from(doc.body.childNodes)) {
@@ -279,7 +279,7 @@ export default function SeriesSetupPage() {
             .split(';')
             .filter(style => {
               const prop = style.trim().split(':')[0]?.trim();
-              return ['color', 'font-weight', 'font-style', 'text-decoration'].includes(prop);}
+              return ['color', 'font-weight', 'font-style', 'text-decoration'].includes(prop);)}
             .join('; ');
           
           if (cleanStyles) {
@@ -297,7 +297,7 @@ export default function SeriesSetupPage() {
     });
     
     return tempDiv.innerHTML;
-  });
+  };
 
   const updateDescriptionFromHTML = () => {
     const editor = document.getElementById('description-editor') as HTMLDivElement;
@@ -310,7 +310,7 @@ export default function SeriesSetupPage() {
     setCharacterCount(textContent.length);
     setEditorContent(cleanedHtmlContent);
     form.setValue('description', cleanedHtmlContent);
-  });
+  };
 
   const handleFormatChange = (format: string) => {
     switch (format) {
@@ -327,7 +327,7 @@ export default function SeriesSetupPage() {
         applyFormatting('formatBlock', 'div');
         break;
     }
-  });
+  };
 
   const handleLinkInsert = () => {
     if (linkUrl) {
@@ -358,71 +358,71 @@ export default function SeriesSetupPage() {
       setLinkUrl('');
       setShowLinkDialog(false);
     }
-  });
+  };
 
   const insertSpecialCharacter = () => {
     const specialChars = ['©', '®', '™', '§', '¶', '†', '‡', '•', '…', '–', '—'];
     const char = specialChars[Math.floor(Math.random() * specialChars.length)];
     applyFormatting('insertText', char);
-  });
+  };
 
   const supportedLanguages = [
-    { value: 'english', label: 'English' });
-    { value: 'afrikaans', label: 'Afrikaans' });
-    { value: 'arabic', label: 'Arabic (Beta)' });
-    { value: 'basque', label: 'Basque' });
-    { value: 'breton', label: 'Breton' });
-    { value: 'bulgarian', label: 'Bulgarian' });
-    { value: 'catalan', label: 'Catalan' });
-    { value: 'chinese_traditional', label: 'Chinese (Traditional) (Beta)' });
-    { value: 'cornish', label: 'Cornish' });
-    { value: 'corsican', label: 'Corsican' });
-    { value: 'croatian', label: 'Croatian' });
-    { value: 'czech', label: 'Czech' });
-    { value: 'danish', label: 'Danish' });
-    { value: 'dutch', label: 'Dutch' });
-    { value: 'eastern_frisian', label: 'Eastern Frisian' });
-    { value: 'estonian', label: 'Estonian' });
-    { value: 'finnish', label: 'Finnish' });
-    { value: 'french', label: 'French' });
-    { value: 'frisian', label: 'Frisian' });
-    { value: 'galician', label: 'Galician' });
-    { value: 'german', label: 'German' });
-    { value: 'greek', label: 'Greek' });
-    { value: 'gujarati', label: 'Gujarati' });
-    { value: 'hebrew', label: 'Hebrew' });
-    { value: 'hindi', label: 'Hindi' });
-    { value: 'hungarian', label: 'Hungarian' });
-    { value: 'icelandic', label: 'Icelandic' });
-    { value: 'irish', label: 'Irish' });
-    { value: 'italian', label: 'Italian' });
-    { value: 'japanese', label: 'Japanese' });
-    { value: 'korean', label: 'Korean' });
-    { value: 'latvian', label: 'Latvian' });
-    { value: 'lithuanian', label: 'Lithuanian' });
-    { value: 'luxembourgish', label: 'Luxembourgish' });
-    { value: 'malay', label: 'Malay' });
-    { value: 'malayalam', label: 'Malayalam' });
-    { value: 'manx', label: 'Manx' });
-    { value: 'marathi', label: 'Marathi' });
-    { value: 'northern_frisian', label: 'Northern Frisian' });
-    { value: 'norwegian', label: 'Norwegian' });
-    { value: 'nynorsk_norwegian', label: 'Nynorsk Norwegian' });
-    { value: 'polish', label: 'Polish' });
-    { value: 'portuguese_brazil', label: 'Portuguese (Brazil)' });
-    { value: 'portuguese_portugal', label: 'Portuguese (Portugal)' });
-    { value: 'romanian', label: 'Romanian' });
-    { value: 'russian', label: 'Russian' });
-    { value: 'scots', label: 'Scots' });
-    { value: 'scottish_gaelic', label: 'Scottish Gaelic' });
-    { value: 'slovak', label: 'Slovak' });
-    { value: 'slovenian', label: 'Slovenian' });
-    { value: 'spanish', label: 'Spanish' });
-    { value: 'swedish', label: 'Swedish' });
-    { value: 'tamil', label: 'Tamil' });
-    { value: 'thai', label: 'Thai' });
-    { value: 'turkish', label: 'Turkish' });
-    { value: 'ukrainian', label: 'Ukrainian' });
+    { value: 'english', label: 'English' },
+    { value: 'afrikaans', label: 'Afrikaans' },
+    { value: 'arabic', label: 'Arabic (Beta)' },
+    { value: 'basque', label: 'Basque' },
+    { value: 'breton', label: 'Breton' },
+    { value: 'bulgarian', label: 'Bulgarian' },
+    { value: 'catalan', label: 'Catalan' },
+    { value: 'chinese_traditional', label: 'Chinese (Traditional) (Beta)' },
+    { value: 'cornish', label: 'Cornish' },
+    { value: 'corsican', label: 'Corsican' },
+    { value: 'croatian', label: 'Croatian' },
+    { value: 'czech', label: 'Czech' },
+    { value: 'danish', label: 'Danish' },
+    { value: 'dutch', label: 'Dutch' },
+    { value: 'eastern_frisian', label: 'Eastern Frisian' },
+    { value: 'estonian', label: 'Estonian' },
+    { value: 'finnish', label: 'Finnish' },
+    { value: 'french', label: 'French' },
+    { value: 'frisian', label: 'Frisian' },
+    { value: 'galician', label: 'Galician' },
+    { value: 'german', label: 'German' },
+    { value: 'greek', label: 'Greek' },
+    { value: 'gujarati', label: 'Gujarati' },
+    { value: 'hebrew', label: 'Hebrew' },
+    { value: 'hindi', label: 'Hindi' },
+    { value: 'hungarian', label: 'Hungarian' },
+    { value: 'icelandic', label: 'Icelandic' },
+    { value: 'irish', label: 'Irish' },
+    { value: 'italian', label: 'Italian' },
+    { value: 'japanese', label: 'Japanese' },
+    { value: 'korean', label: 'Korean' },
+    { value: 'latvian', label: 'Latvian' },
+    { value: 'lithuanian', label: 'Lithuanian' },
+    { value: 'luxembourgish', label: 'Luxembourgish' },
+    { value: 'malay', label: 'Malay' },
+    { value: 'malayalam', label: 'Malayalam' },
+    { value: 'manx', label: 'Manx' },
+    { value: 'marathi', label: 'Marathi' },
+    { value: 'northern_frisian', label: 'Northern Frisian' },
+    { value: 'norwegian', label: 'Norwegian' },
+    { value: 'nynorsk_norwegian', label: 'Nynorsk Norwegian' },
+    { value: 'polish', label: 'Polish' },
+    { value: 'portuguese_brazil', label: 'Portuguese (Brazil)' },
+    { value: 'portuguese_portugal', label: 'Portuguese (Portugal)' },
+    { value: 'romanian', label: 'Romanian' },
+    { value: 'russian', label: 'Russian' },
+    { value: 'scots', label: 'Scots' },
+    { value: 'scottish_gaelic', label: 'Scottish Gaelic' },
+    { value: 'slovak', label: 'Slovak' },
+    { value: 'slovenian', label: 'Slovenian' },
+    { value: 'spanish', label: 'Spanish' },
+    { value: 'swedish', label: 'Swedish' },
+    { value: 'tamil', label: 'Tamil' },
+    { value: 'thai', label: 'Thai' },
+    { value: 'turkish', label: 'Turkish' },
+    { value: 'ukrainian', label: 'Ukrainian' },
     { value: 'welsh', label: 'Welsh' }
   ];
 
@@ -456,8 +456,8 @@ export default function SeriesSetupPage() {
                   
                   if (returnToBookEdit === 'new') {
                     setLocation('/books/create');
-                  } else {
-                    setLocation(`/books/edit/${returnToBookEdit}`);
+                  )} else {
+                    setLocation(`/books/edit/${returnToBookEdit)}`);
                   }
                 } else {
                   setLocation('/manage-series');
@@ -477,7 +477,7 @@ export default function SeriesSetupPage() {
           </h1>
         </div>
 
-        <form onSubmit={ form.handleSubmit(onSubmit} className="space-y-6">
+        <form onSubmit={ form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Language Section */}
           <Card>
             <CardHeader>
@@ -489,15 +489,15 @@ export default function SeriesSetupPage() {
                   Choose the primary language for this series.
                 </p>
                 <Select 
-                  value={ form.watch('language'} 
-                  onValueChange={ (value) => form.setValue('language', value}
+                  value={ form.watch('language')} 
+                  onValueChange={ (value) => form.setValue('language', value)}
                 >
                   <SelectTrigger className="w-full max-w-md">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {supportedLanguages.map((lang) => (
-                      <SelectItem key={lang.value} value={lang.value}>
+                      <SelectItem key={lang.value)} value={lang.value}>
                         {lang.label}
                       </SelectItem>
                     ))}
@@ -521,12 +521,12 @@ export default function SeriesSetupPage() {
                 <Input
                   id="title"
                   placeholder="Enter your series name"
-                  {...form.register('title', { required: 'Series title is required'}}
+                  {...form.register('title', { required: 'Series title is required')}}
                   className="w-full"
                 />
                 {form.formState.errors.title && (
-                  <p className="text-sm text-red-600">{form.formState.errors.title.message}</p>
-                ))}
+                  <p className="text-sm text-red-600">{form.formState.errors.title.message)}</p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -542,8 +542,8 @@ export default function SeriesSetupPage() {
                   Choose how you want to display titles in your series.
                 </p>
                 <RadioGroup 
-                  value={ form.watch('readingOrder'} 
-                  onValueChange={ (value: 'ordered' | 'unordered') => form.setValue('readingOrder', value}
+                  value={ form.watch('readingOrder')} 
+                  onValueChange={ (value: 'ordered' | 'unordered') => form.setValue('readingOrder', value)}
                 >
                   <div className="space-y-4">
                     <div className="flex items-start space-x-2">
@@ -613,7 +613,7 @@ export default function SeriesSetupPage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={ () => applyFormatting('bold' }
+                    onClick={ () => applyFormatting('bold' )}
                     title="Bold"
                   >
                     <strong>B</strong>
@@ -623,7 +623,7 @@ export default function SeriesSetupPage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={ () => applyFormatting('italic' }
+                    onClick={ () => applyFormatting('italic' )}
                     title="Italic"
                   >
                     <em>I</em>
@@ -633,7 +633,7 @@ export default function SeriesSetupPage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={ () => applyFormatting('underline' }
+                    onClick={ () => applyFormatting('underline' )}
                     title="Underline"
                   >
                     <u>U</u>
@@ -644,7 +644,7 @@ export default function SeriesSetupPage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={ () => applyFormatting('insertUnorderedList' }
+                    onClick={ () => applyFormatting('insertUnorderedList' )}
                     title="Bullet List"
                   >
                     •
@@ -654,13 +654,13 @@ export default function SeriesSetupPage() {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 px-2 hover:bg-gray-200"
-                    onClick={ () => applyFormatting('insertOrderedList' }
+                    onClick={ () => applyFormatting('insertOrderedList' )}
                     title="Numbered List"
                   >
                     1.
                   </Button>
                   <div className="w-px h-6 bg-gray-300"></div>
-                  <Select defaultValue="normal" onValueChange={ (value) => handleFormatChange(value}>
+                  <Select defaultValue="normal" onValueChange={ (value) => handleFormatChange(value)}>
                     <SelectTrigger className="w-24 h-8">
                       <SelectValue />
                     </SelectTrigger>
@@ -698,7 +698,7 @@ export default function SeriesSetupPage() {
                             type="url"
                             placeholder="https://example.com"
                             value={linkUrl}
-                            onChange={ (e) => setLinkUrl(e.target.value }
+                            onChange={ (e) => setLinkUrl(e.target.value )}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
                                 e.preventDefault();
@@ -761,7 +761,7 @@ export default function SeriesSetupPage() {
                   />
                   <input
                     type="hidden"
-                    { ...form.register('description'}
+                    { ...form.register('description')}
                   />
                   <div className="flex justify-end">
                     <span className={`text-sm ${characterCount > maxCharacters ? 'text-red-600' : 'text-green-600'}`}>
@@ -787,8 +787,8 @@ export default function SeriesSetupPage() {
                   
                   if (returnToBookEdit === 'new') {
                     setLocation('/books/create');
-                  } else {
-                    setLocation(`/books/edit/${returnToBookEdit}`);
+                  )} else {
+                    setLocation(`/books/edit/${returnToBookEdit)}`);
                   }
                 } else {
                   setLocation('/manage-series');

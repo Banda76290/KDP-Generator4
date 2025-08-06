@@ -27,7 +27,7 @@ export default function AdminBlogCategories() {
     slug: "",
     description: "",
     color: "#3B82F6",
-  });
+  };
 
   // Redirect to home if not admin
   useEffect(() => {
@@ -35,8 +35,7 @@ export default function AdminBlogCategories() {
       toast({
         title: "Accès refusé",
         description: "Vous n'avez pas les permissions d'administrateur.",
-        variant: "destructive"
-      });
+        variant: "destructive",)};
       setTimeout(() => {
         window.location.href = "/";
       }, 500);
@@ -47,70 +46,67 @@ export default function AdminBlogCategories() {
   const { data: categories, isLoading: categoriesLoading } = useQuery<BlogCategory[]>({
     queryKey: ["/api/admin/blog/categories"],
     enabled: isAdmin,
-  });
+  };
 
   const createCategoryMutation = useMutation({ mutationFn: async (categoryData: typeof formData) => {
-      return await apiRequest("/api/admin/blog/categories", { method: "POST", body: JSON.stringify(categoryData});
-    });
+      return await apiRequest("/api/admin/blog/categories", { method: "POST", body: JSON.stringify(categoryData)};
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/categories"]});
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/categories"])};
       toast({
         title: "Succès",
         description: "Catégorie créée avec succès.",
-      });
+      };
       setIsDialogOpen(false);
-      setFormData({ name: "", slug: "", description: "", color: "#3B82F6" });
-    });
+      setFormData({ name: "", slug: "", description: "", color: "#3B82F6" };
+    },
     onError: (error: Error) => {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de créer la catégorie.",
-        variant: "destructive"
-      });
-    });
+        variant: "destructive",)};
+    },
   });
 
   const updateCategoryMutation = useMutation({
-    mutationFn: async ({ id, data}: { id: string; data: typeof formData } => {
-      return await apiRequest(`/api/admin/blog/categories/${id}`, { method: "PUT", body: JSON.stringify(data});
-    });
+    mutationFn: async ({ id, data)}: { id: string; data: typeof formData } => {
+      return await apiRequest(`/api/admin/blog/categories/${id)}`, { method: "PUT", body: JSON.stringify(data)};
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/categories"]});
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/categories"])};
       toast({
         title: "Succès",
         description: "Catégorie mise à jour avec succès.",
-      });
+      };
       setIsDialogOpen(false);
       setSelectedCategory(null);
-      setFormData({ name: "", slug: "", description: "", color: "#3B82F6" });
-    });
+      setFormData({ name: "", slug: "", description: "", color: "#3B82F6" };
+    },
     onError: (error: Error) => {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de mettre à jour la catégorie.",
-        variant: "destructive"
-      });
-    });
+        variant: "destructive",)};
+    },
   });
 
   const deleteCategoryMutation = useMutation({
     mutationFn: async (categoryId: string) => {
-      return await apiRequest(`/api/admin/blog/categories/${categoryId}`, { method: "DELETE" });
-    });
+      return await apiRequest(`/api/admin/blog/categories/${categoryId)}`, { method: "DELETE" };
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/categories"]});
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/categories"])};
       toast({
         title: "Succès",
         description: "Catégorie supprimée avec succès.",
-      });
-    });
+      };
+    },
     onError: (error: Error) => {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de supprimer la catégorie.",
-        variant: "destructive"
-      });
-    });
+        variant: "destructive",)};
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -120,17 +116,16 @@ export default function AdminBlogCategories() {
       toast({
         title: "Erreur",
         description: "Le nom et le slug sont obligatoires.",
-        variant: "destructive"
-      });
+        variant: "destructive",)};
       return;
     }
 
     if (selectedCategory) {
-      updateCategoryMutation.mutate({ id: selectedCategory.id, data: formData});
+      updateCategoryMutation.mutate({ id: selectedCategory.id, data: formData)};
     } else {
       createCategoryMutation.mutate(formData);
     }
-  });
+  };
 
   const handleEdit = (category: BlogCategory) => {
     setSelectedCategory(category);
@@ -138,16 +133,15 @@ export default function AdminBlogCategories() {
       name: category.name,
       slug: category.slug,
       description: category.description || "",
-      color: category.color || "#3B82F6"
-      });
+      color: category.color || "#3B82F6",)};
     setIsDialogOpen(true);
-  });
+  };
 
   const handleNew = () => {
     setSelectedCategory(null);
-    setFormData({ name: "", slug: "", description: "", color: "#3B82F6"});
+    setFormData({ name: "", slug: "", description: "", color: "#3B82F6")};
     setIsDialogOpen(true);
-  });
+  };
 
   // Auto-generate slug from name
   const handleNameChange = (name: string) => { setFormData(prev => ({
@@ -157,8 +151,8 @@ export default function AdminBlogCategories() {
         .replace(/[^a-z0-9\s-]/g, '')
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-')
-        .trim(});
-  });
+        .trim()});
+  };
 
   if (isLoading || categoriesLoading) {
     return (
@@ -178,7 +172,7 @@ export default function AdminBlogCategories() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={ () => window.history.back( }>
+          <Button variant="ghost" size="sm" onClick={ () => window.history.back( )}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
@@ -222,7 +216,7 @@ export default function AdminBlogCategories() {
                 </TableHeader>
                 <TableBody>
                   {categories.map((category) => (
-                    <TableRow key={category.id}>
+                    <TableRow key={category.id)}>
                       <TableCell>
                         <div className="font-medium">{category.name}</div>
                       </TableCell>
@@ -251,14 +245,14 @@ export default function AdminBlogCategories() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        { format(new Date(category.createdAt!), "dd/MM/yyyy"}
+                        { format(new Date(category.createdAt!), "dd/MM/yyyy")}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={ () => handleEdit(category }
+                            onClick={ () => handleEdit(category )}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -281,7 +275,7 @@ export default function AdminBlogCategories() {
                                 <Button variant="outline">Annuler</Button>
                                 <Button 
                                   variant="destructive"
-                                  onClick={ () => deleteCategoryMutation.mutate(category.id }
+                                  onClick={ () => deleteCategoryMutation.mutate(category.id )}
                                 >
                                   Supprimer
                                 </Button>
@@ -303,7 +297,7 @@ export default function AdminBlogCategories() {
                 Créez votre première catégorie pour organiser vos articles.
               </div>
             </div>
-          ))}
+          )}
         </CardContent>
       </Card>
 
@@ -328,7 +322,7 @@ export default function AdminBlogCategories() {
               <Input
                 id="name"
                 value={formData.name}
-                onChange={ (e) => handleNameChange(e.target.value }
+                onChange={ (e) => handleNameChange(e.target.value )}
                 placeholder="Nom de la catégorie"
                 required
               />
@@ -339,7 +333,7 @@ export default function AdminBlogCategories() {
               <Input
                 id="slug"
                 value={formData.slug}
-                onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value )}}
+                onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value ))}}
                 placeholder="slug-de-la-categorie"
                 required
               />
@@ -350,7 +344,7 @@ export default function AdminBlogCategories() {
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value )}}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value ))}}
                 placeholder="Description de la catégorie"
                 rows={3}
               />
@@ -363,12 +357,12 @@ export default function AdminBlogCategories() {
                   type="color"
                   id="color"
                   value={formData.color}
-                  onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value )}}
+                  onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value ))}}
                   className="w-12 h-8 border rounded cursor-pointer"
                 />
                 <Input
                   value={formData.color}
-                  onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value )}}
+                  onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value ))}}
                   placeholder="#3B82F6"
                   className="flex-1"
                 />
@@ -376,7 +370,7 @@ export default function AdminBlogCategories() {
             </div>
             
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={ () => setIsDialogOpen(false }>
+              <Button type="button" variant="outline" onClick={ () => setIsDialogOpen(false )}>
                 Annuler
               </Button>
               <Button 

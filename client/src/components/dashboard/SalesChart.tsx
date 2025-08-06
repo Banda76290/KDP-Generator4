@@ -9,16 +9,16 @@ export default function SalesChart() {
   
   const { data: stats } = useQuery({
     queryKey: ["/api/dashboard/stats"],
-  });
+  };
 
   // Fallback data structure if no stats available
   const chartData = stats?.salesOverTime || [
-    { month: "Jan", revenue: 1200 });
-    { month: "Feb", revenue: 1900 });
-    { month: "Mar", revenue: 2300 });
-    { month: "Apr", revenue: 1700 });
-    { month: "May", revenue: 2100 });
-    { month: "Jun", revenue: 2847 });
+    { month: "Jan", revenue: 1200 },
+    { month: "Feb", revenue: 1900 },
+    { month: "Mar", revenue: 2300 },
+    { month: "Apr", revenue: 1700 },
+    { month: "May", revenue: 2100 },
+    { month: "Jun", revenue: 2847 },
   ];
 
   return (

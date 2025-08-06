@@ -61,76 +61,73 @@ export default function AdminPrompts() {
     systemPrompt: "",
     userPromptTemplate: "",
     isActive: true
-  });
+  };
 
   // Fetch prompts
   const { data: prompts = [], isLoading } = useQuery<AiPromptTemplate[]>({
     queryKey: ['/api/admin/prompts'],
     enabled: isAdmin,
-  });
+  };
 
   // Create prompt mutation
   const createMutation = useMutation({
     mutationFn: (data: InsertAiPromptTemplate) => 
       apiRequest('POST', '/api/admin/prompts', data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/prompts']});
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/prompts'])};
       setIsDialogOpen(false);
       resetForm();
       toast({
         title: "Prompt créé",
         description: "Le template de prompt a été créé avec succès.",
-      });
-    });
+      };
+    },
     onError: (error: any) => {
       toast({
         title: "Erreur de création",
         description: error.message || "Impossible de créer le prompt",
-        variant: "destructive"
-      });
+        variant: "destructive",)};
     }
   });
 
   // Update prompt mutation
   const updateMutation = useMutation({
-    mutationFn: ({ id, data}: { id: string; data: Partial<AiPromptTemplate> } => 
+    mutationFn: ({ id, data)}: { id: string; data: Partial<AiPromptTemplate> } => 
       apiRequest('PUT', `/api/admin/prompts/${id}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/prompts']});
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/prompts'])};
       setIsDialogOpen(false);
       setEditingPrompt(null);
       resetForm();
       toast({
         title: "Prompt mis à jour",
         description: "Le template de prompt a été modifié avec succès.",
-      });
-    });
+      };
+    },
     onError: (error: any) => {
       toast({
         title: "Erreur de modification",
         description: error.message || "Impossible de modifier le prompt",
-        variant: "destructive"
-      });
+        variant: "destructive",)};
     }
   });
 
   // Delete prompt mutation
   const deleteMutation = useMutation({
     mutationFn: (id: string) => 
-      apiRequest('DELETE', `/api/admin/prompts/${id}`),
+      apiRequest('DELETE', `/api/admin/prompts/${id)}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/prompts']});
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/prompts'])};
       toast({
         title: "Prompt supprimé",
         description: "Le template de prompt a été supprimé avec succès.",
-      });
-    });
+      };
+    },
     onError: (error: any) => {
       toast({
         title: "Erreur de suppression",
         description: error.message || "Impossible de supprimer le prompt",
-        variant: "destructive"
-      });
+        variant: "destructive",)};
     }
   });
 
@@ -140,8 +137,8 @@ export default function AdminPrompts() {
       name: "",
       systemPrompt: "",
       userPromptTemplate: "",
-      isActive: true});
-  });
+      isActive: true)};
+  };
 
   const handleEdit = (prompt: AiPromptTemplate) => {
     setEditingPrompt(prompt);
@@ -150,28 +147,27 @@ export default function AdminPrompts() {
       name: prompt.name,
       systemPrompt: prompt.systemPrompt,
       userPromptTemplate: prompt.userPromptTemplate,
-      isActive: prompt.isActive ?? true});
+      isActive: prompt.isActive ?? true)};
     setIsDialogOpen(true);
-  });
+  };
 
   const handleSave = () => {
     if (!formData.type || !formData.name || !formData.systemPrompt || !formData.userPromptTemplate) {
       toast({
         title: "Champs requis",
         description: "Veuillez remplir tous les champs obligatoires.",
-        variant: "destructive"
-      });
+        variant: "destructive",)};
       return;
     }
 
     if (editingPrompt) {
       updateMutation.mutate({ 
         id: editingPrompt.id, 
-        data: formData});
+        data: formData)};
     } else {
       createMutation.mutate(formData);
     }
-  });
+  };
 
   const getTypeColor = (type: string) => {
     const colors: Record<string, string> = {
@@ -183,9 +179,9 @@ export default function AdminPrompts() {
       pricing: "bg-yellow-100 text-yellow-800",
       structure: "bg-indigo-100 text-indigo-800",
       chapters: "bg-teal-100 text-teal-800"
-    });
+    };
     return colors[type] || "bg-gray-100 text-gray-800";
-  });
+  };
 
   if (!isAdmin) {
     return (
@@ -239,7 +235,7 @@ export default function AdminPrompts() {
                     <label className="text-sm font-medium">Type *</label>
                     <Input
                       value={formData.type}
-                      onChange={(e) => setFormData({ ...formData, type: e.target.value }}
+                      onChange={(e) => setFormData({ ...formData, type: e.target.value )}}
                       placeholder="ex: keywords, title, description..."
                     />
                   </div>
@@ -247,7 +243,7 @@ export default function AdminPrompts() {
                     <label className="text-sm font-medium">Nom *</label>
                     <Input
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value }}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value )}}
                       placeholder="Nom du template"
                     />
                   </div>
@@ -258,7 +254,7 @@ export default function AdminPrompts() {
                   <Textarea
                     rows={4}
                     value={formData.systemPrompt}
-                    onChange={(e) => setFormData({ ...formData, systemPrompt: e.target.value }}
+                    onChange={(e) => setFormData({ ...formData, systemPrompt: e.target.value )}}
                     placeholder="Définit le rôle et le comportement de l'IA..."
                   />
                 </div>
@@ -268,7 +264,7 @@ export default function AdminPrompts() {
                   <Textarea
                     rows={6}
                     value={formData.userPromptTemplate}
-                    onChange={(e) => setFormData({ ...formData, userPromptTemplate: e.target.value }}
+                    onChange={(e) => setFormData({ ...formData, userPromptTemplate: e.target.value )}}
                     placeholder="Template avec variables {bookContext}, {bookTitle}, etc..."
                   />
                   <p className="text-xs text-muted-foreground mt-1">
@@ -281,7 +277,7 @@ export default function AdminPrompts() {
                     type="checkbox"
                     id="isActive"
                     checked={formData.isActive}
-                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked }}
+                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked )}}
                   />
                   <label htmlFor="isActive" className="text-sm font-medium">
                     Prompt actif
@@ -308,7 +304,7 @@ export default function AdminPrompts() {
                   { (createMutation.isPending || updateMutation.isPending) ? (
                     <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                   ) : (
-                    <Save className="w-4 h-4 mr-2" />}
+                    <Save className="w-4 h-4 mr-2" />)}
                   {editingPrompt ? "Modifier" : "Créer"}
                 </Button>
               </div>
@@ -330,7 +326,7 @@ export default function AdminPrompts() {
                   <p className="text-muted-foreground mb-4">
                     Créez votre premier template de prompt pour les recommandations IA.
                   </p>
-                  <Button onClick={() => setIsDialogOpen(true )}>
+                  <Button onClick={() => setIsDialogOpen(true ))}>
                     <Plus className="w-4 h-4 mr-2" />
                     Créer un prompt
                   </Button>
@@ -351,7 +347,7 @@ export default function AdminPrompts() {
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Badge className={ getTypeColor(prompt.type}>
+                        <Badge className={ getTypeColor(prompt.type)}>
                           {prompt.type}
                         </Badge>
                         <Badge variant={prompt.isActive ? "default" : "secondary"}>
@@ -384,7 +380,7 @@ export default function AdminPrompts() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={ () => handleEdit(prompt }
+                          onClick={ () => handleEdit(prompt )}
                         >
                           <Edit2 className="w-4 h-4 mr-2" />
                           Modifier
@@ -407,7 +403,7 @@ export default function AdminPrompts() {
                             <AlertDialogFooter>
                               <AlertDialogCancel>Annuler</AlertDialogCancel>
                               <AlertDialogAction
-                                onClick={ () => deleteMutation.mutate(prompt.id }
+                                onClick={ () => deleteMutation.mutate(prompt.id )}
                                 className="bg-red-600 hover:bg-red-700"
                               >
                                 Supprimer
@@ -420,9 +416,9 @@ export default function AdminPrompts() {
                   </CardContent>
                 </Card>
               ))
-            ))}
+            )}
           </div>
-        ))}
+        )}
       </div>
     </Layout>
   );

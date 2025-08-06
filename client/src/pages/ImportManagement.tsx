@@ -28,7 +28,7 @@ const formatFileSize = (bytes: number): string => {
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-});
+};
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -43,7 +43,7 @@ const getStatusBadge = (status: string) => {
     default:
       return <Badge variant="secondary">{status}</Badge>;
   }
-});
+};
 
 const getDetectedTypeDescription = (detectedType: string) => {
   switch (detectedType) {
@@ -60,9 +60,9 @@ const getDetectedTypeDescription = (detectedType: string) => {
     case 'dashboard':
       return 'KDP Dashboard Export - General performance data';
     default:
-      return `KDP Report (${detectedType}`;
+      return `KDP Report (${detectedType)}`;
   }
-});
+};
 
 export default function ImportManagement() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -75,7 +75,7 @@ export default function ImportManagement() {
   // Fetch user imports
   const { data: imports = [], isLoading } = useQuery<KdpImportWithRelations[]>({
     queryKey: ['/api/kdp-imports'],
-  });
+  };
 
   // Upload mutation
   const uploadMutation = useMutation({
@@ -84,14 +84,13 @@ export default function ImportManagement() {
       formData.append('file', file);
       return apiRequest('/api/kdp-imports/upload', {
         method: 'POST',
-        body: formData
-      });
-    });
+        body: formData,)};
+    },
     onSuccess: async (data) => { toast({
         title: "File uploaded successfully",
-        description: `Detected: ${getDetectedTypeDescription(data.parsedData.detectedType}`,
+        description: `Detected: ${getDetectedTypeDescription(data.parsedData.detectedType)}`,
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] };
       setSelectedFile(null);
       
       // Auto-expand and monitor the newly uploaded import
@@ -101,43 +100,39 @@ export default function ImportManagement() {
         // Start monitoring immediately after expansion
         setTimeout(() => {
           // Force refresh the progress query first, then start monitoring
-          queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports', importId, 'progress']});
+          queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports', importId, 'progress'])};
           monitorImportProgress(importId);
         }, 1000);
       }
-    });
+    },
     onError: (error: any) => {
       toast({
         title: "Upload failed",
         description: error.message || "Failed to upload file",
-        variant: "destructive"
-      });
+        variant: "destructive",)};
       setSelectedFile(null);
-    });
+    },
   });
 
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (importId: string) => {
-      return apiRequest(`/api/kdp-imports/${importId}`, {
+      return apiRequest(`/api/kdp-imports/${importId)}`, {
         method: 'DELETE',
-      });
-    });
+      };
+    },
     onSuccess: () => {
       toast({
         title: "Import deleted",
-        description: "Import and all associated data have been removed.",
-        variant: "destructive",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
-    });
+        description: "Import and all associated data have been removed.",)};
+      queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] };
+    },
     onError: (error: any) => {
       toast({
         title: "Delete failed",
         description: error.message || "Failed to delete import",
-        variant: "destructive"
-      });
-    });
+        variant: "destructive",)};
+    },
   });
 
   // Fetch import progress (no polling - only manual refresh)
@@ -145,7 +140,7 @@ export default function ImportManagement() {
     queryKey: ['/api/kdp-imports', expandedImport, 'progress'],
     enabled: !!expandedImport,
     refetchInterval: false, // Disable polling completely
-  });
+  };
 
   const handleFileSelect = (files: File[]) => {
     const file = files[0];
@@ -162,8 +157,7 @@ export default function ImportManagement() {
       toast({
         title: "Invalid file type",
         description: "Please select an Excel (.xlsx, .xls) or CSV file.",
-        variant: "destructive"
-      });
+        variant: "destructive",)};
       return;
     }
 
@@ -172,42 +166,41 @@ export default function ImportManagement() {
       toast({
         title: "File too large",
         description: "Maximum file size is 10MB.",
-        variant: "destructive"
-      });
+        variant: "destructive",)};
       return;
     }
 
     setSelectedFile(file);
-  });
+  };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     const files = Array.from(e.dataTransfer.files);
     handleFileSelect(files);
-  });
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
-  });
+  };
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-  });
+  };
 
   const handleUpload = () => {
     if (selectedFile) {
       uploadMutation.mutate(selectedFile);
     }
-  });
+  };
 
   const handleDelete = (importId: string) => {
     if (confirm('Are you sure you want to delete this import? This action cannot be undone.')) {
       deleteMutation.mutate(importId);
     }
-  });
+  };
 
   const toggleExpandImport = async (importId: string) => {
     const newExpandedImport = expandedImport === importId ? null : importId;
@@ -217,7 +210,7 @@ export default function ImportManagement() {
     if (newExpandedImport) {
       await monitorImportProgress(newExpandedImport);
     }
-  });
+  };
 
   // Monitor import progress with intelligent refresh
   const monitorImportProgress = async (importId: string) => {
@@ -226,7 +219,7 @@ export default function ImportManagement() {
         // Refresh progress data manually for the specific import
         const progressResult = await queryClient.fetchQuery({
           queryKey: ['/api/kdp-imports', importId, 'progress'],
-          queryFn: () => apiRequest(`/api/kdp-imports/${importId}/progress`),
+          queryFn: () => apiRequest(`/api/kdp-imports/${importId)}/progress`),
         });
         
         // If still processing, schedule next check
@@ -234,35 +227,34 @@ export default function ImportManagement() {
           // Wait 3 seconds before next check, but only if still expanded
           setTimeout(() => {
             if (expandedImport === importId) {
-              checkProgress();}
+              checkProgress();)}
           }, 3000);
         } else if (progressResult && (progressResult.status === 'completed' || progressResult.status === 'failed')) {
           // Import finished, refresh the import list to show final status
-          queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports']});
-          queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports', importId, 'progress'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'])};
+          queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports', importId, 'progress'] };
           
           // Show completion notification
           if (progressResult.status === 'completed') {
             toast({
               title: "Import completed",
-              description: `Successfully processed ${progressResult.processedRecords} records`,
+              description: `Successfully processed ${progressResult.processedRecords)} records`,
             });
           } else if (progressResult.status === 'failed') {
             toast({
               title: "Import failed",
               description: "Check the error log for details",
-              variant: "destructive"
-      });
+              variant: "destructive",)};
           }
         }
       } catch (error) {
         console.error('Error checking import progress:', error);
       }
-    });
+    };
 
     // Start monitoring immediately
     await checkProgress();
-  });
+  };
 
   return (
     <Layout>
@@ -304,16 +296,16 @@ export default function ImportManagement() {
                   <FileSpreadsheet className="w-8 h-8 text-primary" />
                   <div className="text-left">
                     <p className="font-medium text-gray-900 dark:text-white">
-                      {selectedFile.name}
+                      {selectedFile.name)}
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      { formatFileSize(selectedFile.size}
+                      { formatFileSize(selectedFile.size)}
                     </p>
                   </div>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={ () => setSelectedFile(null }
+                    onClick={ () => setSelectedFile(null )}
                     className="ml-2"
                   >
                     <X className="w-4 h-4" />
@@ -329,7 +321,7 @@ export default function ImportManagement() {
                   </Button>
                   <Button 
                     variant="outline" 
-                    onClick={ () => setSelectedFile(null }
+                    onClick={ () => setSelectedFile(null )}
                   >
                     Cancel
                   </Button>
@@ -347,7 +339,7 @@ export default function ImportManagement() {
                   </p>
                   <Button 
                     variant="outline" 
-                    onClick={ () => fileInputRef.current?.click( }
+                    onClick={ () => fileInputRef.current?.click( )}
                     className="mt-4"
                   >
                     Select Files
@@ -357,11 +349,11 @@ export default function ImportManagement() {
                     type="file"
                     className="hidden"
                     accept=".xlsx,.xls,.csv"
-                    onChange={ (e) => handleFileSelect(Array.from(e.target.files || [] )}
+                    onChange={ (e) => handleFileSelect(Array.from(e.target.files || [] ))}
                   />
                 </div>
               </div>
-            ))}
+            )}
           </div>
         </CardContent>
       </Card>
@@ -393,7 +385,7 @@ export default function ImportManagement() {
           ) : (
             <div className="space-y-4">
               {imports.map((importRecord) => (
-                <div key={importRecord.id} className="border rounded-lg p-4">
+                <div key={importRecord.id)} className="border rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
@@ -403,33 +395,33 @@ export default function ImportManagement() {
                             {importRecord.fileName}
                           </h3>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            { getDetectedTypeDescription(importRecord.detectedType}
+                            { getDetectedTypeDescription(importRecord.detectedType)}
                           </p>
                         </div>
                       </div>
                       <div className="mt-2 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                        <span>{ formatFileSize(importRecord.fileSize}</span>
+                        <span>{ formatFileSize(importRecord.fileSize)}</span>
                         <span>
-                          { format(new Date(importRecord.createdAt), 'MMM dd, yyyy HH:mm'}
+                          { format(new Date(importRecord.createdAt), 'MMM dd, yyyy HH:mm')}
                         </span>
                         {importRecord.totalRecords > 0 && (
-                          <span>{importRecord.totalRecords} records</span>
-                        ))}
+                          <span>{importRecord.totalRecords)} records</span>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      { getStatusBadge(importRecord.status}
+                      { getStatusBadge(importRecord.status)}
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={ () => toggleExpandImport(importRecord.id }
+                        onClick={ () => toggleExpandImport(importRecord.id )}
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={ () => handleDelete(importRecord.id }
+                        onClick={ () => handleDelete(importRecord.id )}
                         disabled={deleteMutation.isPending}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -440,12 +432,12 @@ export default function ImportManagement() {
                   {/* Expanded Details */}
                   {expandedImport === importRecord.id && importProgress && (
                     <div className="mt-4 pt-4 border-t space-y-4">
-                      {/* Progress Bar */}
+                      {/* Progress Bar */)}
                       {importProgress.status === 'processing' && (
                         <div className="space-y-2">
                           <div className="flex justify-between text-sm">
                             <span>Processing...</span>
-                            <span>{importProgress.progress}%</span>
+                            <span>{importProgress.progress)}%</span>
                           </div>
                           <Progress value={importProgress.progress} className="w-full" />
                           <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -488,19 +480,19 @@ export default function ImportManagement() {
                           <h4 className="font-medium text-red-600">Error Log</h4>
                           <div className="bg-red-50 dark:bg-red-950 p-3 rounded text-sm max-h-40 overflow-y-auto">
                             {importProgress.errorLog.map((error, index) => (
-                              <div key={index} className="mb-1 text-red-700 dark:text-red-300">
+                              <div key={index)} className="mb-1 text-red-700 dark:text-red-300">
                                 {error}
                               </div>
                             ))}
                           </div>
                         </div>
-                      ))}
+                      )}
                     </div>
-                  ))}
+                  )}
                 </div>
               ))}
             </div>
-          ))}
+          )}
         </CardContent>
       </Card>
       </div>
