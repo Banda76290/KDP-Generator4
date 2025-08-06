@@ -116,7 +116,7 @@ export default function AIConfig() {
     mutationFn: async (data: Partial<AIPromptTemplate>) => {
       const method = data.id ? "PUT" : "POST";
       const url = data.id ? `/api/admin/ai/prompts/${data.id}` : "/api/admin/ai/prompts";
-      return await apiRequest(method, url, data);
+      return await apiRequest(url, { method, body: data });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/prompts"] });
@@ -136,7 +136,7 @@ export default function AIConfig() {
     mutationFn: async (data: Partial<AIModel>) => {
       const method = data.id ? "PUT" : "POST";
       const url = data.id ? `/api/admin/ai/models/${data.id}` : "/api/admin/ai/models";
-      return await apiRequest(method, url, data);
+      return await apiRequest(url, { method, body: data });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/models"] });
@@ -156,7 +156,7 @@ export default function AIConfig() {
     mutationFn: async (data: Partial<AIUsageLimit>) => {
       const method = data.id ? "PUT" : "POST";
       const url = data.id ? `/api/admin/ai/limits/${data.id}` : "/api/admin/ai/limits";
-      return await apiRequest(method, url, data);
+      return await apiRequest(url, { method, body: data });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/limits"] });
@@ -174,7 +174,7 @@ export default function AIConfig() {
 
   const deletePromptMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest("DELETE", `/api/admin/ai/prompts/${id}`);
+      return await apiRequest(`/api/admin/ai/prompts/${id}`, { method: "DELETE" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/prompts"] });
