@@ -896,11 +896,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { marketplace } = req.params;
       const { format } = req.query;
       
+      console.log('Marketplace categories API called:', { marketplace, format, params: req.params, query: req.query });
+      
       if (!marketplace) {
+        console.log('Error: No marketplace parameter provided');
         return res.status(400).json({ message: "Marketplace parameter is required" });
       }
 
+      console.log('Calling storage.getMarketplaceCategoriesWithFormat with:', marketplace, format);
       const categories = await storage.getMarketplaceCategoriesWithFormat(marketplace, format as string);
+      console.log('Storage returned categories:', categories?.length, 'items');
+      
       res.json(categories);
     } catch (error) {
       console.error("Error fetching marketplace categories:", error);
