@@ -56,9 +56,12 @@ export default function EditProject() {
     mutationFn: async (data: ProjectFormData) => {
       console.log('Updating project:', projectId, data);
       
-      const updatedProject = await apiRequest("PUT", `/api/projects/${projectId}`, {
-        name: data.name,
-        description: data.description,
+      const updatedProject = await apiRequest(`/api/projects/${projectId}`, {
+        method: "PUT",
+        body: {
+          name: data.name,
+          description: data.description,
+        }
       });
       
       console.log('Project updated:', updatedProject);
