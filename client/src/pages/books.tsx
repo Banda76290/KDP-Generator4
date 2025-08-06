@@ -143,7 +143,7 @@ function BooksContent() {
   // Mutation for assigning book to project
   const assignBookMutation = useMutation({
     mutationFn: async ({ bookId, projectId }: { bookId: string; projectId: string }) => {
-      return apiRequest("PATCH", `/api/books/${bookId}`, { projectId });
+      return apiRequest(`/api/books/${bookId}`, { method: "PUT", body: { projectId } });
     },
     onSuccess: () => {
       toast({
