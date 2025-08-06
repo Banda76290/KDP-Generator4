@@ -2308,17 +2308,15 @@ export class DatabaseStorage implements IStorage {
   async consolidateKdpData(userId: string, exchangeRateService?: any): Promise<{ processed: number; updated: number }> {
     console.log(`[CONSOLIDATION] Démarrage de la consolidation pour l'utilisateur ${userId}`);
     
-    // Récupérer toutes les données KDP pour cet utilisateur (par ASIN et devise)
+    // Les données "payments" sont des paiements agrégés par devise et marketplace
+    // On va consolider par devise et marketplace plutôt que par ASIN
     const rawData = await db.select({
-      asin: kdpImportData.asin,
-      title: kdpImportData.title,
-      authorName: kdpImportData.authorName,
       currency: kdpImportData.currency,
       marketplace: kdpImportData.marketplace,
-      format: kdpImportData.format,
       totalRoyalty: sql<number>`COALESCE(SUM(${kdpImportData.royalty}), 0)`,
       totalUnits: sql<number>`COALESCE(SUM(${kdpImportData.netUnitsSold}), 0)`,
       importIds: sql<string[]>`array_agg(DISTINCT ${kdpImportData.importId})`,
+      recordCount: sql<number>`COUNT(*)`,
     }).from(kdpImportData)
     .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
     .where(and(
@@ -2326,19 +2324,13 @@ export class DatabaseStorage implements IStorage {
       eq(kdpImportData.isDuplicate, false),
       // INCLURE uniquement les fichiers "payments" pour éviter les doublons
       sql`${kdpImports.detectedType} = 'payments'`,
-      isNotNull(kdpImportData.asin),
       isNotNull(kdpImportData.currency),
-      sql`${kdpImportData.asin} != ''`
+      sql`${kdpImportData.royalty} > 0`
     ))
     .groupBy(
-      kdpImportData.asin,
-      kdpImportData.title,
-      kdpImportData.authorName,
       kdpImportData.currency,
-      kdpImportData.marketplace,
-      kdpImportData.format
-    )
-    .having(sql`SUM(${kdpImportData.royalty}) > 0`);
+      kdpImportData.marketplace
+    );
 
     console.log(`[CONSOLIDATION] ${rawData.length} entrées uniques trouvées`);
 
@@ -2364,22 +2356,25 @@ export class DatabaseStorage implements IStorage {
           }
         }
 
+        // Créer une clé unique pour les paiements agrégés
+        const consolidatedKey = `PAYMENTS_${data.currency}_${data.marketplace || 'UNKNOWN'}`;
+        
         // Upsert dans la table consolidée
         await db
           .insert(consolidatedSalesData)
           .values({
             userId,
-            asin: data.asin,
-            title: data.title || 'Titre inconnu',
-            authorName: data.authorName,
+            asin: consolidatedKey,
+            title: `Paiements agrégés ${data.currency}`,
+            authorName: 'Données de paiement',
             currency: data.currency,
             totalRoyalty: data.totalRoyalty.toString(),
             totalUnitsSold: data.totalUnits,
             totalRoyaltyUSD: royaltyUSD.toString(),
             exchangeRate: exchangeRate.toString(),
             exchangeRateDate,
-            marketplace: data.marketplace,
-            format: data.format,
+            marketplace: data.marketplace || 'Multiple',
+            format: 'payments',
             lastUpdateDate: new Date().toISOString().split('T')[0],
             sourceImportIds: data.importIds,
           })
