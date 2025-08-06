@@ -28,29 +28,35 @@ export class MasterBooksService {
 
     console.log(`[MASTER_BOOKS] ${importData.length} enregistrements avec ASIN trouvés`);
 
-    // Grouper par ASIN pour agrégation
-    const asinGroups = new Map<string, typeof importData>();
+    // Grouper par ASIN ET FORMAT pour gérer ebook/paperback/hardcover séparément
+    const asinFormatGroups = new Map<string, typeof importData>();
     
     importData.forEach(record => {
       if (!record.asin) return;
       
-      if (!asinGroups.has(record.asin)) {
-        asinGroups.set(record.asin, []);
+      const format = record.format || 'unknown';
+      const key = `${record.asin}|${format}`;
+      
+      if (!asinFormatGroups.has(key)) {
+        asinFormatGroups.set(key, []);
       }
-      asinGroups.get(record.asin)!.push(record);
+      asinFormatGroups.get(key)!.push(record);
     });
+
+    console.log(`[MASTER_BOOKS] ${asinFormatGroups.size} combinaisons ASIN+Format trouvées`);
 
     let processed = 0;
     let updated = 0;
 
-    // Traiter chaque ASIN
-    for (const [asin, records] of Array.from(asinGroups.entries())) {
+    // Traiter chaque combinaison ASIN+Format
+    for (const [key, records] of Array.from(asinFormatGroups.entries())) {
       try {
-        await this.processAsinGroup(userId, asin, records, importId);
+        const [asin, format] = key.split('|');
+        await this.processAsinFormatGroup(userId, asin, format, records, importId);
         processed++;
         updated++;
       } catch (error) {
-        console.error(`[MASTER_BOOKS] Erreur pour ASIN ${asin}:`, error);
+        console.error(`[MASTER_BOOKS] Erreur pour ${key}:`, error);
         processed++;
       }
     }
@@ -59,11 +65,12 @@ export class MasterBooksService {
   }
 
   /**
-   * Traite un groupe de données pour un ASIN spécifique
+   * Traite un groupe de données pour une combinaison ASIN+Format spécifique
    */
-  private static async processAsinGroup(
+  private static async processAsinFormatGroup(
     userId: string, 
     asin: string, 
+    format: string,
     records: any[], 
     importId: string
   ): Promise<void> {
@@ -73,10 +80,13 @@ export class MasterBooksService {
     // Calculer les agrégations
     const aggregations = this.calculateAggregations(records);
     
-    // Chercher un enregistrement master existant
+    // Chercher un enregistrement master existant pour cette combinaison ASIN+Format
     const existingMaster = await db.select()
       .from(masterBooks)
-      .where(eq(masterBooks.asin, asin))
+      .where(and(
+        eq(masterBooks.asin, asin),
+        eq(masterBooks.format, format as any)
+      ))
       .limit(1);
 
     if (existingMaster.length > 0) {
@@ -84,7 +94,7 @@ export class MasterBooksService {
       await this.updateExistingMaster(existingMaster[0], aggregations, importId);
     } else {
       // Création d'un nouvel enregistrement master
-      await this.createNewMaster(userId, asin, firstRecord, aggregations, importId);
+      await this.createNewMaster(userId, asin, format, firstRecord, aggregations, importId);
     }
   }
 
@@ -262,6 +272,7 @@ export class MasterBooksService {
   private static async createNewMaster(
     userId: string,
     asin: string,
+    format: string,
     firstRecord: any,
     aggregations: any,
     importId: string
@@ -273,8 +284,8 @@ export class MasterBooksService {
       asin,
       isbn: firstRecord.isbn,
       title: firstRecord.title,
+      format: format as any,
       authorName: firstRecord.authorName,
-      format: firstRecord.format,
       firstSaleDate: aggregations.firstSaleDate?.toISOString().split('T')[0],
       lastSaleDate: aggregations.lastSaleDate?.toISOString().split('T')[0],
       totalUnitsSold: aggregations.totalUnitsSold,

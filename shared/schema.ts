@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import {
   index,
+  uniqueIndex,
   jsonb,
   pgTable,
   timestamp,
@@ -562,7 +563,7 @@ export const masterBooks = pgTable("master_books", {
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   
   // Identifiant unique principal
-  asin: varchar("asin").notNull().unique(), // Discriminant principal
+  asin: varchar("asin").notNull(), // Discriminant principal (combiné avec format)
   isbn: varchar("isbn"),
   
   // Informations du livre
@@ -605,6 +606,8 @@ export const masterBooks = pgTable("master_books", {
   // Index sur ASIN pour recherches rapides
   index("idx_master_books_asin").on(table.asin),
   index("idx_master_books_user_asin").on(table.userId, table.asin),
+  // Contrainte unique sur la combinaison ASIN+Format pour permettre plusieurs formats par ASIN
+  uniqueIndex("idx_master_books_asin_format_unique").on(table.asin, table.format),
 ]);
 
 // Relations
