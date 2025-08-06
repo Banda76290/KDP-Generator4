@@ -106,6 +106,19 @@ export class KdpImportProcessor {
         console.log(`[IMPORT ${this.importId.slice(0, 8)}] Skipped ${duplicateCount} duplicate records`);
       }
 
+      await this.updateProgress('Updating master books...', 90, processedRecords, parsedData.summary.estimatedRecords);
+
+      // Mise à jour de la table master books avec les nouvelles données
+      if (savedData.length > 0) {
+        try {
+          await storage.updateMasterBooksFromImport(this.userId, this.importId);
+          console.log(`[IMPORT ${this.importId.slice(0, 8)}] Master books mis à jour avec succès`);
+        } catch (error) {
+          console.error(`[IMPORT ${this.importId.slice(0, 8)}] Erreur mise à jour master books:`, error);
+          // Ne pas échouer l'import entier pour cette erreur
+        }
+      }
+
       await this.updateProgress('Finalizing import...', 95, processedRecords, parsedData.summary.estimatedRecords);
 
       // Update final import status

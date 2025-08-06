@@ -19,6 +19,7 @@ import {
   kdpImports,
   kdpImportData,
   consolidatedSalesData,
+  masterBooks,
   exchangeRates,
   type User,
   type UpsertUser,
@@ -62,6 +63,8 @@ import {
   type InsertKdpImportData,
   type KdpImportWithRelations,
   insertConsolidatedSalesDataSchema,
+  type MasterBook,
+  type InsertMasterBook,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, sum, count, like, or, isNotNull } from "drizzle-orm";
@@ -210,6 +213,11 @@ export interface IStorage {
   // Consolidated Sales Data operations
   consolidateKdpData(userId: string, exchangeRateService?: any): Promise<{ processed: number; updated: number }>;
   getConsolidatedSalesOverview(userId: string): Promise<any>;
+
+  // Master Books operations
+  getMasterBooks(userId: string): Promise<MasterBook[]>;
+  getMasterBookByAsin(asin: string): Promise<MasterBook | null>;
+  updateMasterBooksFromImport(userId: string, importId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2442,6 +2450,30 @@ export class DatabaseStorage implements IStorage {
 
     console.log(`[CONSOLIDATION] Retour: ${result.totalRoyaltiesUSD} USD total`);
     return result;
+  }
+
+  // Master Books operations
+  async getMasterBooks(userId: string): Promise<MasterBook[]> {
+    return await db.select()
+      .from(masterBooks)
+      .where(eq(masterBooks.userId, userId))
+      .orderBy(sql`${masterBooks.totalRoyaltiesUSD} DESC`);
+  }
+
+  async getMasterBookByAsin(asin: string): Promise<MasterBook | null> {
+    const result = await db.select()
+      .from(masterBooks)
+      .where(eq(masterBooks.asin, asin))
+      .limit(1);
+    
+    return result[0] || null;
+  }
+
+  async updateMasterBooksFromImport(userId: string, importId: string): Promise<void> {
+    // Import du service MasterBooks
+    const { MasterBooksService } = await import('./services/masterBooksService');
+    await MasterBooksService.init();
+    await MasterBooksService.updateFromImportData(userId, importId);
   }
 }
 

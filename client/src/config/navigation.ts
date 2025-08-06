@@ -33,6 +33,7 @@ export const navigation: NavigationItem[] = [
   { name: "Authors", href: "/authors", icon: User },
   { name: "Series", href: "/manage-series", icon: Tags },
   { name: "Sales Analytics", href: "/analytics", icon: TrendingUp },
+  { name: "Livres Maîtres", href: "/master-books", icon: FileText, badge: "ASIN" },
   { name: "Exchange Rates", href: "/exchange-rates", icon: DollarSign },
   { name: "KDP Reports", href: "/kdp-reports", icon: Upload },
   { name: "Import Management", href: "/import-management", icon: Download, badge: "NEW" },

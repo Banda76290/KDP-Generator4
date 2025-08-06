@@ -2862,6 +2862,54 @@ Please respond with only a JSON object containing the translated fields. For key
     }
   });
 
+  // Master Books routes
+  app.get('/api/master-books', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const masterBooks = await storage.getMasterBooks(userId);
+      res.json(masterBooks);
+    } catch (error) {
+      console.error('Error fetching master books:', error);
+      res.status(500).json({ error: 'Failed to fetch master books' });
+    }
+  });
+
+  app.get('/api/master-books/:asin', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { asin } = req.params;
+      const masterBook = await storage.getMasterBookByAsin(asin);
+      
+      if (!masterBook) {
+        return res.status(404).json({ error: 'Master book not found' });
+      }
+      
+      res.json(masterBook);
+    } catch (error) {
+      console.error('Error fetching master book:', error);
+      res.status(500).json({ error: 'Failed to fetch master book' });
+    }
+  });
+
+  app.post('/api/master-books/update/:importId', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const { importId } = req.params;
+      
+      await storage.updateMasterBooksFromImport(userId, importId);
+      
+      res.json({ message: 'Master books updated successfully' });
+    } catch (error) {
+      console.error('Error updating master books:', error);
+      res.status(500).json({ error: 'Failed to update master books' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

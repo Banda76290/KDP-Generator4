@@ -556,6 +556,57 @@ export const consolidatedSalesData = pgTable("consolidated_sales_data", {
   index("idx_consolidated_asin_currency").on(table.asin, table.currency, table.userId),
 ]);
 
+// Master Books Table - Table maître avec ASIN comme discriminant principal
+export const masterBooks = pgTable("master_books", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  // Identifiant unique principal
+  asin: varchar("asin").notNull().unique(), // Discriminant principal
+  isbn: varchar("isbn"),
+  
+  // Informations du livre
+  title: text("title").notNull(),
+  authorName: varchar("author_name"),
+  format: formatEnum("format"),
+  
+  // Données de vente agrégées (dates de vente, pas de paiement)
+  firstSaleDate: date("first_sale_date"), // Première vente enregistrée
+  lastSaleDate: date("last_sale_date"), // Dernière vente enregistrée
+  totalUnitsSold: integer("total_units_sold").default(0), // Ventes totales de livres
+  totalUnitsRefunded: integer("total_units_refunded").default(0),
+  netUnitsSold: integer("net_units_sold").default(0),
+  
+  // KENP (Kindle Edition Normalized Pages) - Pages lues
+  totalKenpRead: integer("total_kenp_read").default(0), // Total pages lues KU
+  
+  // Données financières par devise (devise d'origine)
+  totalRoyaltiesOriginal: jsonb("total_royalties_original"), // {"USD": 123.45, "EUR": 67.89}
+  totalRoyaltiesUSD: decimal("total_royalties_usd", { precision: 12, scale: 2 }).default("0.00"),
+  
+  // Répartition par marketplace
+  marketplaceBreakdown: jsonb("marketplace_breakdown"), // {"Amazon.com": {...}, "Amazon.fr": {...}}
+  
+  // Répartition par type de transaction
+  salesBreakdown: jsonb("sales_breakdown"), // {"book_sales": {...}, "kenp_reads": {...}}
+  
+  // Métadonnées de mise à jour
+  lastImportDate: date("last_import_date"), // Dernière mise à jour via import
+  sourceImportIds: text("source_import_ids").array().default([]), // Tracking des imports sources
+  
+  // Données de prix (plus récentes)
+  currentListPrice: decimal("current_list_price", { precision: 10, scale: 2 }),
+  currentOfferPrice: decimal("current_offer_price", { precision: 10, scale: 2 }),
+  currentCurrency: varchar("current_currency"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  // Index sur ASIN pour recherches rapides
+  index("idx_master_books_asin").on(table.asin),
+  index("idx_master_books_user_asin").on(table.userId, table.asin),
+]);
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   projects: many(projects),
@@ -570,6 +621,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   kdpImports: many(kdpImports),
   kdpImportData: many(kdpImportData),
   consolidatedSalesData: many(consolidatedSalesData),
+  masterBooks: many(masterBooks),
 }));
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
@@ -741,6 +793,13 @@ export const consolidatedSalesDataRelations = relations(consolidatedSalesData, (
   }),
 }));
 
+export const masterBooksRelations = relations(masterBooks, ({ one }) => ({
+  user: one(users, {
+    fields: [masterBooks.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -819,6 +878,12 @@ export const insertSystemConfigSchema = createInsertSchema(systemConfig);
 export const insertAuditLogSchema = createInsertSchema(adminAuditLog).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertMasterBookSchema = createInsertSchema(masterBooks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertConsolidatedSalesDataSchema = createInsertSchema(consolidatedSalesData).omit({
@@ -958,6 +1023,10 @@ export const insertAuthorBiographySchema = createInsertSchema(authorBiographies)
 });
 export type AuthorBiography = typeof authorBiographies.$inferSelect;
 export type InsertAuthorBiography = z.infer<typeof insertAuthorBiographySchema>;
+
+// Master Books types
+export type MasterBook = typeof masterBooks.$inferSelect;
+export type InsertMasterBook = z.infer<typeof insertMasterBookSchema>;
 
 // Author with relations type
 export type AuthorWithRelations = Author & {
