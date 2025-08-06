@@ -46,7 +46,7 @@ export default function Projects() {
     queryKey: ["/api/projects"],
     enabled: isAuthenticated,
     staleTime: 0,
-  });
+  };
 
   // Helper functions for sorting
   const getCurrentMonthRevenue = (project: any) => {
@@ -145,7 +145,7 @@ export default function Projects() {
       translateBookMutation.mutate({
         bookId: bookToTranslate.id,
         targetLanguage: selectedLanguage
-      });
+  };
     }
   };
 
@@ -158,7 +158,7 @@ export default function Projects() {
         newSet.add(projectId);
       }
       return newSet;
-    });
+  };
   };
 
   return (
@@ -241,7 +241,7 @@ export default function Projects() {
                     </div>
                   </CardHeader>
                 </Card>
-              ))}
+              ))}}
             </div>
           ) : filteredProjects.length === 0 ? (
             <div className="text-center py-12">
@@ -265,7 +265,7 @@ export default function Projects() {
                     Create Your First Book
                   </Button>
                 </div>
-              )}
+              ))
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -275,7 +275,7 @@ export default function Projects() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start space-x-3 flex-1 min-w-0">
                         <div className="w-12 h-12 gradient-blue-purple rounded-lg flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
-                          {generateProjectInitials(project.name || 'Project')}
+                          {generateProjectInitials(project.name || 'Project'))}
                         </div>
                         <div className="flex-1 min-w-0">
                           <Tooltip>
@@ -299,7 +299,7 @@ export default function Projects() {
                                 <p>{project.description}</p>
                               </TooltipContent>
                             </Tooltip>
-                          )}
+                          ))}
                         </div>
                       </div>
                       <DropdownMenu>
@@ -376,7 +376,7 @@ export default function Projects() {
                                         <span className="text-amber-600">{book.isbnPlaceholder}</span>
                                       ) : (
                                         <span>No ISBN/ASIN</span>
-                                      )}
+                                      ))}
                                     </div>
                                   </div>
                                 </div>
@@ -415,7 +415,7 @@ export default function Projects() {
                                     <TrendingUp className="w-3 h-3" />
                                     This Month
                                   </div>
-                                  <div className="font-medium">${ parseFloat(book.monthlyRevenue || '0').toFixed(2)}</div>
+                                  <div className="font-medium">${ parseFloat(book.monthlyRevenue || '0').toFixed(2))}</div>
                                   <div className="text-gray-500">{book.monthlySales || 0} sales</div>
                                 </div>
                                 <div>
@@ -423,7 +423,7 @@ export default function Projects() {
                                     <DollarSign className="w-3 h-3" />
                                     Total
                                   </div>
-                                  <div className="font-medium">${ parseFloat(book.totalRevenue || '0').toFixed(2)}</div>
+                                  <div className="font-medium">${ parseFloat(book.totalRevenue || '0').toFixed(2))}</div>
                                   <div className="text-gray-500">{book.totalSales || 0} sales</div>
                                 </div>
                               </div>
@@ -440,7 +440,7 @@ export default function Projects() {
                                 {expandedProjects.has(project.id) ? 'Show Less' : 'See More'}
                               </button>
                             </div>
-                          )}
+                          ))}
                         </div>
                       ) : (
                         <div className="text-center py-4 text-gray-500">
@@ -477,7 +477,7 @@ export default function Projects() {
                               Total Revenue  
                             </div>
                             <div className="font-semibold text-blue-600">
-                              ${ parseFloat(project.totalRevenue || '0').toFixed(2)}
+                              ${ parseFloat(project.totalRevenue || '0').toFixed(2))}
                             </div>
                             <div className="text-xs text-gray-500">{project.totalSales || 0} sales</div>
                           </div>
@@ -486,7 +486,7 @@ export default function Projects() {
                     </div>
                   </CardContent>
                 </Card>
-              )}
+              ))}
             </div>
           )}
 
@@ -504,7 +504,7 @@ export default function Projects() {
                 <span className="block mt-2 text-sm">
                   This project has {projectToDelete.books.length} associated book(s).
                 </span>
-              )}
+              ))}
             </AlertDialogDescription>
           </AlertDialogHeader>
           
@@ -541,7 +541,7 @@ export default function Projects() {
                   deleteProject.mutate({ 
                     projectId: projectToDelete.id, 
                     deleteBooks: deleteAssociatedBooks 
-                  });
+  };
                   setProjectToDelete(null);
                   setDeleteAssociatedBooks(false);
                 }
@@ -587,7 +587,7 @@ export default function Projects() {
                     <SelectItem key={language} value={language}>
                       {language}
                     </SelectItem>
-                  )}
+                  ))}
                 </SelectContent>
               </Select>
             </div>

@@ -40,12 +40,12 @@ function useSeriesData() {
     queryKey: ['/api/series'],
     queryFn: async () => {
       const response = await fetch('/api/series', {
-        credentials: 'include' // Include cookies for authentication};
+        credentials: 'include' // Include cookies for authentication});
       if (!response.ok) {
         throw new Error('Failed to fetch series');
       }
       return response.json();
-    },
+    });
     staleTime: 0,
   });
 
@@ -86,11 +86,11 @@ function useSeriesData() {
   const handleDeleteSeries = (seriesId: string) => {
     console.log("Deleting series:", seriesId);
     deleteSeries.mutate(seriesId);
-  };
+  });
 
   const handleCreateSeries = () => {
     setLocation('/series-setup');
-  };
+  });
 
   return (
     <Layout>
@@ -340,7 +340,7 @@ function useSeriesData() {
                                   </Badge>
                                 </div>
                               </div>
-                            )}
+                            ))}
                         </div>
                       </div>
                     )}
@@ -389,9 +389,9 @@ function useSeriesData() {
                   </div>
                 </CardContent>
               </Card>
-            )}
+            ))}
           </div>
-        )}
+        ))}
       </div>
     </Layout>
   );

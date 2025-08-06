@@ -34,14 +34,14 @@ const categoryIcons = {
   'Projet': FolderOpen,
   'Auteur': User,
   'Système': Settings
-};
+});
 
 const categoryColors = {
   'Livre': 'bg-blue-50 border-blue-200',
   'Projet': 'bg-green-50 border-green-200',
   'Auteur': 'bg-purple-50 border-purple-200',
   'Système': 'bg-orange-50 border-orange-200'
-};
+});
 
 export default function AIVariables() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -101,7 +101,7 @@ export default function AIVariables() {
         variant: "destructive"
       });
     }
-  };
+  });
 
   if (isLoading || fieldsLoading) {
     return (
@@ -227,7 +227,7 @@ export default function AIVariables() {
                           >
                             {field.options.length} options
                           </Badge>
-                        )}
+                        ))}
                       </div>
                       
                       {field.options && (
@@ -246,12 +246,12 @@ export default function AIVariables() {
                               <span className="text-xs text-gray-600">
                                 +{field.options.length - 3}
                               </span>
-                            )}
+                            ))}
                           </div>
                         </div>
-                      )}
+                      ))}
                     </div>
-                  )}
+                  ))}
                 </div>
               </CardContent>
             </Card>

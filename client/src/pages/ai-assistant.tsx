@@ -29,7 +29,7 @@ export default function AIAssistant() {
 
   const generateMutation = useMutation({
     mutationFn: async (data: { type: string; prompt: string; title?: string} => { return await apiRequest("/api/ai/generate", { method: "POST", body: JSON.stringify(data});
-    },
+    });
     onSuccess: async (response) => {
       const result = await response.json();
       setGeneratedContent(result.content);
@@ -37,7 +37,7 @@ export default function AIAssistant() {
         title: "Content Generated",
         description: `Used ${result.tokensUsed} tokens`,
       });
-    },
+    });
     onError: (error) => {
       if (isUnauthorizedError(error)) {
         toast({
@@ -55,7 +55,7 @@ export default function AIAssistant() {
         description: error.message || "Failed to generate content",
         variant: "destructive",
       });
-    },
+    });
   });
 
   useEffect(() => {
@@ -95,8 +95,8 @@ export default function AIAssistant() {
     generateMutation.mutate({
       type: selectedType,
       prompt,
-    };
-  };
+    });
+  });
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(generatedContent);
@@ -105,7 +105,7 @@ export default function AIAssistant() {
       description: "Content copied to clipboard",
         variant: "destructive",
       });
-  };
+  });
 
   if (isLoading) {
     return (
@@ -239,7 +239,7 @@ export default function AIAssistant() {
                       <Bot className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                       <p>Generated content will appear here</p>
                     </div>
-                  )}
+                  ))}
                 </CardContent>
               </Card>
             </div>
@@ -266,11 +266,11 @@ export default function AIAssistant() {
                         { generation.response.substring(0, 200}...
                       </div>
                     </div>
-                  )}
+                  ))}
                 </div>
               </CardContent>
             </Card>
-          )}
+          ))}
     </Layout>
   );
 }

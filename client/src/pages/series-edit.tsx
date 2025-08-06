@@ -46,12 +46,12 @@ export default function SeriesEditPage() {
     queryFn: async () => {
       const response = await fetch(`/api/series/${seriesId}`, {
         credentials: 'include'
-      };
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch series');
       }
       return response.json();
-    },
+    });
     enabled: !!seriesId
   });
 
@@ -119,13 +119,13 @@ export default function SeriesEditPage() {
         language: data.language,
         readingOrder: data.readingOrder,
         description: editorContent
-      };
+      });
 
       const response = await fetch(`/api/series/${seriesId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-        },
+        });
         body: JSON.stringify(formData),
         credentials: 'include'
       });
@@ -167,7 +167,7 @@ export default function SeriesEditPage() {
         variant: "destructive"
       });
     }
-  };
+  });
 
   useEffect(() => {
     // Add CSS for the editor placeholder
@@ -191,13 +191,13 @@ export default function SeriesEditPage() {
     
     return () => {
       document.head.removeChild(style);
-    };
+    });
   }, []);
 
   const applyFormatting = (command: string, value?: string) => {
     document.execCommand(command, false, value);
     updateDescriptionFromHTML();
-  };
+  });
 
   // Function to clean HTML and remove unnecessary styles
   const cleanHTML = (html: string): string => {
@@ -239,7 +239,7 @@ export default function SeriesEditPage() {
           }
         }
       }
-    };
+    });
     
     // Copy body content to tempDiv safely
     for (let child of Array.from(doc.body.childNodes)) {
@@ -278,7 +278,7 @@ export default function SeriesEditPage() {
     });
     
     return tempDiv.innerHTML;
-  };
+  });
 
   const updateDescriptionFromHTML = () => {
     const editor = document.getElementById('description-editor') as HTMLDivElement;
@@ -291,7 +291,7 @@ export default function SeriesEditPage() {
     setCharacterCount(textContent.length);
     setEditorContent(cleanedHtmlContent);
     form.setValue('description', cleanedHtmlContent);
-  };
+  });
 
   const handleFormatChange = (format: string) => {
     switch (format) {
@@ -308,7 +308,7 @@ export default function SeriesEditPage() {
         applyFormatting('formatBlock', 'div');
         break;
     }
-  };
+  });
 
   const insertLink = () => {
     if (linkUrl) {
@@ -316,7 +316,7 @@ export default function SeriesEditPage() {
       setLinkUrl('');
       setShowLinkDialog(false);
     }
-  };
+  });
 
   if (isLoadingSeries) {
     return (
@@ -435,7 +435,7 @@ export default function SeriesEditPage() {
                 />
                 {form.formState.errors.title && (
                   <p className="text-red-500 text-sm mt-1">{form.formState.errors.title.message}</p>
-                )}
+                ))}
               </CardContent>
             </Card>
 
@@ -586,7 +586,7 @@ export default function SeriesEditPage() {
                     <span className="text-red-500 font-medium">
                       Exceeds limit by {(characterCount - maxCharacters).toLocaleString(} characters
                     </span>
-                  )}
+                  ))}
                 </div>
               </CardContent>
             </Card>

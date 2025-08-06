@@ -25,7 +25,7 @@ const plans = [
     current: true,
     buttonText: "Current Plan",
     buttonVariant: "secondary" as const
-  },
+  });
   {
     name: "Pro",
     price: "19€",
@@ -45,7 +45,7 @@ const plans = [
     buttonText: "Upgrade to Pro",
     buttonVariant: "default" as const,
     popular: true
-  },
+  });
   {
     name: "Enterprise",
     price: "49€",
@@ -78,7 +78,7 @@ export default function Subscription() {
       // Handle contact form or redirect
       window.open("mailto:support@kdpgenerator.com?subject=Enterprise Plan Inquiry", "_blank");
     }
-  };
+  });
 
   return (
     <Layout>
@@ -147,7 +147,7 @@ export default function Subscription() {
                       {plan.price}
                       {plan.period !== "forever" && (
                         <span className="text-sm text-muted-foreground">/{plan.period}</span>
-                      )}
+                      ))}
                     </div>
                     <CardDescription>{plan.description}</CardDescription>
                   </CardHeader>
@@ -165,7 +165,7 @@ export default function Subscription() {
                           <X className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm text-muted-foreground">{limitation}</span>
                         </div>
-                      )}
+                      ))}
                     </div>
                     
                     <Button 
@@ -178,7 +178,7 @@ export default function Subscription() {
                     </Button>
                   </CardContent>
                 </Card>
-              )}
+              ))}
             </div>
 
             {/* Feature Comparison */}

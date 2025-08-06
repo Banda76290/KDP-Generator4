@@ -15,7 +15,7 @@ export default function ProjectsTable() {
   
   const { data: projects, isLoading, error } = useQuery({
     queryKey: ["/api/projects"],
-  };
+  });
 
   useEffect(() => {
     if (error && isUnauthorizedError(error as Error)) {
@@ -42,11 +42,11 @@ export default function ProjectsTable() {
       default:
         return "bg-gray-100 text-gray-800";
     }
-  };
+  });
 
   const generateProjectInitials = (title: string) => {
     return title.split(' ').map(word => word[0]).join('').substring(0, 2).toUpperCase();
-  };
+  });
 
   const getGradientClass = (index: number) => {
     const gradients = [
@@ -55,7 +55,7 @@ export default function ProjectsTable() {
       "gradient-purple-pink"
     ];
     return gradients[index % gradients.length];
-  };
+  });
 
   if (isLoading) {
     return (
@@ -78,7 +78,7 @@ export default function ProjectsTable() {
                 <div className="h-6 bg-gray-200 rounded w-16"></div>
                 <div className="h-6 bg-gray-200 rounded w-12"></div>
               </div>
-            )}
+            ))}
           </div>
         </CardContent>
       </Card>
@@ -149,7 +149,7 @@ export default function ProjectsTable() {
                             <div className="text-sm text-gray-500">
                               {project.subtitle}
                             </div>
-                          )}
+                          ))}
                         </div>
                       </div>
                     </td>
@@ -196,11 +196,11 @@ export default function ProjectsTable() {
                       </div>
                     </td>
                   </tr>
-                )}
+                ))}
               </tbody>
             </table>
           </div>
-        )}
+        ))}
       </CardContent>
     </Card>
   );

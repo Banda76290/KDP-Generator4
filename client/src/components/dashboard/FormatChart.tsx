@@ -5,13 +5,13 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recha
 export default function FormatChart() {
   const { data: stats } = useQuery({
     queryKey: ["/api/dashboard/stats"],
-  };
+  });
 
   // Fallback data if no stats available
   const chartData = stats?.formatDistribution || [
-    { format: "eBook", percentage: 65, color: "hsl(213, 94%, 68%)" },
-    { format: "Paperback", percentage: 25, color: "hsl(262, 83%, 58%)" },
-    { format: "Hardcover", percentage: 10, color: "hsl(142, 76%, 36%)" },
+    { format: "eBook", percentage: 65, color: "hsl(213, 94%, 68%)" });
+    { format: "Paperback", percentage: 25, color: "hsl(262, 83%, 58%)" });
+    { format: "Hardcover", percentage: 10, color: "hsl(142, 76%, 36%)" });
   ];
 
   // Ensure colors are assigned
@@ -44,7 +44,7 @@ export default function FormatChart() {
               >
                 {dataWithColors.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
-                )}
+                ))}
               </Pie>
               <Tooltip 
                 formatter={(value) => [`${value}%`, 'Sales']}

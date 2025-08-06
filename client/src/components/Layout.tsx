@@ -12,7 +12,7 @@ export default function Layout({ children }: LayoutProps) {
 
   const handleMenuClick = () => {
     setMobileMenuOpen(true);
-  };
+  });
 
   return (
     <div className="layout-container">

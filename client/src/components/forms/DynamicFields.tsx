@@ -28,18 +28,18 @@ export default function DynamicFields<T>({
     if (fields.length < maxFields) {
       onFieldsChange([...fields, defaultField]);
     }
-  };
+  });
 
   const updateField = (index: number, newField: T) => {
     const newFields = [...fields];
     newFields[index] = newField;
     onFieldsChange(newFields);
-  };
+  });
 
   const removeField = (index: number) => {
     const newFields = fields.filter((_, i) => i !== index);
     onFieldsChange(newFields);
-  };
+  });
 
   return (
     <div className="space-y-4">
@@ -77,7 +77,7 @@ export default function DynamicFields<T>({
           fields.map((field, index) =>
             renderField(field, index, updateField, removeField)
           )
-        )}
+        ))}
       </div>
     </div>
   );

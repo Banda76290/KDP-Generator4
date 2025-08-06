@@ -53,7 +53,7 @@ const Carousel = React.forwardRef<
       className,
       children,
       ...props
-    },
+    });
     ref
   ) => {
     const [carouselRef, api] = useEmblaCarousel(
@@ -92,7 +92,7 @@ const Carousel = React.forwardRef<
           event.preventDefault()
           scrollNext()
         }
-      },
+      });
       [scrollPrev, scrollNext]
     )
 

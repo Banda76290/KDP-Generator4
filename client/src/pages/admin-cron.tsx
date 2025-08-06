@@ -28,25 +28,25 @@ export default function AdminCron() {
   const { data: cronJobs, isLoading } = useQuery({
     queryKey: ["/api/admin/cron/jobs"],
     refetchInterval: 30000, // Refresh every 30 seconds
-  };
+  });
 
   // Fetch cron logs
   const { data: cronLogs } = useQuery({
     queryKey: ["/api/admin/cron/logs"],
     refetchInterval: 10000, // Refresh every 10 seconds
-  };
+  });
 
   // Toggle cron job
   const toggleJobMutation = useMutation({
     mutationFn: async ({ jobId, enabled}: { jobId: string; enabled: boolean } => {
       return apiRequest(`/api/admin/cron/jobs/${jobId}/toggle`, {
         method: 'POST',
-        body: JSON.stringify({ enabled},
+        body: JSON.stringify({ enabled});
         headers: {
           'Content-Type': 'application/json'
         }
       });
-    },
+    });
     onSuccess: () => {
       toast({
         title: "Cron Job Updated",
@@ -54,14 +54,14 @@ export default function AdminCron() {
         variant: "destructive",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/jobs"] });
-    },
+    });
     onError: () => {
       toast({
         title: "Error",
         description: "Failed to update the scheduled task.",
         variant: "destructive"
       });
-    },
+    });
   });
 
   // Run job manually
@@ -69,8 +69,8 @@ export default function AdminCron() {
     mutationFn: async (jobId: string) => {
       return apiRequest(`/api/admin/cron/jobs/${jobId}/run`, {
         method: 'POST'
-      };
-    },
+      });
+    });
     onSuccess: () => {
       toast({
         title: "Job Started",
@@ -79,14 +79,14 @@ export default function AdminCron() {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/jobs"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/logs"] });
-    },
+    });
     onError: () => {
       toast({
         title: "Error",
         description: "Failed to start the scheduled task.",
         variant: "destructive"
       });
-    },
+    });
   });
 
   const getStatusIcon = (status: string) => {
@@ -98,7 +98,7 @@ export default function AdminCron() {
       default:
         return <Clock className="h-4 w-4 text-gray-500" />;
     }
-  };
+  });
 
   const getStatusBadge = (status: string, enabled: boolean) => {
     if (!enabled) {
@@ -113,7 +113,7 @@ export default function AdminCron() {
       default:
         return <Badge variant="outline">Stopped</Badge>;
     }
-  };
+  });
 
   return (
     <Layout>
@@ -157,7 +157,7 @@ export default function AdminCron() {
                       <div className="h-8 bg-muted rounded mb-2"></div>
                       <div className="h-3 bg-muted rounded w-2/3"></div>
                     </div>
-                  )}
+                  ))}
                 </div>
               ) : cronJobs && Array.isArray(cronJobs) && cronJobs.length > 0 ? (
                 <div className="space-y-4">
@@ -224,7 +224,7 @@ export default function AdminCron() {
                         </div>
                       </div>
                     </div>
-                  )}
+                  ))}
                 </div>
               ) : (
                 <div className="text-center py-12">
@@ -234,7 +234,7 @@ export default function AdminCron() {
                     No cron jobs are currently configured.
                   </p>
                 </div>
-              )}
+              ))}
             </CardContent>
           </Card>
 
@@ -267,13 +267,13 @@ export default function AdminCron() {
                         <p className="text-sm text-muted-foreground">{log.message}</p>
                       </div>
                     </div>
-                  )}
+                  ))}
                 </div>
               ) : (
                 <div className="text-center py-8">
                   <p className="text-muted-foreground">No recent activity logs available.</p>
                 </div>
-              )}
+              ))}
             </CardContent>
           </Card>
         </div>

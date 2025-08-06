@@ -86,25 +86,25 @@ export default function Analytics() {
   // Main detailed analytics (expert method)
   const { data: detailedData, isLoading: detailedLoading, refetch: refetchDetailed } = useQuery<DetailedAnalytics>({
     queryKey: ['/api/analytics/detailed'],
-  });
+  };
 
   // Legacy data for comparison
   const { data: legacyData, isLoading: legacyLoading } = useQuery<LegacyOverview>({
     queryKey: ['/api/analytics/overview'],
-  });
+  };
 
   // Supporting data
   const { data: topPerformers, isLoading: topPerformersLoading } = useQuery<TopPerformer[]>({
     queryKey: ['/api/analytics/top-performers'],
-  });
+  };
 
   const { data: marketplaceData, isLoading: marketplaceLoading } = useQuery<MarketplaceData[]>({
     queryKey: ['/api/analytics/marketplace-breakdown'],
-  });
+  };
 
   const { data: salesTrends, isLoading: trendsLoading } = useQuery<SalesTrend[]>({
     queryKey: [`/api/analytics/sales-trends/${selectedPeriod}`],
-  });
+  };
 
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat('fr-FR', {
@@ -119,7 +119,7 @@ export default function Analytics() {
     toast({
       title: "Données actualisées",
       description: "Les analytics ont été mises à jour"
-    });
+  };
   };
 
   const isLoading = detailedLoading || legacyLoading || topPerformersLoading || marketplaceLoading || trendsLoading;
@@ -158,7 +158,7 @@ export default function Analytics() {
             <div className="grid gap-6 md:grid-cols-4">
               {[...Array(4)].map((_, i) => (
                 <div key={i} className="h-32 bg-gray-200 rounded"></div>
-              ))}
+              )))}
             </div>
           </div>
         ) : (
@@ -277,14 +277,14 @@ export default function Analytics() {
                           >
                             {detailedData.conversions.map((_, index) => (
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
+                            )))}
                           </Pie>
                           <Tooltip formatter={ (value) => [`${Number(value).toFixed(2))}€`, 'Montant EUR']} />
                         </PieChart>
                       </ResponsiveContainer>
                     </CardContent>
                   </Card>
-                ))}
+                )))}
               </TabsContent>
 
               <TabsContent value="currencies" className="space-y-6">
@@ -324,15 +324,15 @@ export default function Analytics() {
                                       Taux: 1 EUR = { conversion.exchangeRate.toFixed(4))} {curr.currency}
                                     </div>
                                   </>
-                                ))}
+                                )))}
                               </div>
                             </div>
                           );
-                        }))}
+                        })))}
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                )))}
               </TabsContent>
 
               <TabsContent value="performance" className="space-y-6">
@@ -363,7 +363,7 @@ export default function Analytics() {
                               </div>
                             </div>
                           </div>
-                        ))}
+                        )))}
                       </div>
                     </CardContent>
                   </Card>
@@ -403,7 +403,7 @@ export default function Analytics() {
                       </ResponsiveContainer>
                     </CardContent>
                   </Card>
-                ))}
+                )))}
               </TabsContent>
 
               <TabsContent value="comparison" className="space-y-6">
@@ -451,7 +451,7 @@ export default function Analytics() {
                             </div>
                           </div>
                         </div>
-                      ))}
+                      )))}
                     </CardContent>
                   </Card>
 
@@ -497,7 +497,7 @@ export default function Analytics() {
                             </div>
                           </div>
                         </div>
-                      ))}
+                      )))}
                     </CardContent>
                   </Card>
                 </div>
@@ -534,7 +534,7 @@ export default function Analytics() {
               </TabsContent>
             </Tabs>
           </>
-        ))}
+        )))}
       </div>
     </Layout>
   );

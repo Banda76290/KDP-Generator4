@@ -46,14 +46,14 @@ const categoryIcons = {
   marketing: Building,
   seo: Settings,
   profile: User,
-};
+});
 
 const categoryColors = {
   content: 'border-green-200 dark:border-green-800',
   marketing: 'border-blue-200 dark:border-blue-800',
   seo: 'border-purple-200 dark:border-purple-800',
   profile: 'border-orange-200 dark:border-orange-800',
-};
+});
 
 export default function AIFunctions() {
   const { user, isAuthenticated } = useAuth();
@@ -106,7 +106,7 @@ export default function AIFunctions() {
       title: 'Copied!',
       description: 'Text has been copied to clipboard'
       });
-  };
+  });
 
   const generateContent = async () => {
     if (!selectedFunction) return;
@@ -125,7 +125,7 @@ export default function AIFunctions() {
           customModel: customModel !== selectedFunction.defaultModel ? customModel : undefined,
           customTemperature: parseFloat(customTemperature) !== selectedFunction.temperature ? parseFloat(customTemperature) : undefined,
         ),
-      };
+      });
 
       if (!response.ok) {
         throw new Error('Error during generation');
@@ -147,7 +147,7 @@ export default function AIFunctions() {
     } finally {
       setIsGenerating(false);
     }
-  };
+  });
 
   const getAvailableVariables = () => {
     if (!databaseFields || !selectedFunction) return [];
@@ -168,7 +168,7 @@ export default function AIFunctions() {
     relevantFields.push(...(fields.Système || []));
     
     return relevantFields;
-  };
+  });
 
   if (!isAuthenticated) {
     return (
@@ -206,7 +206,7 @@ export default function AIFunctions() {
     if (!acc[func.category]) acc[func.category] = [];
     acc[func.category].push(func);
     return acc;
-  }, {};
+  }, {});
 
   return (
     <Layout>
@@ -325,15 +325,15 @@ export default function AIFunctions() {
                                     <Badge key={tier} variant="secondary" className="text-xs">
                                       {tier}
                                     </Badge>
-                                  )}
+                                  ))}
                                 </div>
                               </div>
                             </Button>
-                          )}
+                          ))}
                         </div>
                       </div>
                     );
-                  })}
+                  }))}
                 </div>
               </CardContent>
             </Card>
@@ -369,7 +369,7 @@ export default function AIFunctions() {
                                 <SelectItem key={book.id} value={book.id}>
                                   {book.title}
                                 </SelectItem>
-                              )}
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
@@ -387,7 +387,7 @@ export default function AIFunctions() {
                                 <SelectItem key={project.id} value={project.id}>
                                   {project.name}
                                 </SelectItem>
-                              )}
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
@@ -413,7 +413,7 @@ export default function AIFunctions() {
                                   </div>
                                 </div>
                               </Button>
-                            )}
+                            ))}
                           </div>
                         </div>
                       </div>
@@ -490,7 +490,7 @@ export default function AIFunctions() {
                             <Copy className="w-4 h-4 mr-2" />
                             Copy
                           </Button>
-                        )}
+                        ))}
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -506,7 +506,7 @@ export default function AIFunctions() {
                           <p>No content generated yet</p>
                           <p className="text-sm">Use the Configuration tab to generate content</p>
                         </div>
-                      )}
+                      ))}
                     </CardContent>
                   </Card>
                 </TabsContent>
@@ -521,7 +521,7 @@ export default function AIFunctions() {
                   </p>
                 </CardContent>
               </Card>
-            )}
+            ))}
           </div>
         </div>
         </div>

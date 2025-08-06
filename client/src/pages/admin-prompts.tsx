@@ -61,7 +61,7 @@ export default function AdminPrompts() {
     systemPrompt: "",
     userPromptTemplate: "",
     isActive: true
-  };
+  });
 
   // Fetch prompts
   const { data: prompts = [], isLoading } = useQuery<AiPromptTemplate[]>({
@@ -81,7 +81,7 @@ export default function AdminPrompts() {
         title: "Prompt créé",
         description: "Le template de prompt a été créé avec succès.",
       });
-    },
+    });
     onError: (error: any) => {
       toast({
         title: "Erreur de création",
@@ -104,7 +104,7 @@ export default function AdminPrompts() {
         title: "Prompt mis à jour",
         description: "Le template de prompt a été modifié avec succès.",
       });
-    },
+    });
     onError: (error: any) => {
       toast({
         title: "Erreur de modification",
@@ -124,7 +124,7 @@ export default function AdminPrompts() {
         title: "Prompt supprimé",
         description: "Le template de prompt a été supprimé avec succès.",
       });
-    },
+    });
     onError: (error: any) => {
       toast({
         title: "Erreur de suppression",
@@ -140,8 +140,8 @@ export default function AdminPrompts() {
       name: "",
       systemPrompt: "",
       userPromptTemplate: "",
-      isActive: true};
-  };
+      isActive: true});
+  });
 
   const handleEdit = (prompt: AiPromptTemplate) => {
     setEditingPrompt(prompt);
@@ -150,9 +150,9 @@ export default function AdminPrompts() {
       name: prompt.name,
       systemPrompt: prompt.systemPrompt,
       userPromptTemplate: prompt.userPromptTemplate,
-      isActive: prompt.isActive ?? true};
+      isActive: prompt.isActive ?? true});
     setIsDialogOpen(true);
-  };
+  });
 
   const handleSave = () => {
     if (!formData.type || !formData.name || !formData.systemPrompt || !formData.userPromptTemplate) {
@@ -171,7 +171,7 @@ export default function AdminPrompts() {
     } else {
       createMutation.mutate(formData);
     }
-  };
+  });
 
   const getTypeColor = (type: string) => {
     const colors: Record<string, string> = {
@@ -183,9 +183,9 @@ export default function AdminPrompts() {
       pricing: "bg-yellow-100 text-yellow-800",
       structure: "bg-indigo-100 text-indigo-800",
       chapters: "bg-teal-100 text-teal-800"
-    };
+    });
     return colors[type] || "bg-gray-100 text-gray-800";
-  };
+  });
 
   if (!isAdmin) {
     return (
@@ -420,9 +420,9 @@ export default function AdminPrompts() {
                   </CardContent>
                 </Card>
               ))
-            )}
+            ))}
           </div>
-        )}
+        ))}
       </div>
     </Layout>
   );

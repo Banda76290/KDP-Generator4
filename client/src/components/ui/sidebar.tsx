@@ -68,7 +68,7 @@ const SidebarProvider = React.forwardRef<
       style,
       children,
       ...props
-    },
+    });
     ref
   ) => {
     const isMobile = useIsMobile()
@@ -88,7 +88,7 @@ const SidebarProvider = React.forwardRef<
 
         // This sets the cookie to keep the sidebar state.
         document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
-      },
+      });
       [setOpenProp, open]
     )
 
@@ -128,7 +128,7 @@ const SidebarProvider = React.forwardRef<
         openMobile,
         setOpenMobile,
         toggleSidebar,
-      },
+      });
       [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
     )
 
@@ -175,7 +175,7 @@ const Sidebar = React.forwardRef<
       className,
       children,
       ...props
-    },
+    });
     ref
   ) => {
     const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
@@ -526,17 +526,17 @@ const sidebarMenuButtonVariants = cva(
         default: "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
         outline:
           "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
-      },
+      });
       size: {
         default: "h-8 text-sm",
         sm: "h-7 text-xs",
         lg: "h-12 text-sm group-data-[collapsible=icon]:!p-0",
-      },
-    },
+      });
+    });
     defaultVariants: {
       variant: "default",
       size: "default",
-    },
+    });
   }
 )
 
@@ -557,7 +557,7 @@ const SidebarMenuButton = React.forwardRef<
       tooltip,
       className,
       ...props
-    },
+    });
     ref
   ) => {
     const Comp = asChild ? Slot : "button"

@@ -12,12 +12,12 @@ import Layout from "@/components/Layout";
 
 
 export default function Settings() {
-  const { user, isLoading } = useAuth() as { user: User | undefined; isLoading: boolean };
+  const { user, isLoading } = useAuth() as { user: User | undefined; isLoading: boolean });
 
   const getUserInitials = (firstName?: string, lastName?: string) => {
     if (!firstName && !lastName) return "U";
     return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
-  };
+  });
 
   // Si on est en cours de chargement, afficher un état de chargement
   if (isLoading) {

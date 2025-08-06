@@ -48,13 +48,13 @@ const getRecommendationIcon = (type: string) => {
     default:
       return <Lightbulb className="w-4 h-4" />;
   }
-};
+});
 
 const getConfidenceColor = (confidence: number) => {
   if (confidence >= 0.8) return "text-green-600 border-green-200 bg-green-50";
   if (confidence >= 0.6) return "text-yellow-600 border-yellow-200 bg-yellow-50";
   return "text-red-600 border-red-200 bg-red-50";
-};
+});
 
 export default function ContentRecommendationSidebar({ 
   bookId, 
@@ -78,7 +78,7 @@ export default function ContentRecommendationSidebar({
         title: "Recommendations Generated",
         description: `Generated ${newRecommendations.length} new recommendations using AI.`,
       });
-    },
+    });
     onError: (error: any) => {
       toast({
         title: "Generation Failed",
@@ -94,11 +94,11 @@ export default function ContentRecommendationSidebar({
       isUseful: boolean; 
       isApplied?: boolean; 
     } => 
-      apiRequest('PUT', `/api/recommendations/${recommendationId}/feedback`, { isUseful, isApplied },
+      apiRequest('PUT', `/api/recommendations/${recommendationId}/feedback`, { isUseful, isApplied });
     onSuccess: () => {
       queryClient.invalidateQueries({ 
         queryKey: ['/api/books', bookId, 'recommendations']});
-    },
+    });
     onError: (error: any) => {
       toast({
         title: "Feedback Failed",
@@ -118,7 +118,7 @@ export default function ContentRecommendationSidebar({
         title: "Recommendation Removed",
         description: "Recommendation deleted successfully.",
       });
-    },
+    });
     onError: (error: any) => {
       toast({
         title: "Delete Failed",
@@ -137,21 +137,21 @@ export default function ContentRecommendationSidebar({
       }
       return newSet;
     });
-  };
+  });
 
   const handleFeedback = (recommendation: ContentRecommendation, isUseful: boolean) => {
     feedbackMutation.mutate({
       recommendationId: recommendation.id,
       isUseful,
-      isApplied: recommendation.isApplied ?? false};
-  };
+      isApplied: recommendation.isApplied ?? false});
+  });
 
   const handleApply = (recommendation: ContentRecommendation) => {
     feedbackMutation.mutate({
       recommendationId: recommendation.id,
       isUseful: recommendation.isUseful ?? true,
-      isApplied: true};
-  };
+      isApplied: true});
+  });
 
   if (!isVisible) return null;
 
@@ -358,7 +358,7 @@ export default function ContentRecommendationSidebar({
               </CollapsibleContent>
             </Collapsible>
           </Card>
-        )}
+        ))}
       </div>
     </div>
   );

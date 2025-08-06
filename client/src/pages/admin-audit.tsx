@@ -24,7 +24,7 @@ interface AuditLog {
     email: string;
     firstName: string | null;
     lastName: string | null;
-  };
+  });
 }
 
 export default function AdminAudit() {
@@ -69,7 +69,7 @@ export default function AdminAudit() {
       default:
         return <Shield className="h-4 w-4 text-gray-600" />;
     }
-  };
+  });
 
   const getActionBadgeVariant = (action: string) => {
     switch (action) {
@@ -84,7 +84,7 @@ export default function AdminAudit() {
       default:
         return "outline";
     }
-  };
+  });
 
   const getResourceLabel = (resource: string) => {
     switch (resource) {
@@ -97,7 +97,7 @@ export default function AdminAudit() {
       default:
         return resource;
     }
-  };
+  });
 
   if (isLoading || auditLoading) {
     return (
@@ -196,7 +196,7 @@ export default function AdminAudit() {
                                   : log.resourceId
                                 }
                               </div>
-                            )}
+                            ))}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -211,7 +211,7 @@ export default function AdminAudit() {
                                 </pre>
                               </details>
                             </div>
-                          )}
+                          ))}
                         </TableCell>
                         <TableCell>
                           <div className="font-mono text-sm">
@@ -219,7 +219,7 @@ export default function AdminAudit() {
                           </div>
                         </TableCell>
                       </TableRow>
-                    )}
+                    ))}
                   </TableBody>
                 </Table>
               </div>
@@ -257,7 +257,7 @@ export default function AdminAudit() {
                 Les actions administratives apparaîtront ici une fois qu'elles seront effectuées.
               </div>
             </div>
-          )}
+          ))}
         </CardContent>
       </Card>
     </div>

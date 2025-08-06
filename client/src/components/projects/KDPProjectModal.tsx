@@ -84,7 +84,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
       formats: [],
       categories: [],
       keywords: [],
-    },
+    });
   });
 
   const createProject = useMutation({
@@ -93,7 +93,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
         ...data,
         categories,
         keywords,
-      };
+      });
       
       console.log('Sending project data:', projectData);
       const project = await apiRequest("/api/projects", { method: "POST", body: JSON.stringify(projectData});
@@ -110,7 +110,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
       }
       
       return project;
-    },
+    });
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"]});
       toast({
@@ -122,7 +122,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
       setContributors([]);
       setKeywords([]);
       setCategories([]);
-    },
+    });
     onError: (error) => {
       console.error('Project creation error:', error);
       toast({
@@ -130,7 +130,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
         description: error.message || "Failed to create project",
         variant: "destructive"
       });
-    },
+    });
   });
 
   const addContributor = () => {
@@ -142,39 +142,39 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
       middleName: "",
       lastName: "",
       suffix: "",
-    };
+    });
     setContributors([...contributors, newContributor]);
-  };
+  });
 
   const updateContributor = (id: string, field: keyof Contributor, value: string) => {
     setContributors(contributors.map(c => 
       c.id === id ? { ...c, [field]: value} : c
     ));
-  };
+  });
 
   const removeContributor = (id: string) => {
     setContributors(contributors.filter(c => c.id !== id));
-  };
+  });
 
   const addKeyword = (keyword: string) => {
     if (keyword.trim() && !keywords.includes(keyword.trim()) && keywords.length < 7) {
       setKeywords([...keywords, keyword.trim()]);
     }
-  };
+  });
 
   const removeKeyword = (keyword: string) => {
     setKeywords(keywords.filter(k => k !== keyword));
-  };
+  });
 
   const addCategory = (category: string) => {
     if (category.trim() && !categories.includes(category.trim()) && categories.length < 3) {
       setCategories([...categories, category.trim()]);
     }
-  };
+  });
 
   const removeCategory = (category: string) => {
     setCategories(categories.filter(c => c !== category));
-  };
+  });
 
   if (!isOpen) return null;
 
@@ -209,7 +209,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
                         <SelectContent>
                           {languages.map((lang) => (
                             <SelectItem key={lang} value={lang}>{lang}</SelectItem>
-                          )}
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -224,7 +224,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
                       />
                       {form.formState.errors.title && (
                         <p className="text-red-500 text-sm mt-1">{form.formState.errors.title.message}</p>
-                      )}
+                      ))}
                     </div>
 
                     {/* Subtitle */}
@@ -341,7 +341,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
                           <SelectContent>
                             {contributorRoles.map((role) => (
                               <SelectItem key={role} value={role}>{role}</SelectItem>
-                            )}
+                            ))}
                           </SelectContent>
                         </Select>
                         <Input
@@ -390,7 +390,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
                         <Plus className="h-4 w-4 mr-2" />
                         Add Another
                       </Button>
-                    )}
+                    ))}
                   </CardContent>
                 </Card>
 
@@ -478,7 +478,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
                             <SelectContent>
                               {readingAges.map((age) => (
                                 <SelectItem key={age} value={age}>{age}</SelectItem>
-                              )}
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
@@ -491,7 +491,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
                             <SelectContent>
                               {readingAges.map((age) => (
                                 <SelectItem key={age} value={age}>{age}</SelectItem>
-                              )}
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
@@ -516,7 +516,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
                       <SelectContent>
                         {marketplaces.map((marketplace) => (
                           <SelectItem key={marketplace} value={marketplace}>{marketplace}</SelectItem>
-                        )}
+                        ))}
                       </SelectContent>
                     </Select>
                   </CardContent>
@@ -540,7 +540,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
                             onClick={ () => removeCategory(category }
                           />
                         </Badge>
-                      )}
+                      ))}
                     </div>
                     {categories.length < 3 && (
                       <div className="flex gap-2">
@@ -597,7 +597,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
                             onClick={ () => removeKeyword(keyword }
                           />
                         </Badge>
-                      )}
+                      ))}
                     </div>
                     {keywords.length < 7 && (
                       <div className="grid grid-cols-2 gap-2">
@@ -660,7 +660,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
                           className="mt-1"
                         />
                       </div>
-                    )}
+                    ))}
                   </CardContent>
                 </Card>
 
@@ -696,7 +696,7 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
                           className="mt-1"
                         />
                       </div>
-                    )}
+                    ))}
                   </CardContent>
                 </Card>
 
@@ -726,11 +726,11 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
                           />
                           <Label htmlFor={format} className="capitalize">{format}</Label>
                         </div>
-                      )}
+                      ))}
                     </div>
                     {form.formState.errors.formats && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.formats.message}</p>
-                    )}
+                    ))}
                   </CardContent>
                 </Card>
             </div>

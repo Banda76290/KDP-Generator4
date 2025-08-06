@@ -78,7 +78,7 @@ const MARKETPLACE_COLORS = {
   'Amazon.ca': '#ffb347',
   'Amazon.co.uk': '#4285f4',
   'Amazon.it': '#34a853'
-};
+});
 
 export default function Analytics() {
   const { toast } = useToast();
@@ -154,12 +154,12 @@ export default function Analytics() {
     } catch (error) { // Fallback for any formatting errors
       return `${amount.toFixed(2} ${currency}`;
     }
-  };
+  });
 
   // Format currency converted to USD for unified display  
   const formatConvertedCurrency = (amount: number): string => {
     return formatCurrency(amount, 'USD');
-  )};
+  )});
 
   // Function to update exchange rates manually
   const updateExchangeRates = async () => {
@@ -187,7 +187,7 @@ export default function Analytics() {
         variant: "destructive"
       });
     }
-  };
+  });
 
   // Get main revenue info for display
   const royaltiesByCurrency = overview?.royaltiesByCurrency || [];
@@ -199,7 +199,7 @@ export default function Analytics() {
       month: 'short',
       day: 'numeric'
       });
-  };
+  });
 
   return (
     <Layout>
@@ -273,10 +273,10 @@ export default function Analytics() {
               { overviewLoading ? (
                 <div className="w-20 h-6 bg-gray-200 animate-pulse rounded" />
               ) : (
-                overview?.totalRoyaltiesUSD ? formatCurrency(overview.totalRoyaltiesUSD, 'USD') : (mainCurrency ? formatCurrency(mainCurrency.amount, mainCurrency.currency) : '0 $')}
+                overview?.totalRoyaltiesUSD ? formatCurrency(overview.totalRoyaltiesUSD, 'USD') : (mainCurrency ? formatCurrency(mainCurrency.amount, mainCurrency.currency) : '0 $'))}
             </div>
             <p className="text-xs text-muted-foreground">
-              {overview?.totalRoyaltiesUSD ? `Converti automatiquement en USD` : (totalCurrencies > 1 ? `${totalCurrencies} devises différentes` : 'Royautés cumulées')}
+              {overview?.totalRoyaltiesUSD ? `Converti automatiquement en USD` : (totalCurrencies > 1 ? `${totalCurrencies} devises différentes` : 'Royautés cumulées'))}
             </p>
           </CardContent>
         </Card>
@@ -359,7 +359,7 @@ export default function Analytics() {
                     />
                   </LineChart>
                 </ResponsiveContainer>
-              )}
+              ))}
             </CardContent>
           </Card>
         </TabsContent>
@@ -377,7 +377,7 @@ export default function Analytics() {
                 <div className="space-y-4">
                   {[1, 2, 3, 4].map((i) => (
                     <div key={i} className="w-full h-16 bg-gray-200 animate-pulse rounded" />
-                  )}
+                  ))}
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -392,19 +392,19 @@ export default function Analytics() {
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="text-2xl font-bold text-secondary">
-                            { formatCurrency(currency.amount, currency.currency)}
+                            { formatCurrency(currency.amount, currency.currency))}
                           </div>
                           { currency.amountUSD && currency.currency !== 'USD' && (
                             <div className="text-sm text-gray-600 mt-1">
-                              ≈ {formatCurrency(currency.amountUSD, 'USD')}
+                              ≈ {formatCurrency(currency.amountUSD, 'USD'))}
                             </div>
-                          )}
+                          ))}
                         </div>
                         <div className="text-sm text-gray-600 text-right">
-                          <div>Moyenne: { formatCurrency(currency.amount / currency.transactions, currency.currency)}</div>
+                          <div>Moyenne: { formatCurrency(currency.amount / currency.transactions, currency.currency))}</div>
                           { currency.amountUSD && currency.currency !== 'USD' && (
-                            <div className="mt-1">≈ {formatCurrency(currency.amountUSD / currency.transactions, 'USD')}</div>
-                          )}
+                            <div className="mt-1">≈ {formatCurrency(currency.amountUSD / currency.transactions, 'USD'))}</div>
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -414,7 +414,7 @@ export default function Analytics() {
                       Aucune donnée de revenus disponible
                     </div>}
                 </div>
-              )}
+              ))}
             </CardContent>
           </Card>
         </TabsContent>
@@ -439,7 +439,7 @@ export default function Analytics() {
                       </div>
                       <div className="w-20 h-6 bg-gray-200 animate-pulse rounded" />
                     </div>
-                  )}
+                  ))}
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -465,13 +465,13 @@ export default function Analytics() {
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-bold text-secondary">
-                          { book.totalRoyaltyUSD ? formatCurrency(book.totalRoyaltyUSD, 'USD') : formatCurrency(book.totalRoyalty, book.currency)}
+                          { book.totalRoyaltyUSD ? formatCurrency(book.totalRoyaltyUSD, 'USD') : formatCurrency(book.totalRoyalty, book.currency))}
                         </div>
                       </div>
                     </div>
-                  )}
+                  ))}
                 </div>
-              )}
+              ))}
             </CardContent>
           </Card>
         </TabsContent>
@@ -509,14 +509,14 @@ export default function Analytics() {
                             key={`cell-${index}`} 
                             fill={MARKETPLACE_COLORS[entry.marketplace as keyof typeof MARKETPLACE_COLORS] || '#8884d8'} 
                           />
-                        )}
+                        ))}
                       </Pie>
                       <Tooltip 
                         formatter={(value) => [formatCurrency(Number(value), 'USD'), 'Royautés'])}
                       />
                     </PieChart>
                   </ResponsiveContainer>
-                )}
+                ))}
               </CardContent>
             </Card>
 
@@ -529,7 +529,7 @@ export default function Analytics() {
                   <div className="space-y-4">
                     {[1, 2, 3, 4].map((i) => (
                       <div key={i} className="w-full h-16 bg-gray-200 animate-pulse rounded" />
-                    )}
+                    ))}
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -548,7 +548,7 @@ export default function Analytics() {
                           <div>
                             <span className="text-gray-500">Revenus:</span>
                             <div className="font-medium text-secondary">
-                              { marketplace.totalRoyaltyUSD ? formatCurrency(marketplace.totalRoyaltyUSD, 'USD') : formatCurrency(marketplace.totalRoyalty, marketplace.currency)}
+                              { marketplace.totalRoyaltyUSD ? formatCurrency(marketplace.totalRoyaltyUSD, 'USD') : formatCurrency(marketplace.totalRoyalty, marketplace.currency))}
                             </div>
                           </div>
                           <div>
@@ -559,9 +559,9 @@ export default function Analytics() {
                           </div>
                         </div>
                       </div>
-                    )}
+                    ))}
                   </div>
-                )}
+                ))}
               </CardContent>
             </Card>
           </div>
@@ -601,7 +601,7 @@ export default function Analytics() {
                     <Bar dataKey="totalRoyalty" fill="#38b6ff" />
                   </BarChart>
                 </ResponsiveContainer>
-              )}
+              ))}
             </CardContent>
           </Card>
         </TabsContent>
@@ -654,7 +654,7 @@ export default function Analytics() {
                           </div>
                         </div>
                       </Card>
-                    )}
+                    ))}
                   </div>
                 ) : (
                   <div className="text-center py-8">
@@ -662,7 +662,7 @@ export default function Analytics() {
                       Aucun taux de change disponible. Cliquez sur "Actualiser" pour charger les données.
                     </p>
                   </div>
-                )}
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -697,7 +697,7 @@ export default function Analytics() {
                         <SelectItem key={rate.currency} value={rate.currency}>
                           {rate.currency}
                         </SelectItem>
-                      )}
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -712,7 +712,7 @@ export default function Analytics() {
                         <SelectItem key={rate.currency} value={rate.currency}>
                           {rate.currency}
                         </SelectItem>
-                      )}
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

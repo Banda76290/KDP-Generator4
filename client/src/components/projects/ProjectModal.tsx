@@ -56,7 +56,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
       aiContentType: "",
       formats: [],
       contributors: [],
-    },
+    });
   });
 
   // Reset form when project changes or modal opens
@@ -94,7 +94,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
 
   const createMutation = useMutation({ mutationFn: async (data: ProjectFormData) => {
       return await apiRequest("/api/projects", { method: "POST", body: JSON.stringify(data});
-    },
+    });
     onSuccess: async () => {
       toast({
         title: "Project Created",
@@ -104,7 +104,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
       onClose();
-    },
+    });
     onError: (error) => {
       if (isUnauthorizedError(error)) {
         toast({
@@ -122,13 +122,13 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
         description: error.message || "Failed to create project",
         variant: "destructive",
       });
-    },
+    });
   });
 
   const updateMutation = useMutation({
     mutationFn: async (data: ProjectFormData) => {
       return await apiRequest(`/api/projects/${project?.id}`, { method: "PUT", body: JSON.stringify(data});
-    },
+    });
     onSuccess: async () => {
       toast({
         title: "Project Updated",
@@ -138,7 +138,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
       onClose();
-    },
+    });
     onError: (error) => {
       if (isUnauthorizedError(error)) {
         toast({
@@ -156,7 +156,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
         description: error.message || "Failed to update project",
         variant: "destructive",
       });
-    },
+    });
   });
 
   const onSubmit = (data: ProjectFormData) => {
@@ -165,7 +165,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
     } else {
       createMutation.mutate(data);
     }
-  };
+  });
 
   // Temporarily allow AI access for all users for testing
   const isPremiumUser = true; // user?.subscriptionTier === 'premium' || user?.subscriptionTier === 'pro';
@@ -196,7 +196,7 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
                   <p className="text-sm text-red-600 mt-1">
                     {form.formState.errors.title.message}
                   </p>
-                )}
+                ))}
               </div>
               <div>
                 <Label htmlFor="subtitle">Subtitle</Label>
@@ -321,8 +321,8 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
             <h3 className="text-lg font-medium text-gray-900">Publication Formats</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
-                { value: "ebook", label: "eBook", description: "Digital format" },
-                { value: "paperback", label: "Paperback", description: "Print on demand" },
+                { value: "ebook", label: "eBook", description: "Digital format" });
+                { value: "paperback", label: "Paperback", description: "Print on demand" });
                 { value: "hardcover", label: "Hardcover", description: "Premium format" }
               ].map((format) => (
                 <div key={format.value} className="flex items-center space-x-3 p-4 border border-gray-300 rounded-lg hover:bg-gray-50">
@@ -344,13 +344,13 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
                     <p className="text-xs text-gray-600">{format.description}</p>
                   </div>
                 </div>
-              )}
+              ))}
             </div>
             {form.formState.errors.formats && (
               <p className="text-sm text-red-600">
                 {form.formState.errors.formats.message}
               </p>
-            )}
+            ))}
           </div>
 
           {/* Form Actions */}

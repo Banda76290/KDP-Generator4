@@ -16,7 +16,7 @@ import { insertProjectSchema, type InsertProject } from "@shared/schema";
 import { z } from "zod";
 import Layout from "@/components/Layout";
 
-const projectFormSchema = insertProjectSchema.pick({ name: true, description: true };
+const projectFormSchema = insertProjectSchema.pick({ name: true, description: true });
 
 type ProjectFormData = z.infer<typeof projectFormSchema>;
 
@@ -33,7 +33,7 @@ export default function EditProject() {
     defaultValues: {
       name: "",
       description: "",
-    },
+    });
   });
 
   // Fetch project data
@@ -62,7 +62,7 @@ export default function EditProject() {
       
       console.log('Project updated:', updatedProject);
       return updatedProject;
-    },
+    });
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"]});
       queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId] });
@@ -71,14 +71,14 @@ export default function EditProject() {
         description: "Your project has been updated successfully.",
       });
       setLocation("/projects");
-    },
+    });
     onError: (error) => {
       console.error('Project update error:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to update project"
       });
-    },
+    });
   });
 
   if (projectLoading) {
@@ -144,7 +144,7 @@ export default function EditProject() {
                             <p className="text-sm text-red-600 mt-1">
                               {form.formState.errors.name.message}
                             </p>
-                          )}
+                          ))}
                         </div>
 
                         <div>
@@ -160,7 +160,7 @@ export default function EditProject() {
                             <p className="text-sm text-red-600 mt-1">
                               {form.formState.errors.description.message}
                             </p>
-                          )}
+                          ))}
                         </div>
 
 

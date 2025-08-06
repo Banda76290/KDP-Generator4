@@ -28,7 +28,7 @@ const formatFileSize = (bytes: number): string => {
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-};
+});
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -43,7 +43,7 @@ const getStatusBadge = (status: string) => {
     default:
       return <Badge variant="secondary">{status}</Badge>;
   }
-};
+});
 
 const getDetectedTypeDescription = (detectedType: string) => {
   switch (detectedType) {
@@ -62,7 +62,7 @@ const getDetectedTypeDescription = (detectedType: string) => {
     default:
       return `KDP Report (${detectedType}`;
   }
-};
+});
 
 export default function ImportManagement() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -75,7 +75,7 @@ export default function ImportManagement() {
   // Fetch user imports
   const { data: imports = [], isLoading } = useQuery<KdpImportWithRelations[]>({
     queryKey: ['/api/kdp-imports'],
-  };
+  });
 
   // Upload mutation
   const uploadMutation = useMutation({
@@ -86,7 +86,7 @@ export default function ImportManagement() {
         method: 'POST',
         body: formData
       });
-    },
+    });
     onSuccess: async (data) => { toast({
         title: "File uploaded successfully",
         description: `Detected: ${getDetectedTypeDescription(data.parsedData.detectedType}`,
@@ -105,7 +105,7 @@ export default function ImportManagement() {
           monitorImportProgress(importId);
         }, 1000);
       }
-    },
+    });
     onError: (error: any) => {
       toast({
         title: "Upload failed",
@@ -113,7 +113,7 @@ export default function ImportManagement() {
         variant: "destructive"
       });
       setSelectedFile(null);
-    },
+    });
   });
 
   // Delete mutation
@@ -121,8 +121,8 @@ export default function ImportManagement() {
     mutationFn: async (importId: string) => {
       return apiRequest(`/api/kdp-imports/${importId}`, {
         method: 'DELETE',
-      };
-    },
+      });
+    });
     onSuccess: () => {
       toast({
         title: "Import deleted",
@@ -130,14 +130,14 @@ export default function ImportManagement() {
         variant: "destructive",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
-    },
+    });
     onError: (error: any) => {
       toast({
         title: "Delete failed",
         description: error.message || "Failed to delete import",
         variant: "destructive"
       });
-    },
+    });
   });
 
   // Fetch import progress (no polling - only manual refresh)
@@ -145,7 +145,7 @@ export default function ImportManagement() {
     queryKey: ['/api/kdp-imports', expandedImport, 'progress'],
     enabled: !!expandedImport,
     refetchInterval: false, // Disable polling completely
-  };
+  });
 
   const handleFileSelect = (files: File[]) => {
     const file = files[0];
@@ -178,36 +178,36 @@ export default function ImportManagement() {
     }
 
     setSelectedFile(file);
-  };
+  });
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     const files = Array.from(e.dataTransfer.files);
     handleFileSelect(files);
-  };
+  });
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
-  };
+  });
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-  };
+  });
 
   const handleUpload = () => {
     if (selectedFile) {
       uploadMutation.mutate(selectedFile);
     }
-  };
+  });
 
   const handleDelete = (importId: string) => {
     if (confirm('Are you sure you want to delete this import? This action cannot be undone.')) {
       deleteMutation.mutate(importId);
     }
-  };
+  });
 
   const toggleExpandImport = async (importId: string) => {
     const newExpandedImport = expandedImport === importId ? null : importId;
@@ -217,7 +217,7 @@ export default function ImportManagement() {
     if (newExpandedImport) {
       await monitorImportProgress(newExpandedImport);
     }
-  };
+  });
 
   // Monitor import progress with intelligent refresh
   const monitorImportProgress = async (importId: string) => {
@@ -258,11 +258,11 @@ export default function ImportManagement() {
       } catch (error) {
         console.error('Error checking import progress:', error);
       }
-    };
+    });
 
     // Start monitoring immediately
     await checkProgress();
-  };
+  });
 
   return (
     <Layout>
@@ -361,7 +361,7 @@ export default function ImportManagement() {
                   />
                 </div>
               </div>
-            )}
+            ))}
           </div>
         </CardContent>
       </Card>
@@ -414,7 +414,7 @@ export default function ImportManagement() {
                         </span>
                         {importRecord.totalRecords > 0 && (
                           <span>{importRecord.totalRecords} records</span>
-                        )}
+                        ))}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -491,16 +491,16 @@ export default function ImportManagement() {
                               <div key={index} className="mb-1 text-red-700 dark:text-red-300">
                                 {error}
                               </div>
-                            )}
+                            ))}
                           </div>
                         </div>
-                      )}
+                      ))}
                     </div>
-                  )}
+                  ))}
                 </div>
-              )}
+              ))}
             </div>
-          )}
+          ))}
         </CardContent>
       </Card>
       </div>

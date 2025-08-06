@@ -31,7 +31,7 @@ interface Contributor {
 
 const bookFormSchema = insertBookSchema.extend({
   projectId: z.string().optional(),
-};
+});
 
 type BookFormData = z.infer<typeof bookFormSchema>;
 
@@ -89,18 +89,18 @@ export default function CreateBook() {
       projectId: preSelectedProjectId || "",
       categories: [],
       keywords: [],
-    },
+    });
   });
 
   // Fetch projects for selection
   const { data: projects = [] } = useQuery({
     queryKey: ["/api/projects"],
-  };
+  });
 
   // Load existing authors
   const { data: authors = [], isLoading: loadingAuthors } = useQuery<any[]>({
     queryKey: ["/api/authors"],
-  };
+  });
 
   const createBook = useMutation({
     mutationFn: async (data: BookFormData) => {
@@ -108,7 +108,7 @@ export default function CreateBook() {
         ...data,
         categories,
         keywords,
-      };
+      });
       
       console.log('Creating book data:', bookData);
       const book = await apiRequest("/api/books", { method: "POST", body: JSON.stringify(bookData});
@@ -125,7 +125,7 @@ export default function CreateBook() {
       }
       
       return book;
-    },
+    });
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/books"]});
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
@@ -134,14 +134,14 @@ export default function CreateBook() {
         description: "Your book has been created successfully.",
       });
       setLocation("/projects");
-    },
+    });
     onError: (error) => {
       console.error('Book creation error:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to create book"
       });
-    },
+    });
   });
 
   const addContributor = () => {
@@ -153,19 +153,19 @@ export default function CreateBook() {
       middleName: "",
       lastName: "",
       suffix: "",
-    };
+    });
     setContributors([...contributors, newContributor]);
-  };
+  });
 
   const updateContributor = (id: string, field: keyof Contributor, value: string) => {
     setContributors(contributors.map(c => 
       c.id === id ? { ...c, [field]: value} : c
     ));
-  };
+  });
 
   const removeContributor = (id: string) => {
     setContributors(contributors.filter(c => c.id !== id));
-  };
+  });
 
   // Function to handle author selection from dropdown
   const handleAuthorSelection = (authorId: string) => {
@@ -181,27 +181,27 @@ export default function CreateBook() {
         setSelectedAuthorId(authorId);
       }
     }
-  };
+  });
 
   const addKeyword = (keyword: string) => {
     if (keyword.trim() && !keywords.includes(keyword.trim()) && keywords.length < 7) {
       setKeywords([...keywords, keyword.trim()]);
     }
-  };
+  });
 
   const removeKeyword = (keyword: string) => {
     setKeywords(keywords.filter(k => k !== keyword));
-  };
+  });
 
   const addCategory = (category: string) => {
     if (category.trim() && !categories.includes(category.trim()) && categories.length < 3) {
       setCategories([...categories, category.trim()]);
     }
-  };
+  });
 
   const removeCategory = (category: string) => {
     setCategories(categories.filter(c => c !== category));
-  };
+  });
 
   return (
     <Layout>
@@ -250,7 +250,7 @@ export default function CreateBook() {
                               <SelectItem key={project.id} value={project.id}>
                                 {project.name}
                               </SelectItem>
-                            )}
+                            ))}
                           </SelectContent>
                         </Select>
                       </CardContent>
@@ -303,7 +303,7 @@ export default function CreateBook() {
                             <SelectContent>
                               {languages.map((lang) => (
                                 <SelectItem key={lang} value={lang}>{lang}</SelectItem>
-                              )}
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
@@ -318,7 +318,7 @@ export default function CreateBook() {
                           />
                           {form.formState.errors.title && (
                             <p className="text-red-500 text-sm mt-1">{form.formState.errors.title.message}</p>
-                          )}
+                          ))}
                         </div>
 
                         {/* Subtitle */}
@@ -382,7 +382,7 @@ export default function CreateBook() {
                                   <SelectItem key={author.id} value={author.id}>
                                     {author.fullName}
                                   </SelectItem>
-                                )}
+                                ))}
                               </SelectContent>
                             </Select>
                             <Button
@@ -440,7 +440,7 @@ export default function CreateBook() {
                                 onClick={ () => removeCategory(category }
                               />
                             </Badge>
-                          )}
+                          ))}
                         </div>
                         {categories.length < 3 && (
                           <div className="flex gap-2">
@@ -454,7 +454,7 @@ export default function CreateBook() {
                               }}
                             />
                           </div>
-                        )}
+                        ))}
                       </CardContent>
                     </Card>
 
@@ -476,7 +476,7 @@ export default function CreateBook() {
                                 onClick={ () => removeKeyword(keyword }
                               />
                             </Badge>
-                          )}
+                          ))}
                         </div>
                         {keywords.length < 7 && (
                           <div className="grid grid-cols-2 gap-2">

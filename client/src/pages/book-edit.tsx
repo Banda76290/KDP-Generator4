@@ -34,7 +34,7 @@ interface Contributor {
 
 const bookFormSchema = insertBookSchema.extend({
   projectId: z.string().min(1, "Project selection is required"),
-};
+});
 type BookFormData = z.infer<typeof bookFormSchema>;
 
 const languages = [
@@ -103,28 +103,28 @@ const contributorRoles = [
 
 const trimSizes = {
   mostPopular: [
-    { id: "5x8", label: "5 x 8 in", metric: "12.7 x 20.32 cm" },
-    { id: "5.25x8", label: "5.25 x 8 in", metric: "13.34 x 20.32 cm" },
-    { id: "5.5x8.5", label: "5.5 x 8.5 in", metric: "13.97 x 21.59 cm" },
+    { id: "5x8", label: "5 x 8 in", metric: "12.7 x 20.32 cm" });
+    { id: "5.25x8", label: "5.25 x 8 in", metric: "13.34 x 20.32 cm" });
+    { id: "5.5x8.5", label: "5.5 x 8.5 in", metric: "13.97 x 21.59 cm" });
     { id: "6x9", label: "6 x 9 in", metric: "15.24 x 22.86 cm" }
   ],
   moreStandard: [
-    { id: "5.06x7.81", label: "5.06 x 7.81 in", metric: "12.85 x 19.84 cm" },
-    { id: "6.14x9.21", label: "6.14 x 9.21 in", metric: "15.6 x 23.39 cm" },
-    { id: "6.69x9.61", label: "6.69 x 9.61 in", metric: "16.99 x 24.4 cm" },
-    { id: "7x10", label: "7 x 10 in", metric: "17.78 x 25.4 cm" },
-    { id: "7.44x9.69", label: "7.44 x 9.69 in", metric: "18.9 x 24.61 cm" },
-    { id: "7.5x9.25", label: "7.5 x 9.25 in", metric: "19.05 x 23.5 cm" },
-    { id: "8x10", label: "8 x 10 in", metric: "20.32 x 25.4 cm" },
+    { id: "5.06x7.81", label: "5.06 x 7.81 in", metric: "12.85 x 19.84 cm" });
+    { id: "6.14x9.21", label: "6.14 x 9.21 in", metric: "15.6 x 23.39 cm" });
+    { id: "6.69x9.61", label: "6.69 x 9.61 in", metric: "16.99 x 24.4 cm" });
+    { id: "7x10", label: "7 x 10 in", metric: "17.78 x 25.4 cm" });
+    { id: "7.44x9.69", label: "7.44 x 9.69 in", metric: "18.9 x 24.61 cm" });
+    { id: "7.5x9.25", label: "7.5 x 9.25 in", metric: "19.05 x 23.5 cm" });
+    { id: "8x10", label: "8 x 10 in", metric: "20.32 x 25.4 cm" });
     { id: "8.5x11", label: "8.5 x 11 in", metric: "21.59 x 27.94 cm" }
   ],
   nonStandard: [
-    { id: "8.27x11.69", label: "8.27 x 11.69 in", metric: "21 x 29.7 cm" },
-    { id: "8.25x6", label: "8.25 x 6 in", metric: "20.96 x 15.24 cm" },
-    { id: "8.25x8.25", label: "8.25 x 8.25 in", metric: "20.96 x 20.96 cm" },
+    { id: "8.27x11.69", label: "8.27 x 11.69 in", metric: "21 x 29.7 cm" });
+    { id: "8.25x6", label: "8.25 x 6 in", metric: "20.96 x 15.24 cm" });
+    { id: "8.25x8.25", label: "8.25 x 8.25 in", metric: "20.96 x 20.96 cm" });
     { id: "8.5x8.5", label: "8.5 x 8.5 in", metric: "21.59 x 21.59 cm" }
   ]
-};
+});
 
 
 
@@ -150,7 +150,7 @@ const fallbackCategories = [
       "User Experience & Usability", 
       "User Generated Content"
     ]
-  },
+  });
   {
     path: "Books › Computers & Technology › Internet & Social Media",
     subcategories: [
@@ -159,7 +159,7 @@ const fallbackCategories = [
       "Website Analytics",
       "Search Engine Optimization"
     ]
-  },
+  });
   {
     path: "Books › Computers & Technology › Web Development & Design",
     subcategories: [
@@ -338,7 +338,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
           parentPath: parentPath,
           isSelectable: marketplaceCategories.some(cat => cat.categoryPath === path),
           sortOrder: 0
-        };
+        });
       });
       
       // Filter by level and parent
@@ -365,13 +365,13 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
     return marketplaceCategories
       .filter(cat => cat.level === level && cat.parentPath === parentPath)
       .sort((a, b) => a.sortOrder - b.sortOrder);
-  };
+  });
 
   const getSelectableCategories = (parentPath: string) => {
     return marketplaceCategories
       .filter(cat => cat.parentPath === parentPath && cat.isSelectable)
       .sort((a, b) => a.sortOrder - b.sortOrder);
-  };
+  });
 
   // Get leaf categories (final/deepest categories) that are descendants of the current navigation path
   const getLeafCategoriesForCurrentPath = () => {
@@ -409,7 +409,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
       }
       return a.displayName.localeCompare(b.displayName);
     });
-  };
+  });
 
   return (
     <div className="grid grid-cols-2 gap-4 min-w-[600px]">
@@ -455,12 +455,12 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
                     <SelectItem key={category.id} value={category.categoryPath}>
                       <span className="text-left">{category.displayName}</span>
                     </SelectItem>
-                  )}
+                  ))}
                 </SelectContent>
               </Select>
             </div>
           );
-        })}
+        }))}
       </div>
       {/* Right side: Placement section */}
       <div className="space-y-2">
@@ -479,7 +479,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
                     id={`leaf-category-${category.id}`}
                     checked={thisInstanceCategory === category.categoryPath}
                     onCheckedChange={(checked) => {
-                    console.log('Placement checkbox clicked:', { checked, categoryPath: category.categoryPath, tempUISelections};
+                    console.log('Placement checkbox clicked:', { checked, categoryPath: category.categoryPath, tempUISelections});
                     
                     const instanceIndex = instanceId ? parseInt(instanceId.split('-')[1]) : 0;
                     
@@ -570,13 +570,13 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
                   ? "No final categories available in this branch."
                   : "Navigate through categories to see placement options."}
               </div>
-            )}
+            ))}
           </div>
         </div>
       </div>
     </div>
   );
-};
+});
 
 export default function EditBook() {
   const { bookId } = useParams();
@@ -597,7 +597,7 @@ export default function EditBook() {
   const [authorExplicitlyRemoved, setAuthorExplicitlyRemoved] = useState<boolean>(false);
   const [marketplaceCategories, setMarketplaceCategories] = useState<MarketplaceCategory[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
-  const [resetTriggers, setResetTriggers] = useState<{ [key: number]: number }>({};
+  const [resetTriggers, setResetTriggers] = useState<{ [key: number]: number }>({});
   const [showMarketplaceConflictDialog, setShowMarketplaceConflictDialog] = useState(false);
   const [pendingMarketplace, setPendingMarketplace] = useState<string>("");
   const [incompatibleCategories, setIncompatibleCategories] = useState<string[]>([]);
@@ -662,7 +662,7 @@ export default function EditBook() {
       console.error('Error applying description formatting:', error);
       toast({ title: "Erreur", description: "Erreur lors de l'application du formatage", variant: "destructive"});
     }
-  };
+  });
 
   // Function to clean HTML and remove unnecessary styles
   const cleanHTML = (html: string): string => {
@@ -713,7 +713,7 @@ export default function EditBook() {
           }
         }
       }
-    };
+    });
     
     // Copy body content to tempDiv safely
     for (let child of Array.from(doc.body.childNodes)) {
@@ -752,7 +752,7 @@ export default function EditBook() {
     });
     
     return tempDiv.innerHTML;
-  };
+  });
 
   const updateDescriptionFromHTML = () => {
     const editor = document.getElementById('description-editor') as HTMLDivElement;
@@ -765,7 +765,7 @@ export default function EditBook() {
     setDescriptionCharacterCount(textContent.length);
     setDescriptionEditorContent(cleanedHtmlContent);
     form.setValue('description', cleanedHtmlContent);
-  };
+  });
 
   const handleDescriptionFormatChange = (format: string) => {
     try {
@@ -790,7 +790,7 @@ export default function EditBook() {
       console.error('Error in handleDescriptionFormatChange:', error);
       toast({ title: "Erreur", description: "Erreur lors du changement de format", variant: "destructive"});
     }
-  };
+  });
 
   const insertDescriptionLink = () => {
     if (linkUrl) {
@@ -798,7 +798,7 @@ export default function EditBook() {
       setLinkUrl('');
       setShowLinkDialog(false);
     }
-  };
+  });
   
   // Get projectId from URL if present
   const urlParams = new URLSearchParams(window.location.search);
@@ -811,7 +811,7 @@ export default function EditBook() {
     preSelectedProjectId,
     fullUrl: window.location.href,
     search: window.location.search
-  };
+  });
 
   // Fetch existing book data (only if editing)
   const { data: book, isLoading: bookLoading, error } = useQuery<Book>({
@@ -825,7 +825,7 @@ export default function EditBook() {
 
   // Save current form state to session storage (for navigation to series creation only)
   const saveFormDataToSession = () => { const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
-    console.log('saveFormDataToSession called:', { returnToBookEdit, bookId: bookId || 'new', shouldSave: returnToBookEdit === (bookId || 'new'};
+    console.log('saveFormDataToSession called:', { returnToBookEdit, bookId: bookId || 'new', shouldSave: returnToBookEdit === (bookId || 'new'});
     
     const watchedFormData = form.watch();
     const currentFormData = {
@@ -836,12 +836,12 @@ export default function EditBook() {
       contributors,
       isPartOfSeries,
       selectedAuthorId
-    };
+    });
     
     const storageKey = `bookFormData_${bookId || 'new'}`;
-    console.log('Saving form data to sessionStorage:', { storageKey, data: currentFormData };
+    console.log('Saving form data to sessionStorage:', { storageKey, data: currentFormData });
     sessionStorage.setItem(storageKey, JSON.stringify(currentFormData));
-  };
+  });
 
   // Real-time auto-save: Save form data automatically when any field changes
   useEffect(() => { let timeoutId: NodeJS.Timeout;
@@ -849,18 +849,18 @@ export default function EditBook() {
     const autoSave = () => {
       // Only auto-save if we are about to navigate to series creation
       const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
-      console.log('Auto-save check:', { returnToBookEdit, currentBookId: bookId || 'new', shouldSave: returnToBookEdit === (bookId || 'new'};
+      console.log('Auto-save check:', { returnToBookEdit, currentBookId: bookId || 'new', shouldSave: returnToBookEdit === (bookId || 'new'});
       if (returnToBookEdit === (bookId || 'new')) {
         saveFormDataToSession();
         console.log('Auto-saved form data to sessionStorage');
       }
-    };
+    });
 
     // Debounced auto-save every 500ms when form data changes
     const subscription = form.watch(() => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(autoSave, 500);
-    };
+    });
 
     // Also save when state arrays change
     timeoutId = setTimeout(autoSave, 500);
@@ -868,7 +868,7 @@ export default function EditBook() {
     return () => {
       clearTimeout(timeoutId);
       subscription.unsubscribe();
-    };
+    });
   }, [form, keywords, categories, contributors, isPartOfSeries, selectedAuthorId, bookId]);
 
   // Clean up auto-saved data when leaving the page normally (not via series creation)
@@ -880,14 +880,14 @@ export default function EditBook() {
       if (!sessionStorage.getItem('returnToBookEdit')) {
         sessionStorage.removeItem(storageKey);
       }
-    };
+    });
     
     const handlePopState = () => {
       // Clear when navigating back/forward unless going to series creation
       if (!sessionStorage.getItem('returnToBookEdit')) {
         sessionStorage.removeItem(storageKey);
       }
-    };
+    });
     
     window.addEventListener('beforeunload', handleBeforeUnload);
     window.addEventListener('popstate', handlePopState);
@@ -895,7 +895,7 @@ export default function EditBook() {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('popstate', handlePopState);
-    };
+    });
   }, [bookId]);
 
   // Update form with fetched book data or restored data
@@ -906,7 +906,7 @@ export default function EditBook() {
     const returnFromSeries = sessionStorage.getItem('returnToBookEdit');
     const newlyCreatedSeries = sessionStorage.getItem('newlyCreatedSeries');
     
-    console.log('Restoration check:', { returnFromSeries, bookId: bookId || 'new', hasStorageData: !!savedFormData, shouldRestore: savedFormData && returnFromSeries === (bookId || 'new'};
+    console.log('Restoration check:', { returnFromSeries, bookId: bookId || 'new', hasStorageData: !!savedFormData, shouldRestore: savedFormData && returnFromSeries === (bookId || 'new'});
     
     if (savedFormData && returnFromSeries === (bookId || 'new')) {
       console.log('Restoring form data from sessionStorage');
@@ -930,7 +930,7 @@ export default function EditBook() {
         if (formFields.seriesTitle) {
           setOriginalSeriesData({
             seriesTitle: formFields.seriesTitle,
-            seriesNumber: formFields.seriesNumber || null};
+            seriesNumber: formFields.seriesNumber || null});
         }
         
         // Immediate form reset - same as buttons "Create series" and "Edit series details"
@@ -1011,7 +1011,7 @@ export default function EditBook() {
     }
     
     // Only load book data if we didn't restore from sessionStorage
-    console.log('Book loading check:', { book: !!book, hasRestoredFromStorage, shouldLoadBook: book && !hasRestoredFromStorage };
+    console.log('Book loading check:', { book: !!book, hasRestoredFromStorage, shouldLoadBook: book && !hasRestoredFromStorage });
     if (book && !hasRestoredFromStorage) {
       // Load description into WYSIWYG editor safely
       if (book.description) {
@@ -1083,14 +1083,14 @@ export default function EditBook() {
         editionNumber: book.editionNumber || null,
         readingAgeMin: book.readingAgeMin ? book.readingAgeMin.toString() : null,
         readingAgeMax: book.readingAgeMax ? book.readingAgeMax.toString() : null,
-      };
+      });
 
       // Set series checkbox state and store original series data
       setIsPartOfSeries(!!book.seriesTitle);
       if (book.seriesTitle) {
         setOriginalSeriesData({
           seriesTitle: book.seriesTitle,
-          seriesNumber: book.seriesNumber || null};
+          seriesNumber: book.seriesNumber || null});
       }
 
       // Auto-detect matching author and set states accordingly
@@ -1175,17 +1175,17 @@ export default function EditBook() {
   // Fetch projects for selection
   const { data: projects = [] } = useQuery({
     queryKey: ["/api/projects"],
-  };
+  });
 
   // Fetch series for selection
   const { data: userSeries = [] } = useQuery<any[]>({
     queryKey: ["/api/series"],
-  };
+  });
 
   // Load existing authors
   const { data: authors = [], isLoading: loadingAuthors } = useQuery<any[]>({
     queryKey: ["/api/authors"],
-  };
+  });
 
   // Auto-detect author from book data when authors and book are loaded
   useEffect(() => {
@@ -1218,7 +1218,7 @@ export default function EditBook() {
         // Convert numeric fields to proper types as expected by schema
         editionNumber: data.bookData.editionNumber ? String(data.bookData.editionNumber) : null,
         seriesNumber: data.bookData.seriesNumber ? Number(data.bookData.seriesNumber) : null,
-      };
+      });
       
       console.log(isCreating ? 'Creating book data:' : 'Updating book data:', formattedData);
       console.log('ProjectId being sent:', formattedData.projectId);
@@ -1245,7 +1245,7 @@ export default function EditBook() {
           }
         }
         
-        return { book: createdBook, shouldNavigate: data.shouldNavigate, nextTab: data.nextTab };
+        return { book: createdBook, shouldNavigate: data.shouldNavigate, nextTab: data.nextTab });
       } else {
         const updatedBook = await apiRequest(`/api/books/${bookId}`, { method: "PATCH", body: JSON.stringify(formattedData});
         console.log('Received updated book response:', updatedBook);
@@ -1254,7 +1254,7 @@ export default function EditBook() {
         if (bookId) {
           // Get existing contributors to delete them
           try {
-            const existingContributors = await apiRequest(`/api/contributors/book/${bookId}`, { method: "GET" };
+            const existingContributors = await apiRequest(`/api/contributors/book/${bookId}`, { method: "GET" });
             if (existingContributors && existingContributors.length > 0) {
               for (const contrib of existingContributors) {
                 await apiRequest(`/api/contributors/${contrib.id}/${bookId}`, { method: "DELETE" });
@@ -1279,16 +1279,16 @@ export default function EditBook() {
                 middleName: contributor.middleName || null,
                 lastName: contributor.lastName,
                 suffix: contributor.suffix || null,
-              };
+              });
               console.log('Sending contributor data:', contributorData);
               await apiRequest("/api/contributors", { method: "POST", body: JSON.stringify(contributorData});
             }
           }
         }
         
-        return { book: updatedBook, shouldNavigate: data.shouldNavigate, nextTab: data.nextTab };
+        return { book: updatedBook, shouldNavigate: data.shouldNavigate, nextTab: data.nextTab });
       }
-    },
+    });
     onSuccess: (result) => {
       // Update the current book query cache with the latest data
       if (result.book && !isCreating) {
@@ -1323,7 +1323,7 @@ export default function EditBook() {
           setLocation("/projects");
         }
       }
-    },
+    });
     onError: (error) => {
       console.error(isCreating ? 'Book creation error:' : 'Book update error:', error);
       toast({
@@ -1331,13 +1331,13 @@ export default function EditBook() {
         description: error.message || `Failed to ${isCreating ? 'create' : 'update'} book`,
         variant: "destructive",
       });
-    },
+    });
   });
 
   const deleteBook = useMutation({
     mutationFn: async () => {
       return await apiRequest(`/api/books/${bookId}`, { method: "DELETE" });
-    },
+    });
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/books"]});
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
@@ -1346,7 +1346,7 @@ export default function EditBook() {
         description: "Your book has been deleted successfully.",
       });
       setLocation("/projects");
-    },
+    });
     onError: (error) => {
       console.error('Book deletion error:', error);
       toast({
@@ -1354,7 +1354,7 @@ export default function EditBook() {
         description: error.message || "Failed to delete book",
         variant: "destructive"
       });
-    },
+    });
   });
 
   const addContributor = () => {
@@ -1366,19 +1366,19 @@ export default function EditBook() {
       middleName: "",
       lastName: "",
       suffix: "",
-    };
+    });
     setContributors([...contributors, newContributor]);
-  };
+  });
 
   const updateContributor = (id: string, field: keyof Contributor, value: string) => {
     setContributors(contributors.map(c => 
       c.id === id ? { ...c, [field]: value} : c
     ));
-  };
+  });
 
   const removeContributor = (id: string) => {
     setContributors(contributors.filter(c => c.id !== id));
-  };
+  });
 
   // Function to handle author selection from dropdown
   const handleAuthorSelection = (authorId: string) => {
@@ -1396,7 +1396,7 @@ export default function EditBook() {
         setSelectedAuthorId(authorId);
       }
     }
-  };
+  });
 
   // ISBN validation function
   const checkIsbnUniqueness = async (isbn: string) => {
@@ -1417,7 +1417,7 @@ export default function EditBook() {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-        },
+        });
       });
 
       if (response.ok) {
@@ -1436,7 +1436,7 @@ export default function EditBook() {
     } finally {
       setIsCheckingIsbn(false);
     }
-  };
+  });
 
   // Debounced ISBN validation
   useEffect(() => {
@@ -1485,12 +1485,12 @@ export default function EditBook() {
         title: "Error",
         description: "Failed to apply ISBN/ASIN. Please try again."});
     }
-  };
+  });
 
   const cancelIsbnApply = () => {
     setOfficialIsbnContentValue("");
     setShowIsbnContentApplyDialog(false);
-  };
+  });
 
   // Force "immediate" release when book was previously published
   useEffect(() => {
@@ -1515,21 +1515,21 @@ export default function EditBook() {
     if (keyword.trim() && !keywords.includes(keyword.trim()) && keywords.length < 7) {
       setKeywords([...keywords, keyword.trim()]);
     }
-  };
+  });
 
   const removeKeyword = (keyword: string) => {
     setKeywords(keywords.filter(k => k !== keyword));
-  };
+  });
 
   const addCategory = (category: string) => {
     if (category.trim() && !categories.includes(category.trim()) && categories.length < 10) {
       setCategories([...categories, category.trim()]);
     }
-  };
+  });
 
   const removeCategory = (category: string) => {
     setCategories(categories.filter(c => c !== category));
-  };
+  });
 
   // Function to determine format from book properties
   const deriveBookFormat = () => {
@@ -1537,7 +1537,7 @@ export default function EditBook() {
     const isLargePrintBook = form.watch("isLargePrintBook");
     const isLowContentBook = form.watch("isLowContentBook");
     
-    console.log('Format derivation inputs:', { format, isLargePrintBook, isLowContentBook};
+    console.log('Format derivation inputs:', { format, isLargePrintBook, isLowContentBook});
     
     // If format is explicitly set, use it
     if (format) {
@@ -1547,14 +1547,14 @@ export default function EditBook() {
     
     // Derive format from boolean flags - large print and low content are typically paperback
     if (isLargePrintBook || isLowContentBook) {
-      console.log('Deriving paperback from flags:', { isLargePrintBook, isLowContentBook};
+      console.log('Deriving paperback from flags:', { isLargePrintBook, isLowContentBook});
       return "paperback";
     }
     
     // Default to ebook if no clear indicators
     console.log('Defaulting to ebook');
     return "ebook";
-  };
+  });
 
   // Function to normalize marketplace names to match database format
   const normalizeMarketplaceName = (marketplace: string): string => {
@@ -1565,10 +1565,10 @@ export default function EditBook() {
       'Amazon.es': 'amazon.es',   // Convert to lowercase
       'Amazon.it': 'amazon.it',   // Convert to lowercase
       'Amazon.co.uk': 'amazon.co.uk', // Convert to lowercase
-    };
+    });
     
     return normalizedMap[marketplace] || marketplace;
-  };
+  });
 
   // Function to load categories for a specific marketplace
   const loadMarketplaceCategories = async (marketplace: string) => { if (!marketplace) return;
@@ -1585,7 +1585,7 @@ export default function EditBook() {
       console.log('Normalized marketplace:', normalizedMarketplace);
       
       const formatParam = derivedFormat ? `?format=${encodeURIComponent(derivedFormat}` : '';
-      const response = await apiRequest(`/api/marketplace-categories/${ encodeURIComponent(normalizedMarketplace}${formatParam}`, { method: "GET" };
+      const response = await apiRequest(`/api/marketplace-categories/${ encodeURIComponent(normalizedMarketplace}${formatParam}`, { method: "GET" });
       setMarketplaceCategories(response || []);
     } catch (error) {
       console.error("Error loading marketplace categories:", error);
@@ -1598,7 +1598,7 @@ export default function EditBook() {
     } finally {
       setLoadingCategories(false);
     }
-  };
+  });
 
   // Function to check if categories are compatible with marketplace
   const checkCategoryCompatibility = async (newMarketplace: string, currentCategories: string[]) => { if (currentCategories.length === 0) return [];
@@ -1607,7 +1607,7 @@ export default function EditBook() {
       const derivedFormat = deriveBookFormat();
       const normalizedMarketplace = normalizeMarketplaceName(newMarketplace);
       const formatParam = derivedFormat ? `?format=${encodeURIComponent(derivedFormat}` : '';
-      const response = await apiRequest(`/api/marketplace-categories/${ encodeURIComponent(normalizedMarketplace}${formatParam}`, { method: "GET" };
+      const response = await apiRequest(`/api/marketplace-categories/${ encodeURIComponent(normalizedMarketplace}${formatParam}`, { method: "GET" });
       const newMarketplaceCategories: MarketplaceCategory[] = response || [];
       const validCategoryPaths = newMarketplaceCategories.map(cat => cat.categoryPath);
       
@@ -1616,7 +1616,7 @@ export default function EditBook() {
       console.error("Error checking category compatibility:", error);
       return currentCategories; // Assume all incompatible on error
     }
-  };
+  });
 
   // Handle marketplace change with compatibility check
   const handleMarketplaceChange = async (newMarketplace: string) => {
@@ -1629,12 +1629,12 @@ export default function EditBook() {
       newMarketplace, 
       formCategories, 
       localCategories, 
-      allCurrentCategories};
+      allCurrentCategories});
     
     if (allCurrentCategories.length > 0) {
       const incompatible = await checkCategoryCompatibility(newMarketplace, allCurrentCategories);
       
-      console.log("Compatibility check result:", { incompatible};
+      console.log("Compatibility check result:", { incompatible});
       
       if (incompatible.length > 0) {
         setPendingMarketplace(newMarketplace);
@@ -1647,7 +1647,7 @@ export default function EditBook() {
     // No conflicts, proceed with change
     form.setValue("primaryMarketplace", newMarketplace);
     loadMarketplaceCategories(newMarketplace);
-  };
+  });
 
   // Handle conflict dialog actions
   const proceedWithMarketplaceChange = () => {
@@ -1675,13 +1675,13 @@ export default function EditBook() {
       title: "Marketplace Changed",
       description: `Marketplace changed to ${marketplaceName} and ${removedCount} incompatible categories removed`
     });
-  };
+  });
 
   const cancelMarketplaceChange = () => {
     setShowMarketplaceConflictDialog(false);
     setPendingMarketplace("");
     setIncompatibleCategories([]);
-  };
+  });
 
   // Function to build category tree structure from flat database records
   const buildCategoryTree = (categories: MarketplaceCategory[]) => {
@@ -1693,7 +1693,7 @@ export default function EditBook() {
     // Sort by level and sort order
     const sortedCategories = [...categories].sort((a, b) => {
       if (a.level !== b.level) return a.level - b.level;
-      return a.sortOrder - b.sortOrder;};
+      return a.sortOrder - b.sortOrder;});
 
     // Build the tree structure
     sortedCategories.forEach(category => {
@@ -1704,7 +1704,7 @@ export default function EditBook() {
         isSelectable: category.isSelectable,
         parentPath: category.parentPath,
         subcategories: []
-      };
+      });
 
       if (category.level === 2) { // Main categories start at level 2 (Books is level 1)
         tree.push(item);
@@ -1719,7 +1719,7 @@ export default function EditBook() {
     });
 
     return tree;
-  };
+  });
 
   // Categories modal handlers
   const openCategoriesModal = async () => {
@@ -1732,20 +1732,20 @@ export default function EditBook() {
     await loadMarketplaceCategories(currentMarketplace);
     
     setShowCategoriesModal(true);
-  };
+  });
 
   const saveCategoriesChanges = () => {
     // Use temporary UI selections for final validation
     setCategories([...tempUISelections]);
     setSelectedCategories([...tempUISelections]);
     setShowCategoriesModal(false);
-  };
+  });
 
   const cancelCategoriesChanges = () => {
     setSelectedCategories([]);
     setTempUISelections([]); // Reset temporary selections
     setShowCategoriesModal(false);
-  };
+  });
 
   const toggleCategorySelection = (categoryPath: string) => {
     const isSelected = tempUISelections.includes(categoryPath);
@@ -1754,22 +1754,22 @@ export default function EditBook() {
     } else if (tempUISelections.length < 3) {
       setTempUISelections([...tempUISelections, categoryPath]);
     }
-  };
+  });
 
   const removeCategoryFromModal = (categoryPath: string) => {
     setSelectedCategories(selectedCategories.filter(c => c !== categoryPath));
     // Also remove from temporary selections
     setTempUISelections(tempUISelections.filter(c => c !== categoryPath));
-  };
+  });
 
   const onSubmit = (data: BookFormData) => {
     const processedData = {
       ...data,
       readingAgeMin: data.readingAgeMin ? String(data.readingAgeMin) : null,
       readingAgeMax: data.readingAgeMax ? String(data.readingAgeMax) : null,
-    };
+    });
     saveBook.mutate({ bookData: processedData, shouldNavigate: true });
-  };
+  });
 
   const handleSaveAsDraft = (data: BookFormData) => {
     const draftData = {
@@ -1777,10 +1777,10 @@ export default function EditBook() {
       status: "draft" as const,
       readingAgeMin: data.readingAgeMin ? String(data.readingAgeMin) : null,
       readingAgeMax: data.readingAgeMax ? String(data.readingAgeMax) : null,
-    };
+    });
     
     saveBook.mutate({ bookData: draftData });
-  };
+  });
 
   const handleSaveAndContinue = (data: BookFormData) => {
     let nextTab = "";
@@ -1794,14 +1794,14 @@ export default function EditBook() {
       ...data,
       readingAgeMin: data.readingAgeMin ? String(data.readingAgeMin) : null,
       readingAgeMax: data.readingAgeMax ? String(data.readingAgeMax) : null,
-    };
+    });
     
     saveBook.mutate({ bookData: processedData, nextTab });
-  };
+  });
 
   const handleDelete = () => {
     setShowDeleteDialog(true);
-  };
+  });
 
   if (bookLoading) {
     return (
@@ -1863,7 +1863,7 @@ export default function EditBook() {
                   <Lightbulb className="w-4 h-4" />
                   <span>AI Recommendations</span>
                 </Button>
-              )}
+              ))}
             </div>
 
         <form onSubmit={ form.handleSubmit(onSubmit} className="space-y-8">
@@ -2006,7 +2006,7 @@ export default function EditBook() {
                           <span className="text-amber-600">{book.isbnPlaceholder}</span>
                         ) : (
                           <span className="text-gray-400">No ISBN/ASIN</span>
-                        )}
+                        ))}
                       </span>
                     </span>
                     { form.watch("language") && (
@@ -2016,7 +2016,7 @@ export default function EditBook() {
                         </svg>
                         <span>{form.watch("language"}</span>
                       </span>
-                    )}
+                    ))}
                   </div>
                 </div>
               </div>
@@ -2050,12 +2050,12 @@ export default function EditBook() {
                     <SelectContent>
                       {(projects as any[]).map((project: any) => (
                         <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>
-                      )}
+                      ))}
                     </SelectContent>
                   </Select>
                   {form.formState.errors.projectId && (
                     <p className="text-sm text-red-600">{form.formState.errors.projectId.message}</p>
-                  )}
+                  ))}
                 </div>
               </div>
 
@@ -2079,7 +2079,7 @@ export default function EditBook() {
                       <SelectContent>
                         {languages.map((lang) => (
                           <SelectItem key={lang} value={lang}>{lang}</SelectItem>
-                        )}
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -2098,7 +2098,7 @@ export default function EditBook() {
                     />
                     {form.formState.errors.title && (
                       <p className="text-sm text-red-600">{form.formState.errors.title.message}</p>
-                    )}
+                    ))}
                   </div>
 
                   {/* Subtitle */}
@@ -2139,7 +2139,7 @@ export default function EditBook() {
                         if (currentSeriesTitle) {
                           setOriginalSeriesData({
                             seriesTitle: currentSeriesTitle,
-                            seriesNumber: currentSeriesNumber || null};
+                            seriesNumber: currentSeriesNumber || null});
                         }
                         form.setValue("seriesTitle", "");
                         form.setValue("seriesNumber", null);
@@ -2185,7 +2185,7 @@ export default function EditBook() {
                           if (currentSeriesTitle) {
                             try {
                               // Récupérer toutes les séries pour trouver l'ID correspondant
-                              const seriesResponse = await apiRequest("/api/series", { method: "GET"};
+                              const seriesResponse = await apiRequest("/api/series", { method: "GET"});
                               const currentSeries = seriesResponse.find((s: any) => s.title === currentSeriesTitle);
                               
                               if (currentSeries) {
@@ -2269,7 +2269,7 @@ export default function EditBook() {
                               <SelectItem value="no-series" disabled>
                                 No series available - Create one first
                               </SelectItem>
-                            )}
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
@@ -2320,9 +2320,9 @@ export default function EditBook() {
                           className="w-32"
                         />
                       </div>
-                    )}
+                    ))}
                   </div>
-                )}
+                ))}
                   </div>
                   
                   {/* Edition Number */}
@@ -2446,7 +2446,7 @@ export default function EditBook() {
                                   <SelectItem value="no-author" disabled>
                                     No authors available - Create one first
                                   </SelectItem>
-                                )}
+                                ))}
                               </SelectContent>
                             </Select>
                           </div>
@@ -2466,7 +2466,7 @@ export default function EditBook() {
                           </div>
                         </div>
                       </div>)
-                    )}
+                    ))}
                   </div>
 
                   {/* Contributors Section */}
@@ -2550,7 +2550,7 @@ export default function EditBook() {
                     >
                       Add Another
                     </Button>
-                  )}
+                  ))}
                     </div>
                   </div>
                 </div>
@@ -2779,24 +2779,24 @@ export default function EditBook() {
                                 {(() => {
                                   const minAge = form.watch("readingAgeMin");
                                   const ageOptions = [
-                                    { value: "0", label: "Baby"},
-                                    { value: "1", label: "1" },
-                                    { value: "2", label: "2" },
-                                    { value: "3", label: "3" },
-                                    { value: "4", label: "4" },
-                                    { value: "5", label: "5" },
-                                    { value: "6", label: "6" },
-                                    { value: "7", label: "7" },
-                                    { value: "8", label: "8" },
-                                    { value: "9", label: "9" },
-                                    { value: "10", label: "10" },
-                                    { value: "11", label: "11" },
-                                    { value: "12", label: "12" },
-                                    { value: "13", label: "13" },
-                                    { value: "14", label: "14" },
-                                    { value: "15", label: "15" },
-                                    { value: "16", label: "16" },
-                                    { value: "17", label: "17" },
+                                    { value: "0", label: "Baby"});
+                                    { value: "1", label: "1" });
+                                    { value: "2", label: "2" });
+                                    { value: "3", label: "3" });
+                                    { value: "4", label: "4" });
+                                    { value: "5", label: "5" });
+                                    { value: "6", label: "6" });
+                                    { value: "7", label: "7" });
+                                    { value: "8", label: "8" });
+                                    { value: "9", label: "9" });
+                                    { value: "10", label: "10" });
+                                    { value: "11", label: "11" });
+                                    { value: "12", label: "12" });
+                                    { value: "13", label: "13" });
+                                    { value: "14", label: "14" });
+                                    { value: "15", label: "15" });
+                                    { value: "16", label: "16" });
+                                    { value: "17", label: "17" });
                                     { value: "18", label: "18+" }
                                   ];
                                   
@@ -2807,9 +2807,9 @@ export default function EditBook() {
                                         {option.label}
                                       </SelectItem>
                                     ));
-                                })()}
+                                })())}
                               </>
-                            )}
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
@@ -2832,7 +2832,7 @@ export default function EditBook() {
                     <SelectContent>
                       {marketplaces.map((marketplace) => (
                         <SelectItem key={marketplace} value={marketplace}>{marketplace}</SelectItem>
-                      )}
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -2869,7 +2869,7 @@ export default function EditBook() {
                         ))
                       ) : (
                         <p className="text-sm text-gray-500 italic">No categories selected</p>
-                      )}
+                      ))}
                     </div>
                     
                     {/* Edit Categories Button */}
@@ -2954,7 +2954,7 @@ export default function EditBook() {
                           onClick={ () => removeKeyword(keyword }
                         />
                       </Badge>
-                    )}
+                    ))}
                   </div>
                   <div className="flex gap-2">
                     <Input
@@ -3055,7 +3055,7 @@ export default function EditBook() {
                             placeholder="MM/DD/YYYY"
                           />
                         </div>
-                      )}
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -3155,7 +3155,7 @@ export default function EditBook() {
                                 }
                               </p>
                             </div>
-                          )}
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -3239,7 +3239,7 @@ export default function EditBook() {
                               </p>}
                             {isbnValidationError && (
                               <p className="text-sm text-red-600 mt-1">{isbnValidationError}</p>
-                            )}
+                            ))}
                           </div>
                           <Button
                             type="button"
@@ -3253,7 +3253,7 @@ export default function EditBook() {
                         <p className="text-sm text-gray-500">Enter your own ISBN/ASIN number if you have purchased one or get one from Amazon</p>
                       </div>
                     </div>)
-                  )}
+                  ))}
                 </div>
               </div>
 
@@ -3551,7 +3551,7 @@ export default function EditBook() {
                     <SelectContent>
                       {marketplaces.map((marketplace) => (
                         <SelectItem key={marketplace} value={marketplace}>{marketplace}</SelectItem>
-                      )}
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -3697,9 +3697,9 @@ export default function EditBook() {
                       <CheckCircle className="w-4 h-4 mr-2" />
                       {isCreating ? 'Create Book' : 'Update Book'}
                     </>
-                  )}
+                  ))}
                 </Button>
-              )}
+              ))}
             </div>
           </div>
         </form>
@@ -3713,7 +3713,7 @@ export default function EditBook() {
             isVisible={showAISidebar}
             onToggle={ () => setShowAISidebar(!showAISidebar}
           />
-        )}
+        ))}
       </div>
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
@@ -3795,7 +3795,7 @@ export default function EditBook() {
                                   setResetTriggers(prev => ({
                                     ...prev,
                                     [index]: (prev[index] || 0) + 1
-                                  )};
+                                  )});
                                   // Remove the category from temp UI selections
                                   const newCategories = tempUISelections.filter((_, i) => i !== index);
                                   setTempUISelections(newCategories);
@@ -3818,7 +3818,7 @@ export default function EditBook() {
                                 Remove
                               </Button>
                             </>
-                          )}
+                          ))}
                         </div>
                       </div>
                       
@@ -3841,9 +3841,9 @@ export default function EditBook() {
                             onCategoryRemove={removeCategoryFromModal}
                           />
                         </div>
-                      )}
+                      ))}
                     </div>
-                  )}
+                  ))}
                   
                   
                 </div>
@@ -3879,7 +3879,7 @@ export default function EditBook() {
                         Remove
                       </button>
                     </div>
-                  )}
+                  ))}
                 </div>
               </div>
             </div>
@@ -3923,7 +3923,7 @@ export default function EditBook() {
                         <span className="text-red-500 mr-2 mt-0.5">•</span>
                         <span className="break-words">{category}</span>
                       </li>
-                    )}
+                    ))}
                   </ul>
                 </div>
                 
@@ -3975,7 +3975,7 @@ export default function EditBook() {
                     <div className="font-medium">{size.label}</div>
                     <div className="text-xs text-gray-500 mt-1">{size.metric}</div>
                   </button>
-                )}
+                ))}
               </div>
             </div>
 
@@ -3998,7 +3998,7 @@ export default function EditBook() {
                     <div className="font-medium">{size.label}</div>
                     <div className="text-xs text-gray-500 mt-1">{size.metric}</div>
                   </button>
-                )}
+                ))}
               </div>
             </div>
 
@@ -4022,7 +4022,7 @@ export default function EditBook() {
                     <div className="font-medium">{size.label}</div>
                     <div className="text-xs text-gray-500 mt-1">{size.metric}</div>
                   </button>
-                )}
+                ))}
               </div>
             </div>
 

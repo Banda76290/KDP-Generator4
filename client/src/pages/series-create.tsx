@@ -55,13 +55,13 @@ export default function SeriesCreatePage() {
         language: data.language,
         readingOrder: data.readingOrder,
         description: editorContent
-      };
+      });
 
       const response = await fetch('/api/series', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        },
+        });
         body: JSON.stringify(formData),
         credentials: 'include' // Include cookies for authentication
       });
@@ -87,7 +87,7 @@ export default function SeriesCreatePage() {
         description: "Failed to save series. Please try again.",
         variant: "destructive"});
     }
-  };
+  });
 
 
 
@@ -113,13 +113,13 @@ export default function SeriesCreatePage() {
     
     return () => {
       document.head.removeChild(style);
-    };
+    });
   }, []);
 
   const applyFormatting = (command: string, value?: string) => {
     document.execCommand(command, false, value);
     updateDescriptionFromHTML();
-  };
+  });
 
   // Function to clean HTML and remove unnecessary styles
   const cleanHTML = (html: string): string => {
@@ -161,7 +161,7 @@ export default function SeriesCreatePage() {
           }
         }
       }
-    };
+    });
     
     // Copy body content to tempDiv safely
     for (let child of Array.from(doc.body.childNodes)) {
@@ -200,7 +200,7 @@ export default function SeriesCreatePage() {
     });
     
     return tempDiv.innerHTML;
-  };
+  });
 
   const updateDescriptionFromHTML = () => {
     const editor = document.getElementById('description-editor') as HTMLDivElement;
@@ -213,7 +213,7 @@ export default function SeriesCreatePage() {
     setCharacterCount(textContent.length);
     setEditorContent(cleanedHtmlContent);
     form.setValue('description', cleanedHtmlContent);
-  };
+  });
 
   const handleFormatChange = (format: string) => {
     switch (format) {
@@ -230,7 +230,7 @@ export default function SeriesCreatePage() {
         applyFormatting('formatBlock', 'div');
         break;
     }
-  };
+  });
 
   const handleLinkInsert = () => {
     if (linkUrl) {
@@ -261,13 +261,13 @@ export default function SeriesCreatePage() {
       setLinkUrl('');
       setShowLinkDialog(false);
     }
-  };
+  });
 
   const insertSpecialCharacter = () => {
     const specialChars = ['©', '®', '™', '§', '¶', '†', '‡', '•', '…', '–', '—'];
     const char = specialChars[Math.floor(Math.random() * specialChars.length)];
     applyFormatting('insertText', char);
-  };
+  });
 
   return (
     <Layout>
@@ -359,7 +359,7 @@ export default function SeriesCreatePage() {
                 />
                 {form.formState.errors.title && (
                   <p className="text-sm text-red-600">{form.formState.errors.title.message}</p>
-                )}
+                ))}
               </div>
             </CardContent>
           </Card>

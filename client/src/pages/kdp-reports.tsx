@@ -21,25 +21,25 @@ export default function KDPReports() {
       const formData = new FormData();
       formData.append('kdpReport', file);
       return await apiRequest("/api/kdp-reports/upload", { method: "POST", body: JSON.stringify(formData});
-    },
+  };
     onSuccess: async (response) => {
       const result = await response.json();
       toast({
         title: "Upload Successful",
         description: `Processed ${result.recordsProcessed} sales records`,
-      });
+  };
       setSelectedFile(null);
       // Invalidate related queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
       queryClient.invalidateQueries({ queryKey: ["/api/sales-data"] });
-    },
+  };
     onError: (error) => {
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
           description: "You are logged out. Logging in again...",
           variant: "destructive"
-      });
+  };
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
@@ -49,9 +49,9 @@ export default function KDPReports() {
         title: "Upload Failed",
         description: error.message || "Failed to process KDP report",
         variant: "destructive",
-      });
-    },
-  });
+  };
+  };
+  };
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -59,7 +59,7 @@ export default function KDPReports() {
         title: "Unauthorized",
         description: "You are logged out. Logging in again...",
         variant: "destructive"
-      });
+  };
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
@@ -92,7 +92,7 @@ export default function KDPReports() {
           title: "Invalid File Type",
           description: "Please upload an Excel (.xlsx, .xls) or CSV file",
           variant: "destructive"
-      });
+  };
       }
     }
   };
@@ -108,7 +108,7 @@ export default function KDPReports() {
           title: "Invalid File Type",
           description: "Please upload an Excel (.xlsx, .xls) or CSV file",
           variant: "destructive"
-      });
+  };
       }
     }
   };
@@ -213,7 +213,7 @@ export default function KDPReports() {
                       Size: { (selectedFile.size / 1024 / 1024).toFixed(2} MB
                     </p>
                   </div>
-                )}
+                ))}
               </CardContent>
             </Card>
 

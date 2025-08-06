@@ -24,7 +24,7 @@ export default function MobileSidebar({ open, onOpenChange }: MobileSidebarProps
 
   const handleLinkClick = () => {
     onOpenChange(false);
-  };
+  });
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -67,7 +67,7 @@ export default function MobileSidebar({ open, onOpenChange }: MobileSidebarProps
                     >
                       {item.badge}
                     </Badge>
-                  )}
+                  ))}
                 </span>
               </Link>
             );
@@ -109,7 +109,7 @@ export default function MobileSidebar({ open, onOpenChange }: MobileSidebarProps
                           >
                             {item.badge}
                           </Badge>
-                        )}
+                        ))}
                       </span>
                     </Link>
                   );
@@ -139,7 +139,7 @@ export default function MobileSidebar({ open, onOpenChange }: MobileSidebarProps
                         </span>
                       </Link>
                     );
-                  })}
+                  }))}
                 </div>
               </div>
             </div>
@@ -165,7 +165,7 @@ export default function MobileSidebar({ open, onOpenChange }: MobileSidebarProps
                     </span>
                   </Link>
                 );
-              })}
+              }))}
             </div>
           </div>
         </nav>

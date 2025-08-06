@@ -128,7 +128,7 @@ const ChartTooltipContent = React.forwardRef<
       color,
       nameKey,
       labelKey,
-    },
+    });
     ref
   ) => {
     const { config } = useChart()
@@ -240,15 +240,15 @@ const ChartTooltipContent = React.forwardRef<
                       </div>
                       {item.value && (
                         <span className="font-mono font-medium tabular-nums text-foreground">
-                          {item.value.toLocaleString()}
+                          {item.value.toLocaleString())}
                         </span>
-                      )}
+                      ))}
                     </div>
                   </>
-                )}
+                ))}
               </div>
             )
-          })}
+          }))}
         </div>
       </div>
     )
@@ -267,7 +267,7 @@ const ChartLegendContent = React.forwardRef<
     }
 >(
   (
-    { className, hideIcon = false, payload, verticalAlign = "bottom", nameKey },
+    { className, hideIcon = false, payload, verticalAlign = "bottom", nameKey });
     ref
   ) => {
     const { config } = useChart()
@@ -309,7 +309,7 @@ const ChartLegendContent = React.forwardRef<
               {itemConfig?.label}
             </div>
           )
-        })}
+        }))}
       </div>
     )
   }

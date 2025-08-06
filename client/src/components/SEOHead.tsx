@@ -36,7 +36,7 @@ export default function SEOHead({
       }
       
       meta.setAttribute('content', content);
-    };
+    });
 
     // Basic meta tags
     updateMeta('description', description);
@@ -80,7 +80,7 @@ export default function SEOHead({
     return () => {
       // We don't actually remove meta tags on cleanup as they should persist
       // This prevents flashing of content when navigating between pages
-    };
+    });
   }, [title, description, canonicalUrl, ogImage, ogType, keywords, noIndex]);
 
   return null; // This component doesn't render anything visual

@@ -22,7 +22,7 @@ const projectFormSchema = insertProjectSchema.pick({ name: true, description: tr
   attachExistingBook: z.boolean().optional(),
   selectedBookId: z.string().optional(),
   createNewBook: z.boolean().optional(),
-};
+});
 
 type ProjectFormData = z.infer<typeof projectFormSchema>;
 
@@ -39,7 +39,7 @@ export default function CreateProject() {
       description: "",
       attachExistingBook: false,
       createNewBook: false,
-    },
+    });
   });
 
   // Fetch existing books for attachment option
@@ -89,7 +89,7 @@ export default function CreateProject() {
       }
       
       return project;
-    },
+    });
     onSuccess: (project) => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"]});
       toast({
@@ -101,7 +101,7 @@ export default function CreateProject() {
       if (!form.getValues("createNewBook")) {
         setLocation("/projects");
       }
-    },
+    });
     onError: (error) => {
       console.error('Project creation error:', error);
       toast({
@@ -109,7 +109,7 @@ export default function CreateProject() {
         description: error.message || "Failed to create project",
         variant: "destructive"
       });
-    },
+    });
   });
 
   const handleNameChange = (value: string) => {
@@ -118,7 +118,7 @@ export default function CreateProject() {
     if (value.trim() && !showBookOptions) {
       setShowBookOptions(true);
     }
-  };
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-background">
@@ -166,7 +166,7 @@ export default function CreateProject() {
                     />
                     {form.formState.errors.name && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.name.message}</p>
-                    )}
+                    ))}
                   </div>
 
                   {/* Project Description */}
@@ -235,10 +235,10 @@ export default function CreateProject() {
                                         {displayText}
                                       </SelectItem>
                                     );
-                                  })}
+                                  }))}
                                 </SelectContent>
                               </Select>
-                            )}
+                            ))}
                           </div>
                         )}
 
@@ -289,7 +289,7 @@ export default function CreateProject() {
                           <Plus className="mr-2 h-4 w-4" />
                           {form.watch("createNewBook") ? "Create and Add Book" : "Create Project"}
                         </>
-                      )}
+                      ))}
                     </Button>
                   </div>
                 </form>

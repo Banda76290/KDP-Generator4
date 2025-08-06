@@ -41,7 +41,7 @@ export default function Sidebar() {
                   >
                     {item.badge}
                   </Badge>
-                )}
+                ))}
               </span>
             </Link>
           );
@@ -74,7 +74,7 @@ export default function Sidebar() {
                       >
                         {item.badge}
                       </Badge>
-                    )}
+                    ))}
                   </span>
                 </Link>
               );
@@ -101,7 +101,7 @@ export default function Sidebar() {
                     </span>
                   </Link>
                 );
-              })}
+              }))}
             </div>
           </div>
         )}
@@ -127,7 +127,7 @@ export default function Sidebar() {
                 </span>
               </Link>
             );
-          })}
+          }))}
         </div>
       </nav>
     </aside>

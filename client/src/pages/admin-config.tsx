@@ -27,7 +27,7 @@ export default function AdminConfig() {
     key: "",
     value: "",
     description: "",
-  };
+  });
 
   // Redirect to home if not admin
   useEffect(() => {
@@ -51,21 +51,21 @@ export default function AdminConfig() {
 
   const updateConfigMutation = useMutation({
     mutationFn: async (configData: { key: string; value: string; description?: string} => { return await apiRequest("/api/admin/config", { method: "PUT", body: JSON.stringify(configData});
-    },
+    });
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/config"]});
       toast({
         title: "Succès",
         description: "Configuration mise à jour avec succès.",
       });
-      setNewConfig({ key: "", value: "", description: "" };
-    },
+      setNewConfig({ key: "", value: "", description: "" });
+    });
     onError: (error: Error) => {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de mettre à jour la configuration."
       });
-    },
+    });
   });
 
   const handleAddConfig = () => {
@@ -79,7 +79,7 @@ export default function AdminConfig() {
     }
 
     updateConfigMutation.mutate(newConfig);
-  };
+  });
 
   const commonConfigs = [
     {
@@ -87,31 +87,31 @@ export default function AdminConfig() {
       label: "Nom de la plateforme",
       description: "Le nom affiché de la plateforme",
       defaultValue: "KDP Generator",
-    },
+    });
     {
       key: "support_email",
       label: "Email de support",
       description: "Adresse email pour le support client",
       defaultValue: "support@kdpgenerator.com",
-    },
+    });
     {
       key: "max_ai_requests_per_day",
       label: "Requêtes IA max par jour",
       description: "Nombre maximum de requêtes IA par utilisateur par jour",
       defaultValue: "10",
-    },
+    });
     {
       key: "free_tier_project_limit",
       label: "Limite projets gratuits",
       description: "Nombre maximum de projets pour les comptes gratuits",
       defaultValue: "3",
-    },
+    });
     {
       key: "maintenance_mode",
       label: "Mode maintenance",
       description: "Activer le mode maintenance",
       defaultValue: "false",
-    },
+    });
   ];
 
   if (isLoading || configLoading) {
@@ -232,7 +232,7 @@ export default function AdminConfig() {
                     </Button>
                   </div>
                 );
-              })}
+              }))}
             </div>
           </CardContent>
         </Card>
@@ -282,7 +282,7 @@ export default function AdminConfig() {
                         </Button>
                       </TableCell>
                     </TableRow>
-                  )}
+                  ))}
                 </TableBody>
               </Table>
             </div>
@@ -290,7 +290,7 @@ export default function AdminConfig() {
             <div className="text-center py-8 text-muted-foreground">
               Aucune configuration système trouvée. Ajoutez votre première configuration ci-dessus.
             </div>
-          )}
+          ))}
         </CardContent>
       </Card>
     </div>

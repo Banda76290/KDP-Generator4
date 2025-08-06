@@ -48,7 +48,7 @@ export default function BooksPage() {
         title: "Unauthorized",
         description: "You are logged out. Logging in again...",
         variant: "destructive",
-      });
+  };
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
@@ -134,73 +134,73 @@ function BooksContent() {
   const { data: books = [], isLoading: booksLoading } = useQuery<Book[]>({
     queryKey: ["/api/books"],
     staleTime: 0,
-  });
+  };
 
   // Mutation for assigning book to project
   const assignBookMutation = useMutation({
     mutationFn: async ({ bookId, projectId }: { bookId: string; projectId: string }) => {
       return apiRequest(`/api/books/${bookId}`, { method: "PATCH", body: JSON.stringify({ projectId }) });
-    },
+  };
     onSuccess: () => {
       toast({
         title: "Success",
         description: "Book assigned to project successfully",
         variant: "destructive",
-      });
+  };
       queryClient.invalidateQueries({ queryKey: ["/api/books"] });
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
-    },
+  };
     onError: (error: Error) => {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive"
-      });
-    },
-  });
+  };
+  };
+  };
 
   // Mutation for duplicating book
   const duplicateBookMutation = useMutation({
     mutationFn: async (bookId: string) => {
       return apiRequest(`/api/books/${bookId}/duplicate`, { method: "POST" });
-    },
+  };
     onSuccess: () => {
       toast({
         title: "Success",
         description: "Book duplicated successfully",
         variant: "destructive",
-      });
+  };
       queryClient.invalidateQueries({ queryKey: ["/api/books"] });
-    },
+  };
     onError: (error: Error) => {
       toast({
         title: "Error",
         description: error.message
-      });
-    },
-  });
+  };
+  };
+  };
 
   // Mutation for deleting book
   const deleteBookMutation = useMutation({
     mutationFn: async (bookId: string) => {
       return apiRequest(`/api/books/${bookId}`, { method: "DELETE" });
-    },
+  };
     onSuccess: () => {
       toast({
         title: "Success",
         description: "Book deleted successfully",
         variant: "destructive",
-      });
+  };
       queryClient.invalidateQueries({ queryKey: ["/api/books"] });
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
-    },
+  };
     onError: (error: Error) => {
       toast({
         title: "Error",
         description: error.message
-      });
-    },
-  });
+  };
+  };
+  };
 
   // Mutation for translating book
   const translateBookMutation = useMutation({
@@ -208,24 +208,24 @@ function BooksContent() {
       return apiRequest(`/api/books/${bookId}/translate`, { 
         method: "POST", 
         body: JSON.stringify({ targetLanguage })
-      });
-    },
+  };
+  };
     onSuccess: (data: any) => {
       toast({
         title: "Translation Complete",
         description: `Book successfully translated to ${data.targetLanguage}`,
-      });
+  };
       queryClient.invalidateQueries({ queryKey: ["/api/books"] });
       setBookToTranslate(null);
       setSelectedLanguage("");
-    },
+  };
     onError: (error: Error) => {
       toast({
         title: "Translation Failed",
         description: error.message
-      });
-    },
-  });
+  };
+  };
+  };
 
   const handleTranslateBook = () => {
     if (bookToTranslate && selectedLanguage) {
@@ -255,15 +255,15 @@ function BooksContent() {
     .sort((a: Book, b: Book) => {
       const getLastModifiedDate = (book: Book) => {
         return new Date(book.updatedAt || book.createdAt || 0);
-      };
+  };
 
       const getCurrentMonthRevenue = (book: Book) => {
         return parseFloat(book.monthlyRevenue || '0');
-      };
+  };
 
       const getTotalRevenue = (book: Book) => {
         return parseFloat(book.totalRevenue || '0');
-      };
+  };
 
       switch (sortBy) {
         case "title-asc":
@@ -287,7 +287,7 @@ function BooksContent() {
         default:
           return 0;
       }
-    });
+  };
 
   const getProjectName = (projectId: string | null) => {
     if (!projectId) return null;
@@ -341,7 +341,7 @@ function BooksContent() {
                 {unassignedBooksCount} book{unassignedBooksCount !== 1 ? 's' : ''} not assigned to any project
               </span>
             </div>
-          )}
+          )))}
         </div>
         <Link href="/books/create">
           <Button>
@@ -409,7 +409,7 @@ function BooksContent() {
               <SelectItem key={language} value={language}>
                 {language}
               </SelectItem>
-            )}
+            ))}
           </SelectContent>
         </Select>
 
@@ -457,7 +457,7 @@ function BooksContent() {
                 </div>
               </CardContent>
             </Card>
-          )}
+          ))}
         </div>
       ) : filteredAndSortedBooks.length === 0 ? (
         <Card>
@@ -506,7 +506,7 @@ function BooksContent() {
                           <p>{book.subtitle}</p>
                         </TooltipContent>
                       </Tooltip>
-                    )}
+                    ))}
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -588,7 +588,7 @@ function BooksContent() {
                         <span className="text-amber-600">{book.isbnPlaceholder}</span>
                       ) : (
                         <span className="text-muted-foreground">No ISBN/ASIN</span>
-                      )}
+                      ))}
                     </span>
                   </div>
 
@@ -602,7 +602,7 @@ function BooksContent() {
                           <span className="ml-1 bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs font-medium">
                             #{book.seriesNumber}
                           </span>
-                        )}
+                        ))}
                       </span>
                     </div>
                   )}
@@ -634,11 +634,11 @@ function BooksContent() {
                               <SelectItem key={project.id} value={project.id}>
                                 {project.name}
                               </SelectItem>
-                            )}
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
-                    )}
+                    ))}
                   </div>
 
                   {/* Revenue Statistics */}
@@ -648,7 +648,7 @@ function BooksContent() {
                         <TrendingUp className="h-3 w-3" />
                         This Month
                       </div>
-                      <div className="font-medium">${ parseFloat(book.monthlyRevenue || '0').toFixed(2)}</div>
+                      <div className="font-medium">${ parseFloat(book.monthlyRevenue || '0').toFixed(2))}</div>
                       <div className="text-muted-foreground">{book.totalSales || 0} sales</div>
                     </div>
                     <div>
@@ -656,14 +656,14 @@ function BooksContent() {
                         <DollarSign className="h-3 w-3" />
                         Total
                       </div>
-                      <div className="font-medium">${ parseFloat(book.totalRevenue || '0').toFixed(2)}</div>
+                      <div className="font-medium">${ parseFloat(book.totalRevenue || '0').toFixed(2))}</div>
                       <div className="text-muted-foreground">{book.totalSales || 0} sales</div>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          )}
+          ))}
         </div>
       )}
 
@@ -728,7 +728,7 @@ function BooksContent() {
                       <SelectItem key={language} value={language}>
                         {language}
                       </SelectItem>
-                    )}
+                    ))}
                 </SelectContent>
               </Select>
             </div>

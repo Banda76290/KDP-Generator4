@@ -33,11 +33,11 @@ interface NormalizedOverview {
 export default function AnalyticsComparison() {
   const { data: legacyData, isLoading: legacyLoading, refetch: refetchLegacy } = useQuery<LegacyOverview>({
     queryKey: ['/api/analytics/overview'],
-  };
+  });
 
   const { data: normalizedData, isLoading: normalizedLoading, refetch: refetchNormalized } = useQuery<NormalizedOverview>({
     queryKey: ['/api/analytics/overview-normalized'],
-  };
+  });
 
   const migrateMutation = async () => {
     try {
@@ -62,7 +62,7 @@ export default function AnalyticsComparison() {
         variant: "destructive"
       });
     }
-  };
+  });
 
   const formatCurrency = (amount: string, currency: string) => {
     const num = parseFloat(amount);
@@ -71,7 +71,7 @@ export default function AnalyticsComparison() {
       currency: currency,
       minimumFractionDigits: 2,
     ).format(num);
-  };
+  });
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -147,7 +147,7 @@ export default function AnalyticsComparison() {
                   </>
                 ) : (
                   <p className="text-red-500">Erreur de chargement</p>
-                )}
+                ))}
               </CardContent>
             </Card>
 
@@ -190,7 +190,7 @@ export default function AnalyticsComparison() {
                   </>
                 ) : (
                   <p className="text-red-500">Erreur de chargement</p>
-                )}
+                ))}
               </CardContent>
             </Card>
           </div>
@@ -221,15 +221,15 @@ export default function AnalyticsComparison() {
                       </div>
                       <div className="text-right">
                         <div className="font-medium">
-                          { formatCurrency(curr.originalAmount, curr.currency)}
+                          { formatCurrency(curr.originalAmount, curr.currency))}
                         </div>
                       </div>
                     </div>
-                  )}
+                  ))}
                 </div>
               </CardContent>
             </Card>
-          )}
+          ))}
         </TabsContent>
 
         <TabsContent value="legacy" className="space-y-6">
@@ -272,7 +272,7 @@ export default function AnalyticsComparison() {
                 </div>
               ) : (
                 <p>Chargement des données héritées...</p>
-              )}
+              ))}
             </CardContent>
           </Card>
         </TabsContent>
@@ -315,16 +315,16 @@ export default function AnalyticsComparison() {
                             </span>
                           </div>
                           <div className="font-medium">
-                            { formatCurrency(curr.originalAmount, curr.currency)}
+                            { formatCurrency(curr.originalAmount, curr.currency))}
                           </div>
                         </div>
-                      )}
+                      ))}
                     </div>
                   </div>
                 </div>
               ) : (
                 <p>Chargement des données normalisées...</p>
-              )}
+              ))}
             </CardContent>
           </Card>
         </TabsContent>

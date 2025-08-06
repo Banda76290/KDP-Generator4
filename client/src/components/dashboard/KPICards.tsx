@@ -10,7 +10,7 @@ export default function KPICards() {
   
   const { data: stats, isLoading, error } = useQuery({
     queryKey: ["/api/dashboard/stats"],
-  };
+  });
 
   useEffect(() => {
     if (error && isUnauthorizedError(error as Error)) {
@@ -42,7 +42,7 @@ export default function KPICards() {
               </div>
             </CardContent>
           </Card>
-        )}
+        ))}
       </div>
     );
   }
@@ -56,7 +56,7 @@ export default function KPICards() {
       icon: FolderOpen,
       iconBg: "bg-blue-100",
       iconColor: "text-primary",
-    },
+    });
     { title: "Monthly Revenue",
       value: `$${(stats?.monthlyRevenue || 0).toLocaleString(}`,
       change: "+18.2%",
@@ -64,7 +64,7 @@ export default function KPICards() {
       icon: DollarSign,
       iconBg: "bg-green-100",
       iconColor: "text-success",
-    },
+    });
     {
       title: "Total Books Sold",
       value: (stats?.totalBooksSold || 0).toLocaleString(),
@@ -73,7 +73,7 @@ export default function KPICards() {
       icon: Book,
       iconBg: "bg-yellow-100",
       iconColor: "text-warning",
-    },
+    });
     {
       title: "AI Generations",
       value: (stats?.aiGenerations || 0).toLocaleString(),
@@ -82,7 +82,7 @@ export default function KPICards() {
       icon: Bot,
       iconBg: "bg-purple-100",
       iconColor: "text-secondary",
-    },
+    });
   ];
 
   return (
@@ -110,7 +110,7 @@ export default function KPICards() {
             </div>
           </CardContent>
         </Card>
-      )}
+      ))}
     </div>
   );
 }

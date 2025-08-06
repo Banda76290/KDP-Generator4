@@ -16,7 +16,7 @@ export default function ExchangeRates() {
   const { data: exchangeRates, isLoading, error } = useQuery({
     queryKey: ["/api/exchange-rates"],
     refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
-  };
+  });
 
   // Function to update exchange rates manually
   const updateExchangeRates = async () => {
@@ -47,7 +47,7 @@ export default function ExchangeRates() {
     } finally {
       setIsUpdating(false);
     }
-  };
+  });
 
   // Group currencies by major/minor for better organization
   const majorCurrencies = ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'CHF', 'CAD', 'AUD'];
@@ -58,7 +58,7 @@ export default function ExchangeRates() {
     new Date(rates[0].updatedAt) : new Date();
   
   // Add USD with rate 1.0 since it's our base currency and filter out duplicate
-  const usdRate = { currency: 'USD', rate: '1.00000000', updatedAt: lastUpdated.toISOString(};
+  const usdRate = { currency: 'USD', rate: '1.00000000', updatedAt: lastUpdated.toISOString(});
   const filteredRates = rates.filter((rate: any) => rate.currency !== 'USD');
   const allRates = [usdRate, ...filteredRates];
   const majorRates = allRates.filter((rate: any) => majorCurrencies.includes(rate.currency));
@@ -115,7 +115,7 @@ export default function ExchangeRates() {
                   <div className="h-3 bg-muted rounded w-2/3"></div>
                 </CardContent>
               </Card>
-            )}
+            ))}
           </div>
         ) : rates.length > 0 ? (
           <div className="space-y-8">
@@ -168,7 +168,7 @@ export default function ExchangeRates() {
                       </div>
                     </CardContent>
                   </Card>
-                )}
+                ))}
               </div>
             </div>
 
@@ -204,7 +204,7 @@ export default function ExchangeRates() {
 
                       </CardContent>
                     </Card>
-                  )}
+                  ))}
                 </div>
               </div>
             )}
@@ -256,7 +256,7 @@ export default function ExchangeRates() {
               Update Rates
             </Button>
           </div>
-        )}
+        ))}
       </div>
     </Layout>
   );

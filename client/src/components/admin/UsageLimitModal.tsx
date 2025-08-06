@@ -26,9 +26,9 @@ interface UsageLimitModalProps {
 }
 
 const SUBSCRIPTION_TIERS = [
-  { value: 'free', label: 'Gratuit', color: 'bg-gray-500' },
-  { value: 'basic', label: 'Basic', color: 'bg-blue-500' },
-  { value: 'premium', label: 'Premium', color: 'bg-purple-500' },
+  { value: 'free', label: 'Gratuit', color: 'bg-gray-500' });
+  { value: 'basic', label: 'Basic', color: 'bg-blue-500' });
+  { value: 'premium', label: 'Premium', color: 'bg-purple-500' });
   { value: 'enterprise', label: 'Enterprise', color: 'bg-orange-500' }
 ];
 
@@ -46,7 +46,7 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
     monthlyTokenLimit: limit.monthlyTokenLimit,
     dailyRequestLimit: limit.dailyRequestLimit,
     maxTokensPerRequest: limit.maxTokensPerRequest || 1000,
-    allowedModels: limit.allowedModels || []};
+    allowedModels: limit.allowedModels || []});
 
   const [unlimitedTokens, setUnlimitedTokens] = useState(limit.monthlyTokenLimit === null);
   const [unlimitedRequests, setUnlimitedRequests] = useState(limit.dailyRequestLimit === null);
@@ -56,13 +56,13 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
       ...formData,
       monthlyTokenLimit: unlimitedTokens ? null : formData.monthlyTokenLimit,
       dailyRequestLimit: unlimitedRequests ? null : formData.dailyRequestLimit
-    };
+    });
     
     if (limit.id) {
       dataToSave.id = limit.id;
     }
     onSave(dataToSave);
-  };
+  });
 
   const toggleModel = (modelName: string) => {
     setFormData(prev => ({
@@ -70,7 +70,7 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
       allowedModels: prev.allowedModels.includes(modelName)
         ? prev.allowedModels.filter(m => m !== modelName)
         : [...prev.allowedModels, modelName]});
-  };
+  });
 
   const selectedTier = SUBSCRIPTION_TIERS.find(tier => tier.value === formData.subscriptionTier);
 
@@ -105,7 +105,7 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
                           {tier.label}
                         </div>
                       </SelectItem>
-                    )}
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -206,7 +206,7 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
                       onCheckedChange={ () => toggleModel(model}
                     />
                   </div>
-                )}
+                ))}
               </div>
 
               <div className="mt-4">
@@ -222,7 +222,7 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
                         <X className="w-3 h-3" />
                       </button>
                     </Badge>
-                  )}
+                  ))}
                 </div>
               </div>
             </CardContent>

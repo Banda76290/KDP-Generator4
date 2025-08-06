@@ -32,11 +32,11 @@ const toastVariants = cva(
           "destructive group border-destructive bg-destructive text-destructive-foreground",
         success:
           "success group border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-900 dark:text-green-100",
-      },
-    },
+      });
+    });
     defaultVariants: {
       variant: "default",
-    },
+    });
   }
 )
 

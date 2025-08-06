@@ -137,7 +137,7 @@ function toast({ ...props }: Toast) {
   const update = (props: ToasterToast) =>
     dispatch({
       type: "UPDATE_TOAST",
-      toast: { ...props, id},
+      toast: { ...props, id});
     })
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id }
 
@@ -147,8 +147,8 @@ function toast({ ...props }: Toast) {
       id,
       open: true,
       onOpenChange: (open) => {
-        if (!open) dismiss(},
-    },
+        if (!open) dismiss(});
+    });
   })
 
   return {
@@ -170,15 +170,15 @@ function useToast() { const [state, setState] = React.useState<State>(memoryStat
   }, [state])
 
   const enhancedToast = Object.assign(toast, {
-    success: (props: Omit<Toast, 'variant'>) => toast({ ...props, variant: "success"},
-    error: (props: Omit<Toast, 'variant'>) => toast({ ...props, variant: "destructive" },
-    info: (props: Omit<Toast, 'variant'>) => toast({ ...props, variant: "default" },
+    success: (props: Omit<Toast, 'variant'>) => toast({ ...props, variant: "success"});
+    error: (props: Omit<Toast, 'variant'>) => toast({ ...props, variant: "destructive" });
+    info: (props: Omit<Toast, 'variant'>) => toast({ ...props, variant: "default" });
   })
 
   return {
     ...state,
     toast: enhancedToast,
-    dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId},
+    dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId});
   }
 }
 

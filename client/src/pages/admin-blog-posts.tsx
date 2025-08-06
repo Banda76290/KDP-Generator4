@@ -19,7 +19,7 @@ interface BlogPostWithAuthor extends BlogPost {
     email: string;
     firstName: string | null;
     lastName: string | null;
-  };
+  });
   category: BlogCategory | null;
 }
 
@@ -58,41 +58,41 @@ export default function AdminBlogPosts() {
   const deletePostMutation = useMutation({
     mutationFn: async (postId: string) => {
       return await apiRequest(`/api/admin/blog/posts/${postId}`, { method: "DELETE" });
-    },
+    });
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/posts"]});
       toast({
         title: "Succès",
         description: "Article supprimé avec succès.",
       });
-    },
+    });
     onError: (error: Error) => {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de supprimer l'article.",
         variant: "destructive"
       });
-    },
+    });
   });
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ postId, status}: { postId: string; status: string } => {
       return await apiRequest(`/api/admin/blog/posts/${postId}/status`, { method: "PUT", body: JSON.stringify({ status} });
-    },
+    });
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/posts"]});
       toast({
         title: "Succès",
         description: "Statut de l'article mis à jour.",
       });
-    },
+    });
     onError: (error: Error) => {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de mettre à jour le statut.",
         variant: "destructive"
       });
-    },
+    });
   });
 
   const getStatusBadgeVariant = (status: string) => {
@@ -106,7 +106,7 @@ export default function AdminBlogPosts() {
       default:
         return "outline";
     }
-  };
+  });
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -119,7 +119,7 @@ export default function AdminBlogPosts() {
       default:
         return status;
     }
-  };
+  });
 
   if (isLoading || postsLoading) {
     return (
@@ -236,7 +236,7 @@ export default function AdminBlogPosts() {
                             <Badge variant="outline">{post.category.name}</Badge>
                           ) : (
                             <span className="text-muted-foreground">Sans catégorie</span>
-                          )}
+                          ))}
                         </TableCell>
                         <TableCell>
                           <Badge variant={ getStatusBadgeVariant(post.status}>
@@ -310,7 +310,7 @@ export default function AdminBlogPosts() {
                           </div>
                         </TableCell>
                       </TableRow>
-                    )}
+                    ))}
                   </TableBody>
                 </Table>
               </div>
@@ -349,7 +349,7 @@ export default function AdminBlogPosts() {
                   </Button>
                 </div>
               </div>
-            )}
+            ))}
           </div>
         </CardContent>
       </Card>

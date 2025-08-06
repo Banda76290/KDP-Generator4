@@ -14,7 +14,7 @@ export default function AuthorsListPage() {
   // Fetch authors with counts
   const { data: authors = [], isLoading: authorsLoading } = useQuery({
     queryKey: ["/api/authors", "withCounts"],
-    queryFn: () => apiRequest("/api/authors?withCounts=true", { method: "GET"},
+    queryFn: () => apiRequest("/api/authors?withCounts=true", { method: "GET"});
   });
 
   return (
@@ -89,7 +89,7 @@ export default function AuthorsListPage() {
                 </CardContent>
               </Card>
             ))
-          )}
+          ))}
         </div>
       </div>
     </Layout>

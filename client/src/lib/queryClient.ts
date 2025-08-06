@@ -38,7 +38,7 @@ export const getQueryFn = <T,>(options: {
   return async ({ queryKey }) => {
     const res = await fetch(queryKey.join("/") as string, {
       credentials: "include",
-    });
+  };
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
       return null;
@@ -62,4 +62,4 @@ export const queryClient = new QueryClient({
       retry: false,
     },
   },
-});
+  };

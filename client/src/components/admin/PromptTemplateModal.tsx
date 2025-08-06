@@ -42,30 +42,30 @@ interface PromptTemplateModalProps {
 }
 
 const AI_FUNCTIONS = [
-  { value: 'structure', label: 'Structure de Livre', description: 'Génère la structure et plan du livre' },
-  { value: 'description', label: 'Description de Livre', description: 'Crée des descriptions marketing attractives' },
-  { value: 'marketing', label: 'Contenu Marketing', description: 'Génère du contenu promotionnel' },
-  { value: 'chapters', label: 'Contenu de Chapitres', description: 'Développe le contenu des chapitres' },
-  { value: 'title', label: 'Titre de Livre', description: 'Propose des titres accrocheurs' },
-  { value: 'keywords', label: 'Mots-clés', description: 'Génère des mots-clés pour le référencement' },
-  { value: 'synopsis', label: 'Synopsis', description: 'Crée un résumé professionnel' },
+  { value: 'structure', label: 'Structure de Livre', description: 'Génère la structure et plan du livre' });
+  { value: 'description', label: 'Description de Livre', description: 'Crée des descriptions marketing attractives' });
+  { value: 'marketing', label: 'Contenu Marketing', description: 'Génère du contenu promotionnel' });
+  { value: 'chapters', label: 'Contenu de Chapitres', description: 'Développe le contenu des chapitres' });
+  { value: 'title', label: 'Titre de Livre', description: 'Propose des titres accrocheurs' });
+  { value: 'keywords', label: 'Mots-clés', description: 'Génère des mots-clés pour le référencement' });
+  { value: 'synopsis', label: 'Synopsis', description: 'Crée un résumé professionnel' });
   { value: 'blurb', label: 'Quatrième de Couverture', description: 'Texte pour la couverture arrière' }
 ];
 
 const AI_MODELS = [
-  { value: 'gpt-4o', label: 'GPT-4o', maxTokens: 4096 },
-  { value: 'gpt-4o-mini', label: 'GPT-4o Mini', maxTokens: 4096 },
-  { value: 'gpt-4', label: 'GPT-4', maxTokens: 8192 },
+  { value: 'gpt-4o', label: 'GPT-4o', maxTokens: 4096 });
+  { value: 'gpt-4o-mini', label: 'GPT-4o Mini', maxTokens: 4096 });
+  { value: 'gpt-4', label: 'GPT-4', maxTokens: 8192 });
   { value: 'claude-3-sonnet', label: 'Claude 3 Sonnet', maxTokens: 4096 }
 ];
 
 const COMMON_VARIABLES: Variable[] = [
-  { name: 'title', description: 'Titre du livre', type: 'text', required: true },
-  { name: 'genre', description: 'Genre du livre', type: 'select', options: ['Fiction', 'Non-fiction', 'Romance', 'Thriller', 'Sci-Fi', 'Fantasy', 'Biography', 'Self-help'], required: false },
-  { name: 'target_audience', description: 'Public cible', type: 'text', required: false },
-  { name: 'language', description: 'Langue du livre', type: 'select', options: ['Français', 'English', 'Español', 'Deutsch'], required: false },
-  { name: 'author', description: 'Nom de l\'auteur', type: 'text', required: false },
-  { name: 'pages', description: 'Nombre de pages', type: 'number', required: false },
+  { name: 'title', description: 'Titre du livre', type: 'text', required: true });
+  { name: 'genre', description: 'Genre du livre', type: 'select', options: ['Fiction', 'Non-fiction', 'Romance', 'Thriller', 'Sci-Fi', 'Fantasy', 'Biography', 'Self-help'], required: false });
+  { name: 'target_audience', description: 'Public cible', type: 'text', required: false });
+  { name: 'language', description: 'Langue du livre', type: 'select', options: ['Français', 'English', 'Español', 'Deutsch'], required: false });
+  { name: 'author', description: 'Nom de l\'auteur', type: 'text', required: false });
+  { name: 'pages', description: 'Nombre de pages', type: 'number', required: false });
   { name: 'description', description: 'Description courte', type: 'text', required: false }
 ];
 
@@ -80,7 +80,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
     temperature: template.temperature || 0.7,
     isActive: template.isActive ?? true,
     isDefault: template.isDefault ?? false,
-    variables: template.variables || []};
+    variables: template.variables || []});
 
   const [previewPrompt, setPreviewPrompt] = useState('');
   const [activeTab, setActiveTab] = useState('config');
@@ -103,13 +103,13 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
       description: '',
       type: 'text',
       required: false
-    };
+    });
     
     setFormData(prev => ({
       ...prev,
       variables: [...(prev.variables || []), newVariable]
     });
-  };
+  });
 
   const updateVariable = (index: number, field: keyof Variable, value: any) => {
     setFormData(prev => ({
@@ -118,13 +118,13 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
         i === index ? { ...variable, [field]: value} : variable
       ) || []
     }));
-  };
+  });
 
   const removeVariable = (index: number) => {
     setFormData(prev => ({
       ...prev,
       variables: prev.variables?.filter((_, i) => i !== index) || []});
-  };
+  });
 
   const insertVariableInPrompt = (variableName: string, isSystemPrompt: boolean = false) => {
     const variable = `{${variableName}}`;
@@ -137,15 +137,15 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
         ...prev,
         userPromptTemplate: prev.userPromptTemplate + variable});
     }
-  };
+  });
 
   const handleSave = () => {
-    const dataToSave = { ...formData };
+    const dataToSave = { ...formData });
     if (template.id) {
       dataToSave.id = template.id;
     }
     onSave(dataToSave);
-  };
+  });
 
   const selectedModel = AI_MODELS.find(m => m.value === formData.model);
   const maxTokensLimit = selectedModel?.maxTokens || 4096;
@@ -192,7 +192,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                           <div className="text-xs text-muted-foreground">{func.description}</div>
                         </div>
                       </SelectItem>
-                    )}
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -210,7 +210,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                       <SelectItem key={model.value} value={model.value}>
                         {model.label} (max {model.maxTokens} tokens)
                       </SelectItem>
-                    )}
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -270,7 +270,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                   >
                     {variable.name}
                   </Button>
-                )}
+                ))}
               </div>
               <Textarea
                 id="systemPrompt"
@@ -293,7 +293,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                   >
                     {variable.name}
                   </Button>
-                )}
+                ))}
               </div>
               <Textarea
                 id="userPrompt"
@@ -314,7 +314,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                   <Badge key={variable.name} variant="secondary" className="text-xs">
                     {'{' + variable.name + '}'}
                   </Badge>
-                )}
+                ))}
               </div>
             </div>
           </TabsContent>
@@ -394,10 +394,10 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                           placeholder="Option1, Option2, Option3"
                         />
                       </div>
-                    )}
+                    ))}
                   </CardContent>
                 </Card>
-              )}
+              ))}
             </div>
 
             <Separator />
@@ -416,7 +416,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                     <Plus className="w-3 h-3 mr-2" />
                     {variable.description}
                   </Button>
-                )}
+                ))}
               </div>
             </div>
           </TabsContent>

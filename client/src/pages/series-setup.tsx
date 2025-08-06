@@ -48,12 +48,12 @@ export default function SeriesSetupPage() {
       if (!seriesId) return null;
       const response = await fetch(`/api/series/${seriesId}`, {
         credentials: 'include'
-      };
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch series');
       }
       return response.json();
-    },
+    });
     enabled: !!seriesId
   });
 
@@ -133,7 +133,7 @@ export default function SeriesSetupPage() {
         language: data.language,
         readingOrder: data.readingOrder,
         description: editorContent
-      };
+      });
 
       const url = isEditing ? `/api/series/${seriesId}` : '/api/series';
       const method = isEditing ? 'PUT' : 'POST';
@@ -142,7 +142,7 @@ export default function SeriesSetupPage() {
         method,
         headers: {
           'Content-Type': 'application/json',
-        },
+        });
         body: JSON.stringify(formData),
         credentials: 'include'
       });
@@ -186,7 +186,7 @@ export default function SeriesSetupPage() {
         variant: "destructive",
       });
     }
-  };
+  });
 
   useEffect(() => {
     // Add CSS for the editor placeholder and formatting
@@ -210,13 +210,13 @@ export default function SeriesSetupPage() {
     
     return () => {
       document.head.removeChild(style);
-    };
+    });
   }, []);
 
   const applyFormatting = (command: string, value?: string) => {
     document.execCommand(command, false, value);
     updateDescriptionFromHTML();
-  };
+  });
 
   // Function to clean HTML and remove unnecessary styles
   const cleanHTML = (html: string): string => {
@@ -258,7 +258,7 @@ export default function SeriesSetupPage() {
           }
         }
       }
-    };
+    });
     
     // Copy body content to tempDiv safely
     for (let child of Array.from(doc.body.childNodes)) {
@@ -297,7 +297,7 @@ export default function SeriesSetupPage() {
     });
     
     return tempDiv.innerHTML;
-  };
+  });
 
   const updateDescriptionFromHTML = () => {
     const editor = document.getElementById('description-editor') as HTMLDivElement;
@@ -310,7 +310,7 @@ export default function SeriesSetupPage() {
     setCharacterCount(textContent.length);
     setEditorContent(cleanedHtmlContent);
     form.setValue('description', cleanedHtmlContent);
-  };
+  });
 
   const handleFormatChange = (format: string) => {
     switch (format) {
@@ -327,7 +327,7 @@ export default function SeriesSetupPage() {
         applyFormatting('formatBlock', 'div');
         break;
     }
-  };
+  });
 
   const handleLinkInsert = () => {
     if (linkUrl) {
@@ -358,71 +358,71 @@ export default function SeriesSetupPage() {
       setLinkUrl('');
       setShowLinkDialog(false);
     }
-  };
+  });
 
   const insertSpecialCharacter = () => {
     const specialChars = ['©', '®', '™', '§', '¶', '†', '‡', '•', '…', '–', '—'];
     const char = specialChars[Math.floor(Math.random() * specialChars.length)];
     applyFormatting('insertText', char);
-  };
+  });
 
   const supportedLanguages = [
-    { value: 'english', label: 'English' },
-    { value: 'afrikaans', label: 'Afrikaans' },
-    { value: 'arabic', label: 'Arabic (Beta)' },
-    { value: 'basque', label: 'Basque' },
-    { value: 'breton', label: 'Breton' },
-    { value: 'bulgarian', label: 'Bulgarian' },
-    { value: 'catalan', label: 'Catalan' },
-    { value: 'chinese_traditional', label: 'Chinese (Traditional) (Beta)' },
-    { value: 'cornish', label: 'Cornish' },
-    { value: 'corsican', label: 'Corsican' },
-    { value: 'croatian', label: 'Croatian' },
-    { value: 'czech', label: 'Czech' },
-    { value: 'danish', label: 'Danish' },
-    { value: 'dutch', label: 'Dutch' },
-    { value: 'eastern_frisian', label: 'Eastern Frisian' },
-    { value: 'estonian', label: 'Estonian' },
-    { value: 'finnish', label: 'Finnish' },
-    { value: 'french', label: 'French' },
-    { value: 'frisian', label: 'Frisian' },
-    { value: 'galician', label: 'Galician' },
-    { value: 'german', label: 'German' },
-    { value: 'greek', label: 'Greek' },
-    { value: 'gujarati', label: 'Gujarati' },
-    { value: 'hebrew', label: 'Hebrew' },
-    { value: 'hindi', label: 'Hindi' },
-    { value: 'hungarian', label: 'Hungarian' },
-    { value: 'icelandic', label: 'Icelandic' },
-    { value: 'irish', label: 'Irish' },
-    { value: 'italian', label: 'Italian' },
-    { value: 'japanese', label: 'Japanese' },
-    { value: 'korean', label: 'Korean' },
-    { value: 'latvian', label: 'Latvian' },
-    { value: 'lithuanian', label: 'Lithuanian' },
-    { value: 'luxembourgish', label: 'Luxembourgish' },
-    { value: 'malay', label: 'Malay' },
-    { value: 'malayalam', label: 'Malayalam' },
-    { value: 'manx', label: 'Manx' },
-    { value: 'marathi', label: 'Marathi' },
-    { value: 'northern_frisian', label: 'Northern Frisian' },
-    { value: 'norwegian', label: 'Norwegian' },
-    { value: 'nynorsk_norwegian', label: 'Nynorsk Norwegian' },
-    { value: 'polish', label: 'Polish' },
-    { value: 'portuguese_brazil', label: 'Portuguese (Brazil)' },
-    { value: 'portuguese_portugal', label: 'Portuguese (Portugal)' },
-    { value: 'romanian', label: 'Romanian' },
-    { value: 'russian', label: 'Russian' },
-    { value: 'scots', label: 'Scots' },
-    { value: 'scottish_gaelic', label: 'Scottish Gaelic' },
-    { value: 'slovak', label: 'Slovak' },
-    { value: 'slovenian', label: 'Slovenian' },
-    { value: 'spanish', label: 'Spanish' },
-    { value: 'swedish', label: 'Swedish' },
-    { value: 'tamil', label: 'Tamil' },
-    { value: 'thai', label: 'Thai' },
-    { value: 'turkish', label: 'Turkish' },
-    { value: 'ukrainian', label: 'Ukrainian' },
+    { value: 'english', label: 'English' });
+    { value: 'afrikaans', label: 'Afrikaans' });
+    { value: 'arabic', label: 'Arabic (Beta)' });
+    { value: 'basque', label: 'Basque' });
+    { value: 'breton', label: 'Breton' });
+    { value: 'bulgarian', label: 'Bulgarian' });
+    { value: 'catalan', label: 'Catalan' });
+    { value: 'chinese_traditional', label: 'Chinese (Traditional) (Beta)' });
+    { value: 'cornish', label: 'Cornish' });
+    { value: 'corsican', label: 'Corsican' });
+    { value: 'croatian', label: 'Croatian' });
+    { value: 'czech', label: 'Czech' });
+    { value: 'danish', label: 'Danish' });
+    { value: 'dutch', label: 'Dutch' });
+    { value: 'eastern_frisian', label: 'Eastern Frisian' });
+    { value: 'estonian', label: 'Estonian' });
+    { value: 'finnish', label: 'Finnish' });
+    { value: 'french', label: 'French' });
+    { value: 'frisian', label: 'Frisian' });
+    { value: 'galician', label: 'Galician' });
+    { value: 'german', label: 'German' });
+    { value: 'greek', label: 'Greek' });
+    { value: 'gujarati', label: 'Gujarati' });
+    { value: 'hebrew', label: 'Hebrew' });
+    { value: 'hindi', label: 'Hindi' });
+    { value: 'hungarian', label: 'Hungarian' });
+    { value: 'icelandic', label: 'Icelandic' });
+    { value: 'irish', label: 'Irish' });
+    { value: 'italian', label: 'Italian' });
+    { value: 'japanese', label: 'Japanese' });
+    { value: 'korean', label: 'Korean' });
+    { value: 'latvian', label: 'Latvian' });
+    { value: 'lithuanian', label: 'Lithuanian' });
+    { value: 'luxembourgish', label: 'Luxembourgish' });
+    { value: 'malay', label: 'Malay' });
+    { value: 'malayalam', label: 'Malayalam' });
+    { value: 'manx', label: 'Manx' });
+    { value: 'marathi', label: 'Marathi' });
+    { value: 'northern_frisian', label: 'Northern Frisian' });
+    { value: 'norwegian', label: 'Norwegian' });
+    { value: 'nynorsk_norwegian', label: 'Nynorsk Norwegian' });
+    { value: 'polish', label: 'Polish' });
+    { value: 'portuguese_brazil', label: 'Portuguese (Brazil)' });
+    { value: 'portuguese_portugal', label: 'Portuguese (Portugal)' });
+    { value: 'romanian', label: 'Romanian' });
+    { value: 'russian', label: 'Russian' });
+    { value: 'scots', label: 'Scots' });
+    { value: 'scottish_gaelic', label: 'Scottish Gaelic' });
+    { value: 'slovak', label: 'Slovak' });
+    { value: 'slovenian', label: 'Slovenian' });
+    { value: 'spanish', label: 'Spanish' });
+    { value: 'swedish', label: 'Swedish' });
+    { value: 'tamil', label: 'Tamil' });
+    { value: 'thai', label: 'Thai' });
+    { value: 'turkish', label: 'Turkish' });
+    { value: 'ukrainian', label: 'Ukrainian' });
     { value: 'welsh', label: 'Welsh' }
   ];
 
@@ -500,7 +500,7 @@ export default function SeriesSetupPage() {
                       <SelectItem key={lang.value} value={lang.value}>
                         {lang.label}
                       </SelectItem>
-                    )}
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -526,7 +526,7 @@ export default function SeriesSetupPage() {
                 />
                 {form.formState.errors.title && (
                   <p className="text-sm text-red-600">{form.formState.errors.title.message}</p>
-                )}
+                ))}
               </div>
             </CardContent>
           </Card>

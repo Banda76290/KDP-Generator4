@@ -15,13 +15,13 @@ import { ArrowLeft, Edit3, Save, BookOpen, FolderOpen, Trash2, User } from "luci
 import type { AuthorWithRelations, ProjectWithRelations, Book } from "@shared/schema";
 
 const LANGUAGES = [
-  { value: "English", label: "English" },
-  { value: "Spanish", label: "Spanish" },
-  { value: "German", label: "German" },
-  { value: "French", label: "French" },
-  { value: "Italian", label: "Italian" },
-  { value: "Portuguese", label: "Portuguese" },
-  { value: "Japanese", label: "Japanese" },
+  { value: "English", label: "English" });
+  { value: "Spanish", label: "Spanish" });
+  { value: "German", label: "German" });
+  { value: "French", label: "French" });
+  { value: "Italian", label: "Italian" });
+  { value: "Portuguese", label: "Portuguese" });
+  { value: "Japanese", label: "Japanese" });
 ];
 
 export default function AuthorViewPage() {
@@ -39,33 +39,33 @@ export default function AuthorViewPage() {
     middleName: "",
     lastName: "",
     suffix: ""
-  };
+  });
 
   // Fetch author details
   const { data: author, isLoading: authorLoading } = useQuery({
     queryKey: ["/api/authors", authorId],
-    queryFn: () => apiRequest(`/api/authors/${authorId}`, { method: "GET" },
+    queryFn: () => apiRequest(`/api/authors/${authorId}`, { method: "GET" });
     enabled: !!authorId,
   });
 
   // Fetch biography for selected language
   const { data: biographyData, isLoading: biographyLoading } = useQuery({
     queryKey: ["/api/authors", authorId, "biography", selectedLanguage],
-    queryFn: () => apiRequest(`/api/authors/${authorId}/biography/${selectedLanguage}`, { method: "GET" },
+    queryFn: () => apiRequest(`/api/authors/${authorId}/biography/${selectedLanguage}`, { method: "GET" });
     enabled: !!authorId,
   });
 
   // Fetch author projects
   const { data: authorProjects = [] } = useQuery({
     queryKey: ["/api/authors", authorId, "projects"],
-    queryFn: () => apiRequest(`/api/authors/${authorId}/projects`, { method: "GET" },
+    queryFn: () => apiRequest(`/api/authors/${authorId}/projects`, { method: "GET" });
     enabled: !!authorId,
   });
 
   // Fetch author books  
   const { data: authorBooks = [] } = useQuery({
     queryKey: ["/api/authors", authorId, "books"],
-    queryFn: () => apiRequest(`/api/authors/${authorId}/books`, { method: "GET" },
+    queryFn: () => apiRequest(`/api/authors/${authorId}/books`, { method: "GET" });
     enabled: !!authorId,
   });
 
@@ -96,7 +96,7 @@ export default function AuthorViewPage() {
       console.error('Error applying biography formatting:', error);
       toast({ title: "Erreur", description: "Erreur lors de l'application du formatage", variant: "destructive"});
     }
-  };
+  });
 
   const handleBiographyFormatChange = (value: string) => {
     switch (value) {
@@ -113,14 +113,14 @@ export default function AuthorViewPage() {
         applyBiographyFormatting("formatBlock", "h6");
         break;
     }
-  };
+  });
 
   const updateBiographyFromHTML = () => {
     const editor = document.getElementById('biography-editor') as HTMLDivElement;
     if (editor) {
       setBiography(editor.innerHTML);
     }
-  };
+  });
 
   // Function to clean HTML content securely
   const cleanHTML = (html: string): string => {
@@ -147,7 +147,7 @@ export default function AuthorViewPage() {
       
       attributesToRemove.forEach(attrName => {
         element.removeAttribute(attrName);
-      };
+      });
       
       if (element.getAttribute('href')?.startsWith('javascript:')) {
         element.removeAttribute('href');
@@ -155,7 +155,7 @@ export default function AuthorViewPage() {
     });
     
     return doc.body.innerHTML;
-  };
+  });
 
   // Add CSS for the biography editor
   React.useEffect(() => {
@@ -181,7 +181,7 @@ export default function AuthorViewPage() {
       if (document.head.contains(style)) {
         document.head.removeChild(style);
       }
-    };
+    });
   }, []);
 
   // Update author form when author data loads
@@ -192,7 +192,7 @@ export default function AuthorViewPage() {
         firstName: author.firstName || "",
         middleName: author.middleName || "",
         lastName: author.lastName || "",
-        suffix: author.suffix || ""};
+        suffix: author.suffix || ""});
     }
   }, [author]);
 
@@ -264,16 +264,16 @@ export default function AuthorViewPage() {
           setLocation(`/books/edit/${returnToBookEdit}`);
         }
       }
-    },
+    });
     onError: () => {
       toast({ title: "Failed to save biography", variant: "destructive"});
-    },
+    });
   });
 
   // Update author mutation
   const updateAuthorMutation = useMutation({
     mutationFn: (authorData: typeof authorForm) =>
-      apiRequest(`/api/authors/${authorId}`, { method: "PUT", body: JSON.stringify(authorData},
+      apiRequest(`/api/authors/${authorId}`, { method: "PUT", body: JSON.stringify(authorData});
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId]});
       setIsEditingAuthor(false);
@@ -290,41 +290,41 @@ export default function AuthorViewPage() {
           setLocation(`/books/edit/${returnToBookEdit}`);
         }
       }
-    },
+    });
     onError: () => {
       toast({ title: "Failed to update author", variant: "destructive"});
-    },
+    });
   });
 
   // Delete author mutation
   const deleteAuthorMutation = useMutation({
-    mutationFn: () => apiRequest(`/api/authors/${authorId}`, { method: "DELETE" },
+    mutationFn: () => apiRequest(`/api/authors/${authorId}`, { method: "DELETE" });
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors"]});
       toast({ title: "Author deleted successfully" });
       setLocation("/authors");
-    },
+    });
     onError: () => {
       toast({ title: "Failed to delete author", variant: "destructive"});
-    },
+    });
   });
 
   const handleSaveBiography = () => {
     updateBiographyMutation.mutate({ biography});
-  };
+  });
 
   const handleSaveAuthor = () => {
     updateAuthorMutation.mutate(authorForm);
-  };
+  });
 
   const handleAuthorFormChange = (field: keyof typeof authorForm, value: string) => {
     setAuthorForm(prev => ({ ...prev, [field]: value});
-  };
+  });
 
   const handleLanguageChange = (language: string) => {
     setSelectedLanguage(language);
     setIsEditing(false);
-  };
+  });
 
   if (authorLoading) {
     return (
@@ -505,7 +505,7 @@ export default function AuthorViewPage() {
                       Click Edit to modify author information
                     </p>
                   </div>
-                )}
+                ))}
               </CardContent>
             </Card>
 
@@ -523,7 +523,7 @@ export default function AuthorViewPage() {
                       <SelectItem key={lang.value} value={lang.value}>
                         {lang.label}
                       </SelectItem>
-                    )}
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -637,7 +637,7 @@ export default function AuthorViewPage() {
                     </Button>
                   </div>
                 </div>
-              )}
+              ))}
               </CardContent>
             </Card>
           </div>
@@ -677,9 +677,9 @@ export default function AuthorViewPage() {
                           </div>
                         </div>
                       </div>
-                    )}
+                    ))}
                   </div>
-                )}
+                ))}
               </CardContent>
             </Card>
 
@@ -718,9 +718,9 @@ export default function AuthorViewPage() {
                           </div>
                         </div>
                       </div>
-                    )}
+                    ))}
                   </div>
-                )}
+                ))}
               </CardContent>
             </Card>
           </div>

@@ -20,18 +20,18 @@ export default function AuthorCreatePage() {
     middleName: "",
     lastName: "",
     suffix: "",
-  };
+  });
 
   // Create author mutation
-  const createAuthorMutation = useMutation({ mutationFn: (data: any) => apiRequest("/api/authors", { method: "POST", body: JSON.stringify(data},
+  const createAuthorMutation = useMutation({ mutationFn: (data: any) => apiRequest("/api/authors", { method: "POST", body: JSON.stringify(data});
     onSuccess: (author) => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors"]});
       toast({ title: "Author created successfully" });
       setLocation(`/authors/${author.id}`);
-    },
+    });
     onError: () => {
       toast({ title: "Failed to create author", variant: "destructive"});
-    },
+    });
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -41,7 +41,7 @@ export default function AuthorCreatePage() {
       return;
     }
     createAuthorMutation.mutate(newAuthor);
-  };
+  });
 
   return (
     <Layout>

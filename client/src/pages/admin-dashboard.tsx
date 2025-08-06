@@ -61,42 +61,42 @@ export default function AdminDashboard() {
       description: "Total des comptes utilisateurs",
       icon: Users,
       color: "text-blue-600",
-    },
+    });
     {
       title: "Projets Actifs",
       value: stats?.totalProjects || 0,
       description: "Projets publiés et en cours",
       icon: BookOpen,
       color: "text-green-600",
-    },
+    });
     {
       title: "Revenus Total",
       value: `${stats?.totalRevenue?.toFixed(2) || '0.00'}€`,
       description: "Revenus générés via la plateforme",
       icon: DollarSign,
       color: "text-yellow-600",
-    },
+    });
     {
       title: "Générations IA",
       value: stats?.aiGenerationsCount || 0,
       description: "Contenu généré par IA",
       icon: Bot,
       color: "text-purple-600",
-    },
+    });
     {
       title: "Utilisateurs Actifs",
       value: stats?.activeUsers || 0,
       description: "Comptes actifs",
       icon: Activity,
       color: "text-indigo-600",
-    },
+    });
     {
       title: "Nouvelles Inscriptions",
       value: stats?.recentSignups || 0,
       description: "30 derniers jours",
       icon: UserPlus,
       color: "text-emerald-600",
-    },
+    });
   ];
 
   return (
@@ -131,7 +131,7 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           );
-        })}
+        }))}
       </div>
 
       {/* Quick Actions */}

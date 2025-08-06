@@ -29,7 +29,7 @@ export default function ImportManagementPage() {
   // Fetch import history
   const { data: imports = [], isLoading: importsLoading } = useQuery({
     queryKey: ["/api/imports"],
-    queryFn: () => apiRequest("/api/imports", { method: "GET"},
+    queryFn: () => apiRequest("/api/imports", { method: "GET"});
   });
 
   // Upload mutation
@@ -41,20 +41,20 @@ export default function ImportManagementPage() {
         method: "POST",
         body: formData
       }).then(res => res.json());
-    },
+    });
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/imports"]});
       setSelectedFile(null);
-    },
+    });
   });
 
   // Delete import mutation
   const deleteMutation = useMutation({
     mutationFn: (importId: string) => 
-      apiRequest(`/api/imports/${importId}`, { method: "DELETE" },
+      apiRequest(`/api/imports/${importId}`, { method: "DELETE" });
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/imports"]});
-    },
+    });
   });
 
   const handleFileSelect = (file: File) => {
@@ -65,20 +65,20 @@ export default function ImportManagementPage() {
     } else {
       alert("Please select an Excel (.xlsx, .xls) or CSV file");
     }
-  };
+  });
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files[0];
     if (file) handleFileSelect(file);
-  };
+  });
 
   const handleUpload = () => {
     if (selectedFile) {
       uploadMutation.mutate(selectedFile);
     }
-  };
+  });
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -87,7 +87,7 @@ export default function ImportManagementPage() {
       case "processing": return <Clock className="w-4 h-4 text-blue-500" />;
       default: return <Clock className="w-4 h-4 text-gray-500" />;
     }
-  };
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -96,11 +96,11 @@ export default function ImportManagementPage() {
       case "processing": return "bg-blue-100 text-blue-800";
       default: return "bg-gray-100 text-gray-800";
     }
-  };
+  });
 
   const getFileTypeIcon = (fileType: string) => {
     return <FileSpreadsheet className="w-4 h-4" />;
-  };
+  });
 
   return (
     <Layout>
@@ -171,7 +171,7 @@ export default function ImportManagementPage() {
                     </label>
                   </Button>
                 </div>
-              )}
+              ))}
             </div>
 
             {/* Supported File Types */}
@@ -233,7 +233,7 @@ export default function ImportManagementPage() {
                             value={importRecord.progress || 0} 
                             className="w-48 mt-2" 
                           />
-                        )}
+                        ))}
                       </div>
                     </div>
                     
@@ -269,9 +269,9 @@ export default function ImportManagementPage() {
                       </Button>
                     </div>
                   </div>
-                )}
+                ))}
               </div>
-            )}
+            ))}
           </CardContent>
         </Card>
       </div>

@@ -27,7 +27,7 @@ export default function AdminBlogCategories() {
     slug: "",
     description: "",
     color: "#3B82F6",
-  };
+  });
 
   // Redirect to home if not admin
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function AdminBlogCategories() {
 
   const createCategoryMutation = useMutation({ mutationFn: async (categoryData: typeof formData) => {
       return await apiRequest("/api/admin/blog/categories", { method: "POST", body: JSON.stringify(categoryData});
-    },
+    });
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/categories"]});
       toast({
@@ -59,21 +59,21 @@ export default function AdminBlogCategories() {
         description: "Catégorie créée avec succès.",
       });
       setIsDialogOpen(false);
-      setFormData({ name: "", slug: "", description: "", color: "#3B82F6" };
-    },
+      setFormData({ name: "", slug: "", description: "", color: "#3B82F6" });
+    });
     onError: (error: Error) => {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de créer la catégorie.",
         variant: "destructive"
       });
-    },
+    });
   });
 
   const updateCategoryMutation = useMutation({
     mutationFn: async ({ id, data}: { id: string; data: typeof formData } => {
       return await apiRequest(`/api/admin/blog/categories/${id}`, { method: "PUT", body: JSON.stringify(data});
-    },
+    });
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/categories"]});
       toast({
@@ -82,35 +82,35 @@ export default function AdminBlogCategories() {
       });
       setIsDialogOpen(false);
       setSelectedCategory(null);
-      setFormData({ name: "", slug: "", description: "", color: "#3B82F6" };
-    },
+      setFormData({ name: "", slug: "", description: "", color: "#3B82F6" });
+    });
     onError: (error: Error) => {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de mettre à jour la catégorie.",
         variant: "destructive"
       });
-    },
+    });
   });
 
   const deleteCategoryMutation = useMutation({
     mutationFn: async (categoryId: string) => {
       return await apiRequest(`/api/admin/blog/categories/${categoryId}`, { method: "DELETE" });
-    },
+    });
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/categories"]});
       toast({
         title: "Succès",
         description: "Catégorie supprimée avec succès.",
       });
-    },
+    });
     onError: (error: Error) => {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de supprimer la catégorie.",
         variant: "destructive"
       });
-    },
+    });
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -130,7 +130,7 @@ export default function AdminBlogCategories() {
     } else {
       createCategoryMutation.mutate(formData);
     }
-  };
+  });
 
   const handleEdit = (category: BlogCategory) => {
     setSelectedCategory(category);
@@ -141,13 +141,13 @@ export default function AdminBlogCategories() {
       color: category.color || "#3B82F6"
       });
     setIsDialogOpen(true);
-  };
+  });
 
   const handleNew = () => {
     setSelectedCategory(null);
-    setFormData({ name: "", slug: "", description: "", color: "#3B82F6"};
+    setFormData({ name: "", slug: "", description: "", color: "#3B82F6"});
     setIsDialogOpen(true);
-  };
+  });
 
   // Auto-generate slug from name
   const handleNameChange = (name: string) => { setFormData(prev => ({
@@ -158,7 +158,7 @@ export default function AdminBlogCategories() {
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-')
         .trim(});
-  };
+  });
 
   if (isLoading || categoriesLoading) {
     return (
@@ -291,7 +291,7 @@ export default function AdminBlogCategories() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  )}
+                  ))}
                 </TableBody>
               </Table>
             </div>
@@ -303,7 +303,7 @@ export default function AdminBlogCategories() {
                 Créez votre première catégorie pour organiser vos articles.
               </div>
             </div>
-          )}
+          ))}
         </CardContent>
       </Card>
 

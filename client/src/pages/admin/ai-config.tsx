@@ -117,19 +117,19 @@ export default function AIConfig() {
       const method = data.id ? "PUT" : "POST";
       const url = data.id ? `/api/admin/ai/prompts/${data.id}` : "/api/admin/ai/prompts";
       return await apiRequest(url, { method, body: JSON.stringify(data});
-    },
+    });
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/prompts"]});
       setEditingPrompt(null);
       toast({ title: "Success", description: "Prompt template saved successfully" });
-    },
+    });
     onError: (error) => {
       if (isUnauthorizedError(error)) {
         window.location.href = "/api/login";
         return;
       }
       toast({ title: "Error", description: "Failed to save prompt template", variant: "destructive" });
-    },
+    });
   });
 
   const saveModelMutation = useMutation({
@@ -137,19 +137,19 @@ export default function AIConfig() {
       const method = data.id ? "PUT" : "POST";
       const url = data.id ? `/api/admin/ai/models/${data.id}` : "/api/admin/ai/models";
       return await apiRequest(url, { method, body: JSON.stringify(data});
-    },
+    });
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/models"]});
       setEditingModel(null);
       toast({ title: "Success", description: "AI model saved successfully" });
-    },
+    });
     onError: (error) => {
       if (isUnauthorizedError(error)) {
         window.location.href = "/api/login";
         return;
       }
       toast({ title: "Error", description: "Failed to save AI model", variant: "destructive" });
-    },
+    });
   });
 
   const saveLimitMutation = useMutation({
@@ -157,29 +157,29 @@ export default function AIConfig() {
       const method = data.id ? "PUT" : "POST";
       const url = data.id ? `/api/admin/ai/limits/${data.id}` : "/api/admin/ai/limits";
       return await apiRequest(url, { method, body: JSON.stringify(data});
-    },
+    });
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/limits"]});
       setEditingLimit(null);
       toast({ title: "Success", description: "Usage limit saved successfully" });
-    },
+    });
     onError: (error) => {
       if (isUnauthorizedError(error)) {
         window.location.href = "/api/login";
         return;
       }
       toast({ title: "Error", description: "Failed to save usage limit", variant: "destructive" });
-    },
+    });
   });
 
   const deletePromptMutation = useMutation({
     mutationFn: async (id: string) => {
       return await apiRequest(`/api/admin/ai/prompts/${id}`, { method: "DELETE" });
-    },
+    });
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/prompts"]});
       toast({ title: "Success", description: "Prompt template deleted successfully" });
-    },
+    });
   });
 
   // Loading state
@@ -268,7 +268,7 @@ export default function AIConfig() {
                   </CardContent>
                 </Card>
               </div>
-            )}
+            ))}
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -313,7 +313,7 @@ export default function AIConfig() {
                                 Max Tokens: {template.maxTokens} | Température: {template.temperature}
                                 {template.variables && template.variables.length > 0 && (
                                   <span className="ml-2">| Variables: {template.variables.length}</span>
-                                )}
+                                ))}
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -335,7 +335,7 @@ export default function AIConfig() {
                           </div>
                         </div>
                       ))
-                    )}
+                    ))}
                   </div>
                 </CardContent>
               </Card>
@@ -388,7 +388,7 @@ export default function AIConfig() {
                           </div>
                         </div>
                       ))
-                    )}
+                    ))}
                   </div>
                 </CardContent>
               </Card>
@@ -438,10 +438,10 @@ export default function AIConfig() {
                                       <Badge key={model} variant="outline" className="text-xs">
                                         {model}
                                       </Badge>
-                                    )}
+                                    ))}
                                   </div>
                                 </div>
-                              )}
+                              ))}
                             </div>
                             <div className="flex items-center gap-2">
                               <Button
@@ -455,7 +455,7 @@ export default function AIConfig() {
                           </div>
                         </div>
                       ))
-                    )}
+                    ))}
                   </div>
                 </CardContent>
               </Card>
@@ -488,7 +488,7 @@ export default function AIConfig() {
               onClose={ () => setEditingLimit(null}
               isLoading={saveLimitMutation.isPending}
             />
-          )}
+          ))}
         </main>
       </div>
     </div>

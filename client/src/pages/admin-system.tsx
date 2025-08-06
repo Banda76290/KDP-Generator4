@@ -21,13 +21,13 @@ interface SystemHealth {
     used: string;
     total: string;
     percentage: number;
-  };
+  });
   uptime: string;
   memoryUsage: {
     used: string;
     total: string;
     percentage: number;
-  };
+  });
 }
 
 export default function AdminSystem() {
@@ -60,29 +60,29 @@ export default function AdminSystem() {
       interactionTimeoutRef.current = setTimeout(() => {
         setUserIsInteracting(false);
       }, 3000);
-    };
+    });
 
     // Add event listeners for user activity
     const events = ['click', 'scroll', 'keydown', 'mousemove', 'touchstart'];
     events.forEach(event => {
       document.addEventListener(event, handleUserActivity);
-    };
+    });
 
     return () => {
       events.forEach(event => {
-        document.removeEventListener(event, handleUserActivity);};
+        document.removeEventListener(event, handleUserActivity);});
       if (interactionTimeoutRef.current) {
         clearTimeout(interactionTimeoutRef.current);
       }
-    };
+    });
   }, []);
 
   // Auto-scroll logs to bottom only if user is not actively using the page
   const scrollToBottom = () => {
     if (autoScrollEnabled && !isPaused && !userIsInteracting) {
-      logsEndRef.current?.scrollIntoView({ behavior: "smooth"};
+      logsEndRef.current?.scrollIntoView({ behavior: "smooth"});
     }
-  };
+  });
 
   useEffect(() => {
     scrollToBottom();
@@ -107,7 +107,7 @@ export default function AdminSystem() {
     } catch (error) {
       console.warn('Error in scroll handler:', error);
     }
-  };
+  });
 
   // Fetch system logs from server
   const { data: systemLogsData, isLoading: logsLoading } = useQuery({
@@ -115,7 +115,7 @@ export default function AdminSystem() {
     refetchInterval: (autoRefreshLogs && !isPaused) ? 2000 : false, // Only refresh if not paused
     refetchIntervalInBackground: true,
     enabled: isAdmin, // Only fetch if user is admin
-  };
+  });
 
   // Update local logs when server logs change
   useEffect(() => {
@@ -142,18 +142,18 @@ export default function AdminSystem() {
     const timestamp = new Date().toLocaleTimeString('fr-FR');
     const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
     setLogs(prev => [...prev, `[${timestamp}] ${prefix} ${message}`]);
-  };
+  });
 
   // Clear logs mutation
   const clearLogsMutation = useMutation({
-    mutationFn: () => apiRequest('/api/admin/system/logs', { method: 'DELETE'},
+    mutationFn: () => apiRequest('/api/admin/system/logs', { method: 'DELETE'});
     onSuccess: () => {
       setLogs([]);
       queryClient.invalidateQueries({ queryKey: ['/api/admin/system/logs']});
       toast({
         description: "Logs système effacés"
       });
-    },
+    });
     onError: (error) => {
       toast({
         variant: "destructive",
@@ -164,7 +164,7 @@ export default function AdminSystem() {
   // Clear logs function
   const clearLogs = () => {
     clearLogsMutation.mutate();
-  };
+  });
 
   // Copy logs to clipboard
   const copyLogs = async () => {
@@ -182,7 +182,7 @@ export default function AdminSystem() {
         variant: "destructive"
       });
     }
-  };
+  });
 
   // Redirect to home if not admin
   useEffect(() => {
@@ -204,7 +204,7 @@ export default function AdminSystem() {
     queryKey: ["/api/admin/system/health"],
     enabled: isAdmin,
     refetchInterval: 30000, // Refresh every 30 seconds
-  };
+  });
 
   // Database seeding mutation
   const seedDatabase = useMutation({
@@ -213,7 +213,7 @@ export default function AdminSystem() {
       addLog('Envoi de la requête POST /api/admin/database/seed', 'info');
       
       try {
-        const result = await apiRequest("/api/admin/database/seed", { method: "POST"};
+        const result = await apiRequest("/api/admin/database/seed", { method: "POST"});
         addLog('Réponse reçue du serveur', 'success');
         addLog(`Résultat: ${ JSON.stringify(result, null, 2}`, 'info');
         return result;
@@ -222,11 +222,11 @@ export default function AdminSystem() {
         addLog(`Détails de l'erreur: ${ JSON.stringify(error, null, 2}`, 'error');
         throw error;
       }
-    },
+    });
     onMutate: () => {
       setSeedingStatus('seeding');
       addLog('🔄 Démarrage de la synchronisation...', 'info');
-    },
+    });
     onSuccess: (data) => {
       addLog('✅ Synchronisation terminée avec succès', 'success');
       if (data.duration) addLog(`⏱️ Durée de l'opération: ${data.duration}`, 'info');
@@ -237,7 +237,7 @@ export default function AdminSystem() {
         description: "La base de données a été synchronisée avec succès.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/system/health"] });
-    },
+    });
     onError: (error: any) => {
       addLog(`❌ Échec de la synchronisation: ${error.message}`, 'error');
       addLog(`Stack trace: ${error.stack || 'Non disponible'}`, 'error');
@@ -246,11 +246,11 @@ export default function AdminSystem() {
         description: error.message || "Impossible de synchroniser la base de données.",
         variant: "destructive",
       });
-    },
+    });
     onSettled: () => {
       setSeedingStatus('idle');
       addLog('🏁 Opération de synchronisation terminée', 'info');
-    },
+    });
   });
 
   // Database reset mutation
@@ -260,7 +260,7 @@ export default function AdminSystem() {
       addLog('Envoi de la requête POST /api/admin/database/reset', 'info');
       
       try {
-        const result = await apiRequest("/api/admin/database/reset", { method: "POST"};
+        const result = await apiRequest("/api/admin/database/reset", { method: "POST"});
         addLog('Réponse reçue du serveur pour le reset', 'success');
         addLog(`Résultat du reset: ${ JSON.stringify(result, null, 2}`, 'info');
         return result;
@@ -269,12 +269,12 @@ export default function AdminSystem() {
         addLog(`Détails de l'erreur reset: ${ JSON.stringify(error, null, 2}`, 'error');
         throw error;
       }
-    },
+    });
     onMutate: () => {
       setSeedingStatus('resetting');
       addLog('🔄 Démarrage du reset complet...', 'warning');
       addLog('⚠️ ATTENTION: Toutes les catégories existantes vont être supprimées', 'warning');
-    },
+    });
     onSuccess: (data) => {
       addLog('✅ Reset et re-synchronisation terminés avec succès', 'success');
       if (data.duration) addLog(`⏱️ Durée totale du reset: ${data.duration}`, 'info');
@@ -285,7 +285,7 @@ export default function AdminSystem() {
         description: "La base de données a été remise à zéro et re-synchronisée.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/system/health"] });
-    },
+    });
     onError: (error: any) => {
       addLog(`❌ Échec du reset: ${error.message}`, 'error');
       addLog(`Stack trace du reset: ${error.stack || 'Non disponible'}`, 'error');
@@ -294,11 +294,11 @@ export default function AdminSystem() {
         description: error.message || "Impossible de remettre à zéro la base de données.",
         variant: "destructive",
       });
-    },
+    });
     onSettled: () => {
       setSeedingStatus('idle');
       addLog('🏁 Opération de reset terminée', 'info');
-    },
+    });
   });
 
   const handleSeed = () => {
@@ -308,7 +308,7 @@ export default function AdminSystem() {
     } else {
       addLog('👤 Utilisateur a annulé la synchronisation', 'warning');
     }
-  };
+  });
 
   const handleReset = () => {
     if (confirm("ATTENTION: Cette action va effacer toutes les catégories existantes et les remplacer. Êtes-vous sûr de vouloir continuer ?")) {
@@ -317,34 +317,34 @@ export default function AdminSystem() {
     } else {
       addLog('👤 Utilisateur a annulé le reset complet', 'info');
     }
-  };
+  });
 
   // Export categories mutation
   const exportCategories = useMutation({
     mutationFn: async () => {
       addLog('📤 Début de l\'export des catégories...', 'info');
       try {
-        const result = await apiRequest("/api/admin/categories/export", { method: "GET"};
+        const result = await apiRequest("/api/admin/categories/export", { method: "GET"});
         addLog(`✅ Export réussi: ${result.count} catégories`, 'success');
         return result;
       } catch (error: any) {
         addLog(`❌ Erreur lors de l\'export: ${error.message}`, 'error');
         throw error;
       }
-    },
+    });
     onSuccess: (data) => {
       toast({
         title: "Export réussi",
         description: `${data.count} catégories exportées avec succès.`,
       });
-    },
+    });
     onError: (error: any) => {
       toast({
         title: "Erreur d'export",
         description: error.message || "Impossible d'exporter les catégories.",
         variant: "destructive"
       });
-    },
+    });
   });
 
   // Sync to production mutation
@@ -365,11 +365,11 @@ export default function AdminSystem() {
         addLog(`❌ Erreur de synchronisation: ${error.message}`, 'error');
         throw error;
       }
-    },
+    });
     onMutate: () => {
       setSeedingStatus('syncing');
       addLog('🚀 Démarrage de la synchronisation Dev → Production...', 'info');
-    },
+    });
     onSuccess: (data) => {
       addLog(`✅ ${data.syncedCount} catégories synchronisées`, 'success');
       if (data.duration) addLog(`⏱️ Durée: ${data.duration}`, 'info');
@@ -377,7 +377,7 @@ export default function AdminSystem() {
         title: "Synchronisation réussie",
         description: `${data.syncedCount} catégories synchronisées vers la production.`,
       });
-    },
+    });
     onError: (error: any) => {
       addLog(`❌ Échec de la synchronisation: ${error.message}`, 'error');
       toast({
@@ -385,11 +385,11 @@ export default function AdminSystem() {
         description: error.message || "Impossible de synchroniser vers la production.",
         variant: "destructive",
       });
-    },
+    });
     onSettled: () => {
       setSeedingStatus('idle');
       addLog('🏁 Opération de synchronisation terminée', 'info');
-    },
+    });
   });
 
   const handleSyncToProduction = async () => {
@@ -412,7 +412,7 @@ export default function AdminSystem() {
           // Then sync to production
           syncToProduction.mutate({
             productionUrl: productionUrl.trim(),
-            categories: exportResult.categories};
+            categories: exportResult.categories});
         }
       } catch (error) {
         addLog('❌ Impossible d\'exporter les catégories pour la synchronisation', 'error');
@@ -420,7 +420,7 @@ export default function AdminSystem() {
     } else {
       addLog('👤 Utilisateur a annulé la synchronisation', 'warning');
     }
-  };
+  });
 
   const generateSQLContent = async () => { const exportResult = await exportCategories.mutateAsync();
     
@@ -449,10 +449,10 @@ export default function AdminSystem() {
         sqlContent += `INSERT INTO marketplace_categories (marketplace, category_path, parent_path, level, display_name, is_selectable, sort_order, is_active, created_at, updated_at) VALUES (${ values.join(', '};\n`;
       });
       
-      return { sqlContent, count: categories.length };
+      return { sqlContent, count: categories.length });
     }
     throw new Error('Aucune catégorie à exporter');
-  };
+  });
 
   const handleCopySQL = async () => {
     try {
@@ -474,7 +474,7 @@ export default function AdminSystem() {
         variant: "destructive",
       });
     }
-  };
+  });
 
   const handleExportSQL = async () => {
     try {
@@ -482,7 +482,7 @@ export default function AdminSystem() {
       const { sqlContent, count } = await generateSQLContent();
       
       // Download file
-      const blob = new Blob([sqlContent], { type: 'text/sql' };
+      const blob = new Blob([sqlContent], { type: 'text/sql' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -505,7 +505,7 @@ export default function AdminSystem() {
         variant: "destructive",
       });
     }
-  };
+  });
 
   const handleExportJSON = async () => {
     try {
@@ -518,10 +518,10 @@ export default function AdminSystem() {
           version: "1.0",
           categoriesCount: exportResult.categories.length,
           categories: exportResult.categories
-        };
+        });
         
         // Download file
-        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' };
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -545,7 +545,7 @@ export default function AdminSystem() {
         variant: "destructive",
       });
     }
-  };
+  });
 
   // Initialize with welcome log
   useEffect(() => {
@@ -582,7 +582,7 @@ export default function AdminSystem() {
       default:
         return <Badge variant="outline">Statut inconnu</Badge>;
     }
-  };
+  });
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -595,7 +595,7 @@ export default function AdminSystem() {
       default:
         return <Server className="h-5 w-5 text-gray-600" />;
     }
-  };
+  });
 
   return (
     <Layout>
@@ -676,7 +676,7 @@ export default function AdminSystem() {
                     style={{ width: `${systemHealth.memoryUsage.percentage}%` }}
                   ></div>
                 </div>
-              )}
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -1194,7 +1194,7 @@ export default function AdminSystem() {
                   )}
                   <div ref={logsEndRef} />
                 </div>
-              )}
+              ))}
             </div>
             
             <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
@@ -1213,12 +1213,12 @@ export default function AdminSystem() {
                     { !autoScrollEnabled && !isPaused && (
                       <span className="text-purple-600"> • 📜 Défilement désactivé</span>}
                   </span>
-                )}
+                ))}
               </div>
               <div>
                 {systemLogsData && typeof systemLogsData === 'object' && 'total' in systemLogsData && (
-                  <span>Total serveur: {String((systemLogsData as { total: number}.total)}</span>
-                )}
+                  <span>Total serveur: {String((systemLogsData as { total: number}.total))}</span>
+                ))}
               </div>
             </div>
             

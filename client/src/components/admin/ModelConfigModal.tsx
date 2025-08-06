@@ -27,9 +27,9 @@ interface ModelConfigModalProps {
 }
 
 const PROVIDERS = [
-  { value: 'openai', label: 'OpenAI' },
-  { value: 'anthropic', label: 'Anthropic' },
-  { value: 'google', label: 'Google' },
+  { value: 'openai', label: 'OpenAI' });
+  { value: 'anthropic', label: 'Anthropic' });
+  { value: 'google', label: 'Google' });
   { value: 'microsoft', label: 'Microsoft' }
 ];
 
@@ -42,15 +42,15 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
     outputPricePer1kTokens: model.outputPricePer1kTokens || 0,
     maxTokens: model.maxTokens || 4096,
     contextWindow: model.contextWindow || 128000,
-    isAvailable: model.isAvailable ?? true};
+    isAvailable: model.isAvailable ?? true});
 
   const handleSave = () => {
-    const dataToSave = { ...formData };
+    const dataToSave = { ...formData });
     if (model.id) {
       dataToSave.id = model.id;
     }
     onSave(dataToSave);
-  };
+  });
 
   const costPer1MTokensInput = formData.inputPricePer1kTokens * 1000;
   const costPer1MTokensOutput = formData.outputPricePer1kTokens * 1000;
@@ -101,7 +101,7 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
                       <SelectItem key={provider.value} value={provider.value}>
                         {provider.label}
                       </SelectItem>
-                    )}
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
