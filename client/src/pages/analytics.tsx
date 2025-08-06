@@ -113,6 +113,12 @@ export default function Analytics() {
     enabled: isAuthenticated,
   });
 
+  // Consolidated sales data
+  const { data: consolidatedOverview, isLoading: consolidatedLoading, refetch: refetchConsolidated } = useQuery({
+    queryKey: ["/api/analytics/consolidated-overview"],
+    enabled: isAuthenticated,
+  });
+
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       toast({
@@ -160,6 +166,36 @@ export default function Analytics() {
   // Format currency converted to USD for unified display  
   const formatConvertedCurrency = (amount: number): string => {
     return formatCurrency(amount, 'USD');
+  };
+
+  // Function to consolidate sales data
+  const consolidateSalesData = async () => {
+    try {
+      const response = await fetch('/api/analytics/consolidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        toast({
+          title: "Données consolidées",
+          description: `${result.processed} entrées traitées, ${result.updated} avec revenus`,
+        });
+        // Refresh consolidated data
+        refetchConsolidated();
+        // Refresh other analytics data
+        queryClient.invalidateQueries({ queryKey: ['/api/analytics'] });
+      } else {
+        throw new Error('Failed to consolidate data');
+      }
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de consolider les données",
+        variant: "destructive",
+      });
+    }
   };
 
   // Function to update exchange rates manually
@@ -210,6 +246,24 @@ export default function Analytics() {
             <p className="text-gray-600 mt-1">Analyse détaillée de vos performances KDP basée sur vos données réelles.</p>
           </div>
           <div className="flex items-center gap-3">
+            <Button 
+              onClick={consolidateSalesData}
+              variant="outline" 
+              size="sm"
+              className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+            >
+              <TrendingUp className="h-4 w-4 mr-2" />
+              Consolider les données
+            </Button>
+            <Button 
+              onClick={updateExchangeRates}
+              variant="outline" 
+              size="sm"
+              className="bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
+            >
+              <Globe className="h-4 w-4 mr-2" />
+              MAJ Taux de change
+            </Button>
             <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
               <SelectTrigger className="w-[140px]">
                 <SelectValue />
@@ -304,8 +358,9 @@ export default function Analytics() {
         </Card>
       </div>
 
-      <Tabs defaultValue="trends" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+      <Tabs defaultValue="consolidated" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="consolidated">Données Consolidées</TabsTrigger>
           <TabsTrigger value="trends">Tendances</TabsTrigger>
           <TabsTrigger value="currencies">Devises</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
@@ -313,6 +368,114 @@ export default function Analytics() {
           <TabsTrigger value="books">Top Livres</TabsTrigger>
           <TabsTrigger value="exchange">Taux de Change</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="consolidated" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Données consolidées */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-green-600" />
+                  Nouvelles Données Consolidées (Sans Duplication)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {consolidatedLoading ? (
+                  <div className="h-32 flex items-center justify-center">
+                    <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+                  </div>
+                ) : consolidatedOverview ? (
+                  <div className="space-y-4">
+                    <div className="text-3xl font-bold text-green-600">
+                      {formatCurrency(consolidatedOverview.totalRoyaltiesUSD, 'USD')}
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-600">Livres uniques:</span>
+                        <div className="font-semibold">{consolidatedOverview.uniqueBooks}</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Enregistrements:</span>
+                        <div className="font-semibold">{consolidatedOverview.totalRecords}</div>
+                      </div>
+                    </div>
+                    
+                    {/* Breakdown par devise */}
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-gray-900">Répartition par devise:</h4>
+                      {consolidatedOverview.salesByCurrency?.map((item: any, index: number) => (
+                        <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">{item.currency}</Badge>
+                            <span className="text-sm">{formatCurrency(item.amount, item.currency)}</span>
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            → {formatCurrency(item.amountUSD, 'USD')}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>Aucune donnée consolidée disponible.</p>
+                    <p className="text-sm mt-2">Cliquez sur "Consolider les données" pour commencer.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Comparaison avec les anciennes données */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-orange-600" />
+                  Anciennes Données (Avec Duplication)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {overviewLoading ? (
+                  <div className="h-32 flex items-center justify-center">
+                    <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+                  </div>
+                ) : overview ? (
+                  <div className="space-y-4">
+                    <div className="text-3xl font-bold text-orange-600">
+                      {overview.totalRoyaltiesUSD ? formatCurrency(overview.totalRoyaltiesUSD, 'USD') : 
+                       (mainCurrency ? formatCurrency(mainCurrency.amount, mainCurrency.currency) : '0 $')}
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-600">Livres uniques:</span>
+                        <div className="font-semibold">{overview.uniqueBooks}</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Enregistrements:</span>
+                        <div className="font-semibold">{overview.totalRecords?.toLocaleString('fr-FR')}</div>
+                      </div>
+                    </div>
+                    
+                    {/* Problème de duplication */}
+                    {consolidatedOverview && overview.totalRoyaltiesUSD && (
+                      <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                        <div className="text-sm font-medium text-orange-800">
+                          Différence détectée:
+                        </div>
+                        <div className="text-sm text-orange-700 mt-1">
+                          {formatCurrency(Math.abs((overview.totalRoyaltiesUSD || 0) - consolidatedOverview.totalRoyaltiesUSD), 'USD')} de duplication
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    Chargement des données...
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
         <TabsContent value="trends" className="space-y-6">
           <Card>

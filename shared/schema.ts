@@ -523,6 +523,39 @@ export const kdpImportData = pgTable("kdp_import_data", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Consolidated Sales Data - Table dédiée pour les données consolidées sans duplication
+export const consolidatedSalesData = pgTable("consolidated_sales_data", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  // Identifiants uniques
+  asin: varchar("asin").notNull(),
+  title: text("title").notNull(),
+  authorName: varchar("author_name"),
+  
+  // Données de vente par devise originale
+  currency: varchar("currency").notNull(), // Devise originale du fichier
+  totalRoyalty: decimal("total_royalty", { precision: 10, scale: 2 }).notNull().default("0.00"),
+  totalUnitsSold: integer("total_units_sold").default(0),
+  
+  // Conversion USD (champ séparé)
+  totalRoyaltyUSD: decimal("total_royalty_usd", { precision: 10, scale: 2 }).default("0.00"),
+  exchangeRate: decimal("exchange_rate", { precision: 8, scale: 4 }).default("1.0000"), // Taux utilisé pour la conversion
+  exchangeRateDate: date("exchange_rate_date"), // Date du taux de change
+  
+  // Métadonnées
+  marketplace: varchar("marketplace"),
+  format: formatEnum("format"),
+  lastUpdateDate: date("last_update_date"), // Dernière mise à jour des données
+  sourceImportIds: text("source_import_ids").array().default([]), // IDs des imports sources pour tracking
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  // Index unique sur ASIN + devise pour éviter les doublons
+  index("idx_consolidated_asin_currency").on(table.asin, table.currency, table.userId),
+]);
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   projects: many(projects),
@@ -536,6 +569,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   contentRecommendations: many(contentRecommendations),
   kdpImports: many(kdpImports),
   kdpImportData: many(kdpImportData),
+  consolidatedSalesData: many(consolidatedSalesData),
 }));
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
@@ -700,6 +734,13 @@ export const kdpImportDataRelations = relations(kdpImportData, ({ one }) => ({
   }),
 }));
 
+export const consolidatedSalesDataRelations = relations(consolidatedSalesData, ({ one }) => ({
+  user: one(users, {
+    fields: [consolidatedSalesData.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -778,6 +819,12 @@ export const insertSystemConfigSchema = createInsertSchema(systemConfig);
 export const insertAuditLogSchema = createInsertSchema(adminAuditLog).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertConsolidatedSalesDataSchema = createInsertSchema(consolidatedSalesData).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 // Types

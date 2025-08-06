@@ -18,6 +18,8 @@ import {
   aiPromptTemplates,
   kdpImports,
   kdpImportData,
+  consolidatedSalesData,
+  exchangeRates,
   type User,
   type UpsertUser,
   type Project,
@@ -59,6 +61,7 @@ import {
   type KdpImportData,
   type InsertKdpImportData,
   type KdpImportWithRelations,
+  insertConsolidatedSalesDataSchema,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, sum, count, like, or, isNotNull } from "drizzle-orm";
@@ -203,6 +206,10 @@ export interface IStorage {
   createKdpImportData(data: InsertKdpImportData[]): Promise<KdpImportData[]>;
   getKdpImportData(importId: string): Promise<KdpImportData[]>;
   deleteKdpImportData(importId: string): Promise<void>;
+  
+  // Consolidated Sales Data operations
+  consolidateKdpData(userId: string, exchangeRateService?: any): Promise<{ processed: number; updated: number }>;
+  getConsolidatedSalesOverview(userId: string): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2295,6 +2302,144 @@ export class DatabaseStorage implements IStorage {
     // Since trends don't have currency info, we'll assume they're in the user's primary currency
     // and convert to USD. For now, we'll return the basic trends as-is since they're aggregated.
     return basicTrends;
+  }
+
+  // NOUVELLES MÉTHODES : Consolidation des données de vente
+  async consolidateKdpData(userId: string, exchangeRateService?: any): Promise<{ processed: number; updated: number }> {
+    console.log(`[CONSOLIDATION] Démarrage de la consolidation pour l'utilisateur ${userId}`);
+    
+    // Récupérer toutes les données KDP pour cet utilisateur (par ASIN et devise)
+    const rawData = await db.select({
+      asin: kdpImportData.asin,
+      title: kdpImportData.title,
+      authorName: kdpImportData.authorName,
+      currency: kdpImportData.currency,
+      marketplace: kdpImportData.marketplace,
+      format: kdpImportData.format,
+      totalRoyalty: sql<number>`COALESCE(SUM(${kdpImportData.royalty}), 0)`,
+      totalUnits: sql<number>`COALESCE(SUM(${kdpImportData.netUnitsSold}), 0)`,
+      importIds: sql<string[]>`array_agg(DISTINCT ${kdpImportData.importId})`,
+    }).from(kdpImportData)
+    .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
+    .where(and(
+      eq(kdpImports.userId, userId),
+      eq(kdpImportData.isDuplicate, false),
+      // INCLURE uniquement les fichiers "payments" pour éviter les doublons
+      sql`${kdpImports.detectedType} = 'payments'`,
+      isNotNull(kdpImportData.asin),
+      isNotNull(kdpImportData.currency),
+      sql`${kdpImportData.asin} != ''`
+    ))
+    .groupBy(
+      kdpImportData.asin,
+      kdpImportData.title,
+      kdpImportData.authorName,
+      kdpImportData.currency,
+      kdpImportData.marketplace,
+      kdpImportData.format
+    )
+    .having(sql`SUM(${kdpImportData.royalty}) > 0`);
+
+    console.log(`[CONSOLIDATION] ${rawData.length} entrées uniques trouvées`);
+
+    let processed = 0;
+    let updated = 0;
+
+    for (const data of rawData) {
+      try {
+        // Calculer la conversion USD si un service de taux de change est disponible
+        let royaltyUSD = data.totalRoyalty;
+        let exchangeRate = 1.0;
+        let exchangeRateDate = new Date().toISOString().split('T')[0];
+
+        if (exchangeRateService && data.currency !== 'USD') {
+          try {
+            const rate = await exchangeRateService.getExchangeRate(data.currency, 'USD');
+            if (rate && rate > 0) {
+              royaltyUSD = data.totalRoyalty * rate;
+              exchangeRate = rate;
+            }
+          } catch (error) {
+            console.warn(`[CONSOLIDATION] Échec conversion ${data.currency} -> USD pour ${data.asin}:`, error);
+          }
+        }
+
+        // Upsert dans la table consolidée
+        await db
+          .insert(consolidatedSalesData)
+          .values({
+            userId,
+            asin: data.asin,
+            title: data.title || 'Titre inconnu',
+            authorName: data.authorName,
+            currency: data.currency,
+            totalRoyalty: data.totalRoyalty.toString(),
+            totalUnitsSold: data.totalUnits,
+            totalRoyaltyUSD: royaltyUSD.toString(),
+            exchangeRate: exchangeRate.toString(),
+            exchangeRateDate,
+            marketplace: data.marketplace,
+            format: data.format,
+            lastUpdateDate: new Date().toISOString().split('T')[0],
+            sourceImportIds: data.importIds,
+          })
+          .onConflictDoUpdate({
+            target: [consolidatedSalesData.asin, consolidatedSalesData.currency, consolidatedSalesData.userId],
+            set: {
+              totalRoyalty: data.totalRoyalty.toString(),
+              totalUnitsSold: data.totalUnits,
+              totalRoyaltyUSD: royaltyUSD.toString(),
+              exchangeRate: exchangeRate.toString(),
+              exchangeRateDate,
+              lastUpdateDate: new Date().toISOString().split('T')[0],
+              sourceImportIds: data.importIds,
+              updatedAt: new Date(),
+            }
+          });
+
+        processed++;
+        if (data.totalRoyalty > 0) updated++;
+      } catch (error) {
+        console.error(`[CONSOLIDATION] Erreur pour ${data.asin} (${data.currency}):`, error);
+      }
+    }
+
+    console.log(`[CONSOLIDATION] Terminé : ${processed} traités, ${updated} avec revenus`);
+    return { processed, updated };
+  }
+
+  async getConsolidatedSalesOverview(userId: string): Promise<any> {
+    // Récupérer les données consolidées par devise
+    const salesByCurrency = await db.select({
+      currency: consolidatedSalesData.currency,
+      totalRoyalty: sql<number>`COALESCE(SUM(${consolidatedSalesData.totalRoyalty}::decimal), 0)`,
+      totalRoyaltyUSD: sql<number>`COALESCE(SUM(${consolidatedSalesData.totalRoyaltyUSD}::decimal), 0)`,
+      totalUnits: sql<number>`COALESCE(SUM(${consolidatedSalesData.totalUnitsSold}), 0)`,
+      bookCount: sql<number>`COUNT(DISTINCT ${consolidatedSalesData.asin})`
+    }).from(consolidatedSalesData)
+    .where(eq(consolidatedSalesData.userId, userId))
+    .groupBy(consolidatedSalesData.currency);
+
+    // Statistiques générales
+    const totalStats = await db.select({
+      totalRecords: sql<number>`COUNT(*)`,
+      uniqueBooks: sql<number>`COUNT(DISTINCT ${consolidatedSalesData.asin})`,
+      totalUSDRevenue: sql<number>`COALESCE(SUM(${consolidatedSalesData.totalRoyaltyUSD}::decimal), 0)`,
+    }).from(consolidatedSalesData)
+    .where(eq(consolidatedSalesData.userId, userId));
+
+    return {
+      salesByCurrency: salesByCurrency.map(item => ({
+        currency: item.currency,
+        amount: Number(item.totalRoyalty),
+        amountUSD: Number(item.totalRoyaltyUSD),
+        transactions: Number(item.bookCount),
+        units: Number(item.totalUnits)
+      })),
+      totalRecords: Number(totalStats[0]?.totalRecords || 0),
+      uniqueBooks: Number(totalStats[0]?.uniqueBooks || 0),
+      totalRoyaltiesUSD: Number(totalStats[0]?.totalUSDRevenue || 0)
+    };
   }
 }
 

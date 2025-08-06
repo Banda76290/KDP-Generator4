@@ -2826,6 +2826,42 @@ Please respond with only a JSON object containing the translated fields. For key
     }
   });
 
+  // NOUVEAUX ENDPOINTS : Consolidation des données de vente
+  app.post("/api/analytics/consolidate", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      // Use the existing instance declared at the top of the function
+      const result = await storage.consolidateKdpData(userId, exchangeRateService);
+
+      res.json({
+        message: "Consolidation terminée avec succès",
+        ...result
+      });
+    } catch (error) {
+      console.error("Error consolidating KDP data:", error);
+      res.status(500).json({ message: "Failed to consolidate sales data" });
+    }
+  });
+
+  app.get("/api/analytics/consolidated-overview", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const overview = await storage.getConsolidatedSalesOverview(userId);
+      res.json(overview);
+    } catch (error) {
+      console.error("Error fetching consolidated sales overview:", error);
+      res.status(500).json({ message: "Failed to fetch consolidated overview" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
