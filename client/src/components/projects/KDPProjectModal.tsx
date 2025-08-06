@@ -96,16 +96,19 @@ export function KDPProjectModal({ isOpen, onClose }: KDPProjectModalProps) {
       };
       
       console.log('Sending project data:', projectData);
-      const project = await apiRequest("POST", "/api/projects", projectData);
+      const project = await apiRequest("/api/projects", { method: "POST", body: projectData });
       console.log('Received project response:', project);
       
       // Create contributors if any
       if (contributors.length > 0) {
         for (const contributor of contributors) {
-          await apiRequest("POST", "/api/contributors", {
-            projectId: project.id,
-            name: `${contributor.firstName} ${contributor.lastName}`.trim(),
-            role: contributor.role,
+          await apiRequest("/api/contributors", {
+            method: "POST",
+            body: {
+              projectId: project.id,
+              name: `${contributor.firstName} ${contributor.lastName}`.trim(),
+              role: contributor.role,
+            }
           });
         }
       }

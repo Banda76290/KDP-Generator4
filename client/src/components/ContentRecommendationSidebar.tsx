@@ -71,7 +71,7 @@ export default function ContentRecommendationSidebar({
   });
 
   const generateMutation = useMutation({
-    mutationFn: () => apiRequest('POST', `/api/books/${bookId}/recommendations/generate`),
+    mutationFn: () => apiRequest(`/api/books/${bookId}/recommendations/generate`, { method: 'POST' }),
     onSuccess: (newRecommendations) => {
       queryClient.setQueryData(['/api/books', bookId, 'recommendations'], newRecommendations);
       toast({
@@ -94,7 +94,7 @@ export default function ContentRecommendationSidebar({
       isUseful: boolean; 
       isApplied?: boolean; 
     }) => 
-      apiRequest('PUT', `/api/recommendations/${recommendationId}/feedback`, { isUseful, isApplied }),
+      apiRequest(`/api/recommendations/${recommendationId}/feedback`, { method: 'PUT', body: { isUseful, isApplied } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ 
         queryKey: ['/api/books', bookId, 'recommendations'] 
@@ -111,7 +111,7 @@ export default function ContentRecommendationSidebar({
 
   const deleteMutation = useMutation({
     mutationFn: (recommendationId: string) => 
-      apiRequest('DELETE', `/api/recommendations/${recommendationId}`),
+      apiRequest(`/api/recommendations/${recommendationId}`, { method: 'DELETE' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ 
         queryKey: ['/api/books', bookId, 'recommendations'] 
