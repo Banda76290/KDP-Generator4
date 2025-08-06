@@ -58,8 +58,8 @@ const MasterBooksPage: React.FC = () => {
     if (!masterBooks) return [];
     
     let filtered = masterBooks.filter(book => 
-      book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      book.asin.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (book.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (book.asin || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (book.authorName && book.authorName.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 

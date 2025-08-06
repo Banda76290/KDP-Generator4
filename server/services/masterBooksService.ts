@@ -74,22 +74,27 @@ export class MasterBooksService {
       return;
     }
 
-    // Récupérer toutes les données de cet import qui ont un ASIN
+    // Récupérer TOUTES les données de cet import (avec et sans ASIN)
     const importData = await db.select()
       .from(kdpImportData)
       .where(and(
         eq(kdpImportData.importId, importId),
         eq(kdpImportData.userId, userId),
-        sql`${kdpImportData.asin} IS NOT NULL AND ${kdpImportData.asin} != ''`
+        sql`${kdpImportData.royalty} IS NOT NULL AND ${kdpImportData.royalty} != 0`
       ));
 
-    console.log(`[MASTER_BOOKS] ${importData.length} enregistrements avec ASIN trouvés`);
+    console.log(`[MASTER_BOOKS] ${importData.length} enregistrements avec revenus trouvés`);
 
-    // Grouper par ASIN ET FORMAT pour gérer ebook/paperback/hardcover séparément
+    // Grouper par ASIN ET FORMAT (créer des clés uniques même pour les enregistrements sans ASIN)
     const asinFormatGroups = new Map<string, typeof importData>();
     
     importData.forEach(record => {
-      if (!record.asin) return;
+      // Créer une clé même pour les enregistrements sans ASIN
+      let asin = record.asin;
+      if (!asin || asin.trim() === '') {
+        // Créer un ASIN virtuel basé sur le titre ou un identifiant unique
+        asin = record.title ? `NO_ASIN_${record.title.substring(0, 20).replace(/[^a-zA-Z0-9]/g, '')}` : `NO_ASIN_${record.id}`;
+      }
       
       // Normaliser le format : utiliser 'ebook' par défaut pour les formats vides/inconnus
       let format = record.format;
@@ -97,7 +102,7 @@ export class MasterBooksService {
         format = 'ebook'; // Par défaut, supposer ebook pour les formats vides
       }
       
-      const key = `${record.asin}|${format}`;
+      const key = `${asin}|${format}`;
       
       if (!asinFormatGroups.has(key)) {
         asinFormatGroups.set(key, []);
@@ -352,7 +357,7 @@ export class MasterBooksService {
       userId,
       asin,
       isbn: firstRecord.isbn,
-      title: firstRecord.title,
+      title: firstRecord.title || `Revenus sans titre - ${asin}`,
       format: format as any,
       authorName: firstRecord.authorName,
       firstSaleDate: aggregations.firstSaleDate?.toISOString().split('T')[0],
