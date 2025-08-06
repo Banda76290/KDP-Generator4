@@ -72,7 +72,7 @@ export default function AdminPrompts() {
   // Create prompt mutation
   const createMutation = useMutation({
     mutationFn: (data: InsertAiPromptTemplate) => 
-      apiRequest('POST', '/api/admin/prompts', data),
+      apiRequest('/api/admin/prompts', { method: 'POST', body: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/prompts'] });
       setIsDialogOpen(false);
@@ -94,7 +94,7 @@ export default function AdminPrompts() {
   // Update prompt mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<AiPromptTemplate> }) => 
-      apiRequest('PUT', `/api/admin/prompts/${id}`, data),
+      apiRequest(`/api/admin/prompts/${id}`, { method: 'PUT', body: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/prompts'] });
       setIsDialogOpen(false);
@@ -117,7 +117,7 @@ export default function AdminPrompts() {
   // Delete prompt mutation
   const deleteMutation = useMutation({
     mutationFn: (id: string) => 
-      apiRequest('DELETE', `/api/admin/prompts/${id}`),
+      apiRequest(`/api/admin/prompts/${id}`, { method: 'DELETE' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/prompts'] });
       toast({
