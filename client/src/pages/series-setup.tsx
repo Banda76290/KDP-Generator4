@@ -497,7 +497,7 @@ export default function SeriesSetupPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {supportedLanguages.map((lang) => (
-                      <SelectItem key={lang.value)} value={lang.value}>
+                      <SelectItem key={lang.value} value={lang.value}>
                         {lang.label}
                       </SelectItem>
                     ))}

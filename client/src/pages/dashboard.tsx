@@ -19,9 +19,11 @@ export default function Dashboard() {
   // Redirect to home if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      toast.error({
+      toast({
         title: "Unauthorized",
-        description: "You are logged out. Logging in again...",)};
+        description: "You are logged out. Logging in again...",
+        variant: "destructive",
+      });
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);

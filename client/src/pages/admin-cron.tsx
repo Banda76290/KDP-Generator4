@@ -50,14 +50,17 @@ export default function AdminCron() {
     onSuccess: () => {
       toast({
         title: "Cron Job Updated",
-        description: "The scheduled task has been updated successfully.",)};
+        description: "The scheduled task has been updated successfully.",
+        variant: "destructive",
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/jobs"] };
     },
     onError: () => {
       toast({
         title: "Error",
         description: "Failed to update the scheduled task.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     },
   });
 
@@ -71,7 +74,9 @@ export default function AdminCron() {
     onSuccess: () => {
       toast({
         title: "Job Started",
-        description: "The scheduled task has been started manually.",)};
+        description: "The scheduled task has been started manually.",
+        variant: "destructive",
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/jobs"] };
       queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/logs"] };
     },
@@ -79,7 +84,8 @@ export default function AdminCron() {
       toast({
         title: "Error",
         description: "Failed to start the scheduled task.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     },
   });
 
@@ -146,7 +152,7 @@ export default function AdminCron() {
               {isLoading ? (
                 <div className="space-y-4">
                   {[...Array(3)].map((_, i) => (
-                    <div key={i)} className="animate-pulse">
+                    <div key={i} className="animate-pulse">
                       <div className="h-4 bg-muted rounded w-1/3 mb-2"></div>
                       <div className="h-8 bg-muted rounded mb-2"></div>
                       <div className="h-3 bg-muted rounded w-2/3"></div>
@@ -156,7 +162,7 @@ export default function AdminCron() {
               ) : cronJobs && Array.isArray(cronJobs) && cronJobs.length > 0 ? (
                 <div className="space-y-4">
                   {cronJobs.map((job: CronJob) => (
-                    <div key={job.id)} className="border rounded-lg p-4">
+                    <div key={job.id} className="border rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
                           { getStatusIcon(job.status)}
@@ -244,7 +250,7 @@ export default function AdminCron() {
               {cronLogs && Array.isArray(cronLogs) && cronLogs.length > 0 ? (
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {cronLogs.map((log: any, index: number) => (
-                    <div key={index)} className="flex items-start gap-3 p-3 bg-muted rounded-lg">
+                    <div key={index} className="flex items-start gap-3 p-3 bg-muted rounded-lg">
                       <div className="flex-shrink-0 mt-1">
                         { log.level === 'error' ? (
                           <AlertCircle className="h-4 w-4 text-red-500" />

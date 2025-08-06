@@ -83,7 +83,8 @@ export default function ContentRecommendationSidebar({
       toast({
         title: "Generation Failed",
         description: error.message || "Failed to generate recommendations",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     }
   });
 
@@ -102,7 +103,8 @@ export default function ContentRecommendationSidebar({
       toast({
         title: "Feedback Failed",
         description: error.message || "Failed to submit feedback",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     }
   });
 
@@ -121,7 +123,8 @@ export default function ContentRecommendationSidebar({
       toast({
         title: "Delete Failed",
         description: error.message || "Failed to delete recommendation",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     }
   });
 
@@ -220,7 +223,7 @@ export default function ContentRecommendationSidebar({
           </Card>)}
 
         {(recommendations as ContentRecommendation[]).map((recommendation: ContentRecommendation) => (
-          <Card key={recommendation.id)} className="border-gray-200">
+          <Card key={recommendation.id} className="border-gray-200">
             <Collapsible
               open={ expandedItems.has(recommendation.id)}
               onOpenChange={ () => toggleExpanded(recommendation.id)}

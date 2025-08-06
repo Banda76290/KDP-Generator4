@@ -520,7 +520,7 @@ export default function AuthorViewPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {LANGUAGES.map((lang) => (
-                      <SelectItem key={lang.value)} value={lang.value}>
+                      <SelectItem key={lang.value} value={lang.value}>
                         {lang.label}
                       </SelectItem>
                     ))}
@@ -660,7 +660,7 @@ export default function AuthorViewPage() {
                 ) : (
                   <div className="space-y-4">
                     {authorProjects.map((project: ProjectWithRelations) => (
-                      <div key={project.id)} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div key={project.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <h4 className="font-semibold text-lg">{project.title}</h4>
@@ -699,7 +699,7 @@ export default function AuthorViewPage() {
                 ) : (
                   <div className="space-y-4">
                     {authorBooks.map((book: Book) => (
-                      <div key={book.id)} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div key={book.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <h4 className="font-semibold text-lg">{book.title}</h4>

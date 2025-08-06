@@ -255,62 +255,8 @@ export default function EditBook() {
     enabled: !isCreating, // Only fetch if we're not creating (i.e., if we have a bookId)
     refetchOnMount: true, // Force refresh on mount
     refetchOnWindowFocus: true, // Force refresh when window gets focus
-    staleTime: 0, // Always consider data stale for immediate updates
+    staleTime: 0,
   });
-  
-  console.log('Query State:', { book, bookLoading, error, isCreating };
-
-  const form = useForm<BookFormData>({
-    resolver: zodResolver(bookFormSchema),
-    defaultValues: {
-      title: "",
-      subtitle: "",
-      description: "",
-      language: "English",
-      authorPrefix: "",
-      authorFirstName: "",
-      authorMiddleName: "",
-      authorLastName: "",
-      authorSuffix: "",
-      publishingRights: "owned",
-      hasExplicitContent: false,
-      primaryMarketplace: "Amazon.com",
-      isLowContentBook: false,
-      isLargePrintBook: false,
-      previouslyPublished: false,
-      releaseOption: "immediate",
-      useAI: false,
-      format: "ebook",
-      status: "draft",
-      projectId: preSelectedProjectId || "",
-      categories: [],
-      keywords: [],
-    },
-  });
-
-  // Add CSS for the description editor
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-      #description-editor:empty:before {
-        content: attr(data-placeholder);
-        color: #9ca3af;
-        pointer-events: none;
-      }
-      #description-editor h4 { font-size: 1.25rem; font-weight: bold; margin: 0.5rem 0; }
-      #description-editor h5 { font-size: 1.125rem; font-weight: bold; margin: 0.5rem 0; }
-      #description-editor h6 { font-size: 1rem; font-weight: bold; margin: 0.5rem 0; }
-      #description-editor ul { list-style-type: disc; margin-left: 1.5rem; }
-      #description-editor ol { list-style-type: decimal; margin-left: 1.5rem; }
-      #description-editor li { margin: 0.25rem 0; }
-      #description-editor a { color: #3b82f6; text-decoration: underline; }
-      #description-editor p { margin: 0.5rem 0; }
-    `;
-    document.head.appendChild(style);
-    
-    return () => {
-      document.head.removeChild(style);
-    };
   }, []);
 
   // Save current form state to session storage (for navigation to series creation only)
@@ -549,7 +495,8 @@ export default function EditBook() {
           firstName: contrib.firstName,
           middleName: contrib.middleName || "",
           lastName: contrib.lastName,
-          suffix: contrib.suffix || "",)});
+          suffix: contrib.suffix || ""
+      }));
         setContributors(loadedContributors);
       } else {
         setContributors([]);
@@ -582,7 +529,7 @@ export default function EditBook() {
       console.log(isCreating ? 'Creating book data:' : 'Updating book data:', formattedData);
       console.log('ProjectId being sent:', formattedData.projectId);
       
-      if (isCreating) { const createdBook = await apiRequest(`/api/books`, { method: "POST", body: JSON.stringify(formattedData)};
+      if (isCreating) { const createdBook = await apiRequest(`/api/books`, { method: "POST", body: JSON.stringify(formattedData)});
         console.log('Received created book response:', createdBook);
         
         // Save contributors after book creation
@@ -604,7 +551,7 @@ export default function EditBook() {
         
         return { book: createdBook, shouldNavigate: data.shouldNavigate, nextTab: data.nextTab };
       } else {
-        const updatedBook = await apiRequest(`/api/books/${bookId)}`, { method: "PATCH", body: JSON.stringify(formattedData)};
+        const updatedBook = await apiRequest(`/api/books/${bookId)}`, { method: "PATCH", body: JSON.stringify(formattedData)});
         console.log('Received updated book response:', updatedBook);
         
         // Update contributors - first delete existing ones, then add new ones
@@ -638,7 +585,7 @@ export default function EditBook() {
                 suffix: contributor.suffix || null,
               };
               console.log('Sending contributor data:', contributorData);
-              await apiRequest("/api/contributors", { method: "POST", body: JSON.stringify(contributorData)};
+              await apiRequest("/api/contributors", { method: "POST", body: JSON.stringify(contributorData)});
             }
           }
         }
@@ -659,7 +606,7 @@ export default function EditBook() {
         queryClient.invalidateQueries({ queryKey: [`/api/books/${bookId)}`] });
       }
       
-      toast.success({
+      toast({
         title: isCreating ? "Book Created" : "Book Updated",
         description: `Your book has been ${isCreating ? 'created' : 'updated'} successfully.`,
       });
@@ -709,7 +656,8 @@ export default function EditBook() {
       toast({
         title: "Error",
         description: error.message || "Failed to delete book",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     },
   });
 
@@ -943,7 +891,7 @@ export default function EditBook() {
                     </SelectTrigger>
                     <SelectContent>
                       {(projects as any[]).map((project: any) => (
-                        <SelectItem key={project.id)} value={project.id}>{project.name}</SelectItem>
+                        <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -972,7 +920,7 @@ export default function EditBook() {
                       </SelectTrigger>
                       <SelectContent>
                         {languages.map((lang) => (
-                          <SelectItem key={lang)} value={lang}>{lang}</SelectItem>
+                          <SelectItem key={lang} value={lang}>{lang}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -1121,7 +1069,7 @@ export default function EditBook() {
                               onClick={() => {
                                 form.setValue("seriesTitle", "");
                                 form.setValue("seriesNumber", null);
-                                toast.success({
+                                toast({
                                   title: "Livre retiré de la série",
                                   description: "Le livre a été retiré de la série avec succès.",
                                 )};
@@ -1155,7 +1103,7 @@ export default function EditBook() {
                           <SelectContent>
                             {userSeries.length > 0 ? (
                               userSeries.map((series: any) => (
-                                <SelectItem key={series.id)} value={series.title}>
+                                <SelectItem key={series.id} value={series.title}>
                                   {series.title}
                                 </SelectItem>
                               ))
@@ -1291,7 +1239,7 @@ export default function EditBook() {
                       <Label className="font-medium text-[14px]">Contributors <span className="text-sm font-normal text-gray-500">(Optional)</span></Label>
                   
                   {contributors.map((contributor, index) => (
-                    <div key={contributor.id)} className="grid grid-cols-7 gap-3 mt-2 items-center">
+                    <div key={contributor.id} className="grid grid-cols-7 gap-3 mt-2 items-center">
                       <Select 
                         value={contributor.role} 
                         onValueChange={ (value) => updateContributor(contributor.id, 'role', value)}
@@ -1512,7 +1460,7 @@ export default function EditBook() {
                     </p>
                     <div className="flex flex-wrap gap-2 mb-2">
                       {categories.map((category) => (
-                        <Badge key={category)} variant="secondary" className="flex items-center gap-1">
+                        <Badge key={category} variant="secondary" className="flex items-center gap-1">
                           {category}
                           <X 
                             className="w-3 h-3 cursor-pointer" 
@@ -1557,7 +1505,7 @@ export default function EditBook() {
                     </p>
                     <div className="flex flex-wrap gap-2 mb-2">
                       {keywords.map((keyword) => (
-                        <Badge key={keyword)} variant="secondary" className="flex items-center gap-1">
+                        <Badge key={keyword} variant="secondary" className="flex items-center gap-1">
                           {keyword}
                           <X 
                             className="w-3 h-3 cursor-pointer" 
@@ -1671,7 +1619,7 @@ export default function EditBook() {
                     </SelectTrigger>
                     <SelectContent>
                       {marketplaces.map((marketplace) => (
-                        <SelectItem key={marketplace)} value={marketplace}>{marketplace}</SelectItem>
+                        <SelectItem key={marketplace} value={marketplace}>{marketplace}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -1768,7 +1716,7 @@ export default function EditBook() {
                   </SelectTrigger>
                   <SelectContent>
                     {marketplaces.map((marketplace) => (
-                      <SelectItem key={marketplace)} value={marketplace}>{marketplace}</SelectItem>
+                      <SelectItem key={marketplace} value={marketplace}>{marketplace}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

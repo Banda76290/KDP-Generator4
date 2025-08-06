@@ -26,7 +26,8 @@ export default function AdminDashboard() {
       toast({
         title: "Accès refusé",
         description: "Vous n'avez pas les permissions d'administrateur.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
       setTimeout(() => {
         window.location.href = "/";
       }, 500);
@@ -115,7 +116,7 @@ export default function AdminDashboard() {
         {adminCards.map((card, index) => {
           const IconComponent = card.icon;
           return (
-            <Card key={index)} className="border-l-4 border-l-primary/20">
+            <Card key={index} className="border-l-4 border-l-primary/20">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   {card.title}

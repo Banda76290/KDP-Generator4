@@ -98,7 +98,7 @@ export default function ModelConfigModal({ model, onSave, onClose, isLoading }: 
                   </SelectTrigger>
                   <SelectContent>
                     {PROVIDERS.map(provider => (
-                      <SelectItem key={provider.value)} value={provider.value}>
+                      <SelectItem key={provider.value} value={provider.value}>
                         {provider.label}
                       </SelectItem>
                     ))}

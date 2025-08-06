@@ -172,12 +172,15 @@ export default function AdminSystem() {
       await navigator.clipboard.writeText(logs.join('\n'));
       toast({
         title: "Logs copiés",
-        description: "Les logs ont été copiés dans le presse-papiers.",)};
+        description: "Les logs ont été copiés dans le presse-papiers.",
+        variant: "destructive",
+      });
     } catch (error) {
       toast({
         title: "Erreur de copie",
         description: "Impossible de copier les logs.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     }
   };
 
@@ -187,7 +190,8 @@ export default function AdminSystem() {
       toast({
         title: "Accès refusé",
         description: "Vous n'avez pas les permissions d'administrateur.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
       setTimeout(() => {
         window.location.href = "/";
       }, 500);
@@ -338,7 +342,8 @@ export default function AdminSystem() {
       toast({
         title: "Erreur d'export",
         description: error.message || "Impossible d'exporter les catégories.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     },
   });
 
@@ -392,7 +397,8 @@ export default function AdminSystem() {
       toast({
         title: "URL manquante",
         description: "Veuillez saisir l'URL de production.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
       return;
     }
 
@@ -1016,7 +1022,8 @@ export default function AdminSystem() {
                       toast({
                         title: "Erreur de récupération",
                         description: "Impossible de récupérer les statistiques.",
-                        variant: "destructive",)};
+                        variant: "destructive"
+      });
                     }
                   }}
                 >
@@ -1181,7 +1188,7 @@ export default function AdminSystem() {
               ) : (
                 <div className="space-y-1">
                   {logs.map((log, index) => (
-                    <div key={index)} className="break-all hover:bg-gray-800 px-1 rounded">
+                    <div key={index} className="break-all hover:bg-gray-800 px-1 rounded">
                       {log}
                     </div>
                   ))}

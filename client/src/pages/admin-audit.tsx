@@ -40,7 +40,8 @@ export default function AdminAudit() {
       toast({
         title: "Accès refusé",
         description: "Vous n'avez pas les permissions d'administrateur.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
       setTimeout(() => {
         window.location.href = "/";
       }, 500);
@@ -154,7 +155,7 @@ export default function AdminAudit() {
                   </TableHeader>
                   <TableBody>
                     {auditData.logs.map((log) => (
-                      <TableRow key={log.id)}>
+                      <TableRow key={log.id}>
                         <TableCell>
                           <div className="text-sm">
                             <div>{ format(new Date(log.createdAt), "dd/MM/yyyy")}</div>

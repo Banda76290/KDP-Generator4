@@ -164,7 +164,8 @@ export default function SeriesEditPage() {
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to update series. Please try again.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     }
   };
 

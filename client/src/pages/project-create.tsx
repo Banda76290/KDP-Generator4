@@ -94,7 +94,7 @@ export default function ProjectCreate() {
       };
       
       console.log('Sending project data:', projectData);
-      const project = await apiRequest("/api/projects", { method: "POST", body: JSON.stringify(projectData)};
+      const project = await apiRequest("/api/projects", { method: "POST", body: JSON.stringify(projectData)});
       console.log('Received project response:', project);
       
       // Create contributors if any
@@ -133,7 +133,8 @@ export default function ProjectCreate() {
       toast({
         title: "Error",
         description: error.message || "Failed to create project",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     },
   });
 
@@ -223,7 +224,7 @@ export default function ProjectCreate() {
                             </SelectTrigger>
                             <SelectContent>
                               {languages.map((lang) => (
-                                <SelectItem key={lang)} value={lang}>{lang}</SelectItem>
+                                <SelectItem key={lang} value={lang}>{lang}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -345,7 +346,7 @@ export default function ProjectCreate() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         {contributors.map((contributor) => (
-                          <div key={contributor.id)} className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                          <div key={contributor.id} className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded">
                             <Select 
                               value={contributor.role} 
                               onValueChange={ (value) => updateContributor(contributor.id, "role", value)}
@@ -355,7 +356,7 @@ export default function ProjectCreate() {
                               </SelectTrigger>
                               <SelectContent>
                                 {contributorRoles.map((role) => (
-                                  <SelectItem key={role)} value={role}>{role}</SelectItem>
+                                  <SelectItem key={role} value={role}>{role}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
@@ -492,7 +493,7 @@ export default function ProjectCreate() {
                                 </SelectTrigger>
                                 <SelectContent>
                                   {readingAges.map((age) => (
-                                    <SelectItem key={age)} value={age}>{age}</SelectItem>
+                                    <SelectItem key={age} value={age}>{age}</SelectItem>
                                   ))}
                                 </SelectContent>
                               </Select>
@@ -505,7 +506,7 @@ export default function ProjectCreate() {
                                 </SelectTrigger>
                                 <SelectContent>
                                   {readingAges.map((age) => (
-                                    <SelectItem key={age)} value={age}>{age}</SelectItem>
+                                    <SelectItem key={age} value={age}>{age}</SelectItem>
                                   ))}
                                 </SelectContent>
                               </Select>
@@ -530,7 +531,7 @@ export default function ProjectCreate() {
                           </SelectTrigger>
                           <SelectContent>
                             {marketplaces.map((marketplace) => (
-                              <SelectItem key={marketplace)} value={marketplace}>{marketplace}</SelectItem>
+                              <SelectItem key={marketplace} value={marketplace}>{marketplace}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -548,7 +549,7 @@ export default function ProjectCreate() {
                       <CardContent className="space-y-4">
                         <div className="flex flex-wrap gap-2">
                           {categories.map((category) => (
-                            <Badge key={category)} variant="secondary" className="flex items-center gap-1">
+                            <Badge key={category} variant="secondary" className="flex items-center gap-1">
                               {category}
                               <X
                                 className="h-3 w-3 cursor-pointer"
@@ -605,7 +606,7 @@ export default function ProjectCreate() {
                       <CardContent className="space-y-4">
                         <div className="flex flex-wrap gap-2">
                           {keywords.map((keyword) => (
-                            <Badge key={keyword)} variant="secondary" className="flex items-center gap-1">
+                            <Badge key={keyword} variant="secondary" className="flex items-center gap-1">
                               {keyword}
                               <X
                                 className="h-3 w-3 cursor-pointer"
@@ -726,7 +727,7 @@ export default function ProjectCreate() {
                       <CardContent>
                         <div className="space-y-2">
                           {(["ebook", "paperback", "hardcover"] as const).map((format) => (
-                            <div key={format)} className="flex items-center space-x-2">
+                            <div key={format} className="flex items-center space-x-2">
                               <Checkbox
                                 id={format}
                                 checked={ form.watch("formats")?.includes(format)}

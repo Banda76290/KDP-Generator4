@@ -35,7 +35,8 @@ export default function AdminBlogCategories() {
       toast({
         title: "Accès refusé",
         description: "Vous n'avez pas les permissions d'administrateur.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
       setTimeout(() => {
         window.location.href = "/";
       }, 500);
@@ -49,7 +50,7 @@ export default function AdminBlogCategories() {
   };
 
   const createCategoryMutation = useMutation({ mutationFn: async (categoryData: typeof formData) => {
-      return await apiRequest("/api/admin/blog/categories", { method: "POST", body: JSON.stringify(categoryData)};
+      return await apiRequest("/api/admin/blog/categories", { method: "POST", body: JSON.stringify(categoryData)});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/categories"])};
@@ -64,13 +65,14 @@ export default function AdminBlogCategories() {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de créer la catégorie.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     },
   });
 
   const updateCategoryMutation = useMutation({
     mutationFn: async ({ id, data)}: { id: string; data: typeof formData } => {
-      return await apiRequest(`/api/admin/blog/categories/${id)}`, { method: "PUT", body: JSON.stringify(data)};
+      return await apiRequest(`/api/admin/blog/categories/${id)}`, { method: "PUT", body: JSON.stringify(data)});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/categories"])};
@@ -86,7 +88,8 @@ export default function AdminBlogCategories() {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de mettre à jour la catégorie.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     },
   });
 
@@ -105,7 +108,8 @@ export default function AdminBlogCategories() {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de supprimer la catégorie.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     },
   });
 
@@ -116,7 +120,8 @@ export default function AdminBlogCategories() {
       toast({
         title: "Erreur",
         description: "Le nom et le slug sont obligatoires.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
       return;
     }
 
@@ -133,7 +138,8 @@ export default function AdminBlogCategories() {
       name: category.name,
       slug: category.slug,
       description: category.description || "",
-      color: category.color || "#3B82F6",)};
+      color: category.color || "#3B82F6"
+      });
     setIsDialogOpen(true);
   };
 
@@ -216,7 +222,7 @@ export default function AdminBlogCategories() {
                 </TableHeader>
                 <TableBody>
                   {categories.map((category) => (
-                    <TableRow key={category.id)}>
+                    <TableRow key={category.id}>
                       <TableCell>
                         <div className="font-medium">{category.name}</div>
                       </TableCell>

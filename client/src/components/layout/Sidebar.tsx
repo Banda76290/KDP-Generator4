@@ -20,7 +20,7 @@ export default function Sidebar() {
         {navigation.map((item) => {
           const isActive = location === item.href;
           return (
-            <Link key={item.name)} href={item.href}>
+            <Link key={item.name} href={item.href}>
               <span
                 className={ cn(
                   "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",
@@ -56,7 +56,7 @@ export default function Sidebar() {
             {adminNavigation.map((item) => {
               const isActive = location === item.href;
               return (
-                <Link key={item.name)} href={item.href}>
+                <Link key={item.name} href={item.href}>
                   <span
                     className={ cn(
                       "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",
@@ -88,7 +88,7 @@ export default function Sidebar() {
               {blogAdminNavigation.map((item) => {
                 const isActive = location === item.href;
                 return (
-                  <Link key={item.name)} href={item.href}>
+                  <Link key={item.name} href={item.href}>
                     <span
                       className={ cn(
                         "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer",
@@ -113,7 +113,7 @@ export default function Sidebar() {
           {accountNavigation.map((item) => {
             const isActive = location === item.href;
             return (
-              <Link key={item.name)} href={item.href}>
+              <Link key={item.name} href={item.href}>
                 <span
                   className={ cn(
                     "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",

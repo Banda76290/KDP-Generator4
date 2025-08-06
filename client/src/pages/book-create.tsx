@@ -111,7 +111,7 @@ export default function CreateBook() {
       };
       
       console.log('Creating book data:', bookData);
-      const book = await apiRequest("/api/books", { method: "POST", body: JSON.stringify(bookData)};
+      const book = await apiRequest("/api/books", { method: "POST", body: JSON.stringify(bookData)});
       console.log('Received book response:', book);
       
       // Create contributors if any
@@ -129,7 +129,7 @@ export default function CreateBook() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/books"])};
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
-      toast.success({
+      toast({
         title: "Book Created",
         description: "Your book has been created successfully.",
       };
@@ -137,9 +137,10 @@ export default function CreateBook() {
     },
     onError: (error) => {
       console.error('Book creation error:', error);
-      toast.error({
+      toast({
         title: "Error",
-        description: error.message || "Failed to create book",)};
+        description: error.message || "Failed to create book"
+      });
     },
   });
 
@@ -246,7 +247,7 @@ export default function CreateBook() {
                           </SelectTrigger>
                           <SelectContent>
                             {(projects as any[]).map((project: any) => (
-                              <SelectItem key={project.id)} value={project.id}>
+                              <SelectItem key={project.id} value={project.id}>
                                 {project.name}
                               </SelectItem>
                             ))}
@@ -301,7 +302,7 @@ export default function CreateBook() {
                             </SelectTrigger>
                             <SelectContent>
                               {languages.map((lang) => (
-                                <SelectItem key={lang)} value={lang}>{lang}</SelectItem>
+                                <SelectItem key={lang} value={lang}>{lang}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -378,7 +379,7 @@ export default function CreateBook() {
                               </SelectTrigger>
                               <SelectContent>
                                 {authors.map((author) => (
-                                  <SelectItem key={author.id)} value={author.id}>
+                                  <SelectItem key={author.id} value={author.id}>
                                     {author.fullName}
                                   </SelectItem>
                                 ))}
@@ -432,7 +433,7 @@ export default function CreateBook() {
                       <CardContent className="space-y-4">
                         <div className="flex flex-wrap gap-2">
                           {categories.map((category) => (
-                            <Badge key={category)} variant="secondary" className="flex items-center gap-1">
+                            <Badge key={category} variant="secondary" className="flex items-center gap-1">
                               {category}
                               <X
                                 className="h-3 w-3 cursor-pointer"
@@ -468,7 +469,7 @@ export default function CreateBook() {
                       <CardContent className="space-y-4">
                         <div className="flex flex-wrap gap-2">
                           {keywords.map((keyword) => (
-                            <Badge key={keyword)} variant="secondary" className="flex items-center gap-1">
+                            <Badge key={keyword} variant="secondary" className="flex items-center gap-1">
                               {keyword}
                               <X
                                 className="h-3 w-3 cursor-pointer"

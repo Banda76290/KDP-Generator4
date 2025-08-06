@@ -24,7 +24,8 @@ import type { ProjectWithRelations } from "@shared/schema";
 const projectFormSchema = insertProjectSchema.extend({
   contributors: z.array(z.object({
     name: z.string().min(1, "Name is required"),
-    role: z.string().min(1, "Role is required"),)}).optional(),
+    role: z.string().min(1, "Role is required")
+      })).optional(),
   formats: z.array(z.enum(["ebook", "paperback", "hardcover"])).min(1, "Select at least one format"),
 });
 
@@ -85,18 +86,21 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
         aiPrompt: "",
         aiContentType: "",
         formats: [],
-        contributors: [],)};
+        contributors: []
+      });
       setUseAI(false);
     }
   }, [project, form, isOpen]);
 
   const createMutation = useMutation({ mutationFn: async (data: ProjectFormData) => {
-      return await apiRequest("/api/projects", { method: "POST", body: JSON.stringify(data)};
+      return await apiRequest("/api/projects", { method: "POST", body: JSON.stringify(data)});
     },
     onSuccess: async () => {
       toast({
         title: "Project Created",
-        description: "Your project has been created successfully",)};
+        description: "Your project has been created successfully",
+        variant: "destructive",
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] };
       onClose();
@@ -106,7 +110,8 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
         toast({
           title: "Unauthorized",
           description: "You are logged out. Logging in again...",
-          variant: "destructive",)};
+          variant: "destructive"
+      });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
@@ -122,12 +127,14 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
 
   const updateMutation = useMutation({
     mutationFn: async (data: ProjectFormData) => {
-      return await apiRequest(`/api/projects/${project?.id)}`, { method: "PUT", body: JSON.stringify(data)};
+      return await apiRequest(`/api/projects/${project?.id)}`, { method: "PUT", body: JSON.stringify(data)});
     },
     onSuccess: async () => {
       toast({
         title: "Project Updated",
-        description: "Your project has been updated successfully",)};
+        description: "Your project has been updated successfully",
+        variant: "destructive",
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] };
       onClose();
@@ -137,7 +144,8 @@ export default function ProjectModal({ isOpen, onClose, project }: ProjectModalP
         toast({
           title: "Unauthorized",
           description: "You are logged out. Logging in again...",
-          variant: "destructive",)};
+          variant: "destructive"
+      });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);

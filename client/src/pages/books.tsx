@@ -44,9 +44,11 @@ export default function BooksPage() {
   // Redirect to home if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      toast.error({
+      toast({
         title: "Unauthorized",
-        description: "You are logged out. Logging in again...",)};
+        description: "You are logged out. Logging in again...",
+        variant: "destructive",
+      });
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
@@ -131,92 +133,97 @@ function BooksContent() {
   // Fetch all books
   const { data: books = [], isLoading: booksLoading } = useQuery<Book[]>({
     queryKey: ["/api/books"],
-    staleTime: 0, // Always refetch to get latest ISBN changes
-  };
-
-  // Fetch all projects for assignment dropdown
-  const { data: projects = [] } = useQuery<Project[]>({
-    queryKey: ["/api/projects"],
-  };
+    staleTime: 0,
+  });
 
   // Mutation for assigning book to project
   const assignBookMutation = useMutation({
-    mutationFn: async ({ bookId, projectId)}: { bookId: string; projectId: string } => {
-      return apiRequest(`/api/books/${bookId)}`, { method: "PATCH", body: JSON.stringify({ projectId)} });
+    mutationFn: async ({ bookId, projectId }: { bookId: string; projectId: string }) => {
+      return apiRequest(`/api/books/${bookId}`, { method: "PATCH", body: JSON.stringify({ projectId }) });
     },
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Book assigned to project successfully",)};
-      queryClient.invalidateQueries({ queryKey: ["/api/books"] };
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
+        description: "Book assigned to project successfully",
+        variant: "destructive",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
     },
     onError: (error: Error) => {
       toast({
         title: "Error",
         description: error.message,
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     },
   });
 
   // Mutation for duplicating book
   const duplicateBookMutation = useMutation({
     mutationFn: async (bookId: string) => {
-      return apiRequest(`/api/books/${bookId)}/duplicate`, { method: "POST" };
+      return apiRequest(`/api/books/${bookId}/duplicate`, { method: "POST" });
     },
     onSuccess: () => {
-      toast.success({
+      toast({
         title: "Success",
-        description: "Book duplicated successfully",)};
-      queryClient.invalidateQueries({ queryKey: ["/api/books"] };
+        description: "Book duplicated successfully",
+        variant: "destructive",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
     },
     onError: (error: Error) => {
-      toast.error({
+      toast({
         title: "Error",
-        description: error.message,)};
+        description: error.message
+      });
     },
   });
 
   // Mutation for deleting book
   const deleteBookMutation = useMutation({
     mutationFn: async (bookId: string) => {
-      return apiRequest(`/api/books/${bookId)}`, { method: "DELETE" };
+      return apiRequest(`/api/books/${bookId}`, { method: "DELETE" });
     },
     onSuccess: () => {
-      toast.success({
+      toast({
         title: "Success",
-        description: "Book deleted successfully",)};
-      queryClient.invalidateQueries({ queryKey: ["/api/books"] };
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
+        description: "Book deleted successfully",
+        variant: "destructive",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
     },
     onError: (error: Error) => {
-      toast.error({
+      toast({
         title: "Error",
-        description: error.message,)};
+        description: error.message
+      });
     },
   });
 
   // Mutation for translating book
   const translateBookMutation = useMutation({
     mutationFn: async ({ bookId, targetLanguage)}: { bookId: string; targetLanguage: string } => {
-      return apiRequest(`/api/books/${bookId)}/translate`, { 
+      return apiRequest(`/api/books/${bookId}/translate`, { 
         method: "POST", 
         body: JSON.stringify({ targetLanguage)} 
       });
     },
     onSuccess: (data: any) => {
-      toast.success({
+      toast({
         title: "Translation Complete",
         description: `Book successfully translated to ${data.targetLanguage)}`,
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/books"] };
+      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
       setBookToTranslate(null);
       setSelectedLanguage("");
     },
     onError: (error: Error) => {
-      toast.error({
+      toast({
         title: "Translation Failed",
-        description: error.message,)};
+        description: error.message
+      });
     },
   });
 
@@ -399,7 +406,7 @@ function BooksContent() {
           <SelectContent>
             <SelectItem value="all">All Languages</SelectItem>
             {languages.map((language) => (
-              <SelectItem key={language)} value={language}>
+              <SelectItem key={language} value={language}>
                 {language}
               </SelectItem>
             ))}
@@ -438,7 +445,7 @@ function BooksContent() {
       {booksLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i)} className="animate-pulse">
+            <Card key={i} className="animate-pulse">
               <CardHeader>
                 <div className="h-4 bg-gray-200 rounded w-3/4"></div>
                 <div className="h-3 bg-gray-200 rounded w-1/2"></div>
@@ -473,7 +480,7 @@ function BooksContent() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredAndSortedBooks.map((book: Book) => (
-            <Card key={book.id)} className={`relative ${!book.projectId ? 'border-amber-200 bg-amber-50' : ''}`}>
+            <Card key={book.id} className={`relative ${!book.projectId ? 'border-amber-200 bg-amber-50' : ''}`}>
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
                   <div className="flex-1 min-w-0">
@@ -605,7 +612,7 @@ function BooksContent() {
                     { book.projectId ? (
                       <div className="text-sm">
                         <span className="text-muted-foreground">Project: </span>
-                        <span className="font-medium">{getProjectName(book.projectId)}</span>
+                        <span className="font-medium">{getProjectName(book.projectId }</span>
                       </div>
                     ) : (
                       <div className="space-y-2">
@@ -615,7 +622,7 @@ function BooksContent() {
                         </div>
                         <Select
                           onValueChange={(projectId) => 
-                            assignBookMutation.mutate({ bookId: book.id, projectId)}
+                            assignBookMutation.mutate({ bookId: book.id, projectId }
                           }
                           disabled={assignBookMutation.isPending}
                         >
@@ -624,7 +631,7 @@ function BooksContent() {
                           </SelectTrigger>
                           <SelectContent>
                             {projects.map((project: Project) => (
-                              <SelectItem key={project.id)} value={project.id}>
+                              <SelectItem key={project.id} value={project.id}>
                                 {project.name}
                               </SelectItem>
                             ))}
@@ -718,7 +725,7 @@ function BooksContent() {
                   {languages
                     .filter(lang => lang !== bookToTranslate?.language)
                     .map((language) => (
-                      <SelectItem key={language)} value={language}>
+                      <SelectItem key={language} value={language}>
                         {language}
                       </SelectItem>
                     ))}

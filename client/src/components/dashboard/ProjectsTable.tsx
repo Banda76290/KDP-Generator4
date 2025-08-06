@@ -22,7 +22,8 @@ export default function ProjectsTable() {
       toast({
         title: "Unauthorized",
         description: "You are logged out. Logging in again...",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
@@ -68,7 +69,7 @@ export default function ProjectsTable() {
         <CardContent>
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i)} className="flex items-center space-x-4 p-4 border rounded-lg animate-pulse">
+              <div key={i} className="flex items-center space-x-4 p-4 border rounded-lg animate-pulse">
                 <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
                 <div className="flex-1 space-y-2">
                   <div className="h-4 bg-gray-200 rounded w-1/3"></div>
@@ -134,7 +135,7 @@ export default function ProjectsTable() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {recentProjects.map((project: ProjectWithRelations, index: number) => (
-                  <tr key={project.id)} className="hover:bg-gray-50">
+                  <tr key={project.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className={ `w-10 h-10 ${getGradientClass(index)} rounded-lg flex items-center justify-center text-white font-semibold text-sm`}>

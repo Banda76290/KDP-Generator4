@@ -104,7 +104,8 @@ export default function AIFunctions() {
     navigator.clipboard.writeText(text);
     toast({
       title: 'Copied!',
-      description: 'Text has been copied to clipboard',)};
+      description: 'Text has been copied to clipboard'
+      });
   };
 
   const generateContent = async () => {
@@ -115,7 +116,8 @@ export default function AIFunctions() {
       const response = await fetch('/api/ai/generate', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',)},
+          'Content-Type': 'application/json'
+      }),
         body: JSON.stringify({ functionKey: selectedFunction.key,
           bookId: selectedFunction.requiresBookContext ? selectedBook : undefined,
           projectId: selectedFunction.requiresProjectContext ? selectedProject : undefined,
@@ -140,7 +142,8 @@ export default function AIFunctions() {
       toast({
         title: 'Error',
         description: 'Unable to generate content',
-        variant: 'destructive',)};
+        variant: 'destructive'
+      });
     } finally {
       setIsGenerating(false);
     }
@@ -299,7 +302,7 @@ export default function AIFunctions() {
                     const colorClass = categoryColors[category as keyof typeof categoryColors] || '';
                     
                     return (
-                      <div key={category)}>
+                      <div key={category}>
                         <div className="flex items-center gap-2 mb-3">
                           <IconComponent className="w-4 h-4" />
                           <h3 className="font-semibold capitalize">{category}</h3>
@@ -307,7 +310,7 @@ export default function AIFunctions() {
                         <div className="space-y-2 ml-6">
                           {(functions as AIFunction[]).map((func) => (
                             <Button
-                              key={func.key)}
+                              key={func.key}
                               variant={selectedFunction?.key === func.key ? 'default' : 'ghost'}
                               className="w-full justify-start text-left h-auto p-3"
                               onClick={ () => setSelectedFunction(func )}
@@ -319,7 +322,7 @@ export default function AIFunctions() {
                                 </div>
                                 <div className="flex gap-1 mt-2">
                                   {func.availableForTiers.map((tier: string) => (
-                                    <Badge key={tier)} variant="secondary" className="text-xs">
+                                    <Badge key={tier} variant="secondary" className="text-xs">
                                       {tier}
                                     </Badge>
                                   ))}
@@ -363,7 +366,7 @@ export default function AIFunctions() {
                             </SelectTrigger>
                             <SelectContent>
                               {(books as any[] || []).map((book: any) => (
-                                <SelectItem key={book.id)} value={book.id}>
+                                <SelectItem key={book.id} value={book.id}>
                                   {book.title}
                                 </SelectItem>
                               ))}
@@ -381,7 +384,7 @@ export default function AIFunctions() {
                             </SelectTrigger>
                             <SelectContent>
                               {(projects as any[] || []).map((project: any) => (
-                                <SelectItem key={project.id)} value={project.id}>
+                                <SelectItem key={project.id} value={project.id}>
                                   {project.name}
                                 </SelectItem>
                               ))}
@@ -397,7 +400,7 @@ export default function AIFunctions() {
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                             {getAvailableVariables().map((field) => (
                               <Button
-                                key={`${field.table)}-${field.field}`}
+                                key={`${field.table}-${field.field}`}
                                 variant="outline"
                                 size="sm"
                                 className="h-auto p-2 text-left justify-start"

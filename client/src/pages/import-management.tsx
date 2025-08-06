@@ -39,7 +39,8 @@ export default function ImportManagementPage() {
       formData.append("file", file);
       return fetch("/api/imports/upload", {
         method: "POST",
-        body: formData,)}.then(res => res.json());
+        body: formData
+      }).then(res => res.json());
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/imports"])};
@@ -207,7 +208,7 @@ export default function ImportManagementPage() {
               <div className="space-y-4">
                 {imports.map((importRecord: KdpImport) => (
                   <div 
-                    key={importRecord.id)} 
+                    key={importRecord.id} 
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50"
                   >
                     <div className="flex items-center space-x-4">

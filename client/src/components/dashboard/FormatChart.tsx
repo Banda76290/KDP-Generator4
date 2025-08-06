@@ -43,7 +43,7 @@ export default function FormatChart() {
                 dataKey="percentage"
               >
                 {dataWithColors.map((entry, index) => (
-                  <Cell key={`cell-${index)}`} fill={entry.color} />
+                  <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
               <Tooltip 

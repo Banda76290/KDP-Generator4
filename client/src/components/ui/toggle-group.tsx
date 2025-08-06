@@ -45,7 +45,8 @@ const ToggleGroupItem = React.forwardRef<
       className={cn(
         toggleVariants({
           variant: context.variant || variant,
-          size: context.size || size,)},
+          size: context.size || size
+      }),
         className
       )}
       {...props}

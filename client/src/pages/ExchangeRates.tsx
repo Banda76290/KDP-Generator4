@@ -30,7 +30,9 @@ export default function ExchangeRates() {
       if (response.ok) {
         toast({
           title: "Exchange Rates Updated",
-          description: "Exchange rates have been successfully updated.",)};
+          description: "Exchange rates have been successfully updated.",
+        variant: "destructive",
+      });
         // Refetch exchange rates data
         queryClient.invalidateQueries({ queryKey: ["/api/exchange-rates"] };
       } else {
@@ -40,7 +42,8 @@ export default function ExchangeRates() {
       toast({
         title: "Error",
         description: "Failed to update exchange rates.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     } finally {
       setIsUpdating(false);
     }
@@ -105,7 +108,7 @@ export default function ExchangeRates() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
-              <Card key={i)} className="animate-pulse">
+              <Card key={i} className="animate-pulse">
                 <CardContent className="p-6">
                   <div className="h-4 bg-muted rounded w-1/3 mb-2"></div>
                   <div className="h-8 bg-muted rounded w-1/2 mb-2"></div>
@@ -136,7 +139,7 @@ export default function ExchangeRates() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {majorRates.map((rate: any) => (
-                  <Card key={rate.currency)} className="hover:shadow-lg transition-shadow">
+                  <Card key={rate.currency} className="hover:shadow-lg transition-shadow">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -190,7 +193,7 @@ export default function ExchangeRates() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {otherRates.map((rate: any) => (
-                    <Card key={rate.currency)} className="hover:shadow-md transition-shadow">
+                    <Card key={rate.currency} className="hover:shadow-md transition-shadow">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-semibold">{rate.currency}</span>

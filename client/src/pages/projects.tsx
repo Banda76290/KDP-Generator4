@@ -45,191 +45,55 @@ export default function Projects() {
   const { data: projects, isLoading: projectsLoading, error } = useQuery({
     queryKey: ["/api/projects"],
     enabled: isAuthenticated,
-    staleTime: 0, // Always refetch to get latest book changes including ISBN
+    staleTime: 0,
+  });
+
+  // Helper functions for sorting
+  const getCurrentMonthRevenue = (project: any) => {
+    // TODO: Calculate actual current month revenue
+    return parseFloat(project.monthlyRevenue) || 0;
   };
 
-  // Duplication mutation
-  const duplicateProject = useMutation({
-    mutationFn: async (project: ProjectWithRelations) => {
-      console.log("Starting duplication for project:", project.name);
-      try {
-        const result = await apiRequest(`/api/projects/${project.id)}/duplicate`, { method: "POST" };
-        console.log("Duplication successful:", result);
-        return result;
-      } catch (error) {
-        console.error("Duplication failed:", error);
-        throw error;
-      }
-    },
-    onSuccess: (data) => {
-      console.log("onSuccess called with:", data);
-      toast.success({
-        title: "Success",
-        description: "Project and all books duplicated successfully",)};
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
-    },
-    onError: (error) => {
-      console.error("onError called with:", error);
-      toast.error({
-        title: "Error",
-        description: "Failed to duplicate project",)};
-    },
-  });
+  const getLastModifiedDate = (project: any) => {
+    if (!project.books || !Array.isArray(project.books)) return new Date(project.updatedAt);
+    const dates = project.books.map((book: any) => new Date(book.updatedAt));
+    dates.push(new Date(project.updatedAt));
+    return new Date(Math.max(...dates.map((d: Date) => d.getTime())));
+  };
 
-  // Delete mutation
-  const deleteProject = useMutation({
-    mutationFn: async ({ projectId, deleteBooks)}: { projectId: string; deleteBooks: boolean } => {
-      console.log("Deleting project:", projectId, "with deleteBooks:", deleteBooks);
-      return await apiRequest(`/api/projects/${projectId)}?deleteBooks=${deleteBooks}`, { method: "DELETE" };
-    },
-    onSuccess: (_, { deleteBooks } => {
-      toast.success({
-        title: "Success",
-        description: deleteBooks 
-          ? "Project and associated books deleted successfully" 
-          : "Project deleted successfully, books have been unlinked",)};
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
-      queryClient.invalidateQueries({ queryKey: ["/api/books"] };
-    },
-    onError: (error) => {
-      console.error("Delete failed:", error);
-      toast.error({
-        title: "Error",
-        description: "Failed to delete project",)};
-    },
-  });
+  const getTotalRevenue = (project: any) => {
+    return parseFloat(project.totalRevenue) || 0;
+  };
 
-  // Book duplication mutation
-  const duplicateBook = useMutation({
-    mutationFn: async (bookId: string) => {
-      console.log("Duplicating book:", bookId);
-      return await apiRequest(`/api/books/${bookId)}/duplicate`, { method: "POST" };
-    },
-    onSuccess: () => {
-      toast.success({
-        title: "Success",
-        description: "Book duplicated successfully",)};
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
-    },
-    onError: (error) => {
-      console.error("Book duplication failed:", error);
-      toast.error({
-        title: "Error",
-        description: "Failed to duplicate book",)};
-    },
-  });
-
-  // Book translation mutation
-  const translateBookMutation = useMutation({
-    mutationFn: async ({ bookId, targetLanguage)}: { bookId: string; targetLanguage: string } => {
-      return await apiRequest(`/api/books/${bookId)}/translate`, { method: "POST", body: JSON.stringify({ targetLanguage)} });
-    },
-    onSuccess: () => {
-      toast.success({
-        title: "Success",
-        description: "Book translated successfully",)};
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] };
-      queryClient.invalidateQueries({ queryKey: ["/api/books"] };
-      setBookToTranslate(null);
-      setSelectedLanguage("");
-    },
-    onError: (error) => {
-      console.error("Book translation failed:", error);
-      toast.error({
-        title: "Error", 
-        description: "Failed to translate book",)};
-    },
-  });
-
-  // Redirect to home if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast.error({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",)};
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
+  // Filter projects
+  const filteredProjects = projects ? projects.filter((project: ProjectWithRelations) => {
+    const matchesSearch = project.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "all" || project.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  }).sort((a: any, b: any) => {
+    switch (sortBy) {
+      case "alphabetical":
+        return (a.name || "").localeCompare(b.name || "");
+      case "alphabetical-desc":
+        return (b.name || "").localeCompare(a.name || "");
+      case "createdAt":
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      case "createdAt-asc":
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      case "lastModified":
+        return getLastModifiedDate(b).getTime() - getLastModifiedDate(a).getTime();
+      case "monthlyRevenue":
+        return getCurrentMonthRevenue(b) - getCurrentMonthRevenue(a);
+      case "totalRevenue":
+        return getTotalRevenue(b) - getTotalRevenue(a);
+      case "status-asc":
+        return (a.status || '').localeCompare(b.status || '');
+      case "status-desc":
+        return (b.status || '').localeCompare(a.status || '');
+      default:
+        return 0;
     }
-  }, [isAuthenticated, isLoading, toast]);
-
-  useEffect(() => {
-    if (error && isUnauthorizedError(error as Error)) {
-      toast.error({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",)};
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [error, toast]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  // Filter and sort projects
-  const filteredProjects = Array.isArray(projects) ? projects
-    .filter((project: any) => {
-      const matchesSearch = project.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           project.description?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = statusFilter === "all" || project.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    }
-    .sort((a: any, b: any) => {
-      const getCurrentMonthRevenue = (project: any) => {
-        if (!project.books || !Array.isArray(project.books)) return 0;
-        const currentMonth = new Date().getMonth();
-        const currentYear = new Date().getFullYear();
-        return project.books.reduce((total: number, book: any) => {
-          // For now, we'll use monthlyRevenue field if available
-          return total + (parseFloat(book.monthlyRevenue) || 0);)}, 0);
-      };
-
-      const getLastModifiedDate = (project: any) => {
-        if (!project.books || !Array.isArray(project.books)) return new Date(project.updatedAt);
-        const dates = project.books.map((book: any) => new Date(book.updatedAt));
-        dates.push(new Date(project.updatedAt));
-        return new Date(Math.max(...dates.map((d: Date) => d.getTime())));
-      };
-
-      const getTotalRevenue = (project: any) => {
-        return parseFloat(project.totalRevenue) || 0;
-      };
-
-      switch (sortBy) {
-        case "alphabetical":
-          return (a.name || "").localeCompare(b.name || "");
-        case "alphabetical-desc":
-          return (b.name || "").localeCompare(a.name || "");
-        case "createdAt":
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        case "createdAt-asc":
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        case "lastModified":
-          return getLastModifiedDate(b).getTime() - getLastModifiedDate(a).getTime();
-        case "monthlyRevenue":
-          return getCurrentMonthRevenue(b) - getCurrentMonthRevenue(a);
-        case "totalRevenue":
-          return getTotalRevenue(b) - getTotalRevenue(a);
-        case "status-asc":
-          return (a.status || '').localeCompare(b.status || '');
-        case "status-desc":
-          return (b.status || '').localeCompare(a.status || '');
-        default:
-          return 0;
-      }
-    }) : [];
+  }) : [];
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -254,7 +118,7 @@ export default function Projects() {
   };
 
   const handleEditProject = (project: ProjectWithRelations) => {
-    setLocation(`/projects/edit/${project.id)}`);
+    setLocation(`/projects/edit/${project.id}`);
   };
 
   const handleDuplicateProject = (project: ProjectWithRelations) => {
@@ -280,7 +144,8 @@ export default function Projects() {
     if (bookToTranslate && selectedLanguage) {
       translateBookMutation.mutate({
         bookId: bookToTranslate.id,
-        targetLanguage: selectedLanguage)};
+        targetLanguage: selectedLanguage
+      });
     }
   };
 
@@ -288,7 +153,8 @@ export default function Projects() {
     setExpandedProjects(prev => {
       const newSet = new Set(prev);
       if (newSet.has(projectId)) {
-        newSet.delete(projectId);)} else {
+        newSet.delete(projectId);
+      } else {
         newSet.add(projectId);
       }
       return newSet;
@@ -364,7 +230,7 @@ export default function Projects() {
           {projectsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <Card key={i)} className="animate-pulse">
+                <Card key={i} className="animate-pulse">
                   <CardHeader>
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
@@ -390,7 +256,7 @@ export default function Projects() {
               </p>
               { (!searchTerm && statusFilter === "all") && (
                 <div className="flex gap-2 justify-center">
-                  <Button onClick={() => setLocation("/project-create-simple"))} variant="outline">
+                  <Button onClick={() => setLocation("/project-create-simple")} variant="outline">
                     <Plus className="w-4 h-4 mr-2" />
                     Create Your First Project
                   </Button>
@@ -404,7 +270,7 @@ export default function Projects() {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredProjects.map((project: ProjectWithRelations) => (
-                <Card key={project.id)} className="hover:shadow-lg transition-shadow h-fit">
+                <Card key={project.id} className="hover:shadow-lg transition-shadow h-fit">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start space-x-3 flex-1 min-w-0">
@@ -426,7 +292,7 @@ export default function Projects() {
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <p className="text-sm text-gray-600 leading-relaxed break-words cursor-help">
-                                  {project.description)}
+                                  {project.description}
                                 </p>
                               </TooltipTrigger>
                               <TooltipContent>
@@ -478,7 +344,7 @@ export default function Projects() {
                           {project.books
                             .slice(0, expandedProjects.has(project.id) ? project.books.length : 3)
                             .map((book: any) => (
-                            <div key={book.id)} className="border rounded-lg p-3 bg-gray-50 space-y-2">
+                            <div key={book.id} className="border rounded-lg p-3 bg-gray-50 space-y-2">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
                                   <Tooltip>
@@ -718,7 +584,7 @@ export default function Projects() {
                   {LANGUAGE_OPTIONS
                     .filter(lang => lang !== bookToTranslate?.language)
                     .map((language) => (
-                    <SelectItem key={language)} value={language}>
+                    <SelectItem key={language} value={language}>
                       {language}
                     </SelectItem>
                   ))}

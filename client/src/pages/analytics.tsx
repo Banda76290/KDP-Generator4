@@ -86,21 +86,21 @@ export default function Analytics() {
   // Main detailed analytics (expert method)
   const { data: detailedData, isLoading: detailedLoading, refetch: refetchDetailed } = useQuery<DetailedAnalytics>({
     queryKey: ['/api/analytics/detailed'],
-  };
+  });
 
   // Legacy data for comparison
   const { data: legacyData, isLoading: legacyLoading } = useQuery<LegacyOverview>({
     queryKey: ['/api/analytics/overview'],
-  };
+  });
 
   // Supporting data
   const { data: topPerformers, isLoading: topPerformersLoading } = useQuery<TopPerformer[]>({
     queryKey: ['/api/analytics/top-performers'],
-  };
+  });
 
   const { data: marketplaceData, isLoading: marketplaceLoading } = useQuery<MarketplaceData[]>({
     queryKey: ['/api/analytics/marketplace-breakdown'],
-  };
+  });
 
   const { data: salesTrends, isLoading: trendsLoading } = useQuery<SalesTrend[]>({
     queryKey: [`/api/analytics/sales-trends/${selectedPeriod}`],
@@ -110,14 +110,16 @@ export default function Analytics() {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: currency,
-      minimumFractionDigits: 2,)}.format(amount);
+      minimumFractionDigits: 2
+    }).format(amount);
   };
 
   const refreshAllData = () => {
     refetchDetailed();
     toast({
       title: "Données actualisées",
-      description: "Les analytics ont été mises à jour",)};
+      description: "Les analytics ont été mises à jour"
+    });
   };
 
   const isLoading = detailedLoading || legacyLoading || topPerformersLoading || marketplaceLoading || trendsLoading;
@@ -155,7 +157,7 @@ export default function Analytics() {
           <div className="animate-pulse space-y-6">
             <div className="grid gap-6 md:grid-cols-4">
               {[...Array(4)].map((_, i) => (
-                <div key={i)} className="h-32 bg-gray-200 rounded"></div>
+                <div key={i} className="h-32 bg-gray-200 rounded"></div>
               ))}
             </div>
           </div>
@@ -274,7 +276,7 @@ export default function Analytics() {
                             label={({ currency, amountInEUR)} => `${currency}: ${ amountInEUR.toFixed(0)}€`}
                           >
                             {detailedData.conversions.map((_, index) => (
-                              <Cell key={`cell-${index)}`} fill={COLORS[index % COLORS.length]} />
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                           </Pie>
                           <Tooltip formatter={ (value) => [`${Number(value).toFixed(2)}€`, 'Montant EUR']} />
@@ -298,7 +300,7 @@ export default function Analytics() {
                         {detailedData.royaltiesByCurrency.map((curr, index) => {
                           const conversion = detailedData.conversions.find(c => c.currency === curr.currency);
                           return (
-                            <div key={index)} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
                               <div className="flex items-center gap-4">
                                 <Badge variant="outline" className="font-mono text-lg">
                                   {curr.currency}
@@ -344,7 +346,7 @@ export default function Analytics() {
                     <CardContent>
                       <div className="space-y-4">
                         {topPerformers.slice(0, 5).map((book, index) => (
-                          <div key={index)} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
                             <div className="flex items-center gap-4">
                               <Badge variant="secondary">#{index + 1}</Badge>
                               <div>

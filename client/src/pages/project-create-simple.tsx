@@ -66,7 +66,8 @@ export default function CreateProject() {
       
       // Create the project first
       const project = await apiRequest("/api/projects", { method: "POST", body: JSON.stringify({ name: data.name,
-        description: data.description,)}});
+        description: data.description
+      })});
       
       console.log('Project created:', project);
       
@@ -79,7 +80,8 @@ export default function CreateProject() {
         }
         
         // Attach existing book to project
-        await apiRequest(`/api/books/${data.selectedBookId}`, { method: "PATCH", body: JSON.stringify({ projectId: project.id,)}});
+        await apiRequest(`/api/books/${data.selectedBookId}`, { method: "PATCH", body: JSON.stringify({ projectId: project.id
+      })});
       } else if (data.createNewBook) {
         // Redirect to book creation with project pre-selected
         setLocation(`/books/create?projectId=${project.id)}`);
@@ -105,7 +107,8 @@ export default function CreateProject() {
       toast({
         title: "Error",
         description: error.message || "Failed to create project",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     },
   });
 

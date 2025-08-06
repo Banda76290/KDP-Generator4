@@ -46,63 +46,8 @@ function useSeriesData() {
       }
       return response.json();
     },
-    staleTime: 0, // Always fetch fresh data to see updated series with books
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
-}
-
-export default function SeriesListPage() {
-  const [, setLocation] = useLocation();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "title-az" | "title-za" | "lastModified" | "language-az" | "language-za" | "mostBooks" | "highestRevenue">("newest");
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  const { data: series = [], isLoading, error } = useSeriesData();
-
-  // Mutation to remove book from series
-  const removeBookFromSeries = useMutation({
-    mutationFn: async (bookId: string) => {
-      return await apiRequest(`/api/books/${bookId)}`, { method: "PATCH", body: JSON.stringify({ seriesTitle: "",
-        seriesNumber: null)}});
-    },
-    onSuccess: () => {
-      // Invalidate queries to refresh the data
-      queryClient.invalidateQueries({ queryKey: ['/api/series'])};
-      queryClient.invalidateQueries({ queryKey: ['/api/books'] };
-      toast.success({ title: "Book Removed", description: "The book has been successfully removed from the series." };
-    },
-    onError: (error: any) => {
-      toast.error({ title: "Error", description: error.message || "Failed to remove book from series")};
-    },
-  });
-
-  // Mutation to delete series
-  const deleteSeries = useMutation({
-    mutationFn: async (seriesId: string) => {
-      return await apiRequest(`/api/series/${seriesId)}`, { method: "DELETE" };
-    },
-    onSuccess: () => {
-      // Invalidate queries to refresh the data
-      queryClient.invalidateQueries({ queryKey: ['/api/series'])};
-      queryClient.invalidateQueries({ queryKey: ['/api/books'] };
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] };
-      toast.success({ title: "Series Deleted", description: "The series has been successfully deleted." };
-    },
-    onError: (error: any) => {
-      toast.error({ title: "Error", description: error.message || "Failed to delete series")};
-    },
-  });
-
-  // Calculate series revenue
-  const calculateSeriesRevenue = (books: BookData[]) => { const totalRevenue = books.reduce((sum, book) => sum + parseFloat(book.totalRevenue || '0'), 0);
-    const monthlyRevenue = books.reduce((sum, book) => sum + parseFloat(book.monthlyRevenue || '0'), 0);
-    return {
-      totalRevenue: totalRevenue.toFixed(2),
-      monthlyRevenue: monthlyRevenue.toFixed(2)};
-  };
 
   // Filter and sort series
   const filteredSeries = series
@@ -249,7 +194,7 @@ export default function SeriesListPage() {
         {!isLoading && !error && filteredSeries.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredSeries.map((seriesItem: SeriesData) => (
-              <Card key={seriesItem.id)} className="hover:shadow-lg transition-shadow">
+              <Card key={seriesItem.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -338,7 +283,7 @@ export default function SeriesListPage() {
                           {seriesItem.books
                             .sort((a, b) => (a.seriesNumber || 0) - (b.seriesNumber || 0))
                             .map((book) => (
-                              <div key={book.id)} className="text-xs p-3 bg-gray-50 rounded space-y-2">
+                              <div key={book.id} className="text-xs p-3 bg-gray-50 rounded space-y-2">
                                 {/* First row: Series number and title with remove button */}
                                 <div className="flex items-start justify-between">
                                   <div className="flex items-center space-x-2 flex-1 min-w-0">

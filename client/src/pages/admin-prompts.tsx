@@ -86,7 +86,8 @@ export default function AdminPrompts() {
       toast({
         title: "Erreur de création",
         description: error.message || "Impossible de créer le prompt",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     }
   });
 
@@ -108,7 +109,8 @@ export default function AdminPrompts() {
       toast({
         title: "Erreur de modification",
         description: error.message || "Impossible de modifier le prompt",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     }
   });
 
@@ -127,7 +129,8 @@ export default function AdminPrompts() {
       toast({
         title: "Erreur de suppression",
         description: error.message || "Impossible de supprimer le prompt",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     }
   });
 
@@ -156,7 +159,8 @@ export default function AdminPrompts() {
       toast({
         title: "Champs requis",
         description: "Veuillez remplir tous les champs obligatoires.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
       return;
     }
 

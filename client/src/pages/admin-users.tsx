@@ -43,7 +43,8 @@ export default function AdminUsers() {
       toast({
         title: "Accès refusé",
         description: "Vous n'avez pas les permissions d'administrateur.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
       setTimeout(() => {
         window.location.href = "/";
       }, 500);
@@ -72,7 +73,8 @@ export default function AdminUsers() {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de mettre à jour le rôle.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     },
   });
 
@@ -91,7 +93,8 @@ export default function AdminUsers() {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de désactiver l'utilisateur.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     },
   });
 
@@ -110,7 +113,8 @@ export default function AdminUsers() {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de réactiver l'utilisateur.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     },
   });
 
@@ -204,7 +208,7 @@ export default function AdminUsers() {
                 </TableHeader>
                 <TableBody>
                   {usersData?.users?.map((user: User) => (
-                    <TableRow key={user.id)}>
+                    <TableRow key={user.id}>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           { getRoleIcon(user.role)}

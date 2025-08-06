@@ -59,7 +59,8 @@ export default function AnalyticsComparison() {
       toast({
         title: "Erreur de migration",
         description: "Impossible de migrer les données",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     }
   };
 
@@ -209,7 +210,7 @@ export default function AnalyticsComparison() {
               <CardContent>
                 <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                   {normalizedData.royaltiesByCurrency.map((curr, index) => (
-                    <div key={index)} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="font-mono">
                           {curr.currency}
@@ -306,7 +307,7 @@ export default function AnalyticsComparison() {
                     <h4 className="font-medium mb-3">Revenus par Devise</h4>
                     <div className="space-y-2">
                       {normalizedData.royaltiesByCurrency.map((curr, index) => (
-                        <div key={index)} className="flex items-center justify-between p-3 border rounded">
+                        <div key={index} className="flex items-center justify-between p-3 border rounded">
                           <div className="flex items-center gap-3">
                             <Badge className="font-mono">{curr.currency}</Badge>
                             <span className="text-sm text-muted-foreground">

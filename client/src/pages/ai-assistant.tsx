@@ -28,7 +28,7 @@ export default function AIAssistant() {
   };
 
   const generateMutation = useMutation({
-    mutationFn: async (data: { type: string; prompt: string; title?: string)} => { return await apiRequest("/api/ai/generate", { method: "POST", body: JSON.stringify(data)};
+    mutationFn: async (data: { type: string; prompt: string; title?: string)} => { return await apiRequest("/api/ai/generate", { method: "POST", body: JSON.stringify(data)});
     },
     onSuccess: async (response) => {
       const result = await response.json();
@@ -43,7 +43,8 @@ export default function AIAssistant() {
         toast({
           title: "Unauthorized",
           description: "You are logged out. Logging in again...",
-          variant: "destructive",)};
+          variant: "destructive"
+      });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
@@ -62,7 +63,8 @@ export default function AIAssistant() {
       toast({
         title: "Unauthorized",
         description: "You are logged out. Logging in again...",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
@@ -75,7 +77,8 @@ export default function AIAssistant() {
       toast({
         title: "Missing Information",
         description: "Please select a content type and enter a prompt",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
       return;
     }
 
@@ -99,7 +102,9 @@ export default function AIAssistant() {
     navigator.clipboard.writeText(generatedContent);
     toast({
       title: "Copied",
-      description: "Content copied to clipboard",)};
+      description: "Content copied to clipboard",
+        variant: "destructive",
+      });
   };
 
   if (isLoading) {
@@ -249,7 +254,7 @@ export default function AIAssistant() {
               <CardContent>
                 <div className="space-y-4">
                   {(generations as any[]).slice(0, 5).map((generation: any) => (
-                    <div key={generation.id)} className="border-b border-gray-200 pb-4 last:border-b-0">
+                    <div key={generation.id} className="border-b border-gray-200 pb-4 last:border-b-0">
                       <div className="flex items-center justify-between mb-2">
                         <Badge variant="outline">{generation.type}</Badge>
                         <span className="text-xs text-gray-500">

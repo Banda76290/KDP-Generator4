@@ -47,14 +47,17 @@ export default function AnalyticsDetailed() {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: currency,
-      minimumFractionDigits: 2,)}.format(amount);
+      minimumFractionDigits: 2
+      }).format(amount);
   };
 
   const refreshData = () => {
     refetch();
     toast({
       title: "Données actualisées",
-      description: "Les analytics détaillées ont été mises à jour",)};
+      description: "Les analytics détaillées ont été mises à jour",
+        variant: "destructive",
+      });
   };
 
   if (isLoading) {
@@ -64,7 +67,7 @@ export default function AnalyticsDetailed() {
           <div className="h-8 bg-gray-200 rounded w-1/3"></div>
           <div className="grid gap-6 md:grid-cols-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i)} className="h-32 bg-gray-200 rounded"></div>
+              <div key={i} className="h-32 bg-gray-200 rounded"></div>
             ))}
           </div>
         </div>
@@ -177,7 +180,7 @@ export default function AnalyticsDetailed() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {data.royaltiesByCurrency.map((curr, index) => (
-              <div key={index)} className="flex items-center justify-between p-4 border rounded-lg">
+              <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center gap-3">
                   <Badge variant="outline" className="font-mono text-lg">
                     {curr.currency}
@@ -215,7 +218,7 @@ export default function AnalyticsDetailed() {
         <CardContent>
           <div className="space-y-3">
             {data.conversions.map((conv, index) => (
-              <div key={index)} className="flex items-center justify-between p-4 border rounded-lg">
+              <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center gap-4">
                   <Badge className="font-mono">{conv.currency}</Badge>
                   <div className="text-sm">

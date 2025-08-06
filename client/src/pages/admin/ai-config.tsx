@@ -83,7 +83,8 @@ export default function AIConfig() {
       toast({
         title: "Access Denied",
         description: "You need administrator privileges to access this page.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
       window.location.href = "/";
       return;
     }
@@ -115,7 +116,7 @@ export default function AIConfig() {
     mutationFn: async (data: Partial<AIPromptTemplate>) => {
       const method = data.id ? "PUT" : "POST";
       const url = data.id ? `/api/admin/ai/prompts/${data.id}` : "/api/admin/ai/prompts";
-      return await apiRequest(url, { method, body: JSON.stringify(data)};
+      return await apiRequest(url, { method, body: JSON.stringify(data)});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/prompts"])};
@@ -135,7 +136,7 @@ export default function AIConfig() {
     mutationFn: async (data: Partial<AIModel>) => {
       const method = data.id ? "PUT" : "POST";
       const url = data.id ? `/api/admin/ai/models/${data.id}` : "/api/admin/ai/models";
-      return await apiRequest(url, { method, body: JSON.stringify(data)};
+      return await apiRequest(url, { method, body: JSON.stringify(data)});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/models"])};
@@ -155,7 +156,7 @@ export default function AIConfig() {
     mutationFn: async (data: Partial<AIUsageLimit>) => {
       const method = data.id ? "PUT" : "POST";
       const url = data.id ? `/api/admin/ai/limits/${data.id}` : "/api/admin/ai/limits";
-      return await apiRequest(url, { method, body: JSON.stringify(data)};
+      return await apiRequest(url, { method, body: JSON.stringify(data)});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/ai/limits"])};
@@ -295,7 +296,7 @@ export default function AIConfig() {
                       <div className="text-center py-8">Loading...</div>
                     ) : (
                       (promptTemplates as any)?.map((template: any) => (
-                        <div key={template.id)} className="border rounded-lg p-4">
+                        <div key={template.id} className="border rounded-lg p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-2">
@@ -358,7 +359,7 @@ export default function AIConfig() {
                       <div className="text-center py-8">Loading...</div>
                     ) : (
                       (aiModels as any)?.map((model: any) => (
-                        <div key={model.id)} className="border rounded-lg p-4">
+                        <div key={model.id} className="border rounded-lg p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-2">
@@ -411,7 +412,7 @@ export default function AIConfig() {
                       <div className="text-center py-8">Loading...</div>
                     ) : (
                       (usageLimits as any)?.map((limit: any) => (
-                        <div key={limit.id)} className="border rounded-lg p-4">
+                        <div key={limit.id} className="border rounded-lg p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <h3 className="font-medium capitalize mb-2">{limit.subscriptionTier} Tier</h3>
@@ -434,7 +435,7 @@ export default function AIConfig() {
                                   <p className="text-sm font-medium text-gray-600">Allowed Models:</p>
                                   <div className="flex flex-wrap gap-1 mt-1">
                                     {limit.allowedModels.map((model: string) => (
-                                      <Badge key={model)} variant="outline" className="text-xs">
+                                      <Badge key={model} variant="outline" className="text-xs">
                                         {model}
                                       </Badge>
                                     ))}

@@ -35,7 +35,8 @@ export default function AdminConfig() {
       toast({
         title: "Accès refusé",
         description: "Vous n'avez pas les permissions d'administrateur.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
       setTimeout(() => {
         window.location.href = "/";
       }, 500);
@@ -49,28 +50,31 @@ export default function AdminConfig() {
   };
 
   const updateConfigMutation = useMutation({
-    mutationFn: async (configData: { key: string; value: string; description?: string)} => { return await apiRequest("/api/admin/config", { method: "PUT", body: JSON.stringify(configData)};
+    mutationFn: async (configData: { key: string; value: string; description?: string)} => { return await apiRequest("/api/admin/config", { method: "PUT", body: JSON.stringify(configData)});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/config"])};
-      toast.success({
+      toast({
         title: "Succès",
         description: "Configuration mise à jour avec succès.",
       };
       setNewConfig({ key: "", value: "", description: "" };
     },
     onError: (error: Error) => {
-      toast.error({
+      toast({
         title: "Erreur",
-        description: error.message || "Impossible de mettre à jour la configuration.",)};
+        description: error.message || "Impossible de mettre à jour la configuration."
+      });
     },
   });
 
   const handleAddConfig = () => {
     if (!newConfig.key || !newConfig.value) {
-      toast.error({
+      toast({
         title: "Erreur",
-        description: "La clé et la valeur sont obligatoires.",)};
+        description: "La clé et la valeur sont obligatoires.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -207,7 +211,7 @@ export default function AdminConfig() {
               {commonConfigs.map((configItem) => {
                 const existingConfig = config?.find(c => c.key === configItem.key);
                 return (
-                  <div key={configItem.key)} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div key={configItem.key} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="space-y-1">
                       <div className="font-medium">{configItem.label}</div>
                       <div className="text-sm text-muted-foreground">{configItem.description}</div>
@@ -257,7 +261,7 @@ export default function AdminConfig() {
                 </TableHeader>
                 <TableBody>
                   {config.map((configItem) => (
-                    <TableRow key={configItem.key)}>
+                    <TableRow key={configItem.key}>
                       <TableCell className="font-mono text-sm">{configItem.key}</TableCell>
                       <TableCell className="max-w-xs truncate">{configItem.value}</TableCell>
                       <TableCell className="max-w-xs truncate">{configItem.description || "-"}</TableCell>

@@ -41,7 +41,8 @@ export default function AdminBlogPosts() {
       toast({
         title: "Accès refusé",
         description: "Vous n'avez pas les permissions d'administrateur.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
       setTimeout(() => {
         window.location.href = "/";
       }, 500);
@@ -69,7 +70,8 @@ export default function AdminBlogPosts() {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de supprimer l'article.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     },
   });
 
@@ -88,7 +90,8 @@ export default function AdminBlogPosts() {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de mettre à jour le statut.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     },
   });
 
@@ -209,7 +212,7 @@ export default function AdminBlogPosts() {
                   </TableHeader>
                   <TableBody>
                     {postsData.posts.map((post) => (
-                      <TableRow key={post.id)}>
+                      <TableRow key={post.id}>
                         <TableCell>
                           <div>
                             <div className="font-medium">{post.title}</div>

@@ -99,7 +99,7 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
                   </SelectTrigger>
                   <SelectContent>
                     {SUBSCRIPTION_TIERS.map(tier => (
-                      <SelectItem key={tier.value)} value={tier.value}>
+                      <SelectItem key={tier.value} value={tier.value}>
                         <div className="flex items-center gap-2">
                           <div className={`w-3 h-3 rounded-full ${tier.color}`} />
                           {tier.label}
@@ -191,7 +191,7 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
               
               <div className="space-y-3">
                 {AVAILABLE_MODELS.map(model => (
-                  <div key={model)} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div key={model} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
                       <span className="font-medium">{model}</span>
                       <p className="text-sm text-muted-foreground">
@@ -213,7 +213,7 @@ export default function UsageLimitModal({ limit, onSave, onClose, isLoading }: U
                 <Label className="text-sm font-medium">Modèles sélectionnés:</Label>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {formData.allowedModels.map(model => (
-                    <Badge key={model)} variant="secondary" className="flex items-center gap-1">
+                    <Badge key={model} variant="secondary" className="flex items-center gap-1">
                       {model}
                       <button
                         onClick={ () => toggleModel(model )}

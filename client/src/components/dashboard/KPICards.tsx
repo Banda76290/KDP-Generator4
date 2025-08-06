@@ -17,7 +17,8 @@ export default function KPICards() {
       toast({
         title: "Unauthorized",
         description: "You are logged out. Logging in again...",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
@@ -29,7 +30,7 @@ export default function KPICards() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {[1, 2, 3, 4].map((i) => (
-          <Card key={i)} className="animate-pulse">
+          <Card key={i} className="animate-pulse">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-2">
@@ -87,7 +88,7 @@ export default function KPICards() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       {kpiData.map((kpi) => (
-        <Card key={kpi.title)} className="shadow-sm border border-gray-200">
+        <Card key={kpi.title} className="shadow-sm border border-gray-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>

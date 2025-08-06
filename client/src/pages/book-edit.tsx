@@ -431,7 +431,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
           if (categories.length === 0) return null;
           
           return (
-            <div key={`level-${level)}`} className="space-y-2">
+            <div key={`level-${level}`} className="space-y-2">
               <Label className="text-sm font-medium">
                 {index === 0 ? "Category" : "Subcategory"}
               </Label>
@@ -452,7 +452,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((category) => (
-                    <SelectItem key={category.id)} value={category.categoryPath}>
+                    <SelectItem key={category.id} value={category.categoryPath}>
                       <span className="text-left">{category.displayName}</span>
                     </SelectItem>
                   ))}
@@ -474,7 +474,7 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
               const thisInstanceCategory = tempUISelections[instanceIndex];
               
               return (
-                <div key={category.id)} className="flex items-start space-x-2">
+                <div key={category.id} className="flex items-start space-x-2">
                   <Checkbox
                     id={`leaf-category-${category.id}`}
                     checked={thisInstanceCategory === category.categoryPath}
@@ -819,62 +819,8 @@ export default function EditBook() {
     enabled: !isCreating, // Only fetch if we're not creating (i.e., if we have a bookId)
     refetchOnMount: true, // Force refresh on mount
     refetchOnWindowFocus: true, // Force refresh when window gets focus
-    staleTime: 0, // Always consider data stale for immediate updates
+    staleTime: 0,
   });
-  
-  console.log('Query State:', { book, bookLoading, error, isCreating };
-
-  const form = useForm<BookFormData>({
-    resolver: zodResolver(bookFormSchema),
-    defaultValues: {
-      title: "",
-      subtitle: "",
-      description: "",
-      language: "English",
-      authorPrefix: "",
-      authorFirstName: "",
-      authorMiddleName: "",
-      authorLastName: "",
-      authorSuffix: "",
-      publishingRights: "owned",
-      hasExplicitContent: false,
-      primaryMarketplace: "Amazon.com",
-      isLowContentBook: false,
-      isLargePrintBook: false,
-      previouslyPublished: false,
-      releaseOption: "immediate",
-      useAI: false,
-      format: "ebook",
-      status: "draft",
-      projectId: preSelectedProjectId || "",
-      categories: [],
-      keywords: [],
-    },
-  });
-
-  // Add CSS for the description editor
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-      #description-editor:empty:before {
-        content: attr(data-placeholder);
-        color: #9ca3af;
-        pointer-events: none;
-      }
-      #description-editor h4 { font-size: 1.25rem; font-weight: bold; margin: 0.5rem 0; }
-      #description-editor h5 { font-size: 1.125rem; font-weight: bold; margin: 0.5rem 0; }
-      #description-editor h6 { font-size: 1rem; font-weight: bold; margin: 0.5rem 0; }
-      #description-editor ul { list-style-type: disc; margin-left: 1.5rem; }
-      #description-editor ol { list-style-type: decimal; margin-left: 1.5rem; }
-      #description-editor li { margin: 0.25rem 0; }
-      #description-editor a { color: #3b82f6; text-decoration: underline; }
-      #description-editor p { margin: 0.5rem 0; }
-    `;
-    document.head.appendChild(style);
-    
-    return () => {
-      document.head.removeChild(style);
-    };
   }, []);
 
   // Save current form state to session storage (for navigation to series creation only)
@@ -1194,7 +1140,8 @@ export default function EditBook() {
           firstName: contrib.firstName,
           middleName: contrib.middleName || "",
           lastName: contrib.lastName,
-          suffix: contrib.suffix || "",)});
+          suffix: contrib.suffix || ""
+      }));
         setContributors(loadedContributors);
       } else {
         setContributors([]);
@@ -1276,7 +1223,7 @@ export default function EditBook() {
       console.log(isCreating ? 'Creating book data:' : 'Updating book data:', formattedData);
       console.log('ProjectId being sent:', formattedData.projectId);
       
-      if (isCreating) { const createdBook = await apiRequest(`/api/books`, { method: "POST", body: JSON.stringify(formattedData)};
+      if (isCreating) { const createdBook = await apiRequest(`/api/books`, { method: "POST", body: JSON.stringify(formattedData)});
         console.log('Received created book response:', createdBook);
         
         // Save contributors after book creation
@@ -1300,7 +1247,7 @@ export default function EditBook() {
         
         return { book: createdBook, shouldNavigate: data.shouldNavigate, nextTab: data.nextTab };
       } else {
-        const updatedBook = await apiRequest(`/api/books/${bookId)}`, { method: "PATCH", body: JSON.stringify(formattedData)};
+        const updatedBook = await apiRequest(`/api/books/${bookId)}`, { method: "PATCH", body: JSON.stringify(formattedData)});
         console.log('Received updated book response:', updatedBook);
         
         // Update contributors - first delete existing ones, then add new ones
@@ -1334,7 +1281,7 @@ export default function EditBook() {
                 suffix: contributor.suffix || null,
               };
               console.log('Sending contributor data:', contributorData);
-              await apiRequest("/api/contributors", { method: "POST", body: JSON.stringify(contributorData)};
+              await apiRequest("/api/contributors", { method: "POST", body: JSON.stringify(contributorData)});
             }
           }
         }
@@ -1355,7 +1302,7 @@ export default function EditBook() {
         queryClient.invalidateQueries({ queryKey: [`/api/books/${bookId)}`] });
       }
       
-      toast.success({
+      toast({
         title: isCreating ? "Book Created" : "Book Updated",
         description: `Your book has been ${isCreating ? 'created' : 'updated'} successfully.`,
       });
@@ -1405,7 +1352,8 @@ export default function EditBook() {
       toast({
         title: "Error",
         description: error.message || "Failed to delete book",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     },
   });
 
@@ -1508,7 +1456,7 @@ export default function EditBook() {
 
     // Check for validation errors before applying
     if (isbnValidationError) {
-      toast.error({
+      toast({
         title: "Cannot apply ISBN/ASIN",
         description: "Please resolve the validation error first.")};
       return;
@@ -1521,7 +1469,7 @@ export default function EditBook() {
       });
 
       if (response) {
-        toast.success({
+        toast({
           title: "ISBN/ASIN Applied Successfully",
           description: "The Official ISBN/ASIN has been permanently applied to this book.")};
         // Reset the input value and close dialog
@@ -1533,7 +1481,7 @@ export default function EditBook() {
       }
     } catch (error) {
       console.error('Error applying ISBN:', error);
-      toast.error({
+      toast({
         title: "Error",
         description: "Failed to apply ISBN/ASIN. Please try again.")};
     }
@@ -1723,7 +1671,7 @@ export default function EditBook() {
     setPendingMarketplace("");
     setIncompatibleCategories([]);
     
-    toast.success({
+    toast({
       title: "Marketplace Changed",
       description: `Marketplace changed to ${marketplaceName)} and ${removedCount} incompatible categories removed`
     });
@@ -2101,7 +2049,7 @@ export default function EditBook() {
                     </SelectTrigger>
                     <SelectContent>
                       {(projects as any[]).map((project: any) => (
-                        <SelectItem key={project.id)} value={project.id}>{project.name}</SelectItem>
+                        <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -2130,7 +2078,7 @@ export default function EditBook() {
                       </SelectTrigger>
                       <SelectContent>
                         {languages.map((lang) => (
-                          <SelectItem key={lang)} value={lang}>{lang}</SelectItem>
+                          <SelectItem key={lang} value={lang}>{lang}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -2279,7 +2227,7 @@ export default function EditBook() {
                               onClick={() => {
                                 form.setValue("seriesTitle", "");
                                 form.setValue("seriesNumber", null);
-                                toast.success({
+                                toast({
                                   title: "Livre retiré de la série",
                                   description: "Le livre a été retiré de la série avec succès.",
                                 )};
@@ -2313,7 +2261,7 @@ export default function EditBook() {
                           <SelectContent>
                             {userSeries.length > 0 ? (
                               userSeries.map((series: any) => (
-                                <SelectItem key={series.id)} value={series.title}>
+                                <SelectItem key={series.id} value={series.title}>
                                   {series.title}
                                 </SelectItem>
                               ))
@@ -2490,7 +2438,7 @@ export default function EditBook() {
                               <SelectContent>
                                 {authors.length > 0 ? (
                                   authors.map((author) => (
-                                    <SelectItem key={author.id)} value={author.id}>
+                                    <SelectItem key={author.id} value={author.id}>
                                       {author.fullName}
                                     </SelectItem>
                                   ))
@@ -2534,7 +2482,7 @@ export default function EditBook() {
                       <Label className="font-medium text-[14px]">Contributors <span className="text-sm font-normal text-gray-500">(Optional)</span></Label>
                       
                       {contributors.map((contributor, index) => (
-                    <div key={contributor.id)} className="grid grid-cols-7 gap-3 mt-2 items-center">
+                    <div key={contributor.id} className="grid grid-cols-7 gap-3 mt-2 items-center">
                       <Select 
                         value={contributor.role} 
                         onValueChange={ (value) => updateContributor(contributor.id, 'role', value)}
@@ -2883,7 +2831,7 @@ export default function EditBook() {
                     </SelectTrigger>
                     <SelectContent>
                       {marketplaces.map((marketplace) => (
-                        <SelectItem key={marketplace)} value={marketplace}>{marketplace}</SelectItem>
+                        <SelectItem key={marketplace} value={marketplace}>{marketplace}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -2907,7 +2855,7 @@ export default function EditBook() {
                     <div className="space-y-2">
                       {categories.length > 0 ? (
                         categories.map((category, index) => (
-                          <div key={index)} className="text-sm text-gray-700 flex items-center">
+                          <div key={index} className="text-sm text-gray-700 flex items-center">
                             <span className="text-gray-500">Books › </span>
                             <span className="text-gray-700">{category}</span>
                             <button 
@@ -2999,7 +2947,7 @@ export default function EditBook() {
                   </p>
                   <div className="flex flex-wrap gap-2 mb-2">
                     {keywords.map((keyword) => (
-                      <Badge key={keyword)} variant="secondary" className="flex items-center gap-1">
+                      <Badge key={keyword} variant="secondary" className="flex items-center gap-1">
                         {keyword}
                         <X 
                           className="w-3 h-3 cursor-pointer" 
@@ -3602,7 +3550,7 @@ export default function EditBook() {
                     </SelectTrigger>
                     <SelectContent>
                       {marketplaces.map((marketplace) => (
-                        <SelectItem key={marketplace)} value={marketplace}>{marketplace}</SelectItem>
+                        <SelectItem key={marketplace} value={marketplace}>{marketplace}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -3919,7 +3867,7 @@ export default function EditBook() {
                 
                 <div className="space-y-2">
                   {tempUISelections.map((categoryPath, index) => (
-                    <div key={index)} className="flex items-center justify-between text-sm">
+                    <div key={index} className="flex items-center justify-between text-sm">
                       <span className="text-gray-700">{categoryPath}</span>
                       <button 
                         type="button"
@@ -3971,7 +3919,7 @@ export default function EditBook() {
                   <p className="font-medium text-red-800 mb-2">Incompatible categories:</p>
                   <ul className="space-y-1 text-red-700">
                     {incompatibleCategories.map((category, index) => (
-                      <li key={index)} className="flex items-start">
+                      <li key={index} className="flex items-start">
                         <span className="text-red-500 mr-2 mt-0.5">•</span>
                         <span className="break-words">{category}</span>
                       </li>
@@ -4016,7 +3964,7 @@ export default function EditBook() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {trimSizes.mostPopular.map((size) => (
                   <button
-                    key={size.id)}
+                    key={size.id}
                     onClick={ () => setSelectedTrimSize(size.id )}
                     className={`p-3 text-center border rounded-md text-sm transition-colors ${
                       selectedTrimSize === size.id
@@ -4039,7 +3987,7 @@ export default function EditBook() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {trimSizes.moreStandard.map((size) => (
                   <button
-                    key={size.id)}
+                    key={size.id}
                     onClick={ () => setSelectedTrimSize(size.id )}
                     className={`p-3 text-center border rounded-md text-sm transition-colors ${
                       selectedTrimSize === size.id
@@ -4063,7 +4011,7 @@ export default function EditBook() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {trimSizes.nonStandard.map((size) => (
                   <button
-                    key={size.id)}
+                    key={size.id}
                     onClick={ () => setSelectedTrimSize(size.id )}
                     className={`p-3 text-center border rounded-md text-sm transition-colors ${
                       selectedTrimSize === size.id

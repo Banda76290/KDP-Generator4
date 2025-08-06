@@ -47,7 +47,8 @@ export default function EditProject() {
     if (project) {
       form.reset({
         name: (project as any).name || "",
-        description: (project as any).description || "",)};
+        description: (project as any).description || ""
+      });
     }
   }, [project, form]);
 
@@ -56,7 +57,8 @@ export default function EditProject() {
       console.log('Updating project:', projectId, data);
       
       const updatedProject = await apiRequest(`/api/projects/${projectId)}`, { method: "PUT", body: JSON.stringify({ name: data.name,
-        description: data.description,)}});
+        description: data.description
+      })});
       
       console.log('Project updated:', updatedProject);
       return updatedProject;
@@ -64,7 +66,7 @@ export default function EditProject() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"])};
       queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId] };
-      toast.success({
+      toast({
         title: "Project Updated",
         description: "Your project has been updated successfully.",
       };
@@ -72,9 +74,10 @@ export default function EditProject() {
     },
     onError: (error) => {
       console.error('Project update error:', error);
-      toast.error({
+      toast({
         title: "Error",
-        description: error.message || "Failed to update project",)};
+        description: error.message || "Failed to update project"
+      });
     },
   });
 

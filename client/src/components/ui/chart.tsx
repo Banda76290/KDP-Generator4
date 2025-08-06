@@ -214,7 +214,8 @@ const ChartTooltipContent = React.forwardRef<
                               "w-1": indicator === "line",
                               "w-0 border-[1.5px] border-dashed bg-transparent":
                                 indicator === "dashed",
-                              "my-0.5": nestLabel && indicator === "dashed",)}
+                              "my-0.5": nestLabel && indicator === "dashed"
+      })
                           )}
                           style={
                             {
@@ -301,7 +302,8 @@ const ChartLegendContent = React.forwardRef<
                 <div
                   className="h-2 w-2 shrink-0 rounded-[2px]"
                   style={{
-                    backgroundColor: item.color,)}}
+                    backgroundColor: item.color
+      })}
                 />
               )}
               {itemConfig?.label}

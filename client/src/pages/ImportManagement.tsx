@@ -84,7 +84,8 @@ export default function ImportManagement() {
       formData.append('file', file);
       return apiRequest('/api/kdp-imports/upload', {
         method: 'POST',
-        body: formData,)};
+        body: formData
+      });
     },
     onSuccess: async (data) => { toast({
         title: "File uploaded successfully",
@@ -109,7 +110,8 @@ export default function ImportManagement() {
       toast({
         title: "Upload failed",
         description: error.message || "Failed to upload file",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
       setSelectedFile(null);
     },
   });
@@ -124,14 +126,17 @@ export default function ImportManagement() {
     onSuccess: () => {
       toast({
         title: "Import deleted",
-        description: "Import and all associated data have been removed.",)};
+        description: "Import and all associated data have been removed.",
+        variant: "destructive",
+      });
       queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] };
     },
     onError: (error: any) => {
       toast({
         title: "Delete failed",
         description: error.message || "Failed to delete import",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
     },
   });
 
@@ -157,7 +162,8 @@ export default function ImportManagement() {
       toast({
         title: "Invalid file type",
         description: "Please select an Excel (.xlsx, .xls) or CSV file.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
       return;
     }
 
@@ -166,7 +172,8 @@ export default function ImportManagement() {
       toast({
         title: "File too large",
         description: "Maximum file size is 10MB.",
-        variant: "destructive",)};
+        variant: "destructive"
+      });
       return;
     }
 
@@ -244,7 +251,8 @@ export default function ImportManagement() {
             toast({
               title: "Import failed",
               description: "Check the error log for details",
-              variant: "destructive",)};
+              variant: "destructive"
+      });
           }
         }
       } catch (error) {
@@ -385,7 +393,7 @@ export default function ImportManagement() {
           ) : (
             <div className="space-y-4">
               {imports.map((importRecord) => (
-                <div key={importRecord.id)} className="border rounded-lg p-4">
+                <div key={importRecord.id} className="border rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
@@ -480,7 +488,7 @@ export default function ImportManagement() {
                           <h4 className="font-medium text-red-600">Error Log</h4>
                           <div className="bg-red-50 dark:bg-red-950 p-3 rounded text-sm max-h-40 overflow-y-auto">
                             {importProgress.errorLog.map((error, index) => (
-                              <div key={index)} className="mb-1 text-red-700 dark:text-red-300">
+                              <div key={index} className="mb-1 text-red-700 dark:text-red-300">
                                 {error}
                               </div>
                             ))}

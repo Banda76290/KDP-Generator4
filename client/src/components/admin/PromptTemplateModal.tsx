@@ -186,7 +186,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                   </SelectTrigger>
                   <SelectContent>
                     {AI_FUNCTIONS.map(func => (
-                      <SelectItem key={func.value)} value={func.value}>
+                      <SelectItem key={func.value} value={func.value}>
                         <div>
                           <div className="font-medium">{func.label}</div>
                           <div className="text-xs text-muted-foreground">{func.description}</div>
@@ -207,7 +207,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
                   </SelectTrigger>
                   <SelectContent>
                     {AI_MODELS.map(model => (
-                      <SelectItem key={model.value)} value={model.value}>
+                      <SelectItem key={model.value} value={model.value}>
                         {model.label} (max {model.maxTokens} tokens)
                       </SelectItem>
                     ))}
@@ -263,7 +263,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
               <div className="flex gap-2 mb-2">
                 {formData.variables?.map(variable => (
                   <Button
-                    key={variable.name)}
+                    key={variable.name}
                     variant="outline"
                     size="sm"
                     onClick={ () => insertVariableInPrompt(variable.name, true )}
@@ -286,7 +286,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
               <div className="flex gap-2 mb-2">
                 {formData.variables?.map(variable => (
                   <Button
-                    key={variable.name)}
+                    key={variable.name}
                     variant="outline"
                     size="sm"
                     onClick={ () => insertVariableInPrompt(variable.name, false )}
@@ -311,7 +311,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
               </div>
               <div className="flex flex-wrap gap-1">
                 {formData.variables?.map(variable => (
-                  <Badge key={variable.name)} variant="secondary" className="text-xs">
+                  <Badge key={variable.name} variant="secondary" className="text-xs">
                     {'{' + variable.name + '}'}
                   </Badge>
                 ))}
@@ -330,7 +330,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
 
             <div className="space-y-3">
               {formData.variables?.map((variable, index) => (
-                <Card key={index)}>
+                <Card key={index}>
                   <CardContent className="p-4">
                     <div className="grid grid-cols-12 gap-3 items-end">
                       <div className="col-span-3">
@@ -407,7 +407,7 @@ export default function PromptTemplateModal({ template, onSave, onClose, isLoadi
               <div className="grid grid-cols-2 gap-2">
                 {COMMON_VARIABLES.map(variable => (
                   <Button
-                    key={variable.name)}
+                    key={variable.name}
                     variant="outline"
                     size="sm"
                     onClick={ () => addVariable(variable )}

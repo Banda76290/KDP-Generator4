@@ -129,7 +129,7 @@ export default function Subscription() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
               {plans.map((plan) => (
                 <Card 
-                  key={plan.name)} 
+                  key={plan.name} 
                   className={`relative ${plan.popular ? 'border-primary shadow-lg scale-105' : ''} ${plan.current ? 'border-secondary' : ''}`}
                 >
                   { plan.popular && (
@@ -155,13 +155,13 @@ export default function Subscription() {
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
                       {plan.features.map((feature) => (
-                        <div key={feature)} className="flex items-center gap-2">
+                        <div key={feature} className="flex items-center gap-2">
                           <Check className="h-4 w-4 text-success" />
                           <span className="text-sm">{feature}</span>
                         </div>
                       ))}
                       {plan.limitations.map((limitation) => (
-                        <div key={limitation)} className="flex items-center gap-2">
+                        <div key={limitation} className="flex items-center gap-2">
                           <X className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm text-muted-foreground">{limitation}</span>
                         </div>
