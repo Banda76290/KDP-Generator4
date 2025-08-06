@@ -281,7 +281,7 @@ export class CronService {
 
     await db.update(cronJobs)
       .set({ 
-        intervalHours,
+        intervalHours: intervalHours.toString(),
         updatedAt: new Date(),
         nextRun: job[0].enabled ? new Date(Date.now() + (intervalHours * 60 * 60 * 1000)) : null
       })
