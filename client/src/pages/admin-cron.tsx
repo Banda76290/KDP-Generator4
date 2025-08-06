@@ -228,7 +228,7 @@ export default function AdminCron() {
         description: "La planification de la tâche a été mise à jour avec succès.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/jobs"] });
-      setEditingJob(null);
+
     },
     onError: () => {
       toast({
@@ -366,7 +366,7 @@ export default function AdminCron() {
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                      <div className="space-y-4">
                         <IntervalSelector 
                           job={job}
                           onUpdate={(intervalHours) => {
@@ -376,45 +376,48 @@ export default function AdminCron() {
                             });
                           }}
                         />
-                        <div>
-                          <span className="text-muted-foreground">État:</span>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Switch
-                              checked={job.enabled}
-                              onCheckedChange={(enabled) => toggleJobMutation.mutate({
-                                jobId: job.id,
-                                enabled
-                              })}
-                            />
-                            {job.enabled ? (
-                              <div className="flex items-center gap-1">
-                                <Power className="h-3 w-3 text-green-500" />
-                                <span className="text-xs text-green-600">Actif</span>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-1">
-                                <Power className="h-3 w-3 text-red-500" />
-                                <span className="text-xs text-red-600">Désactivé</span>
-                              </div>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">État:</span>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Switch
+                                checked={job.enabled}
+                                onCheckedChange={(enabled) => toggleJobMutation.mutate({
+                                  jobId: job.id,
+                                  enabled
+                                })}
+                              />
+                              {job.enabled ? (
+                                <div className="flex items-center gap-1">
+                                  <Power className="h-3 w-3 text-green-500" />
+                                  <span className="text-xs text-green-600">Actif</span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-1">
+                                  <Power className="h-3 w-3 text-red-500" />
+                                  <span className="text-xs text-red-600">Désactivé</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Dernière exécution:</span>
+                            <p className="text-xs">{job.lastRun ? new Date(job.lastRun).toLocaleString('fr-FR') : 'Jamais'}</p>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Prochaine exécution:</span>
+                            <p className="text-xs">{job.nextRun ? new Date(job.nextRun).toLocaleString('fr-FR') : 'N/A'}</p>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Exécutions:</span>
+                            <p className="text-xs">{job.runCount || 0} fois</p>
+                            {job.lastError && (
+                              <p className="text-xs text-red-500 mt-1" title={job.lastError}>
+                                Dernière erreur: {job.lastError.substring(0, 30)}...
+                              </p>
                             )}
                           </div>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Dernière exécution:</span>
-                          <p className="text-xs">{job.lastRun ? new Date(job.lastRun).toLocaleString('fr-FR') : 'Jamais'}</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Prochaine exécution:</span>
-                          <p className="text-xs">{job.nextRun ? new Date(job.nextRun).toLocaleString('fr-FR') : 'N/A'}</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Exécutions:</span>
-                          <p className="text-xs">{job.runCount || 0} fois</p>
-                          {job.lastError && (
-                            <p className="text-xs text-red-500 mt-1" title={job.lastError}>
-                              Dernière erreur: {job.lastError.substring(0, 30)}...
-                            </p>
-                          )}
                         </div>
                       </div>
                     </div>
