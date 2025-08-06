@@ -1,21 +1,28 @@
 #!/usr/bin/env node
 
 // Production startup script for KDP Generator
-// This script ensures tsx is properly loaded and available
+// This script ensures tsx is available in production
 
-const { spawn } = require('child_process');
-const path = require('path');
+import { spawn } from 'child_process';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 console.log('🚀 Starting KDP Generator in production mode...');
 
 // Set production environment
 process.env.NODE_ENV = 'production';
 
-// Start the server using npx to ensure tsx is found
-const serverProcess = spawn('npx', ['tsx', 'server/index.ts'], {
+// Try to find tsx in node_modules
+const tsxPath = join(__dirname, 'node_modules', '.bin', 'tsx');
+
+// Start the server using the local tsx installation
+const serverProcess = spawn(tsxPath, ['server/index.ts'], {
   stdio: 'inherit',
   env: process.env,
-  shell: true
+  shell: false
 });
 
 serverProcess.on('error', (err) => {
