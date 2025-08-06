@@ -810,7 +810,7 @@ export const cronJobs = pgTable("cron_jobs", {
   name: varchar("name").notNull(),
   description: text("description"),
   enabled: boolean("enabled").default(false),
-  intervalHours: integer("interval_hours").default(24),
+  intervalHours: decimal("interval_hours", { precision: 10, scale: 2 }).default("24"),
   lastRun: timestamp("last_run"),
   nextRun: timestamp("next_run"),
   lastStatus: varchar("last_status").default("stopped"), // running, stopped, error, completed

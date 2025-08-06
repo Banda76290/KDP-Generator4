@@ -2783,9 +2783,13 @@ Please respond with only a JSON object containing the translated fields. For key
       if (!intervalHours || intervalHours <= 0) {
         return res.status(400).json({ message: 'Invalid interval hours' });
       }
+
+      // Arrondir et limiter les valeurs raisonnables (max 1 an = 8760 heures)
+      const sanitizedHours = Math.min(Math.max(Math.round(intervalHours * 100) / 100, 0.01), 8760);
+      console.log('Sanitized hours:', sanitizedHours);
       
-      await cronService.updateJobConfig(jobId, intervalHours);
-      systemLog(`Cron job interval updated: ${jobId} to ${intervalHours}h`, 'info', 'CRON');
+      await cronService.updateJobConfig(jobId, sanitizedHours);
+      systemLog(`Cron job interval updated: ${jobId} to ${sanitizedHours}h`, 'info', 'CRON');
       
       res.json({ message: 'Job configuration updated successfully' });
     } catch (error) {

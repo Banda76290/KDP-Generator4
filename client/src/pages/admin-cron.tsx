@@ -74,8 +74,15 @@ function IntervalSelector({ job, onUpdate }: {
                       selectedHours + 
                       selectedMinutes / 60 + 
                       selectedSeconds / 3600;
+    
+    console.log('Calculated total hours:', totalHours);
+    console.log('Selected values:', { selectedMonths, selectedDays, selectedHours, selectedMinutes, selectedSeconds });
+    
     if (totalHours > 0) {
-      onUpdate(totalHours);
+      // Arrondir à 2 décimales pour éviter les problèmes de précision
+      const roundedHours = Math.round(totalHours * 100) / 100;
+      console.log('Rounded hours:', roundedHours);
+      onUpdate(roundedHours);
     }
   };
 
