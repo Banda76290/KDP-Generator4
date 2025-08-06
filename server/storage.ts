@@ -2352,7 +2352,7 @@ export class DatabaseStorage implements IStorage {
               exchangeRate = rate;
             }
           } catch (error) {
-            console.warn(`[CONSOLIDATION] Échec conversion ${data.currency} -> USD pour ${data.asin}:`, error);
+            console.warn(`[CONSOLIDATION] Échec conversion ${data.currency} -> USD pour ${consolidatedKey}:`, error);
           }
         }
 
@@ -2363,7 +2363,7 @@ export class DatabaseStorage implements IStorage {
         await db
           .insert(consolidatedSalesData)
           .values({
-            userId,
+            userId: userId,
             asin: consolidatedKey,
             title: `Paiements agrégés ${data.currency}`,
             authorName: 'Données de paiement',
@@ -2395,7 +2395,7 @@ export class DatabaseStorage implements IStorage {
         processed++;
         if (data.totalRoyalty > 0) updated++;
       } catch (error) {
-        console.error(`[CONSOLIDATION] Erreur pour ${data.asin} (${data.currency}):`, error);
+        console.error(`[CONSOLIDATION] Erreur pour ${consolidatedKey} (${data.currency}):`, error);
       }
     }
 
@@ -2404,6 +2404,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getConsolidatedSalesOverview(userId: string): Promise<any> {
+    console.log(`[CONSOLIDATION] Récupération overview pour utilisateur: ${userId}`);
+    
     // Récupérer les données consolidées par devise
     const salesByCurrency = await db.select({
       currency: consolidatedSalesData.currency,
@@ -2415,6 +2417,8 @@ export class DatabaseStorage implements IStorage {
     .where(eq(consolidatedSalesData.userId, userId))
     .groupBy(consolidatedSalesData.currency);
 
+    console.log(`[CONSOLIDATION] Trouvé ${salesByCurrency.length} devises`);
+
     // Statistiques générales
     const totalStats = await db.select({
       totalRecords: sql<number>`COUNT(*)`,
@@ -2423,7 +2427,7 @@ export class DatabaseStorage implements IStorage {
     }).from(consolidatedSalesData)
     .where(eq(consolidatedSalesData.userId, userId));
 
-    return {
+    const result = {
       salesByCurrency: salesByCurrency.map(item => ({
         currency: item.currency,
         amount: Number(item.totalRoyalty),
@@ -2435,6 +2439,9 @@ export class DatabaseStorage implements IStorage {
       uniqueBooks: Number(totalStats[0]?.uniqueBooks || 0),
       totalRoyaltiesUSD: Number(totalStats[0]?.totalUSDRevenue || 0)
     };
+
+    console.log(`[CONSOLIDATION] Retour: ${result.totalRoyaltiesUSD} USD total`);
+    return result;
   }
 }
 
