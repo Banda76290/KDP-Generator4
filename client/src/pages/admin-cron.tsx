@@ -4,8 +4,11 @@ import Layout from "@/components/Layout";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Clock, Play, Pause, RefreshCw, Calendar, AlertCircle, CheckCircle } from "lucide-react";
+import { Clock, Play, Pause, RefreshCw, Calendar, AlertCircle, CheckCircle, Settings } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface CronJob {
@@ -16,8 +19,10 @@ interface CronJob {
   enabled: boolean;
   lastRun?: string;
   nextRun?: string;
-  status: 'running' | 'stopped' | 'error';
-  logs?: string[];
+  status: 'running' | 'stopped' | 'error' | 'completed';
+  intervalHours?: number;
+  runCount?: number;
+  lastError?: string;
 }
 
 export default function AdminCron() {
@@ -41,10 +46,7 @@ export default function AdminCron() {
     mutationFn: async ({ jobId, enabled }: { jobId: string; enabled: boolean }) => {
       return apiRequest(`/api/admin/cron/jobs/${jobId}/toggle`, {
         method: 'POST',
-        body: JSON.stringify({ enabled }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        body: { enabled }
       });
     },
     onSuccess: () => {
@@ -58,6 +60,30 @@ export default function AdminCron() {
       toast({
         title: "Error",
         description: "Failed to update the scheduled task.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update job configuration
+  const updateConfigMutation = useMutation({
+    mutationFn: async ({ jobId, intervalHours }: { jobId: string; intervalHours: number }) => {
+      return apiRequest(`/api/admin/cron/jobs/${jobId}/config`, {
+        method: 'POST',
+        body: { intervalHours }
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Configuration Updated",
+        description: "The job schedule has been updated successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/jobs"] });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update job configuration.",
         variant: "destructive",
       });
     },
@@ -180,46 +206,60 @@ export default function AdminCron() {
                             <Play className="h-3 w-3 mr-1" />
                             Run Now
                           </Button>
-                          <Button
-                            size="sm"
-                            variant={job.enabled ? "destructive" : "default"}
-                            onClick={() => toggleJobMutation.mutate({
-                              jobId: job.id,
-                              enabled: !job.enabled
-                            })}
-                            disabled={toggleJobMutation.isPending}
-                          >
-                            {job.enabled ? (
-                              <>
-                                <Pause className="h-3 w-3 mr-1" />
-                                Disable
-                              </>
-                            ) : (
-                              <>
-                                <Play className="h-3 w-3 mr-1" />
-                                Enable
-                              </>
-                            )}
-                          </Button>
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
                         <div>
-                          <span className="text-muted-foreground">Schedule:</span>
-                          <p className="font-mono">{job.schedule}</p>
+                          <span className="text-muted-foreground">Interval:</span>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Input
+                              type="number"
+                              min="1"
+                              max="168"
+                              value={job.intervalHours || 24}
+                              onChange={(e) => {
+                                const hours = parseInt(e.target.value);
+                                if (hours >= 1 && hours <= 168) {
+                                  updateConfigMutation.mutate({
+                                    jobId: job.id,
+                                    intervalHours: hours
+                                  });
+                                }
+                              }}
+                              className="w-16 h-8 text-xs"
+                            />
+                            <span className="text-xs text-muted-foreground">hours</span>
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Enabled:</span>
+                          <div className="mt-1">
+                            <Switch
+                              checked={job.enabled}
+                              onCheckedChange={(enabled) => toggleJobMutation.mutate({
+                                jobId: job.id,
+                                enabled
+                              })}
+                            />
+                          </div>
                         </div>
                         <div>
                           <span className="text-muted-foreground">Last Run:</span>
-                          <p>{job.lastRun ? new Date(job.lastRun).toLocaleString() : 'Never'}</p>
+                          <p className="text-xs">{job.lastRun ? new Date(job.lastRun).toLocaleString() : 'Never'}</p>
                         </div>
                         <div>
                           <span className="text-muted-foreground">Next Run:</span>
-                          <p>{job.nextRun ? new Date(job.nextRun).toLocaleString() : 'N/A'}</p>
+                          <p className="text-xs">{job.nextRun ? new Date(job.nextRun).toLocaleString() : 'N/A'}</p>
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Status:</span>
-                          <p className="capitalize">{job.status}</p>
+                          <span className="text-muted-foreground">Runs:</span>
+                          <p className="text-xs">{job.runCount || 0} times</p>
+                          {job.lastError && (
+                            <p className="text-xs text-red-500 mt-1" title={job.lastError}>
+                              Last error: {job.lastError.substring(0, 30)}...
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>

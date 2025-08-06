@@ -797,8 +797,50 @@ export const exchangeRates = pgTable("exchange_rates", {
   index("idx_exchange_rates_currencies_date").on(table.fromCurrency, table.toCurrency, table.date),
 ]);
 
+// Cron Jobs Configuration table
+export const cronJobsEnum = pgEnum("cron_job_type", [
+  "exchange_rates_update",
+  "data_cleanup",
+  "backup_generation"
+]);
+
+export const cronJobs = pgTable("cron_jobs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  jobType: cronJobsEnum("job_type").notNull().unique(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  enabled: boolean("enabled").default(false),
+  intervalHours: integer("interval_hours").default(24),
+  lastRun: timestamp("last_run"),
+  nextRun: timestamp("next_run"),
+  lastStatus: varchar("last_status").default("stopped"), // running, stopped, error, completed
+  lastError: text("last_error"),
+  runCount: integer("run_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Cron Job Logs table
+export const cronJobLogs = pgTable("cron_job_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  jobId: varchar("job_id").notNull().references(() => cronJobs.id, { onDelete: "cascade" }),
+  jobType: cronJobsEnum("job_type").notNull(),
+  status: varchar("status").notNull(), // started, completed, failed
+  message: text("message"),
+  error: text("error"),
+  duration: integer("duration_ms"), // Duration in milliseconds
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
 export type InsertExchangeRate = typeof exchangeRates.$inferInsert;
 export type ExchangeRate = typeof exchangeRates.$inferSelect;
+
+// Cron Job types
+export type CronJob = typeof cronJobs.$inferSelect;
+export type InsertCronJob = typeof cronJobs.$inferInsert;
+export type CronJobLog = typeof cronJobLogs.$inferSelect;
+export type InsertCronJobLog = typeof cronJobLogs.$inferInsert;
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
 export type InsertBook = z.infer<typeof insertBookSchema>;
@@ -935,4 +977,20 @@ export type InsertKdpImportData = z.infer<typeof insertKdpImportDataSchema>;
 export type KdpImportWithRelations = KdpImport & {
   user: User;
   importData: KdpImportData[];
+};
+
+// Cron Job schemas
+export const insertCronJobSchema = createInsertSchema(cronJobs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCronJobLogSchema = createInsertSchema(cronJobLogs).omit({
+  id: true,
+});
+
+// Cron Job with relations
+export type CronJobWithLogs = CronJob & {
+  logs: CronJobLog[];
 };
