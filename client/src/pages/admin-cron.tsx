@@ -207,6 +207,7 @@ export default function AdminCron() {
       toast({
         title: "Tâche Cron Mise à Jour",
         description: "La tâche planifiée a été mise à jour avec succès.",
+        variant: "success",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/jobs"] });
     },
@@ -232,6 +233,7 @@ export default function AdminCron() {
       toast({
         title: "Configuration Mise à Jour",
         description: "La planification de la tâche a été mise à jour avec succès.",
+        variant: "success",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/jobs"] });
 
@@ -256,6 +258,7 @@ export default function AdminCron() {
       toast({
         title: "Tâche Démarrée",
         description: "La tâche planifiée a été démarrée manuellement.",
+        variant: "success",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/jobs"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/logs"] });
