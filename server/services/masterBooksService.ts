@@ -12,10 +12,67 @@ export class MasterBooksService {
   }
 
   /**
+   * Vérifie si un import est un doublon complet d'un autre import déjà traité
+   */
+  private static async isImportDuplicate(importId: string, userId: string): Promise<boolean> {
+    const currentImportData = await db.select()
+      .from(kdpImportData)
+      .where(and(
+        eq(kdpImportData.importId, importId),
+        eq(kdpImportData.userId, userId),
+        sql`${kdpImportData.asin} IS NOT NULL AND ${kdpImportData.asin} != ''`
+      ));
+
+    if (currentImportData.length === 0) return false;
+
+    // Créer une empreinte unique de cet import basée sur les données clés
+    const currentFingerprint = currentImportData
+      .map(row => `${row.asin}:${row.royalty}:${row.salesDate}:${row.marketplace}:${row.format}`)
+      .sort()
+      .join('|');
+
+    // Vérifier s'il existe déjà un import avec la même empreinte
+    const allImports = await db.selectDistinct({ importId: kdpImportData.importId })
+      .from(kdpImportData)
+      .where(and(
+        eq(kdpImportData.userId, userId),
+        sql`${kdpImportData.importId} != ${importId}`
+      ));
+
+    for (const existingImport of allImports) {
+      const existingData = await db.select()
+        .from(kdpImportData)
+        .where(and(
+          eq(kdpImportData.importId, existingImport.importId),
+          eq(kdpImportData.userId, userId),
+          sql`${kdpImportData.asin} IS NOT NULL AND ${kdpImportData.asin} != ''`
+        ));
+
+      const existingFingerprint = existingData
+        .map(row => `${row.asin}:${row.royalty}:${row.salesDate}:${row.marketplace}:${row.format}`)
+        .sort()
+        .join('|');
+
+      if (currentFingerprint === existingFingerprint) {
+        console.log(`[MASTER_BOOKS] Import ${importId.slice(0, 8)} est un doublon complet de ${existingImport.importId.slice(0, 8)}, ignoré`);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * Met à jour ou crée un enregistrement master book à partir des données d'import KDP
    */
   static async updateFromImportData(userId: string, importId: string): Promise<void> {
     console.log(`[MASTER_BOOKS] Début de la mise à jour pour l'import ${importId.slice(0, 8)}...`);
+
+    // Vérifier si cet import est un doublon complet d'un autre import
+    if (await this.isImportDuplicate(importId, userId)) {
+      console.log(`[MASTER_BOOKS] Import ${importId.slice(0, 8)} ignoré car c'est un doublon complet`);
+      return;
+    }
 
     // Récupérer toutes les données de cet import qui ont un ASIN
     const importData = await db.select()
