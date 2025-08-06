@@ -57,7 +57,7 @@ export default function AdminBlogPosts() {
 
   const deletePostMutation = useMutation({
     mutationFn: async (postId: string) => {
-      return await apiRequest(`/api/admin/blog/posts/${postId}`, "DELETE");
+      return await apiRequest(`/api/admin/blog/posts/${postId}`, { method: "DELETE" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/posts"] });
@@ -77,7 +77,7 @@ export default function AdminBlogPosts() {
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ postId, status }: { postId: string; status: string }) => {
-      return await apiRequest(`/api/admin/blog/posts/${postId}/status`, "PUT", { status });
+      return await apiRequest(`/api/admin/blog/posts/${postId}/status`, { method: "PUT", body: { status } });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/posts"] });
