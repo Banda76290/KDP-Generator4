@@ -9,7 +9,7 @@ export default function SalesChart() {
   
   const { data: stats } = useQuery({
     queryKey: ["/api/dashboard/stats"],
-  };
+  });
 
   // Fallback data structure if no stats available
   const chartData = stats?.salesOverTime || [

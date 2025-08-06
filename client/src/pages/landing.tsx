@@ -16,7 +16,7 @@ export default function Landing() {
         ogType="website"
       />
       <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-orange-50">
-      {/* Header */)}
+      {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">

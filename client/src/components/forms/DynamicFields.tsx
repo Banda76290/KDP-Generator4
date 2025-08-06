@@ -54,12 +54,12 @@ export default function DynamicFields<T>({
           className="text-primary hover:text-primary/80"
         >
           <Plus className="w-4 h-4 mr-1" />
-          Add { label.slice(0, -1)}
+          Add {label.slice(0, -1)}
         </Button>
       </div>
 
       <div className="space-y-3">
-        { fields.length === 0 ? (
+        {fields.length === 0 ? (
           <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
             <p className="mb-2">No {label.toLowerCase()} added yet</p>
             <Button
@@ -70,7 +70,7 @@ export default function DynamicFields<T>({
               className="text-primary hover:text-primary/80"
             >
               <Plus className="w-4 h-4 mr-1" />
-              Add First { label.slice(0, -1)}
+              Add First {label.slice(0, -1)}
             </Button>
           </div>
         ) : (

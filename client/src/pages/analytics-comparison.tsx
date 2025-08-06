@@ -33,17 +33,17 @@ interface NormalizedOverview {
 export default function AnalyticsComparison() {
   const { data: legacyData, isLoading: legacyLoading, refetch: refetchLegacy } = useQuery<LegacyOverview>({
     queryKey: ['/api/analytics/overview'],
-  };
+  });
 
   const { data: normalizedData, isLoading: normalizedLoading, refetch: refetchNormalized } = useQuery<NormalizedOverview>({
     queryKey: ['/api/analytics/overview-normalized'],
-  };
+  });
 
   const migrateMutation = async () => {
     try {
       const response = await fetch('/api/analytics/migrate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json')}
+        headers: { 'Content-Type': 'application/json' }
       });
       const result = await response.json();
       
@@ -59,7 +59,8 @@ export default function AnalyticsComparison() {
       toast({
         title: "Erreur de migration",
         description: "Impossible de migrer les données",
-        variant: "destructive",)};
+        variant: "destructive",
+      });
     }
   };
 
@@ -69,7 +70,7 @@ export default function AnalyticsComparison() {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 2,
-    ).format(num);
+    }).format(num);
   };
 
   return (
@@ -124,7 +125,7 @@ export default function AnalyticsComparison() {
                   <>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Total Records:</span>
-                      <Badge variant="outline">{legacyData.totalRecords)}</Badge>
+                      <Badge variant="outline">{legacyData.totalRecords}</Badge>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Revenue (USD):</span>
@@ -171,7 +172,7 @@ export default function AnalyticsComparison() {
                   <>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Total Records:</span>
-                      <Badge variant="outline">{normalizedData.totalRecords)}</Badge>
+                      <Badge variant="outline">{normalizedData.totalRecords}</Badge>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Livres uniques:</span>
@@ -209,7 +210,7 @@ export default function AnalyticsComparison() {
               <CardContent>
                 <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                   {normalizedData.royaltiesByCurrency.map((curr, index) => (
-                    <div key={index)} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="font-mono">
                           {curr.currency}
@@ -220,7 +221,7 @@ export default function AnalyticsComparison() {
                       </div>
                       <div className="text-right">
                         <div className="font-medium">
-                          { formatCurrency(curr.originalAmount, curr.currency)}
+                          {formatCurrency(curr.originalAmount, curr.currency)}
                         </div>
                       </div>
                     </div>
@@ -245,7 +246,7 @@ export default function AnalyticsComparison() {
                   <div className="space-y-2">
                     <h4 className="font-medium">Métriques Principales</h4>
                     <div className="text-2xl font-bold text-green-600">
-                      ${legacyData.totalRevenueUSD)}
+                      ${legacyData.totalRevenueUSD}
                     </div>
                     <p className="text-sm text-muted-foreground">
                       Revenue total en USD (après conversion)
@@ -289,7 +290,7 @@ export default function AnalyticsComparison() {
                 <div className="space-y-6">
                   <div className="grid gap-4 md:grid-cols-3">
                     <div className="text-center p-4 border rounded-lg">
-                      <div className="text-2xl font-bold">{normalizedData.totalRecords)}</div>
+                      <div className="text-2xl font-bold">{normalizedData.totalRecords}</div>
                       <p className="text-sm text-muted-foreground">Transactions</p>
                     </div>
                     <div className="text-center p-4 border rounded-lg">
@@ -306,7 +307,7 @@ export default function AnalyticsComparison() {
                     <h4 className="font-medium mb-3">Revenus par Devise</h4>
                     <div className="space-y-2">
                       {normalizedData.royaltiesByCurrency.map((curr, index) => (
-                        <div key={index)} className="flex items-center justify-between p-3 border rounded">
+                        <div key={index} className="flex items-center justify-between p-3 border rounded">
                           <div className="flex items-center gap-3">
                             <Badge className="font-mono">{curr.currency}</Badge>
                             <span className="text-sm text-muted-foreground">
@@ -314,7 +315,7 @@ export default function AnalyticsComparison() {
                             </span>
                           </div>
                           <div className="font-medium">
-                            { formatCurrency(curr.originalAmount, curr.currency)}
+                            {formatCurrency(curr.originalAmount, curr.currency)}
                           </div>
                         </div>
                       ))}

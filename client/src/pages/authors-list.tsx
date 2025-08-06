@@ -14,7 +14,7 @@ export default function AuthorsListPage() {
   // Fetch authors with counts
   const { data: authors = [], isLoading: authorsLoading } = useQuery({
     queryKey: ["/api/authors", "withCounts"],
-    queryFn: () => apiRequest("/api/authors?withCounts=true", { method: "GET")},
+    queryFn: () => apiRequest("GET", "/api/authors?withCounts=true"),
   });
 
   return (
@@ -26,7 +26,7 @@ export default function AuthorsListPage() {
             <h1 className="text-3xl font-bold">Authors</h1>
             <p className="text-gray-600 dark:text-gray-400">Manage your publishing authors</p>
           </div>
-          <Button onClick={ () => setLocation("/authors/create")} className="kdp-btn-primary">
+          <Button onClick={() => setLocation("/authors/create")} className="kdp-btn-primary">
             <Plus className="w-4 h-4 mr-2" />
             Create Author
           </Button>
@@ -34,7 +34,7 @@ export default function AuthorsListPage() {
 
         {/* Authors Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          { authorsLoading ? (
+          {authorsLoading ? (
             <div className="col-span-full text-center py-8">Loading authors...</div>
           ) : authors.length === 0 ? (
             <div className="col-span-full text-center py-12">
@@ -43,13 +43,13 @@ export default function AuthorsListPage() {
               <p className="text-gray-500 dark:text-gray-400 mb-4">
                 Get started by creating your first author
               </p>
-              <Button onClick={() => setLocation("/authors/create"))} className="kdp-btn-primary">
+              <Button onClick={() => setLocation("/authors/create")} className="kdp-btn-primary">
                 <Plus className="w-4 h-4 mr-2" />
                 Create First Author
               </Button>
             </div>
           ) : (
-            authors.map((author: AuthorWithRelations & { bookCount: number; projectCount: number } => (
+            authors.map((author: AuthorWithRelations & { bookCount: number; projectCount: number }) => (
               <Card key={author.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center justify-between">
@@ -79,7 +79,7 @@ export default function AuthorsListPage() {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      onClick={() => setLocation(`/authors/${author.id)}`)}
+                      onClick={() => setLocation(`/authors/${author.id}`)}
                       className="flex items-center gap-1"
                     >
                       <Eye className="w-4 h-4" />

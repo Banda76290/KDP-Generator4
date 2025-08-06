@@ -5,7 +5,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recha
 export default function FormatChart() {
   const { data: stats } = useQuery({
     queryKey: ["/api/dashboard/stats"],
-  };
+  });
 
   // Fallback data if no stats available
   const chartData = stats?.formatDistribution || [
@@ -22,7 +22,7 @@ export default function FormatChart() {
       "hsl(262, 83%, 58%)", 
       "hsl(142, 76%, 36%)"
     ][index]
-  });
+  }));
 
   return (
     <Card className="shadow-sm border border-gray-200">
@@ -43,7 +43,7 @@ export default function FormatChart() {
                 dataKey="percentage"
               >
                 {dataWithColors.map((entry, index) => (
-                  <Cell key={`cell-${index)}`} fill={entry.color} />
+                  <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
               <Tooltip 

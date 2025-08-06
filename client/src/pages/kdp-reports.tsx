@@ -17,28 +17,30 @@ export default function KDPReports() {
   const [dragActive, setDragActive] = useState(false);
   const queryClient = useQueryClient();
 
-  const uploadMutation = useMutation({ mutationFn: async (file: File) => {
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('kdpReport', file);
-      return await apiRequest("/api/kdp-reports/upload", { method: "POST", body: JSON.stringify(formData)};
+      return await apiRequest("POST", "/api/kdp-reports/upload", formData);
     },
     onSuccess: async (response) => {
       const result = await response.json();
       toast({
         title: "Upload Successful",
-        description: `Processed ${result.recordsProcessed)} sales records`,
+        description: `Processed ${result.recordsProcessed} sales records`,
       });
       setSelectedFile(null);
       // Invalidate related queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] };
-      queryClient.invalidateQueries({ queryKey: ["/api/sales-data"] };
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/sales-data"] });
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
           description: "You are logged out. Logging in again...",
-          variant: "destructive",)};
+          variant: "destructive",
+        });
         setTimeout(() => {
           window.location.href = "/api/login";
         }, 500);
@@ -48,7 +50,7 @@ export default function KDPReports() {
         title: "Upload Failed",
         description: error.message || "Failed to process KDP report",
         variant: "destructive",
-      };
+      });
     },
   });
 
@@ -57,7 +59,8 @@ export default function KDPReports() {
       toast({
         title: "Unauthorized",
         description: "You are logged out. Logging in again...",
-        variant: "destructive",)};
+        variant: "destructive",
+      });
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
@@ -89,7 +92,8 @@ export default function KDPReports() {
         toast({
           title: "Invalid File Type",
           description: "Please upload an Excel (.xlsx, .xls) or CSV file",
-          variant: "destructive",)};
+          variant: "destructive",
+        });
       }
     }
   };
@@ -104,7 +108,8 @@ export default function KDPReports() {
         toast({
           title: "Invalid File Type",
           description: "Please upload an Excel (.xlsx, .xls) or CSV file",
-          variant: "destructive",)};
+          variant: "destructive",
+        });
       }
     }
   };
@@ -195,7 +200,7 @@ export default function KDPReports() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <FileText className="w-4 h-4 text-gray-500 mr-2" />
-                        <span className="text-sm font-medium">{selectedFile.name)}</span>
+                        <span className="text-sm font-medium">{selectedFile.name}</span>
                       </div>
                       <Button
                         onClick={handleUpload}
@@ -206,7 +211,7 @@ export default function KDPReports() {
                       </Button>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
-                      Size: { (selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                      Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                     </p>
                   </div>
                 )}
