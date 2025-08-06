@@ -24,8 +24,10 @@ const actionTypes = {
 
 let count = 0
 
-function genId() { count = (count + 1) % Number.MAX_SAFE_INTEGER
-  return count.toString()}
+function genId() {
+  count = (count + 1) % Number.MAX_SAFE_INTEGER
+  return count.toString()
+}
 
 type ActionType = typeof actionTypes
 
@@ -62,7 +64,8 @@ const addToRemoveQueue = (toastId: string) => {
     toastTimeouts.delete(toastId)
     dispatch({
       type: "REMOVE_TOAST",
-      toastId: toastId,)}
+      toastId: toastId,
+    })
   }, TOAST_REMOVE_DELAY)
 
   toastTimeouts.set(toastId, timeout)
@@ -80,7 +83,7 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         toasts: state.toasts.map((t) =>
-          t.id === action.toast.id ? { ...t, ...action.toast)} : t
+          t.id === action.toast.id ? { ...t, ...action.toast } : t
         ),
       }
 
