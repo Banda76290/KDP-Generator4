@@ -2727,7 +2727,7 @@ Please respond with only a JSON object containing the translated fields. For key
       
       // Format logs for frontend
       const formattedLogs = logs.map(log => ({
-        job: log.jobType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        job: log.jobType.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
         level: log.status === 'failed' ? 'error' : 'info',
         message: log.message,
         error: log.error,

@@ -45,52 +45,129 @@ const formatInterval = (hours: number): string => {
   }
 };
 
-// Nouvelle interface simplifiée pour l'intervalle
-function IntervalDisplay({ job, onUpdate }: {
+// Interface avec dropdowns séparés pour chaque unité de temps
+function IntervalSelector({ job, onUpdate }: {
   job: CronJob;
   onUpdate: (hours: number) => void;
 }) {
-  const intervals = [
-    { label: '30 secondes', hours: 30 / 3600 },
-    { label: '1 minute', hours: 1 / 60 },
-    { label: '5 minutes', hours: 5 / 60 },
-    { label: '15 minutes', hours: 15 / 60 },
-    { label: '30 minutes', hours: 0.5 },
-    { label: '1 heure', hours: 1 },
-    { label: '2 heures', hours: 2 },
-    { label: '6 heures', hours: 6 },
-    { label: '12 heures', hours: 12 },
-    { label: '1 jour', hours: 24 },
-    { label: '3 jours', hours: 72 },
-    { label: '1 semaine', hours: 168 },
-    { label: '1 mois', hours: 720 }
-  ];
+  const totalHours = job.intervalHours || 24;
+  
+  // Calculer les valeurs actuelles
+  const months = Math.floor(totalHours / (24 * 30));
+  const remainingAfterMonths = totalHours % (24 * 30);
+  const days = Math.floor(remainingAfterMonths / 24);
+  const remainingAfterDays = remainingAfterMonths % 24;
+  const hours = Math.floor(remainingAfterDays);
+  const remainingAfterHours = remainingAfterDays % 1;
+  const minutes = Math.floor(remainingAfterHours * 60);
+  const seconds = Math.round((remainingAfterHours * 60 - minutes) * 60);
 
-  const currentInterval = intervals.find(interval => 
-    Math.abs(interval.hours - (job.intervalHours || 24)) < 0.01
-  );
+  const [selectedMonths, setSelectedMonths] = useState(months);
+  const [selectedDays, setSelectedDays] = useState(days);
+  const [selectedHours, setSelectedHours] = useState(hours);
+  const [selectedMinutes, setSelectedMinutes] = useState(minutes);
+  const [selectedSeconds, setSelectedSeconds] = useState(seconds);
+
+  const handleUpdate = () => {
+    const totalHours = selectedMonths * 24 * 30 + 
+                      selectedDays * 24 + 
+                      selectedHours + 
+                      selectedMinutes / 60 + 
+                      selectedSeconds / 3600;
+    if (totalHours > 0) {
+      onUpdate(totalHours);
+    }
+  };
 
   return (
     <div className="space-y-2">
       <span className="text-muted-foreground text-xs">Intervalle:</span>
-      <Select 
-        value={currentInterval?.hours.toString() || '24'}
-        onValueChange={(value) => {
-          const hours = parseFloat(value);
-          onUpdate(hours);
-        }}
+      <div className="grid grid-cols-5 gap-1">
+        {/* Mois */}
+        <div className="space-y-1">
+          <label className="text-xs text-gray-500">Mois</label>
+          <Select value={selectedMonths.toString()} onValueChange={(value) => setSelectedMonths(parseInt(value))}>
+            <SelectTrigger className="w-full h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({length: 13}, (_, i) => (
+                <SelectItem key={i} value={i.toString()}>{i}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Jours */}
+        <div className="space-y-1">
+          <label className="text-xs text-gray-500">Jours</label>
+          <Select value={selectedDays.toString()} onValueChange={(value) => setSelectedDays(parseInt(value))}>
+            <SelectTrigger className="w-full h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({length: 31}, (_, i) => (
+                <SelectItem key={i} value={i.toString()}>{i}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Heures */}
+        <div className="space-y-1">
+          <label className="text-xs text-gray-500">Heures</label>
+          <Select value={selectedHours.toString()} onValueChange={(value) => setSelectedHours(parseInt(value))}>
+            <SelectTrigger className="w-full h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({length: 24}, (_, i) => (
+                <SelectItem key={i} value={i.toString()}>{i}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Minutes */}
+        <div className="space-y-1">
+          <label className="text-xs text-gray-500">Min</label>
+          <Select value={selectedMinutes.toString()} onValueChange={(value) => setSelectedMinutes(parseInt(value))}>
+            <SelectTrigger className="w-full h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({length: 60}, (_, i) => (
+                <SelectItem key={i} value={i.toString()}>{i}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Secondes */}
+        <div className="space-y-1">
+          <label className="text-xs text-gray-500">Sec</label>
+          <Select value={selectedSeconds.toString()} onValueChange={(value) => setSelectedSeconds(parseInt(value))}>
+            <SelectTrigger className="w-full h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({length: 60}, (_, i) => (
+                <SelectItem key={i} value={i.toString()}>{i}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      <Button 
+        size="sm" 
+        variant="outline" 
+        onClick={handleUpdate}
+        className="w-full h-7 text-xs"
+        disabled={selectedMonths === 0 && selectedDays === 0 && selectedHours === 0 && selectedMinutes === 0 && selectedSeconds === 0}
       >
-        <SelectTrigger className="w-32 h-8 text-xs">
-          <SelectValue placeholder="Choisir..." />
-        </SelectTrigger>
-        <SelectContent>
-          {intervals.map((interval) => (
-            <SelectItem key={interval.hours} value={interval.hours.toString()}>
-              {interval.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        Appliquer l'intervalle
+      </Button>
     </div>
   );
 }
@@ -289,8 +366,8 @@ export default function AdminCron() {
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
-                        <IntervalDisplay 
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                        <IntervalSelector 
                           job={job}
                           onUpdate={(intervalHours) => {
                             updateConfigMutation.mutate({
