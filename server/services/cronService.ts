@@ -269,8 +269,13 @@ export class CronService {
    * Update job configuration
    */
   async updateJobConfig(jobId: string, intervalHours: number): Promise<void> {
+    console.log(`[CRON] Looking for job with ID: ${jobId}`);
     const job = await db.select().from(cronJobs).where(eq(cronJobs.id, jobId)).limit(1);
+    console.log(`[CRON] Found ${job.length} jobs`);
     if (!job.length) {
+      // Liste tous les jobs pour debugging
+      const allJobs = await db.select().from(cronJobs);
+      console.log(`[CRON] Available job IDs:`, allJobs.map(j => j.id));
       throw new Error('Job not found');
     }
 

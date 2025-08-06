@@ -193,8 +193,7 @@ export default function AdminCron() {
     mutationFn: async ({ jobId, enabled }: { jobId: string; enabled: boolean }) => {
       return apiRequest(`/api/admin/cron/jobs/${jobId}/toggle`, {
         method: 'POST',
-        body: JSON.stringify({ enabled }),
-        headers: { 'Content-Type': 'application/json' }
+        body: { enabled }
       });
     },
     onSuccess: () => {
@@ -216,10 +215,10 @@ export default function AdminCron() {
   // Update job configuration
   const updateConfigMutation = useMutation({
     mutationFn: async ({ jobId, intervalHours }: { jobId: string; intervalHours: number }) => {
+      console.log('Updating cron config:', { jobId, intervalHours });
       return apiRequest(`/api/admin/cron/jobs/${jobId}/config`, {
         method: 'POST',
-        body: JSON.stringify({ intervalHours }),
-        headers: { 'Content-Type': 'application/json' }
+        body: { intervalHours }
       });
     },
     onSuccess: () => {
