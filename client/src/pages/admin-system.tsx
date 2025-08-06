@@ -147,7 +147,7 @@ export default function AdminSystem() {
 
   // Clear logs mutation
   const clearLogsMutation = useMutation({
-    mutationFn: () => apiRequest('DELETE', '/api/admin/system/logs'),
+    mutationFn: () => apiRequest('/api/admin/system/logs', { method: 'DELETE' }),
     onSuccess: () => {
       setLogs([]);
       queryClient.invalidateQueries({ queryKey: ['/api/admin/system/logs'] });
@@ -214,7 +214,7 @@ export default function AdminSystem() {
       addLog('Envoi de la requête POST /api/admin/database/seed', 'info');
       
       try {
-        const result = await apiRequest("/api/admin/database/seed", "POST");
+        const result = await apiRequest("/api/admin/database/seed", { method: "POST" });
         addLog('Réponse reçue du serveur', 'success');
         addLog(`Résultat: ${JSON.stringify(result, null, 2)}`, 'info');
         return result;
@@ -261,7 +261,7 @@ export default function AdminSystem() {
       addLog('Envoi de la requête POST /api/admin/database/reset', 'info');
       
       try {
-        const result = await apiRequest("/api/admin/database/reset", "POST");
+        const result = await apiRequest("/api/admin/database/reset", { method: "POST" });
         addLog('Réponse reçue du serveur pour le reset', 'success');
         addLog(`Résultat du reset: ${JSON.stringify(result, null, 2)}`, 'info');
         return result;
@@ -325,7 +325,7 @@ export default function AdminSystem() {
     mutationFn: async () => {
       addLog('📤 Début de l\'export des catégories...', 'info');
       try {
-        const result = await apiRequest("GET", "/api/admin/categories/export");
+        const result = await apiRequest("/api/admin/categories/export");
         addLog(`✅ Export réussi: ${result.count} catégories`, 'success');
         return result;
       } catch (error: any) {
@@ -355,9 +355,12 @@ export default function AdminSystem() {
       addLog(`📊 ${categories.length} catégories à synchroniser`, 'info');
       
       try {
-        const result = await apiRequest("POST", "/api/admin/categories/sync-to-production", {
-          productionUrl,
-          categories
+        const result = await apiRequest("/api/admin/categories/sync-to-production", {
+          method: "POST",
+          body: {
+            productionUrl,
+            categories
+          }
         });
         addLog('✅ Synchronisation réussie', 'success');
         return result;
