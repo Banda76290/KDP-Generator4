@@ -1,0 +1,255 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(0, 0%, 10%);
+  --muted: hsl(195, 15%, 96%);
+  --muted-foreground: hsl(195, 10%, 45%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(0, 0%, 10%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(0, 0%, 10%);
+  --border: hsl(195, 15%, 90%);
+  --input: hsl(195, 15%, 90%);
+  --primary: hsl(195, 100%, 50%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(35, 100%, 50%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --accent: hsl(195, 15%, 96%);
+  --accent-foreground: hsl(0, 0%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --success: hsl(142, 76%, 36%);
+  --warning: hsl(35, 100%, 50%);
+  --error: hsl(0, 72%, 51%);
+  --ring: hsl(195, 100%, 50%);
+  --radius: 0.5rem;
+}
+
+
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  /* Global typography colors for consistency */
+  h1, h2, h3, h4, h5, h6 {
+    color: #1a1a1a !important;
+  }
+
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+    color: white !important;
+  }
+
+  /* Override specific text color classes */
+  .text-gray-900 {
+    color: #1a1a1a !important;
+  }
+
+  .dark .text-gray-900 {
+    color: white !important;
+  }
+
+  /* Ensure consistent card titles */
+  .card-title {
+    color: #1a1a1a !important;
+  }
+
+  .dark .card-title {
+    color: white !important;
+  }
+
+  /* Form labels */
+  label {
+    color: #1a1a1a !important;
+  }
+
+  .dark label {
+    color: white !important;
+  }
+}
+
+/* Custom utility classes for KDP Generator */
+.gradient-primary {
+  background: linear-gradient(135deg, hsl(195, 100%, 50%) 0%, hsl(35, 100%, 50%) 100%);
+}
+
+.gradient-success {
+  background: linear-gradient(135deg, hsl(142, 76%, 36%) 0%, hsl(195, 100%, 50%) 100%);
+}
+
+/* KDP Generator Brand Colors */
+:root {
+  --kdp-primary-blue: #38b6ff;    /* Primary blue for main actions */
+  --kdp-secondary-orange: #ff9900; /* Secondary orange for highlights */
+  --kdp-accent-blue: #146eb4;      /* Darker blue for secondary actions */
+}
+
+.kdp-btn-primary {
+  background-color: var(--kdp-primary-blue);
+  color: white;
+}
+
+.kdp-btn-primary:hover {
+  background-color: #2da5ee;
+  opacity: 0.9;
+}
+
+.kdp-btn-secondary {
+  background-color: var(--kdp-accent-blue);
+  color: white;
+}
+
+.kdp-btn-secondary:hover {
+  background-color: #125a96;
+  opacity: 0.9;
+}
+
+.kdp-text-primary {
+  color: var(--kdp-primary-blue);
+}
+
+.kdp-text-accent {
+  color: var(--kdp-accent-blue);
+}
+
+.kdp-text-orange {
+  color: var(--kdp-secondary-orange);
+}
+
+/* Override primary button colors to use KDP colors */
+.bg-primary {
+  background-color: var(--kdp-primary-blue) !important;
+}
+
+.bg-primary:hover {
+  background-color: #2da5ee !important;
+}
+
+/* Ensure buttons use KDP styling */
+.btn-primary {
+  background-color: var(--kdp-primary-blue) !important;
+  color: white !important;
+}
+
+.btn-primary:hover {
+  background-color: #2da5ee !important;
+}
+
+/* Series description formatting in cards */
+.series-description h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0.25rem 0;
+  color: #374151;
+}
+
+.series-description h5 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0.25rem 0;
+  color: #374151;
+}
+
+.series-description h6 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0.25rem 0;
+  color: #374151;
+}
+
+.series-description p {
+  margin: 0.25rem 0;
+  line-height: 1.4;
+}
+
+.series-description b,
+.series-description strong {
+  font-weight: 600;
+  color: #111827;
+}
+
+.series-description ul,
+.series-description ol {
+  margin: 0.25rem 0 0.25rem 1rem;
+  padding-left: 0.5rem;
+}
+
+.series-description li {
+  margin: 0.125rem 0;
+}
+
+.series-description a {
+  color: var(--kdp-primary-blue);
+  text-decoration: underline;
+}
+
+.gradient-warning {
+  background: linear-gradient(135deg, hsl(35, 100%, 50%) 0%, hsl(45, 95%, 53%) 100%);
+}
+
+.gradient-cyan-orange {
+  background: linear-gradient(135deg, hsl(195, 100%, 50%) 0%, hsl(35, 100%, 50%) 100%);
+}
+
+.gradient-cyan-blue {
+  background: linear-gradient(135deg, hsl(195, 100%, 50%) 0%, hsl(210, 100%, 60%) 100%);
+}
+
+
+
+.gradient-orange-yellow {
+  background: linear-gradient(135deg, hsl(35, 100%, 50%) 0%, hsl(50, 100%, 60%) 100%);
+}
+
+/* Layout System - Universal solution for header positioning
+   This system works for ALL pages (current and future) without any page-specific modifications
+   Compatible with mobile, tablet, desktop, and any screen size */
+.layout-container {
+  @apply min-h-screen bg-gray-50;
+  display: grid;
+  grid-template-rows: 64px 1fr; /* Header is exactly 64px (h-16), content takes remaining space */
+  grid-template-areas: 
+    "header"
+    "content";
+}
+
+.layout-container > header {
+  grid-area: header;
+  @apply fixed top-0 left-0 right-0 z-50;
+  height: 64px; /* Ensure header height is consistent */
+}
+
+.layout-content {
+  grid-area: content;
+  @apply flex;
+  min-height: 0; /* Important for nested flex/grid layouts */
+  /* Content starts exactly at 64px from top - no overlap, no gap */
+}
+
+.layout-main {
+  @apply flex-1 min-w-0 p-4 md:p-6;
+  /* Responsive margin for sidebar - automatically handled by CSS */
+  margin-left: 0; /* Mobile: no sidebar margin */
+}
+
+/* Desktop: sidebar margin only when sidebar is visible */
+@media (min-width: 768px) {
+  .layout-main {
+    margin-left: 256px; /* 64 * 4 = 256px (w-64) */
+  }
+}
+
+/* Future-proof: Any new page using Layout component will automatically:
+   1. Have content positioned exactly under the header
+   2. Work on all device sizes  
+   3. Respect sidebar positioning
+   4. No manual padding-top adjustments needed
+   5. No page-specific CSS required */
