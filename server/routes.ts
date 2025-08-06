@@ -900,17 +900,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Marketplace parameter is required" });
       }
 
-      console.log(`[CATEGORIES] Requesting categories for marketplace: ${marketplace} with format: ${format}`);
-      
-      let categories = await storage.getMarketplaceCategoriesWithFormat(marketplace, format as string);
-      
-      // Fallback: if no categories found for Amazon.com, try amazon.com (lowercase)
-      if (categories.length === 0 && marketplace === 'Amazon.com') {
-        console.log(`[CATEGORIES] No categories found for Amazon.com, trying fallback to amazon.com`);
-        categories = await storage.getMarketplaceCategoriesWithFormat('amazon.com', format as string);
-      }
-      
-      console.log(`[CATEGORIES] Found ${categories.length} categories for ${marketplace}`);
+      const categories = await storage.getMarketplaceCategoriesWithFormat(marketplace, format as string);
       res.json(categories);
     } catch (error) {
       console.error("Error fetching marketplace categories:", error);
