@@ -4,7 +4,6 @@ import {
   FolderOpen, 
   TrendingUp, 
   Upload, 
-  Download,
   Bot, 
   Crown, 
   Settings,
@@ -15,8 +14,7 @@ import {
   Tags,
   Server,
   User,
-  MessageSquare,
-  DollarSign
+  MessageSquare
 } from "lucide-react";
 
 interface NavigationItem {
@@ -33,9 +31,7 @@ export const navigation: NavigationItem[] = [
   { name: "Authors", href: "/authors", icon: User },
   { name: "Series", href: "/manage-series", icon: Tags },
   { name: "Sales Analytics", href: "/analytics", icon: TrendingUp },
-  { name: "Exchange Rates", href: "/exchange-rates", icon: DollarSign },
   { name: "KDP Reports", href: "/kdp-reports", icon: Upload },
-  { name: "Import Management", href: "/import-management", icon: Download, badge: "NEW" },
   { name: "AI Assistant", href: "/ai-assistant", icon: Bot, badge: "PRO" },
   { name: "AI Functions", href: "/ai-functions", icon: Zap, badge: "NEW" },
 ];
@@ -51,7 +47,6 @@ export const adminNavigation: NavigationItem[] = [
   { name: "AI Configuration", href: "/admin/ai-config", icon: Bot },
   { name: "Prompts IA", href: "/admin/prompts", icon: MessageSquare },
   { name: "Variables IA", href: "/admin/ai-variables", icon: Variable },
-  { name: "Cron Jobs", href: "/admin/cron", icon: Bot },
   { name: "Système", href: "/admin/system", icon: Server },
 ];
 
