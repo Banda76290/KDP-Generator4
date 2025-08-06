@@ -7,8 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Clock, Play, Pause, RefreshCw, Calendar, AlertCircle, CheckCircle, Settings } from "lucide-react";
+import { Clock, Play, Pause, RefreshCw, Calendar, AlertCircle, CheckCircle, Settings, Power } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface CronJob {
@@ -25,20 +26,111 @@ interface CronJob {
   lastError?: string;
 }
 
+// Conversion functions for time units
+const convertHoursToUnit = (hours: number): { value: number; unit: string } => {
+  if (hours >= 24 * 30) {
+    return { value: Math.round(hours / (24 * 30)), unit: 'mois' };
+  } else if (hours >= 24) {
+    return { value: Math.round(hours / 24), unit: 'jours' };
+  } else if (hours >= 1) {
+    return { value: hours, unit: 'heures' };
+  } else {
+    const minutes = Math.round(hours * 60);
+    if (minutes >= 1) {
+      return { value: minutes, unit: 'minutes' };
+    } else {
+      return { value: Math.round(hours * 3600), unit: 'secondes' };
+    }
+  }
+};
+
+const convertUnitToHours = (value: number, unit: string): number => {
+  switch (unit) {
+    case 'mois': return value * 24 * 30;
+    case 'jours': return value * 24;
+    case 'heures': return value;
+    case 'minutes': return value / 60;
+    case 'secondes': return value / 3600;
+    default: return value;
+  }
+};
+
+// Component for editing interval
+function IntervalEditor({ job, onUpdate, onCancel }: {
+  job: CronJob;
+  onUpdate: (hours: number) => void;
+  onCancel: () => void;
+}) {
+  const [value, setValue] = useState(() => {
+    const converted = convertHoursToUnit(job.intervalHours || 24);
+    return converted.value;
+  });
+  const [unit, setUnit] = useState(() => {
+    return convertHoursToUnit(job.intervalHours || 24).unit;
+  });
+
+  const handleUpdate = () => {
+    const hours = convertUnitToHours(value, unit);
+    onUpdate(hours);
+  };
+
+  return (
+    <div className="flex items-center gap-1">
+      <Input
+        type="number"
+        min="1"
+        max="999"
+        value={value}
+        onChange={(e) => setValue(parseInt(e.target.value) || 1)}
+        className="w-16 h-8 text-xs"
+      />
+      <Select value={unit} onValueChange={setUnit}>
+        <SelectTrigger className="w-20 h-8 text-xs">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="secondes">sec</SelectItem>
+          <SelectItem value="minutes">min</SelectItem>
+          <SelectItem value="heures">h</SelectItem>
+          <SelectItem value="jours">j</SelectItem>
+          <SelectItem value="mois">mois</SelectItem>
+        </SelectContent>
+      </Select>
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={handleUpdate}
+        className="h-8 px-2 text-xs"
+      >
+        ✓
+      </Button>
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={onCancel}
+        className="h-8 px-2 text-xs"
+      >
+        ✕
+      </Button>
+    </div>
+  );
+}
+
 export default function AdminCron() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [editingJob, setEditingJob] = useState<string | null>(null);
 
-  // Fetch cron jobs
+  // Récupérer les tâches cron
   const { data: cronJobs, isLoading } = useQuery({
     queryKey: ["/api/admin/cron/jobs"],
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 30000, // Actualiser toutes les 30 secondes
   });
 
-  // Fetch cron logs
+  // Récupérer les logs cron
   const { data: cronLogs } = useQuery({
     queryKey: ["/api/admin/cron/logs"],
-    refetchInterval: 10000, // Refresh every 10 seconds
+    refetchInterval: 10000, // Actualiser toutes les 10 secondes
   });
 
   // Toggle cron job
@@ -46,20 +138,21 @@ export default function AdminCron() {
     mutationFn: async ({ jobId, enabled }: { jobId: string; enabled: boolean }) => {
       return apiRequest(`/api/admin/cron/jobs/${jobId}/toggle`, {
         method: 'POST',
-        body: { enabled }
+        body: JSON.stringify({ enabled }),
+        headers: { 'Content-Type': 'application/json' }
       });
     },
     onSuccess: () => {
       toast({
-        title: "Cron Job Updated",
-        description: "The scheduled task has been updated successfully.",
+        title: "Tâche Cron Mise à Jour",
+        description: "La tâche planifiée a été mise à jour avec succès.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/jobs"] });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update the scheduled task.",
+        title: "Erreur",
+        description: "Échec de la mise à jour de la tâche planifiée.",
         variant: "destructive",
       });
     },
@@ -70,20 +163,22 @@ export default function AdminCron() {
     mutationFn: async ({ jobId, intervalHours }: { jobId: string; intervalHours: number }) => {
       return apiRequest(`/api/admin/cron/jobs/${jobId}/config`, {
         method: 'POST',
-        body: { intervalHours }
+        body: JSON.stringify({ intervalHours }),
+        headers: { 'Content-Type': 'application/json' }
       });
     },
     onSuccess: () => {
       toast({
-        title: "Configuration Updated",
-        description: "The job schedule has been updated successfully.",
+        title: "Configuration Mise à Jour",
+        description: "La planification de la tâche a été mise à jour avec succès.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/jobs"] });
+      setEditingJob(null);
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update job configuration.",
+        title: "Erreur",
+        description: "Échec de la mise à jour de la configuration de la tâche.",
         variant: "destructive",
       });
     },
@@ -98,16 +193,16 @@ export default function AdminCron() {
     },
     onSuccess: () => {
       toast({
-        title: "Job Started",
-        description: "The scheduled task has been started manually.",
+        title: "Tâche Démarrée",
+        description: "La tâche planifiée a été démarrée manuellement.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/jobs"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/cron/logs"] });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to start the scheduled task.",
+        title: "Erreur",
+        description: "Échec du démarrage de la tâche planifiée.",
         variant: "destructive",
       });
     },
@@ -126,28 +221,30 @@ export default function AdminCron() {
 
   const getStatusBadge = (status: string, enabled: boolean) => {
     if (!enabled) {
-      return <Badge variant="secondary">Disabled</Badge>;
+      return <Badge variant="destructive" className="bg-red-500 text-white">Désactivé</Badge>;
     }
     
     switch (status) {
       case 'running':
-        return <Badge className="bg-green-500">Running</Badge>;
+        return <Badge className="bg-green-500 text-white">En cours</Badge>;
+      case 'completed':
+        return <Badge className="bg-green-600 text-white">Actif</Badge>;
       case 'error':
-        return <Badge variant="destructive">Error</Badge>;
+        return <Badge variant="destructive">Erreur</Badge>;
       default:
-        return <Badge variant="outline">Stopped</Badge>;
+        return <Badge variant="outline">Arrêté</Badge>;
     }
   };
 
   return (
     <Layout>
       <div className="container mx-auto p-6">
-        {/* Header */}
+        {/* En-tête */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Scheduled Tasks & Cron Jobs</h1>
+            <h1 className="text-3xl font-bold mb-2">Tâches Planifiées & Cron Jobs</h1>
             <p className="text-muted-foreground">
-              Manage and monitor automated background tasks
+              Gérer et surveiller les tâches automatisées en arrière-plan
             </p>
           </div>
           <Button 
@@ -159,7 +256,7 @@ export default function AdminCron() {
             className="flex items-center gap-2"
           >
             <RefreshCw className="h-4 w-4" />
-            Refresh
+            Actualiser
           </Button>
         </div>
 
@@ -169,7 +266,7 @@ export default function AdminCron() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Scheduled Tasks
+                Tâches Planifiées
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -204,37 +301,45 @@ export default function AdminCron() {
                             disabled={runJobMutation.isPending}
                           >
                             <Play className="h-3 w-3 mr-1" />
-                            Run Now
+                            Exécuter maintenant
                           </Button>
                         </div>
                       </div>
                       
                       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
                         <div>
-                          <span className="text-muted-foreground">Interval:</span>
+                          <span className="text-muted-foreground">Intervalle:</span>
                           <div className="flex items-center gap-2 mt-1">
-                            <Input
-                              type="number"
-                              min="1"
-                              max="168"
-                              value={job.intervalHours || 24}
-                              onChange={(e) => {
-                                const hours = parseInt(e.target.value);
-                                if (hours >= 1 && hours <= 168) {
+                            {editingJob === job.id ? (
+                              <IntervalEditor 
+                                job={job}
+                                onUpdate={(intervalHours) => {
                                   updateConfigMutation.mutate({
                                     jobId: job.id,
-                                    intervalHours: hours
+                                    intervalHours
                                   });
-                                }
-                              }}
-                              className="w-16 h-8 text-xs"
-                            />
-                            <span className="text-xs text-muted-foreground">hours</span>
+                                }}
+                                onCancel={() => setEditingJob(null)}
+                              />
+                            ) : (
+                              <div 
+                                className="flex items-center gap-1 cursor-pointer p-1 rounded hover:bg-gray-100"
+                                onClick={() => setEditingJob(job.id)}
+                              >
+                                <span className="text-xs">
+                                  {(() => {
+                                    const converted = convertHoursToUnit(job.intervalHours || 24);
+                                    return `${converted.value} ${converted.unit}`;
+                                  })()}
+                                </span>
+                                <Settings className="h-3 w-3 text-gray-400" />
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Enabled:</span>
-                          <div className="mt-1">
+                          <span className="text-muted-foreground">État:</span>
+                          <div className="flex items-center gap-2 mt-1">
                             <Switch
                               checked={job.enabled}
                               onCheckedChange={(enabled) => toggleJobMutation.mutate({
@@ -242,22 +347,33 @@ export default function AdminCron() {
                                 enabled
                               })}
                             />
+                            {job.enabled ? (
+                              <div className="flex items-center gap-1">
+                                <Power className="h-3 w-3 text-green-500" />
+                                <span className="text-xs text-green-600">Actif</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1">
+                                <Power className="h-3 w-3 text-red-500" />
+                                <span className="text-xs text-red-600">Désactivé</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Last Run:</span>
-                          <p className="text-xs">{job.lastRun ? new Date(job.lastRun).toLocaleString() : 'Never'}</p>
+                          <span className="text-muted-foreground">Dernière exécution:</span>
+                          <p className="text-xs">{job.lastRun ? new Date(job.lastRun).toLocaleString('fr-FR') : 'Jamais'}</p>
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Next Run:</span>
-                          <p className="text-xs">{job.nextRun ? new Date(job.nextRun).toLocaleString() : 'N/A'}</p>
+                          <span className="text-muted-foreground">Prochaine exécution:</span>
+                          <p className="text-xs">{job.nextRun ? new Date(job.nextRun).toLocaleString('fr-FR') : 'N/A'}</p>
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Runs:</span>
-                          <p className="text-xs">{job.runCount || 0} times</p>
+                          <span className="text-muted-foreground">Exécutions:</span>
+                          <p className="text-xs">{job.runCount || 0} fois</p>
                           {job.lastError && (
                             <p className="text-xs text-red-500 mt-1" title={job.lastError}>
-                              Last error: {job.lastError.substring(0, 30)}...
+                              Dernière erreur: {job.lastError.substring(0, 30)}...
                             </p>
                           )}
                         </div>
@@ -268,21 +384,21 @@ export default function AdminCron() {
               ) : (
                 <div className="text-center py-12">
                   <Clock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No Scheduled Tasks</h3>
+                  <h3 className="text-lg font-semibold mb-2">Aucune Tâche Planifiée</h3>
                   <p className="text-muted-foreground">
-                    No cron jobs are currently configured.
+                    Aucune tâche cron n'est actuellement configurée.
                   </p>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Recent Logs */}
+          {/* Logs Récents */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <RefreshCw className="h-5 w-5" />
-                Recent Activity Logs
+                Journaux d'Activité Récents
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -301,7 +417,7 @@ export default function AdminCron() {
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-sm font-medium">{log.job}</span>
                           <span className="text-xs text-muted-foreground">
-                            {new Date(log.timestamp).toLocaleString()}
+                            {new Date(log.timestamp).toLocaleString('fr-FR')}
                           </span>
                         </div>
                         <p className="text-sm text-muted-foreground">{log.message}</p>
@@ -310,8 +426,12 @@ export default function AdminCron() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">No recent activity logs available.</p>
+                <div className="text-center py-12">
+                  <RefreshCw className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Aucun Journal d'Activité</h3>
+                  <p className="text-muted-foreground">
+                    Aucune activité de tâche cron n'a encore été enregistrée.
+                  </p>
                 </div>
               )}
             </CardContent>
