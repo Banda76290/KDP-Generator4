@@ -2778,7 +2778,7 @@ Please respond with only a JSON object containing the translated fields. For key
       const { jobId } = req.params;
       const { intervalHours } = req.body;
       
-      if (!intervalHours || intervalHours < 1) {
+      if (!intervalHours || intervalHours <= 0) {
         return res.status(400).json({ message: 'Invalid interval hours' });
       }
       

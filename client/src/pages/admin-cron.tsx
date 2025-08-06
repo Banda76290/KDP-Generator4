@@ -26,92 +26,71 @@ interface CronJob {
   lastError?: string;
 }
 
-// Conversion functions for time units
-const convertHoursToUnit = (hours: number): { value: number; unit: string } => {
+// Helper function to format interval display
+const formatInterval = (hours: number): string => {
   if (hours >= 24 * 30) {
-    return { value: Math.round(hours / (24 * 30)), unit: 'mois' };
+    return `${Math.round(hours / (24 * 30))} mois`;
   } else if (hours >= 24) {
-    return { value: Math.round(hours / 24), unit: 'jours' };
+    return `${Math.round(hours / 24)} jour${Math.round(hours / 24) > 1 ? 's' : ''}`;
   } else if (hours >= 1) {
-    return { value: hours, unit: 'heures' };
+    return `${hours} heure${hours > 1 ? 's' : ''}`;
   } else {
     const minutes = Math.round(hours * 60);
     if (minutes >= 1) {
-      return { value: minutes, unit: 'minutes' };
+      return `${minutes} minute${minutes > 1 ? 's' : ''}`;
     } else {
-      return { value: Math.round(hours * 3600), unit: 'secondes' };
+      const seconds = Math.round(hours * 3600);
+      return `${seconds} seconde${seconds > 1 ? 's' : ''}`;
     }
   }
 };
 
-const convertUnitToHours = (value: number, unit: string): number => {
-  switch (unit) {
-    case 'mois': return value * 24 * 30;
-    case 'jours': return value * 24;
-    case 'heures': return value;
-    case 'minutes': return value / 60;
-    case 'secondes': return value / 3600;
-    default: return value;
-  }
-};
-
-// Component for editing interval
-function IntervalEditor({ job, onUpdate, onCancel }: {
+// Nouvelle interface simplifiée pour l'intervalle
+function IntervalDisplay({ job, onUpdate }: {
   job: CronJob;
   onUpdate: (hours: number) => void;
-  onCancel: () => void;
 }) {
-  const [value, setValue] = useState(() => {
-    const converted = convertHoursToUnit(job.intervalHours || 24);
-    return converted.value;
-  });
-  const [unit, setUnit] = useState(() => {
-    return convertHoursToUnit(job.intervalHours || 24).unit;
-  });
+  const intervals = [
+    { label: '30 secondes', hours: 30 / 3600 },
+    { label: '1 minute', hours: 1 / 60 },
+    { label: '5 minutes', hours: 5 / 60 },
+    { label: '15 minutes', hours: 15 / 60 },
+    { label: '30 minutes', hours: 0.5 },
+    { label: '1 heure', hours: 1 },
+    { label: '2 heures', hours: 2 },
+    { label: '6 heures', hours: 6 },
+    { label: '12 heures', hours: 12 },
+    { label: '1 jour', hours: 24 },
+    { label: '3 jours', hours: 72 },
+    { label: '1 semaine', hours: 168 },
+    { label: '1 mois', hours: 720 }
+  ];
 
-  const handleUpdate = () => {
-    const hours = convertUnitToHours(value, unit);
-    onUpdate(hours);
-  };
+  const currentInterval = intervals.find(interval => 
+    Math.abs(interval.hours - (job.intervalHours || 24)) < 0.01
+  );
 
   return (
-    <div className="flex items-center gap-1">
-      <Input
-        type="number"
-        min="1"
-        max="999"
-        value={value}
-        onChange={(e) => setValue(parseInt(e.target.value) || 1)}
-        className="w-16 h-8 text-xs"
-      />
-      <Select value={unit} onValueChange={setUnit}>
-        <SelectTrigger className="w-20 h-8 text-xs">
-          <SelectValue />
+    <div className="space-y-2">
+      <span className="text-muted-foreground text-xs">Intervalle:</span>
+      <Select 
+        value={currentInterval?.hours.toString() || '24'}
+        onValueChange={(value) => {
+          const hours = parseFloat(value);
+          onUpdate(hours);
+        }}
+      >
+        <SelectTrigger className="w-32 h-8 text-xs">
+          <SelectValue placeholder="Choisir..." />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="secondes">sec</SelectItem>
-          <SelectItem value="minutes">min</SelectItem>
-          <SelectItem value="heures">h</SelectItem>
-          <SelectItem value="jours">j</SelectItem>
-          <SelectItem value="mois">mois</SelectItem>
+          {intervals.map((interval) => (
+            <SelectItem key={interval.hours} value={interval.hours.toString()}>
+              {interval.label}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
-      <Button
-        size="sm"
-        variant="outline"
-        onClick={handleUpdate}
-        className="h-8 px-2 text-xs"
-      >
-        ✓
-      </Button>
-      <Button
-        size="sm"
-        variant="ghost"
-        onClick={onCancel}
-        className="h-8 px-2 text-xs"
-      >
-        ✕
-      </Button>
     </div>
   );
 }
@@ -119,7 +98,6 @@ function IntervalEditor({ job, onUpdate, onCancel }: {
 export default function AdminCron() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [editingJob, setEditingJob] = useState<string | null>(null);
 
   // Récupérer les tâches cron
   const { data: cronJobs, isLoading } = useQuery({
@@ -299,44 +277,28 @@ export default function AdminCron() {
                             variant="outline"
                             onClick={() => runJobMutation.mutate(job.id)}
                             disabled={runJobMutation.isPending}
+                            className="flex items-center gap-1"
                           >
-                            <Play className="h-3 w-3 mr-1" />
+                            {runJobMutation.isPending ? (
+                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-current" />
+                            ) : (
+                              <Play className="h-3 w-3" />
+                            )}
                             Exécuter maintenant
                           </Button>
                         </div>
                       </div>
                       
                       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
-                        <div>
-                          <span className="text-muted-foreground">Intervalle:</span>
-                          <div className="flex items-center gap-2 mt-1">
-                            {editingJob === job.id ? (
-                              <IntervalEditor 
-                                job={job}
-                                onUpdate={(intervalHours) => {
-                                  updateConfigMutation.mutate({
-                                    jobId: job.id,
-                                    intervalHours
-                                  });
-                                }}
-                                onCancel={() => setEditingJob(null)}
-                              />
-                            ) : (
-                              <div 
-                                className="flex items-center gap-1 cursor-pointer p-1 rounded hover:bg-gray-100"
-                                onClick={() => setEditingJob(job.id)}
-                              >
-                                <span className="text-xs">
-                                  {(() => {
-                                    const converted = convertHoursToUnit(job.intervalHours || 24);
-                                    return `${converted.value} ${converted.unit}`;
-                                  })()}
-                                </span>
-                                <Settings className="h-3 w-3 text-gray-400" />
-                              </div>
-                            )}
-                          </div>
-                        </div>
+                        <IntervalDisplay 
+                          job={job}
+                          onUpdate={(intervalHours) => {
+                            updateConfigMutation.mutate({
+                              jobId: job.id,
+                              intervalHours
+                            });
+                          }}
+                        />
                         <div>
                           <span className="text-muted-foreground">État:</span>
                           <div className="flex items-center gap-2 mt-1">
