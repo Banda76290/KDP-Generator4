@@ -145,6 +145,13 @@ export default function Analytics() {
     enabled: isAuthenticated && !!analyticsCurrency,
   });
 
+  // Nouvelle requête pour Total Revenue avec conversion automatique USD 
+  const { data: totalRevenue, isLoading: totalRevenueLoading } = useQuery<{ totalRevenue: number; currency: string }>({
+    queryKey: ['/api/analytics/total-revenue', analyticsCurrency],
+    queryFn: () => fetch(`/api/analytics/total-revenue?currency=${analyticsCurrency}`).then(res => res.json()),
+    enabled: isAuthenticated && !!analyticsCurrency,
+  });
+
 
 
 
@@ -346,14 +353,16 @@ export default function Analytics() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-secondary">
-              {overviewLoading ? (
-                <div className="w-20 h-6 bg-gray-200 animate-pulse rounded" />
+              {totalRevenueLoading ? (
+                <div className="w-24 h-6 bg-gray-200 animate-pulse rounded" />
+              ) : totalRevenue ? (
+                formatCurrencySync(totalRevenue.totalRevenue, totalRevenue.currency)
               ) : (
-                mainCurrency ? formatCurrency(mainCurrency.amount, mainCurrency.currency) : '$0'
+                formatCurrencySync(0, analyticsCurrency)
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              {totalCurrencies > 1 ? `${totalCurrencies} different currencies` : 'Cumulative royalties'}
+              Converti depuis les données USD des royalties
             </p>
           </CardContent>
         </Card>

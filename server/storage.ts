@@ -2150,6 +2150,18 @@ export class DatabaseStorage implements IStorage {
       sql`${kdpRoyaltiesEstimatorData.asin} != ''`
     ));
 
+    // Nouveau calcul du Total Revenue en USD
+    const totalRevenueUSD = await db.select({
+      sum: sql<number>`coalesce(sum(${kdpRoyaltiesEstimatorData.royaltyUsd}::decimal), 0)`
+    }).from(kdpRoyaltiesEstimatorData)
+    .innerJoin(kdpImports, eq(kdpRoyaltiesEstimatorData.importId, kdpImports.id))
+    .where(and(
+      eq(kdpImports.userId, userId),
+      sql`${kdpImports.detectedType} = 'payments'`,
+      isNotNull(kdpRoyaltiesEstimatorData.royaltyUsd),
+      sql`${kdpRoyaltiesEstimatorData.royaltyUsd} > 0`
+    ));
+
     return {
       totalImports: totalImports[0]?.count || 0,
       totalRecords: totalRecords[0]?.count || 0,
@@ -2158,8 +2170,46 @@ export class DatabaseStorage implements IStorage {
         amount: Number(r.sum),
         transactions: Number(r.count)
       })),
-      uniqueBooks: uniqueBooks[0]?.count || 0
+      uniqueBooks: uniqueBooks[0]?.count || 0,
+      totalRevenueUSD: Number(totalRevenueUSD[0]?.sum || 0)
     };
+  }
+
+  /**
+   * Calcule le Total Revenue à partir de royalty_usd converti dans la devise spécifiée
+   */
+  async getTotalRevenue(userId: string, targetCurrency: string = 'USD'): Promise<{ totalRevenue: number; currency: string }> {
+    // D'abord récupérer le total en USD
+    const totalRevenueUSD = await db.select({
+      sum: sql<number>`coalesce(sum(${kdpRoyaltiesEstimatorData.royaltyUsd}::decimal), 0)`
+    }).from(kdpRoyaltiesEstimatorData)
+    .innerJoin(kdpImports, eq(kdpRoyaltiesEstimatorData.importId, kdpImports.id))
+    .where(and(
+      eq(kdpImports.userId, userId),
+      sql`${kdpImports.detectedType} = 'payments'`,
+      isNotNull(kdpRoyaltiesEstimatorData.royaltyUsd),
+      sql`${kdpRoyaltiesEstimatorData.royaltyUsd} > 0`
+    ));
+
+    const totalUSD = Number(totalRevenueUSD[0]?.sum || 0);
+
+    // Si la devise cible est USD, retourner directement
+    if (targetCurrency === 'USD') {
+      return { totalRevenue: totalUSD, currency: 'USD' };
+    }
+
+    // Sinon, convertir vers la devise cible
+    try {
+      const { ExchangeRateService } = await import('./services/exchangeRateService');
+      const exchangeService = new ExchangeRateService();
+      const convertedAmount = await exchangeService.convertCurrency(totalUSD, 'USD', targetCurrency);
+      
+      return { totalRevenue: convertedAmount, currency: targetCurrency };
+    } catch (error) {
+      console.warn(`[TOTAL_REVENUE] Échec conversion USD -> ${targetCurrency}:`, error);
+      // En cas d'échec, retourner le montant USD
+      return { totalRevenue: totalUSD, currency: 'USD' };
+    }
   }
 
   async getSalesTrends(userId: string, days: number): Promise<any[]> {
@@ -2452,7 +2502,7 @@ export class DatabaseStorage implements IStorage {
         await db
           .insert(consolidatedSalesData)
           .values({
-            userId: userId,
+            user_id: userId,
             title: `Paiements agrégés ${data.currency}`,
             authorName: 'Données de paiement',
             currency: data.currency,

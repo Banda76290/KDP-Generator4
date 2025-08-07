@@ -2745,6 +2745,22 @@ Please respond with only a JSON object containing the translated fields. For key
     }
   });
 
+  // Total Revenue endpoint - calcule le total des royalties en devise choisie
+  app.get('/api/analytics/total-revenue', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const { currency = 'USD' } = req.query;
+      const totalRevenue = await storage.getTotalRevenue(userId, currency as string);
+      res.json(totalRevenue);
+    } catch (error: any) {
+      console.error('Error getting total revenue:', error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Exchange rate endpoints
   app.get("/api/exchange-rates", isAuthenticated, async (req, res) => {
     try {
