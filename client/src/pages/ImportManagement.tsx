@@ -268,22 +268,27 @@ export default function ImportManagement() {
           queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
           queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports', importId, 'progress'] });
           
-          // Show completion notification if there was a real status change from processing
+          // Show completion notification when status changes to completed or failed
           console.log(`[TOAST] Status transition: ${previousStatus} → ${progressResult.status}`);
-          if (previousStatus && (previousStatus === 'processing' || previousStatus === 'pending') && progressResult.status !== previousStatus) {
-            console.log(`[TOAST] Valid transition detected, showing notification`);
+          if (previousStatus && previousStatus !== progressResult.status) {
             if (progressResult.status === 'completed') {
               console.log(`[TOAST] Triggering success toast`);
+              const newRecords = progressResult.processedRecords || 0;
+              const duplicates = progressResult.duplicateRecords || 0;
               toast({
                 title: "Import completed",
-                description: `Successfully processed ${progressResult.processedRecords} new records`,
+                description: newRecords > 0 
+                  ? `Successfully processed ${newRecords} new records${duplicates > 0 ? ` and updated ${duplicates} existing records` : ''}`
+                  : `Updated ${duplicates} existing records (no new records added)`,
                 variant: "success",
               });
-            } else if (progressResult.status === 'failed') {
+            } else if (progressResult.status === 'failed' || progressResult.status === 'error') {
               console.log(`[TOAST] Triggering error toast`);
               toast({
                 title: "Import failed",
-                description: "Check the error log for details",
+                description: progressResult.errorLog?.length > 0 
+                  ? progressResult.errorLog[0]
+                  : "Check the error log for details",
                 variant: "destructive",
               });
             }

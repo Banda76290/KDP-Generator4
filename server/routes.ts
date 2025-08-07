@@ -2531,10 +2531,10 @@ Please respond with only a JSON object containing the translated fields. For key
               userId
             );
             
+            // Note: The update is already done in processKdpRoyaltiesEstimator
+            // We just need to set completedAt
             await storage.updateKdpImport(newImport.id, {
               status: 'completed',
-              totalRecords: result.totalProcessed,
-              processedRecords: result.filteredRecords,
               completedAt: new Date(),
             });
             
