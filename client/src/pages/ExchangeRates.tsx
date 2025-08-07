@@ -49,7 +49,7 @@ export default function ExchangeRates() {
   };
 
   // Group currencies by major/minor for better organization
-  const majorCurrencies = ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'CHF', 'CAD', 'AUD'];
+  const majorCurrencies = ['USD', 'EUR', 'CNY', 'JPY', 'GBP', 'CHF', 'CAD', 'AUD'];
   const rates = Array.isArray(exchangeRates) ? exchangeRates : [];
   
   // Get the most recent update time from the rates

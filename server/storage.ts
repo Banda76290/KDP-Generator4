@@ -2557,18 +2557,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCurrenciesForUserPreferences(): Promise<Array<{code: string, name: string, symbol: string}>> {
-    // Get the 8 strongest currencies (lowest rates = strongest vs USD)
-    const strongestCurrencies = await db
-      .select({
-        currency: exchangeRates.toCurrency,
-        minRate: sql<number>`MIN(CAST(${exchangeRates.rate} AS DECIMAL))`.as('min_rate')
-      })
-      .from(exchangeRates)
-      .groupBy(exchangeRates.toCurrency)
-      .orderBy(sql`MIN(CAST(${exchangeRates.rate} AS DECIMAL)) ASC`)
-      .limit(8);
+    // Define the 8 major currencies in the specified order
+    const majorCurrencies = ['USD', 'EUR', 'CNY', 'JPY', 'GBP', 'CHF', 'CAD', 'AUD'];
 
-    // Get all other currencies alphabetically
+    // Get all available currencies alphabetically for the remaining ones
     const allCurrencies = await db
       .select({
         currency: exchangeRates.toCurrency
@@ -2577,9 +2569,8 @@ export class DatabaseStorage implements IStorage {
       .groupBy(exchangeRates.toCurrency)
       .orderBy(asc(exchangeRates.toCurrency));
 
-    const strongestCodes = strongestCurrencies.map(c => c.currency);
     const otherCurrencies = allCurrencies
-      .filter(c => !strongestCodes.includes(c.currency))
+      .filter(c => !majorCurrencies.includes(c.currency))
       .map(c => c.currency);
 
     // Currency mappings with names and symbols
@@ -2604,8 +2595,8 @@ export class DatabaseStorage implements IStorage {
       'FKP': { name: 'Falkland Islands Pound', symbol: '£' }
     };
 
-    // Combine strongest first, then others alphabetically
-    const finalOrder = [...strongestCodes, ...otherCurrencies];
+    // Combine major currencies first, then others alphabetically
+    const finalOrder = [...majorCurrencies, ...otherCurrencies];
     
     return finalOrder.map(code => ({
       code,
