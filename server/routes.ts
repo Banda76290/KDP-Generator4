@@ -2564,8 +2564,7 @@ Please respond with only a JSON object containing the translated fields. For key
         parsedData: {
           detectedType: parsedData.detectedType,
           summary: parsedData.summary
-        },
-        workbook: isKdpRoyaltiesEstimator ? workbook : undefined // Pass workbook for immediate processing later
+        }
       });
 
     } catch (error) {
