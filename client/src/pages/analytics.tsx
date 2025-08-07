@@ -283,14 +283,14 @@ export default function Analytics() {
             <Button 
               variant="outline" 
               onClick={applyAnalyticsOnly}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white border-green-600"
             >
               <BarChart3 className="h-4 w-4" />
               Analytics Only
             </Button>
             <AlertDialogAction 
               onClick={applyGlobally}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white"
             >
               <Settings className="h-4 w-4" />
               Apply Site-wide
