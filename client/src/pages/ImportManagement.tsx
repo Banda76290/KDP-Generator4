@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileSpreadsheet, Trash2, Eye, AlertCircle, CheckCircle, Clock, X, RefreshCw } from 'lucide-react';
+import { Upload, FileSpreadsheet, Trash2, Eye, AlertCircle, CheckCircle, Clock, X } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { format } from 'date-fns';
 import Layout from '@/components/Layout';
