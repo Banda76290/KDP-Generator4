@@ -192,14 +192,14 @@ export class KdpRoyaltiesEstimatorProcessor {
                 mappedData
               );
               console.log(`[KDP_ROYALTIES] ✅ Ligne mise à jour avec ID: ${updatedRecord.id}`);
-              duplicateRecords++;
+              duplicateRecords++; // Compte seulement les mises à jour
             } else {
               console.log(`[KDP_ROYALTIES] ➕ Nouvelle ligne ${i + 1} de ${sheet.name}`);
               // Ajouter la clé unique aux données à sauver
               const dataWithKey = { ...mappedData, uniqueKey };
               const savedRecord = await storage.createKdpRoyaltiesEstimatorData(dataWithKey);
               console.log(`[KDP_ROYALTIES] ✅ Ligne sauvegardée avec ID: ${savedRecord.id}`);
-              newRecords++;
+              newRecords++; // Compte seulement les nouveaux
             }
             
             filteredRecords++;

@@ -268,20 +268,26 @@ export default function ImportManagement() {
           queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports', importId, 'progress'] });
           
           // Show completion notification if there was a real status change from processing
+          console.log(`[TOAST] Status transition: ${previousStatus} → ${progressResult.status}`);
           if (previousStatus && (previousStatus === 'processing' || previousStatus === 'pending') && progressResult.status !== previousStatus) {
+            console.log(`[TOAST] Valid transition detected, showing notification`);
             if (progressResult.status === 'completed') {
+              console.log(`[TOAST] Triggering success toast`);
               toast({
                 title: "Import completed",
-                description: `Successfully processed ${progressResult.processedRecords} records`,
+                description: `Successfully processed ${progressResult.processedRecords} new records`,
                 variant: "success",
               });
             } else if (progressResult.status === 'failed') {
+              console.log(`[TOAST] Triggering error toast`);
               toast({
                 title: "Import failed",
                 description: "Check the error log for details",
                 variant: "destructive",
               });
             }
+          } else {
+            console.log(`[TOAST] No valid transition: previousStatus=${previousStatus}, currentStatus=${progressResult.status}`);
           }
         }
       } catch (error) {
