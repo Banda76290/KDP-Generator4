@@ -2452,7 +2452,7 @@ export class DatabaseStorage implements IStorage {
         await db
           .insert(consolidatedSalesData)
           .values({
-            userId: data.userId || '',
+            userId: userId,
             title: `Paiements agrégés ${data.currency}`,
             authorName: 'Données de paiement',
             currency: data.currency,
@@ -2554,6 +2554,64 @@ export class DatabaseStorage implements IStorage {
     const { MasterBooksService } = await import('./services/masterBooksService');
     await MasterBooksService.init();
     await MasterBooksService.updateFromImportData(userId, importId);
+  }
+
+  async getCurrenciesForUserPreferences(): Promise<Array<{code: string, name: string, symbol: string}>> {
+    // Get the 8 strongest currencies (lowest rates = strongest vs USD)
+    const strongestCurrencies = await db
+      .select({
+        currency: exchangeRates.toCurrency,
+        minRate: sql<number>`MIN(CAST(${exchangeRates.rate} AS DECIMAL))`.as('min_rate')
+      })
+      .from(exchangeRates)
+      .groupBy(exchangeRates.toCurrency)
+      .orderBy(sql`MIN(CAST(${exchangeRates.rate} AS DECIMAL)) ASC`)
+      .limit(8);
+
+    // Get all other currencies alphabetically
+    const allCurrencies = await db
+      .select({
+        currency: exchangeRates.toCurrency
+      })
+      .from(exchangeRates)
+      .groupBy(exchangeRates.toCurrency)
+      .orderBy(asc(exchangeRates.toCurrency));
+
+    const strongestCodes = strongestCurrencies.map(c => c.currency);
+    const otherCurrencies = allCurrencies
+      .filter(c => !strongestCodes.includes(c.currency))
+      .map(c => c.currency);
+
+    // Currency mappings with names and symbols
+    const currencyMappings: Record<string, {name: string, symbol: string}> = {
+      'USD': { name: 'US Dollar', symbol: '$' },
+      'EUR': { name: 'Euro', symbol: '€' },
+      'GBP': { name: 'British Pound', symbol: '£' },
+      'JPY': { name: 'Japanese Yen', symbol: '¥' },
+      'CHF': { name: 'Swiss Franc', symbol: 'CHF' },
+      'CAD': { name: 'Canadian Dollar', symbol: 'C$' },
+      'AUD': { name: 'Australian Dollar', symbol: 'A$' },
+      'SEK': { name: 'Swedish Krona', symbol: 'kr' },
+      'NOK': { name: 'Norwegian Krone', symbol: 'kr' },
+      'DKK': { name: 'Danish Krone', symbol: 'kr' },
+      'KWD': { name: 'Kuwaiti Dinar', symbol: 'KWD' },
+      'BHD': { name: 'Bahraini Dinar', symbol: 'BHD' },
+      'OMR': { name: 'Omani Rial', symbol: 'OMR' },
+      'JOD': { name: 'Jordanian Dinar', symbol: 'JOD' },
+      'XDR': { name: 'Special Drawing Rights', symbol: 'XDR' },
+      'JEP': { name: 'Jersey Pound', symbol: '£' },
+      'SHP': { name: 'Saint Helena Pound', symbol: '£' },
+      'FKP': { name: 'Falkland Islands Pound', symbol: '£' }
+    };
+
+    // Combine strongest first, then others alphabetically
+    const finalOrder = [...strongestCodes, ...otherCurrencies];
+    
+    return finalOrder.map(code => ({
+      code,
+      name: currencyMappings[code]?.name || code,
+      symbol: currencyMappings[code]?.symbol || code
+    }));
   }
 }
 

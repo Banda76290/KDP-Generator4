@@ -2754,6 +2754,17 @@ Please respond with only a JSON object containing the translated fields. For key
     }
   });
 
+  // Currencies list endpoint for user preferences
+  app.get("/api/currencies", isAuthenticated, async (req, res) => {
+    try {
+      const currencies = await storage.getCurrenciesForUserPreferences();
+      res.json(currencies);
+    } catch (error) {
+      console.error("Error fetching currencies:", error);
+      res.status(500).json({ error: "Failed to fetch currencies" });
+    }
+  });
+
   app.post("/api/exchange-rates/update", isAuthenticated, async (req, res) => {
     try {
       await cronService.forceUpdate();

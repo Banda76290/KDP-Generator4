@@ -23,9 +23,10 @@ export default function Settings() {
   // Save preferred currency with toast notification
   const handleCurrencyChange = (newCurrency: string) => {
     updatePreferredCurrency(newCurrency);
+    const currency = availableCurrencies.find(c => c.code === newCurrency);
     toast({
-      title: "Currency Updated",
-      description: `Display currency changed to ${availableCurrencies.find(c => c.code === newCurrency)?.name}`,
+      title: "Currency Updated", 
+      description: `Display currency changed to ${currency?.name || newCurrency}`,
       variant: "success"
     });
   };

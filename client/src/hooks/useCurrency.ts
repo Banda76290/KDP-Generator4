@@ -1,23 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useQuery } from "@tanstack/react-query";
 
 export interface Currency {
   code: string;
   name: string;
   symbol: string;
 }
-
-export const AVAILABLE_CURRENCIES: Currency[] = [
-  { code: 'USD', name: 'US Dollar', symbol: '$' },
-  { code: 'EUR', name: 'Euro', symbol: '€' },
-  { code: 'GBP', name: 'British Pound', symbol: '£' },
-  { code: 'CAD', name: 'Canadian Dollar', symbol: 'C$' },
-  { code: 'AUD', name: 'Australian Dollar', symbol: 'A$' },
-  { code: 'JPY', name: 'Japanese Yen', symbol: '¥' },
-  { code: 'CHF', name: 'Swiss Franc', symbol: 'CHF' },
-  { code: 'SEK', name: 'Swedish Krona', symbol: 'kr' },
-  { code: 'NOK', name: 'Norwegian Krone', symbol: 'kr' },
-  { code: 'DKK', name: 'Danish Krone', symbol: 'kr' }
-];
 
 /**
  * Hook for managing user's preferred display currency
@@ -26,17 +14,23 @@ export const AVAILABLE_CURRENCIES: Currency[] = [
 export function useCurrency() {
   const [preferredCurrency, setPreferredCurrency] = useState<string>('USD');
 
+  // Fetch available currencies from the database
+  const { data: availableCurrencies = [] } = useQuery<Currency[]>({
+    queryKey: ['/api/currencies'],
+    staleTime: 1000 * 60 * 60, // Cache for 1 hour
+  });
+
   // Load saved currency preference on mount
   useEffect(() => {
     const savedCurrency = localStorage.getItem('preferredCurrency');
-    if (savedCurrency && AVAILABLE_CURRENCIES.find(c => c.code === savedCurrency)) {
+    if (savedCurrency && availableCurrencies.find(c => c.code === savedCurrency)) {
       setPreferredCurrency(savedCurrency);
     }
-  }, []);
+  }, [availableCurrencies]);
 
   // Update preferred currency and save to localStorage
   const updatePreferredCurrency = (currencyCode: string) => {
-    if (AVAILABLE_CURRENCIES.find(c => c.code === currencyCode)) {
+    if (availableCurrencies.find(c => c.code === currencyCode)) {
       setPreferredCurrency(currencyCode);
       localStorage.setItem('preferredCurrency', currencyCode);
     }
@@ -44,7 +38,7 @@ export function useCurrency() {
 
   // Get currency object for current preference
   const getCurrentCurrency = (): Currency => {
-    return AVAILABLE_CURRENCIES.find(c => c.code === preferredCurrency) || AVAILABLE_CURRENCIES[0];
+    return availableCurrencies.find(c => c.code === preferredCurrency) || availableCurrencies[0] || { code: 'USD', name: 'US Dollar', symbol: '$' };
   };
 
   // Format amount in preferred currency
@@ -71,6 +65,6 @@ export function useCurrency() {
     updatePreferredCurrency,
     getCurrentCurrency,
     formatCurrency,
-    availableCurrencies: AVAILABLE_CURRENCIES
+    availableCurrencies
   };
 }
