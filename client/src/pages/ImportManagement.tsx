@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileSpreadsheet, Trash2, Eye, AlertCircle, CheckCircle, Clock, X } from 'lucide-react';
+import { Upload, FileSpreadsheet, Eye, AlertCircle, CheckCircle, Clock, X, RefreshCw } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { format } from 'date-fns';
 import Layout from '@/components/Layout';
@@ -80,8 +80,6 @@ export default function ImportManagement() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [expandedImport, setExpandedImport] = useState<string | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [importToDelete, setImportToDelete] = useState<string | null>(null);
   const [validationDialogOpen, setValidationDialogOpen] = useState(false);
   const [selectedImportForValidation, setSelectedImportForValidation] = useState<string | null>(null);
   const [importPreview, setImportPreview] = useState<any>(null);
@@ -316,18 +314,7 @@ export default function ImportManagement() {
     }
   };
 
-  const handleDelete = (importId: string) => {
-    setImportToDelete(importId);
-    setDeleteDialogOpen(true);
-  };
 
-  const confirmDelete = () => {
-    if (importToDelete) {
-      deleteMutation.mutate(importToDelete);
-      setDeleteDialogOpen(false);
-      setImportToDelete(null);
-    }
-  };
 
   const toggleExpandImport = async (importId: string) => {
     const newExpandedImport = expandedImport === importId ? null : importId;
@@ -578,11 +565,22 @@ export default function ImportManagement() {
       {/* Import History */}
       <Card>
         <CardHeader>
-          <div>
-            <CardTitle>Import History</CardTitle>
-            <CardDescription>
-              View and manage your previously uploaded KDP reports
-            </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Import History</CardTitle>
+              <CardDescription>
+                View and manage your previously uploaded KDP reports
+              </CardDescription>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => refetchImports()}
+              disabled={isLoading}
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -663,16 +661,6 @@ export default function ImportManagement() {
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
-
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(importRecord.id)}
-                        disabled={deleteMutation.isPending}
-                        title="Delete import"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
                     </div>
                   </div>
 
@@ -746,25 +734,7 @@ export default function ImportManagement() {
       </Card>
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Import History</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this import history? This action cannot be undone and will remove this import record from your history. No imported data will be lost.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDeleteDialogOpen(false)}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+
 
       {/* KDP Import Validation Dialog */}
       <KdpImportValidationDialog
