@@ -94,6 +94,7 @@ export default function ImportManagement() {
       toast({
         title: "File uploaded successfully",
         description: `Detected: ${getDetectedTypeDescription(data.parsedData.detectedType)}`,
+        variant: "success",
       });
       // Force immediate refresh of imports list 
       await refetchImports();
@@ -131,6 +132,7 @@ export default function ImportManagement() {
       toast({
         title: "Import deleted",
         description: "Import and all associated data have been removed.",
+        variant: "success",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
     },
