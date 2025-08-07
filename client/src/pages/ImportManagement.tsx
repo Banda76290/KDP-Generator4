@@ -612,7 +612,7 @@ export default function ImportManagement() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Import History</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this import history? This action cannot be undone and will remove this import record from your history.
+              Are you sure you want to delete this import history? This action cannot be undone and will remove this import record from your history. No imported data will be lost.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
