@@ -7,6 +7,11 @@ import { KdpImportValidationDialog, type ImportOptions } from '@/components/KdpI
 interface GlobalKdpImportContextType {
   uploadFile: (file: File) => void;
   isUploading: boolean;
+  validationDialogOpen: boolean;
+  setValidationDialogOpen: (open: boolean) => void;
+  selectedImportForValidation: string | null;
+  importPreview: any;
+  handleValidationConfirm: (options: any) => void;
 }
 
 const GlobalKdpImportContext = createContext<GlobalKdpImportContextType | null>(null);
@@ -63,7 +68,7 @@ export function GlobalKdpImportProvider({ children }: GlobalKdpImportProviderPro
       if (importId) {
         // If it's a royalties_estimator file, open validation dialog immediately
         if (data.parsedData.detectedType === 'royalties_estimator') {
-          // Create a basic preview from upload response data
+          // Create a basic preview from upload response data - IDENTICAL to ImportManagement.tsx
           const basicPreview = {
             totalBooks: data.parsedData.summary?.estimatedRecords || 0,
             existingBooks: 0, // Will be calculated during processing
@@ -74,12 +79,13 @@ export function GlobalKdpImportProvider({ children }: GlobalKdpImportProviderPro
             missingAuthorData: 0
           };
           
-          // Open validation dialog immediately - GLOBALLY
+          // Open validation dialog immediately - EXACTLY like ImportManagement.tsx
           setImportPreview(basicPreview);
           setSelectedImportForValidation(importId);
           setValidationDialogOpen(true);
           
-          return; // Don't start any automatic processing
+          // Don't start processing yet - wait for user confirmation - IDENTICAL logic
+          return; // Skip the automatic monitoring
         } else {
           // For other file types, redirect to import management page
           window.location.href = '/import-management';
@@ -164,9 +170,24 @@ export function GlobalKdpImportProvider({ children }: GlobalKdpImportProviderPro
     },
   });
 
+  // Handler for the global validation dialog
+  const handleValidationConfirm = (options: ImportOptions) => {
+    if (selectedImportForValidation) {
+      processBooksMutation.mutate({
+        importId: selectedImportForValidation,
+        options
+      });
+    }
+  };
+
   const contextValue: GlobalKdpImportContextType = {
     uploadFile: (file: File) => uploadMutation.mutate(file),
     isUploading: uploadMutation.isPending,
+    validationDialogOpen,
+    setValidationDialogOpen,
+    selectedImportForValidation,
+    importPreview,
+    handleValidationConfirm,
   };
 
   return (

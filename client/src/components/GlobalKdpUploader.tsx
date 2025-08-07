@@ -1,7 +1,8 @@
 import React, { useRef } from 'react';
-import { Upload } from 'lucide-react';
+import { Upload, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useGlobalKdpImport } from '@/hooks/useGlobalKdpImport';
+import { KdpImportValidationDialog } from '@/components/KdpImportValidationDialog';
 
 interface GlobalKdpUploaderProps {
   children?: React.ReactNode;
@@ -17,7 +18,15 @@ export function GlobalKdpUploader({
   size = "default"
 }: GlobalKdpUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { uploadFile, isUploading } = useGlobalKdpImport();
+  const { 
+    uploadFile, 
+    isUploading, 
+    validationDialogOpen, 
+    setValidationDialogOpen,
+    selectedImportForValidation,
+    importPreview,
+    handleValidationConfirm
+  } = useGlobalKdpImport();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -49,9 +58,30 @@ export function GlobalKdpUploader({
         variant={variant}
         size={size}
       >
-        <Upload className="w-4 h-4 mr-2" />
-        {children || (isUploading ? "Uploading..." : "Upload KDP Report")}
+        {isUploading ? (
+          <>
+            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+            Uploading...
+          </>
+        ) : (
+          <>
+            <Upload className="w-4 h-4 mr-2" />
+            {children || "Upload KDP Report"}
+          </>
+        )}
       </Button>
+
+      {/* Global Validation Dialog - IDENTICAL to ImportManagement.tsx */}
+      {validationDialogOpen && selectedImportForValidation && importPreview && (
+        <KdpImportValidationDialog
+          isOpen={validationDialogOpen}
+          onClose={() => setValidationDialogOpen(false)}
+          onConfirm={handleValidationConfirm}
+          importData={selectedImportForValidation}
+          preview={importPreview}
+          isLoading={false}
+        />
+      )}
     </>
   );
 }
