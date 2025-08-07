@@ -143,8 +143,8 @@ export default function ImportManagement() {
     },
     onSuccess: () => {
       toast({
-        title: "Import deleted",
-        description: "Import and all associated data have been removed.",
+        title: "Import history deleted",
+        description: "Import record has been removed from your history.",
         variant: "success",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
@@ -610,9 +610,9 @@ export default function ImportManagement() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Import</AlertDialogTitle>
+            <AlertDialogTitle>Delete Import History</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this import? This action cannot be undone and will remove all associated data.
+              Are you sure you want to delete this import history? This action cannot be undone and will remove this import record from your history.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
