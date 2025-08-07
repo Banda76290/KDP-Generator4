@@ -386,7 +386,7 @@ export default function ImportManagement() {
             Upload KDP Report
           </CardTitle>
           <CardDescription>
-            Upload your complete historical KDP Royalties Estimator file containing all sales since the beginning. This will replace all existing sales data.
+            Upload any exported file from Amazon KDP that will be automatically recognized if it's a file that KDP Generator can integrate into your environment.
           </CardDescription>
         </CardHeader>
         <CardContent>
