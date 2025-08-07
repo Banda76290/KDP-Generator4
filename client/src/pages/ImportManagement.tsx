@@ -578,22 +578,11 @@ export default function ImportManagement() {
       {/* Import History */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Import History</CardTitle>
-              <CardDescription>
-                View and manage your previously uploaded KDP reports
-              </CardDescription>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => refetchImports()}
-              disabled={isLoading}
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
+          <div>
+            <CardTitle>Import History</CardTitle>
+            <CardDescription>
+              View and manage your previously uploaded KDP reports
+            </CardDescription>
           </div>
         </CardHeader>
         <CardContent>
