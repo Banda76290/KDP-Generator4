@@ -80,11 +80,14 @@ export function GlobalKdpImportProvider({ children }: GlobalKdpImportProviderPro
           setValidationDialogOpen(true);
           
           return; // Don't start any automatic processing
+        } else {
+          // For other file types, redirect to import management page
+          window.location.href = '/import-management';
         }
-        
-        // For other file types, refresh imports if we're on import management page
-        queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
       }
+      
+      // Invalidate queries to refresh the UI
+      queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
     },
     onError: (error: any) => {
       toast({
