@@ -70,7 +70,7 @@ import {
   type InsertMasterBook,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, gte, lte, sql, sum, count, like, or, isNotNull } from "drizzle-orm";
+import { eq, desc, and, gte, lte, sql, sum, count, like, or, isNotNull, asc, inArray } from "drizzle-orm";
 import { generateUniqueIsbnPlaceholder } from "./utils/isbnGenerator";
 import { nanoid } from "nanoid";
 
@@ -2044,7 +2044,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(kdpRoyaltiesEstimatorData)
       .where(eq(kdpRoyaltiesEstimatorData.importId, importId))
-      .orderBy(asc(kdpRoyaltiesEstimatorData.rowIndex));
+      .orderBy(kdpRoyaltiesEstimatorData.rowIndex);
   }
 
   async getKdpRoyaltiesEstimatorDataByTransactionType(
@@ -2057,10 +2057,10 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(kdpRoyaltiesEstimatorData.userId, userId),
-          inArray(kdpRoyaltiesEstimatorData.transactionType, transactionTypes)
+          sql`${kdpRoyaltiesEstimatorData.transactionType} = ANY(${transactionTypes})`
         )
       )
-      .orderBy(asc(kdpRoyaltiesEstimatorData.royaltyDate));
+      .orderBy(kdpRoyaltiesEstimatorData.royaltyDate);
   }
 
   async deleteKdpRoyaltiesEstimatorData(importId: string): Promise<void> {
@@ -2460,7 +2460,7 @@ export class DatabaseStorage implements IStorage {
         await db
           .insert(consolidatedSalesData)
           .values({
-            asin: consolidatedKey,
+            userId: data.userId || '',
             title: `Paiements agrégés ${data.currency}`,
             authorName: 'Données de paiement',
             currency: data.currency,
@@ -2491,7 +2491,7 @@ export class DatabaseStorage implements IStorage {
         processed++;
         if (data.totalRoyalty > 0) updated++;
       } catch (error) {
-        console.error(`[CONSOLIDATION] Erreur pour ${consolidatedKey} (${data.currency}):`, error);
+        console.error(`[CONSOLIDATION] Erreur pour ${data.currency}:`, error);
       }
     }
 
