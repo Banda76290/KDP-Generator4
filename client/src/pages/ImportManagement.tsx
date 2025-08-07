@@ -575,32 +575,21 @@ export default function ImportManagement() {
                 View and manage your previously uploaded KDP reports
               </CardDescription>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">Show:</span>
-                <Select value={itemsPerPage.toString()} onValueChange={(value) => {
-                  setItemsPerPage(Number(value));
-                  setCurrentPage(1); // Reset to first page when changing items per page
-                }}>
-                  <SelectTrigger className="w-20">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="20">20</SelectItem>
-                    <SelectItem value="50">50</SelectItem>
-                    <SelectItem value="100">100</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => refetchImports()}
-                disabled={isLoading}
-              >
-                <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Show:</span>
+              <Select value={itemsPerPage.toString()} onValueChange={(value) => {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1); // Reset to first page when changing items per page
+              }}>
+                <SelectTrigger className="w-20">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="20">20</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardHeader>
