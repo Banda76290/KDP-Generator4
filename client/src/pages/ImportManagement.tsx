@@ -76,11 +76,7 @@ export default function ImportManagement() {
   const { data: imports = [], isLoading, refetch: refetchImports } = useQuery<KdpImportWithRelations[]>({
     queryKey: ['/api/kdp-imports'],
     staleTime: 0, // No cache staleness
-    refetchInterval: (data) => {
-      // Si un import est en cours, rafraîchir chaque seconde
-      const hasProcessingImport = data?.some((imp: any) => imp.status === 'processing');
-      return hasProcessingImport ? 1000 : 5000; // 1s si processing, 5s sinon
-    },
+    refetchInterval: 1000, // Refresh every second during processing
     refetchIntervalInBackground: true,
   });
 
