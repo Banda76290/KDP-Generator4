@@ -223,14 +223,19 @@ export default function ImportManagement() {
     const newExpandedImport = expandedImport === importId ? null : importId;
     setExpandedImport(newExpandedImport);
     
-    // If expanding an import, start monitoring its progress
+    // If expanding an import, start monitoring its progress ONLY if it's still processing
     if (newExpandedImport) {
-      await monitorImportProgress(newExpandedImport);
+      const currentImport = imports.find(imp => imp.id === importId);
+      if (currentImport && (currentImport.status === 'processing' || currentImport.status === 'pending')) {
+        await monitorImportProgress(newExpandedImport);
+      }
     }
   };
 
   // Monitor import progress with intelligent refresh
   const monitorImportProgress = async (importId: string) => {
+    let previousStatus: string | null = null;
+    
     const checkProgress = async () => {
       try {
         // Refresh progress data manually for the specific import
@@ -241,6 +246,7 @@ export default function ImportManagement() {
         
         // If still processing or pending, schedule next check
         if (progressResult && (progressResult.status === 'processing' || progressResult.status === 'pending')) {
+          previousStatus = progressResult.status;
           // Wait 2 seconds before next check, but only if still expanded
           setTimeout(() => {
             if (expandedImport === importId) {
@@ -252,18 +258,20 @@ export default function ImportManagement() {
           queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
           queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports', importId, 'progress'] });
           
-          // Show completion notification
-          if (progressResult.status === 'completed') {
-            toast({
-              title: "Import completed",
-              description: `Successfully processed ${progressResult.processedRecords} records`,
-            });
-          } else if (progressResult.status === 'failed') {
-            toast({
-              title: "Import failed",
-              description: "Check the error log for details",
-              variant: "destructive",
-            });
+          // Show completion notification ONLY if there was a status change from processing
+          if (previousStatus && (previousStatus === 'processing' || previousStatus === 'pending')) {
+            if (progressResult.status === 'completed') {
+              toast({
+                title: "Import completed",
+                description: `Successfully processed ${progressResult.processedRecords} records`,
+              });
+            } else if (progressResult.status === 'failed') {
+              toast({
+                title: "Import failed",
+                description: "Check the error log for details",
+                variant: "destructive",
+              });
+            }
           }
         }
       } catch (error) {
