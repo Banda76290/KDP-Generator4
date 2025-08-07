@@ -10,6 +10,17 @@ import { apiRequest } from '@/lib/queryClient';
 import { format } from 'date-fns';
 import Layout from '@/components/Layout';
 import type { KdpImportWithRelations } from '@shared/schema';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ImportProgress {
   status: string;
@@ -68,6 +79,8 @@ export default function ImportManagement() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [expandedImport, setExpandedImport] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [importToDelete, setImportToDelete] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -220,8 +233,15 @@ export default function ImportManagement() {
   };
 
   const handleDelete = (importId: string) => {
-    if (confirm('Are you sure you want to delete this import? This action cannot be undone.')) {
-      deleteMutation.mutate(importId);
+    setImportToDelete(importId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (importToDelete) {
+      deleteMutation.mutate(importToDelete);
+      setDeleteDialogOpen(false);
+      setImportToDelete(null);
     }
   };
 
@@ -585,6 +605,26 @@ export default function ImportManagement() {
         </CardContent>
       </Card>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Import</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this import? This action cannot be undone and will remove all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteDialogOpen(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 }
