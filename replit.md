@@ -53,20 +53,17 @@ The application follows a modern full-stack architecture with clear separation b
 
 4. **Component Standards**:
    - Replace ALL native browser popups with custom `AlertDialog` components
-   - Consistent card styling: `bg-white dark:bg-gray-800 border rounded-lg shadow-sm`
+   - Consistent card styling: `bg-white border rounded-lg shadow-sm`
    - Status badges: Color-coded with consistent styling patterns
    - Loading states: Skeleton components or spinners with consistent theming
 
 5. **Typography & Accessibility**:
    - Consistent heading hierarchy: `text-3xl font-bold` for h1, `text-xl font-semibold` for h2
-   - Readable text colors: `text-gray-900 dark:text-white` for primary text
+   - Readable text colors: `text-gray-900` for primary text
    - Sufficient contrast ratios for all text/background combinations
    - Proper focus indicators for keyboard navigation
 
-6. **Dark Mode Compliance**:
-   - ALL components MUST support dark mode with explicit variants
-   - Use CSS variables for colors that change between themes
-   - Test both light and dark modes for every new feature
+
 
 #### Implementation Requirements
 - Before creating ANY new component or page, reference these standards
