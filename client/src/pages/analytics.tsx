@@ -352,7 +352,7 @@ export default function Analytics() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-secondary">
+            <div className="text-2xl font-bold text-green-600">
               {totalRevenueLoading ? (
                 <div className="w-24 h-6 bg-gray-200 animate-pulse rounded" />
               ) : totalRevenue ? (
