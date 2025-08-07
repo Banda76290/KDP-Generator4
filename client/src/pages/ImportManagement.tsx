@@ -252,10 +252,12 @@ export default function ImportManagement() {
           console.log(`[TOAST] Initial status set: ${previousStatus}`);
         }
         
-        // If still processing or pending, schedule next check
+        // Check if import is still in progress
         if (progressResult && (progressResult.status === 'processing' || progressResult.status === 'pending')) {
+          console.log(`[TOAST] Still in progress: ${progressResult.status}`);
           // Update previous status for transition tracking
           if (progressResult.status !== previousStatus) {
+            console.log(`[TOAST] Status changed from ${previousStatus} to ${progressResult.status}`);
             previousStatus = progressResult.status;
           }
           
@@ -265,35 +267,34 @@ export default function ImportManagement() {
           }, 2000);
         } else if (progressResult && (progressResult.status === 'completed' || progressResult.status === 'failed' || progressResult.status === 'error')) {
           // Import finished, refresh the import list to show final status
+          console.log(`[TOAST] Import finished with status: ${progressResult.status}`);
           queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
           queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports', importId, 'progress'] });
           
-          // Show completion notification when status changes to completed or failed
-          console.log(`[TOAST] Status transition: ${previousStatus} → ${progressResult.status}`);
-          if (previousStatus && previousStatus !== progressResult.status) {
-            if (progressResult.status === 'completed') {
-              console.log(`[TOAST] Triggering success toast`);
-              const newRecords = progressResult.processedRecords || 0;
-              const duplicates = progressResult.duplicateRecords || 0;
-              toast({
-                title: "Import completed",
-                description: newRecords > 0 
-                  ? `Successfully processed ${newRecords} new records${duplicates > 0 ? ` and updated ${duplicates} existing records` : ''}`
-                  : `Updated ${duplicates} existing records (no new records added)`,
-                variant: "success",
-              });
-            } else if (progressResult.status === 'failed' || progressResult.status === 'error') {
-              console.log(`[TOAST] Triggering error toast`);
-              toast({
-                title: "Import failed",
-                description: progressResult.errorLog?.length > 0 
-                  ? progressResult.errorLog[0]
-                  : "Check the error log for details",
-                variant: "destructive",
-              });
-            }
+          // Always show notification for completed/failed imports (unless it was already completed from the start)
+          console.log(`[TOAST] Final transition: ${previousStatus} → ${progressResult.status}`);
+          if (progressResult.status === 'completed' && previousStatus !== 'completed') {
+            console.log(`[TOAST] Showing success toast!`);
+            const newRecords = progressResult.processedRecords || 0;
+            const duplicates = progressResult.duplicateRecords || 0;
+            toast({
+              title: "Import completed ✓",
+              description: newRecords > 0 
+                ? `Successfully processed ${newRecords} new records${duplicates > 0 ? ` and updated ${duplicates} existing records` : ''}`
+                : `Updated ${duplicates} existing records (no new records added)`,
+              variant: "success",
+            });
+          } else if ((progressResult.status === 'failed' || progressResult.status === 'error') && previousStatus !== 'failed' && previousStatus !== 'error') {
+            console.log(`[TOAST] Showing error toast!`);
+            toast({
+              title: "Import failed",
+              description: progressResult.errorLog?.length > 0 
+                ? progressResult.errorLog[0]
+                : "Check the error log for details",
+              variant: "destructive",
+            });
           } else {
-            console.log(`[TOAST] No valid transition: previousStatus=${previousStatus}, currentStatus=${progressResult.status}`);
+            console.log(`[TOAST] No toast shown: previousStatus=${previousStatus}, currentStatus=${progressResult.status}`);
           }
         }
       } catch (error) {
