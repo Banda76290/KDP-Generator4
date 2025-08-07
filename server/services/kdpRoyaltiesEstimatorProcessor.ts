@@ -160,17 +160,17 @@ export class KdpRoyaltiesEstimatorProcessor {
         }
 
         // Filtrer selon l'onglet :
-        // - Combined Sales : filtrer par Transaction Types
-        // - Autres onglets : prendre toutes les lignes
+        // - Combined Sales : filtrer par Transaction Types ciblés (garder seulement Free-Promotion et Expanded Distribution)
+        // - Autres onglets : exclure les Transaction Types ciblés (garder tout sauf Free-Promotion et Expanded Distribution)
         const filteredRows = sheet.name === 'Combined Sales' 
           ? sheet.data.filter(row => {
               const transactionType = row[transactionTypeIndex];
               return transactionType && this.TARGET_TRANSACTION_TYPES.includes(transactionType);
             })
           : sheet.data.filter(row => {
-              // Pour les autres onglets, prendre toutes les lignes avec des données valides
+              // Pour les autres onglets, EXCLURE les target types (garder tout le reste)
               const transactionType = row[transactionTypeIndex];
-              return transactionType && transactionType.trim() !== '';
+              return transactionType && transactionType.trim() !== '' && !this.TARGET_TRANSACTION_TYPES.includes(transactionType);
             });
 
         console.log(`[KDP_ROYALTIES] ${sheet.name}: ${filteredRows.length} lignes filtrées sur ${sheet.data.length} total`);
@@ -404,6 +404,7 @@ export class KdpRoyaltiesEstimatorProcessor {
       return {
         ...commonData,
         isbn: parseStringValue(getColumnValue('ISBN')), // ISBN pour livres imprimés
+        asin: parseStringValue(getColumnValue('ASIN')), // ASIN aussi présent dans Paperback/Hardcover !
         orderDate: parseStringValue(getColumnValue('Order Date')),
         avgManufacturingCost: parseNumericValue(getColumnValuePartial('Avg. Manufacturing Cost')).toString(),
       };
@@ -420,9 +421,12 @@ export class KdpRoyaltiesEstimatorProcessor {
    */
   private static createUniqueKey(data: InsertKdpRoyaltiesEstimatorData): string {
     // Les 5 champs pour la déduplication
+    // Pour Paperback/Hardcover qui ont ISBN ET ASIN, on privilégie l'ISBN comme identifiant principal
+    const productId = data.isbn || data.asin || '';
+    
     const keyComponents = [
       data.royaltyDate || '',
-      data.asin || data.isbn || '', // ASIN ou ISBN selon l'onglet
+      productId,
       data.marketplace || '',
       data.royaltyType || '',
       data.transactionType || ''
