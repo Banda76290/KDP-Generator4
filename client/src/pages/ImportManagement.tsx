@@ -45,13 +45,13 @@ const formatFileSize = (bytes: number): string => {
 const getStatusBadge = (status: string) => {
   switch (status) {
     case 'completed':
-      return <Badge className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800"><CheckCircle className="w-3 h-3 mr-1" />Completed</Badge>;
+      return <Badge className="bg-green-50 text-green-700 border-green-200"><CheckCircle className="w-3 h-3 mr-1" />Completed</Badge>;
     case 'processing':
-      return <Badge className="bg-primary/10 dark:bg-primary/20 text-primary border-primary/20"><Clock className="w-3 h-3 mr-1" />Processing</Badge>;
+      return <Badge className="bg-primary/10 text-primary border-primary/20"><Clock className="w-3 h-3 mr-1" />Processing</Badge>;
     case 'failed':
-      return <Badge className="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800"><AlertCircle className="w-3 h-3 mr-1" />Failed</Badge>;
+      return <Badge className="bg-red-50 text-red-700 border-red-200"><AlertCircle className="w-3 h-3 mr-1" />Failed</Badge>;
     case 'pending':
-      return <Badge className="bg-secondary/10 dark:bg-secondary/20 text-secondary border-secondary/20"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
+      return <Badge className="bg-secondary/10 text-secondary border-secondary/20"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
     default:
       return <Badge variant="secondary">{status}</Badge>;
   }
@@ -430,10 +430,10 @@ export default function ImportManagement() {
     <Layout>
       <div className="container mx-auto p-6 max-w-6xl">
         <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
           KDP Import Management
         </h1>
-        <p className="text-gray-600 dark:text-gray-300">
+        <p className="text-gray-600">
           Upload and manage your Amazon KDP reports for analysis and data integration.
         </p>
       </div>
@@ -453,8 +453,8 @@ export default function ImportManagement() {
           <div
             className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
               isDragging
-                ? 'border-primary bg-primary/5 dark:bg-primary/10'
-                : 'border-gray-300 dark:border-gray-600 hover:border-primary/50 dark:hover:border-primary/50'
+                ? 'border-primary bg-primary/5'
+                : 'border-gray-300 hover:border-primary/50'
             }`}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
@@ -465,10 +465,10 @@ export default function ImportManagement() {
                 <div className="flex items-center justify-center gap-2">
                   <FileSpreadsheet className="w-8 h-8 text-primary" />
                   <div className="text-left">
-                    <p className="font-medium text-gray-900 dark:text-white">
+                    <p className="font-medium text-gray-900">
                       {selectedFile.name}
                     </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-gray-500">
                       {formatFileSize(selectedFile.size)}
                     </p>
                   </div>
@@ -548,10 +548,10 @@ export default function ImportManagement() {
               <div>
                 <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <div className="space-y-2">
-                  <p className="text-lg font-medium text-gray-900 dark:text-white">
+                  <p className="text-lg font-medium text-gray-900">
                     Drop your KDP files here
                   </p>
-                  <p className="text-gray-500 dark:text-gray-400">
+                  <p className="text-gray-500">
                     Or click to browse and select files
                   </p>
                   <Button 
@@ -589,15 +589,15 @@ export default function ImportManagement() {
           {isLoading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-2 text-gray-500 dark:text-gray-400">Loading imports...</p>
+              <p className="mt-2 text-gray-500">Loading imports...</p>
             </div>
           ) : imports.length === 0 ? (
             <div className="text-center py-8">
               <FileSpreadsheet className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              <p className="text-lg font-medium text-gray-900 mb-2">
                 No imports yet
               </p>
-              <p className="text-gray-500 dark:text-gray-400">
+              <p className="text-gray-500">
                 Upload your first KDP report to get started
               </p>
             </div>
@@ -610,15 +610,15 @@ export default function ImportManagement() {
                       <div className="flex items-center gap-3">
                         <FileSpreadsheet className="w-5 h-5 text-primary" />
                         <div>
-                          <h3 className="font-medium text-gray-900 dark:text-white">
+                          <h3 className="font-medium text-gray-900">
                             {importRecord.fileName}
                           </h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                          <p className="text-sm text-gray-500">
                             {getDetectedTypeDescription(importRecord.detectedType || '')}
                           </p>
                         </div>
                       </div>
-                      <div className="mt-2 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                      <div className="mt-2 flex items-center gap-4 text-sm text-gray-500">
                         <span>{formatFileSize(importRecord.fileSize)}</span>
                         <span>
                           {format(new Date(importRecord.createdAt || new Date()), 'MMM dd, yyyy HH:mm')}
@@ -689,7 +689,7 @@ export default function ImportManagement() {
                             <span>{importRecord.progress || 0}%</span>
                           </div>
                           <Progress value={importRecord.progress || 0} className="w-full" />
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                          <p className="text-sm text-gray-500">
                             Processing {importRecord.totalRecords || 0} records from file
                           </p>
                         </div>
@@ -697,26 +697,26 @@ export default function ImportManagement() {
 
                       {/* Summary Stats */}
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="text-center p-4 bg-primary/10 dark:bg-primary/20 rounded-lg border border-primary/20">
+                        <div className="text-center p-4 bg-primary/10 rounded-lg border border-primary/20">
                           <div className="text-2xl font-bold text-primary">
                             {importRecord.processedRecords || 0}
                           </div>
                           <div className="text-sm text-primary/70 font-medium">New Records</div>
                         </div>
-                        <div className="text-center p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                          <div className="text-2xl font-bold text-slate-700 dark:text-slate-300">
+                        <div className="text-center p-4 bg-slate-50 rounded-lg border border-slate-200">
+                          <div className="text-2xl font-bold text-slate-700">
                             {importRecord.totalRecords || 0}
                           </div>
-                          <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">File Records</div>
+                          <div className="text-sm text-slate-600 font-medium">File Records</div>
                         </div>
-                        <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                          <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                        <div className="text-center p-4 bg-red-50 rounded-lg border border-red-200">
+                          <div className="text-2xl font-bold text-red-600">
                             {importRecord.errorRecords || 0}
                           </div>
-                          <div className="text-sm text-red-600/70 dark:text-red-400/70 font-medium">Errors</div>
+                          <div className="text-sm text-red-600/70 font-medium">Errors</div>
                         </div>
-                        <div className="text-center p-4 bg-secondary/10 dark:bg-secondary/20 rounded-lg border border-secondary/20">
-                          <div className="text-2xl font-bold text-secondary dark:text-secondary">
+                        <div className="text-center p-4 bg-secondary/10 rounded-lg border border-secondary/20">
+                          <div className="text-2xl font-bold text-secondary">
                             {importRecord.duplicateRecords || 0}
                           </div>
                           <div className="text-sm text-secondary/70 font-medium">Duplicates</div>
@@ -727,9 +727,9 @@ export default function ImportManagement() {
                       {importRecord.errorLog && importRecord.errorLog.length > 0 && (
                         <div className="space-y-2">
                           <h4 className="font-medium text-red-600">Error Log</h4>
-                          <div className="bg-red-50 dark:bg-red-950 p-3 rounded text-sm max-h-40 overflow-y-auto">
+                          <div className="bg-red-50 p-3 rounded text-sm max-h-40 overflow-y-auto">
                             {importRecord.errorLog.map((error, index) => (
-                              <div key={index} className="mb-1 text-red-700 dark:text-red-300">
+                              <div key={index} className="mb-1 text-red-700">
                                 {error}
                               </div>
                             ))}
