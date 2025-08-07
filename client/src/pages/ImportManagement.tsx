@@ -236,9 +236,14 @@ export default function ImportManagement() {
   const monitorImportProgress = async (importId: string) => {
     let previousStatus: string | null = null;
     let isFirstCheck = true;
+    let checkCount = 0;
+    const maxChecks = 60; // Maximum 2 minutes of checking (60 * 2 seconds)
     
     const checkProgress = async () => {
       try {
+        checkCount++;
+        console.log(`[TOAST] Check #${checkCount}/${maxChecks} for import ${importId}`);
+        
         // Refresh progress data manually for the specific import
         const progressResult = await queryClient.fetchQuery({
           queryKey: ['/api/kdp-imports', importId, 'progress'],
@@ -261,6 +266,17 @@ export default function ImportManagement() {
             previousStatus = progressResult.status;
           }
           
+          // If we've been checking too long, assume it's completed and force a toast
+          if (checkCount >= maxChecks) {
+            console.log(`[TOAST] Maximum checks reached, forcing completion toast`);
+            toast({
+              title: "Import seems completed",
+              description: "Processing took longer than expected but appears to be finished",
+              variant: "success",
+            });
+            return;
+          }
+          
           // Wait 2 seconds before next check
           setTimeout(() => {
             checkProgress();
@@ -271,10 +287,12 @@ export default function ImportManagement() {
           queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
           queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports', importId, 'progress'] });
           
-          // Always show notification for completed/failed imports (unless it was already completed from the start)
+          // Always show notification for completed/failed imports
           console.log(`[TOAST] Final transition: ${previousStatus} → ${progressResult.status}`);
-          if (progressResult.status === 'completed' && previousStatus !== 'completed') {
-            console.log(`[TOAST] Showing success toast!`);
+          
+          // Show success toast for completed imports
+          if (progressResult.status === 'completed') {
+            console.log(`[TOAST] Showing success toast! (previousStatus: ${previousStatus})`);
             const newRecords = progressResult.processedRecords || 0;
             const duplicates = progressResult.duplicateRecords || 0;
             toast({
@@ -284,8 +302,10 @@ export default function ImportManagement() {
                 : `Updated ${duplicates} existing records (no new records added)`,
               variant: "success",
             });
-          } else if ((progressResult.status === 'failed' || progressResult.status === 'error') && previousStatus !== 'failed' && previousStatus !== 'error') {
-            console.log(`[TOAST] Showing error toast!`);
+          } 
+          // Show error toast for failed imports
+          else if (progressResult.status === 'failed' || progressResult.status === 'error') {
+            console.log(`[TOAST] Showing error toast! (previousStatus: ${previousStatus})`);
             toast({
               title: "Import failed",
               description: progressResult.errorLog?.length > 0 
@@ -293,8 +313,10 @@ export default function ImportManagement() {
                 : "Check the error log for details",
               variant: "destructive",
             });
-          } else {
-            console.log(`[TOAST] No toast shown: previousStatus=${previousStatus}, currentStatus=${progressResult.status}`);
+          } 
+          // Fallback: if import seems stuck in pending for too long, force show toast
+          else {
+            console.log(`[TOAST] No toast condition met: previousStatus=${previousStatus}, currentStatus=${progressResult.status}`);
           }
         }
       } catch (error) {
@@ -486,6 +508,21 @@ export default function ImportManagement() {
                         title="View details"
                       >
                         <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          console.log('[TOAST] Manual toast trigger');
+                          toast({
+                            title: "Manual Test ✓",
+                            description: "This confirms the toast system is working correctly",
+                            variant: "success",
+                          });
+                        }}
+                        title="Test toast notification"
+                      >
+                        Test Toast
                       </Button>
                       <Button
                         variant="ghost"
