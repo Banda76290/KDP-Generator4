@@ -524,62 +524,52 @@ export const kdpImportData = pgTable("kdp_import_data", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Nouvelle table dédiée spécifiquement aux fichiers KDP_Royalties_Estimator
+// Table KDP_Royalties_Estimator basée sur l'analyse du fichier réel fourni
 export const kdpRoyaltiesEstimatorData = pgTable("kdp_royalties_estimator_data", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   importId: varchar("import_id").notNull().references(() => kdpImports.id, { onDelete: "cascade" }),
-  sheetName: varchar("sheet_name").notNull(), // "Combined Sales", "eBook Royalty", etc.
+  sheetName: varchar("sheet_name").notNull(), // "Combined Sales", "eBook Royalty", "Paperback Royalty", "Hardcover Royalty"
   
-  // Champs exacts du KDP_Royalties_Estimator
-  royaltyDate: varchar("royalty_date"),
-  orderDate: varchar("order_date"), // Pour Paperback/Hardcover
-  title: text("title"),
-  authorName: varchar("author_name"),
-  asinIsbn: varchar("asin_isbn"), // "ASIN/ISBN" ou "ASIN" ou "ISBN" selon l'onglet
-  marketplace: varchar("marketplace"),
-  royaltyType: varchar("royalty_type"),
-  transactionType: varchar("transaction_type"), // CRITÈRE DE FILTRAGE: "Free - Promotion" ou "Expanded Distribution Channels"
+  // === CHAMPS COMMUNS À TOUS LES ONGLETS ROYALTY ===
+  royaltyDate: varchar("royalty_date"), // "Royalty Date" - présent dans tous les onglets royalty
+  title: text("title"), // "Title"
+  authorName: varchar("author_name"), // "Author Name"
+  marketplace: varchar("marketplace"), // "Marketplace"
+  royaltyType: varchar("royalty_type"), // "Royalty Type"
+  transactionType: varchar("transaction_type"), // "Transaction Type" - FILTRE: "Free - Promotion" et "Expanded Distribution Channels"
+  unitsSold: integer("units_sold"), // "Units Sold"
+  unitsRefunded: integer("units_refunded"), // "Units Refunded"
+  netUnitsSold: integer("net_units_sold"), // "Net Units Sold"
+  avgListPriceWithoutTax: decimal("avg_list_price_without_tax", { precision: 12, scale: 4 }), // "Avg. List Price without tax"
+  avgOfferPriceWithoutTax: decimal("avg_offer_price_without_tax", { precision: 12, scale: 4 }), // "Avg. Offer Price without tax"
+  royalty: decimal("royalty", { precision: 12, scale: 4 }), // "Royalty"
+  currency: varchar("currency"), // "Currency"
   
-  // Données de ventes
-  unitsSold: integer("units_sold"),
-  unitsRefunded: integer("units_refunded"),
-  netUnitsSold: integer("net_units_sold"),
+  // === CHAMPS SPÉCIFIQUES AUX eBOOKS (eBook Royalty, Combined Sales) ===
+  asin: varchar("asin"), // "ASIN" pour eBook Royalty
+  asinIsbn: varchar("asin_isbn"), // "ASIN/ISBN" pour Combined Sales
+  avgFileSizeMb: decimal("avg_file_size_mb", { precision: 8, scale: 3 }), // "Avg. File Size (MB)" - eBook seulement
+  avgDeliveryCost: decimal("avg_delivery_cost", { precision: 12, scale: 6 }), // "Avg. Delivery Cost" - eBook seulement
   
-  // Prix et coûts (précision élevée pour exactitude)
-  avgListPriceWithoutTax: decimal("avg_list_price_without_tax", { precision: 12, scale: 4 }),
-  avgOfferPriceWithoutTax: decimal("avg_offer_price_without_tax", { precision: 12, scale: 4 }),
-  avgDeliveryManufacturingCost: decimal("avg_delivery_manufacturing_cost", { precision: 12, scale: 4 }),
+  // === CHAMPS SPÉCIFIQUES AUX LIVRES IMPRIMÉS (Paperback/Hardcover Royalty) ===
+  orderDate: varchar("order_date"), // "Order Date" - Paperback/Hardcover seulement
+  isbn: varchar("isbn"), // "ISBN" - Paperback/Hardcover seulement
+  avgManufacturingCost: decimal("avg_manufacturing_cost", { precision: 12, scale: 4 }), // "Avg. Manufacturing Cost" - Print seulement
+  asinRef: varchar("asin_ref"), // "ASIN" - colonne additionnelle dans Paperback/Hardcover
   
-  // Spécifique eBook
-  avgFileSizeMb: decimal("avg_file_size_mb", { precision: 8, scale: 4 }),
-  avgDeliveryCost: decimal("avg_delivery_cost", { precision: 12, scale: 4 }),
-  
-  // Spécifique Paperback/Hardcover
-  printingCost: decimal("printing_cost", { precision: 12, scale: 4 }),
-  expandedDistributionCost: decimal("expanded_distribution_cost", { precision: 12, scale: 4 }),
-  
-  // Royalties et devises (précision maximale pour exactitude)
-  royalty: decimal("royalty", { precision: 12, scale: 4 }),
-  currency: varchar("currency"),
-  
-  // KENP (pour onglet KENP Read)
-  kenpRead: integer("kenp_read"),
-  
-  // Orders data (pour Orders Placed)
-  paidUnits: integer("paid_units"),
-  freeUnits: integer("free_units"),
-  
-  // Métadonnées de traitement
-  rowIndex: integer("row_index"), // Position dans le fichier original
-  rawRowData: jsonb("raw_row_data"), // Données originales pour debug
+  // === MÉTADONNÉES ===
+  rowIndex: integer("row_index"), // Position ligne dans le fichier Excel
+  rawData: jsonb("raw_data"), // Données brutes pour débogage
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
-  // Index pour performance et détection de doublons
-  index("idx_royalties_estimator_import_sheet").on(table.importId, table.sheetName),
-  index("idx_royalties_estimator_asin_transaction").on(table.asinIsbn, table.transactionType),
+  // Index optimisés pour les requêtes de filtrage
+  index("idx_kdp_royalties_estimator_import").on(table.importId),
+  index("idx_kdp_royalties_estimator_transaction_type").on(table.transactionType), // Pour filtrer "Free - Promotion" et "Expanded Distribution Channels"
+  index("idx_kdp_royalties_estimator_sheet").on(table.sheetName),
+  index("idx_kdp_royalties_estimator_user_transaction").on(table.userId, table.transactionType),
 ]);
 
 // Consolidated Sales Data - Table dédiée pour les données consolidées sans duplication
@@ -1155,6 +1145,11 @@ export type KdpImportWithRelations = KdpImport & {
   user: User;
   importData: KdpImportData[];
 };
+
+// KDP Royalties Estimator Data schemas
+export const insertKdpRoyaltiesEstimatorDataSchema = createInsertSchema(kdpRoyaltiesEstimatorData).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertKdpRoyaltiesEstimatorData = z.infer<typeof insertKdpRoyaltiesEstimatorDataSchema>;
+export type SelectKdpRoyaltiesEstimatorData = typeof kdpRoyaltiesEstimatorData.$inferSelect;
 
 // Cron Job schemas
 export const insertCronJobSchema = createInsertSchema(cronJobs).omit({

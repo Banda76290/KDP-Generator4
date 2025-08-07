@@ -2027,28 +2027,46 @@ export class DatabaseStorage implements IStorage {
       .where(eq(kdpImportData.importId, importId));
   }
 
-  // KDP Royalties Estimator operations
-  async createKdpRoyaltiesEstimatorRecord(data: any): Promise<any> {
-    const [record] = await db
+  // === KDP ROYALTIES ESTIMATOR MANAGEMENT ===
+  async createKdpRoyaltiesEstimatorData(data: InsertKdpRoyaltiesEstimatorData): Promise<SelectKdpRoyaltiesEstimatorData> {
+    const [result] = await db
       .insert(kdpRoyaltiesEstimatorData)
       .values(data)
       .returning();
-    return record;
+    return result;
   }
 
-  async getKdpRoyaltiesEstimatorData(importId: string): Promise<any[]> {
+  async getKdpRoyaltiesEstimatorData(importId: string): Promise<SelectKdpRoyaltiesEstimatorData[]> {
     return await db
       .select()
       .from(kdpRoyaltiesEstimatorData)
       .where(eq(kdpRoyaltiesEstimatorData.importId, importId))
-      .orderBy(kdpRoyaltiesEstimatorData.sheetName, kdpRoyaltiesEstimatorData.rowIndex);
+      .orderBy(asc(kdpRoyaltiesEstimatorData.rowIndex));
+  }
+
+  async getKdpRoyaltiesEstimatorDataByTransactionType(
+    userId: string, 
+    transactionTypes: string[]
+  ): Promise<SelectKdpRoyaltiesEstimatorData[]> {
+    return await db
+      .select()
+      .from(kdpRoyaltiesEstimatorData)
+      .where(
+        and(
+          eq(kdpRoyaltiesEstimatorData.userId, userId),
+          inArray(kdpRoyaltiesEstimatorData.transactionType, transactionTypes)
+        )
+      )
+      .orderBy(asc(kdpRoyaltiesEstimatorData.royaltyDate));
   }
 
   async deleteKdpRoyaltiesEstimatorData(importId: string): Promise<void> {
-    await db.delete(kdpRoyaltiesEstimatorData).where(eq(kdpRoyaltiesEstimatorData.importId, importId));
+    await db
+      .delete(kdpRoyaltiesEstimatorData)
+      .where(eq(kdpRoyaltiesEstimatorData.importId, importId));
   }
 
-  async getUserKdpRoyaltiesEstimatorData(userId: string): Promise<any[]> {
+  async getUserKdpRoyaltiesEstimatorData(userId: string): Promise<SelectKdpRoyaltiesEstimatorData[]> {
     return await db
       .select()
       .from(kdpRoyaltiesEstimatorData)

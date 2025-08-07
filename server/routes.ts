@@ -9,6 +9,7 @@ import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, in
 import { aiService } from "./services/aiService";
 import { parseKDPReport } from "./services/kdpParser";
 import { KdpImportProcessor } from "./services/kdpImportProcessor";
+import { KdpRoyaltiesEstimatorProcessor } from "./services/kdpRoyaltiesEstimatorProcessor";
 import { generateUniqueIsbnPlaceholder, ensureIsbnPlaceholder } from "./utils/isbnGenerator";
 import XLSX from 'xlsx';
 import path from 'path';
@@ -2473,11 +2474,30 @@ Please respond with only a JSON object containing the translated fields. For key
         });
       }
 
-      // Parse the KDP file with processor
-      const processor = new KdpImportProcessor(storage);
+      // First check if it's a KDP_Royalties_Estimator file
+      const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+      let isKdpRoyaltiesEstimator = false;
       let parsedData: any;
+      
       try {
-        parsedData = await processor.parseKdpFile(req.file);
+        isKdpRoyaltiesEstimator = KdpRoyaltiesEstimatorProcessor.detectKdpRoyaltiesEstimator(workbook);
+        
+        if (isKdpRoyaltiesEstimator) {
+          // Process as KDP_Royalties_Estimator
+          systemLog(`Detected KDP_Royalties_Estimator file: ${req.file.originalname}`, 'info', 'KDP_ROYALTIES');
+          
+          parsedData = {
+            detectedType: 'kdp_royalties_estimator',
+            summary: {
+              estimatedRecords: 0, // Will be set during processing
+              fileType: 'KDP_Royalties_Estimator'
+            }
+          };
+        } else {
+          // Use legacy processor for other file types
+          const processor = new KdpImportProcessor(req.file.originalname, '');
+          parsedData = await processor.parseKdpFile(req.file);
+        }
       } catch (parseError) {
         console.error("Error parsing KDP file:", parseError);
         return res.status(400).json({ 
@@ -2498,13 +2518,45 @@ Please respond with only a JSON object containing the translated fields. For key
 
       const newImport = await storage.createKdpImport(importData);
 
-      // Process the import asynchronously
-      const backgroundProcessor = new KdpImportProcessor(newImport.id, userId);
-      
-      // Start processing in background (don't wait for completion)
-      backgroundProcessor.processImport(parsedData).catch(error => {
-        console.error(`Import processing failed for ${newImport.id}:`, error);
-      });
+      // Process the import asynchronously based on detected type
+      if (isKdpRoyaltiesEstimator) {
+        // Process KDP_Royalties_Estimator in background
+        setImmediate(async () => {
+          try {
+            systemLog(`Starting KDP_Royalties_Estimator processing for ${newImport.id}`, 'info', 'KDP_ROYALTIES');
+            
+            const result = await KdpRoyaltiesEstimatorProcessor.processKdpRoyaltiesEstimator(
+              workbook, 
+              newImport.id, 
+              userId
+            );
+            
+            await storage.updateKdpImport(newImport.id, {
+              status: 'completed',
+              totalRecords: result.totalProcessed,
+              processedRecords: result.filteredRecords,
+              completedAt: new Date(),
+            });
+            
+            systemLog(`KDP_Royalties_Estimator processing completed: ${result.filteredRecords} filtered records from ${result.totalProcessed} total`, 'info', 'KDP_ROYALTIES');
+            
+          } catch (error) {
+            systemLog(`KDP_Royalties_Estimator processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error', 'KDP_ROYALTIES');
+            
+            await storage.updateKdpImport(newImport.id, {
+              status: 'error',
+              error: error instanceof Error ? error.message : 'Unknown error occurred',
+            });
+          }
+        });
+      } else {
+        // Use legacy processor for other file types
+        const backgroundProcessor = new KdpImportProcessor(newImport.id, userId);
+        
+        backgroundProcessor.processImport(parsedData).catch(error => {
+          console.error(`Import processing failed for ${newImport.id}:`, error);
+        });
+      }
 
       res.json({
         import: newImport,
@@ -2561,20 +2613,38 @@ Please respond with only a JSON object containing the translated fields. For key
         return res.status(404).json({ message: "Import not found" });
       }
 
-      const importData = await storage.getKdpImportData(importId);
-      
-      // Apply pagination
-      const paginatedData = importData.slice(
-        parseInt(offset as string),
-        parseInt(offset as string) + parseInt(limit as string)
-      );
+      // Check if this is a KDP_Royalties_Estimator import
+      if (importRecord.detectedType === 'kdp_royalties_estimator') {
+        const importData = await storage.getKdpRoyaltiesEstimatorData(importId);
+        
+        // Apply pagination
+        const paginatedData = importData.slice(
+          parseInt(offset as string),
+          parseInt(offset as string) + parseInt(limit as string)
+        );
 
-      res.json({
-        data: paginatedData,
-        total: importData.length,
-        limit: parseInt(limit as string),
-        offset: parseInt(offset as string)
-      });
+        res.json({
+          data: paginatedData,
+          total: importData.length,
+          limit: parseInt(limit as string),
+          fileType: 'kdp_royalties_estimator'
+        });
+      } else {
+        const importData = await storage.getKdpImportData(importId);
+        
+        // Apply pagination
+        const paginatedData = importData.slice(
+          parseInt(offset as string),
+          parseInt(offset as string) + parseInt(limit as string)
+        );
+
+        res.json({
+          data: paginatedData,
+          total: importData.length,
+          limit: parseInt(limit as string),
+          offset: parseInt(offset as string)
+        });
+      }
 
     } catch (error) {
       console.error("Error fetching KDP import data:", error);

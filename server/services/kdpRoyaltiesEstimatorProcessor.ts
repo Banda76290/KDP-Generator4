@@ -1,336 +1,245 @@
 import XLSX from 'xlsx';
-import { IStorage } from '../storage';
-import { nanoid } from 'nanoid';
+import { storage } from '../storage';
+import type { InsertKdpRoyaltiesEstimatorData } from '@shared/schema';
 
-export interface RoyaltiesEstimatorConfig {
-  // Signatures de colonnes pour reconnaissance automatique
-  combinedSalesSignature: string[];
-  ebookRoyaltySignature: string[];
-  paperbackRoyaltySignature: string[];
-  hardcoverRoyaltySignature: string[];
-  kenpReadSignature: string[];
-  ordersPlacedSignature: string[];
+interface KdpRoyaltiesSheet {
+  name: string;
+  headers: string[];
+  data: any[][];
+  hasTransactionType: boolean;
 }
 
-// Configuration des signatures de colonnes exactes pour reconnaissance
-const ROYALTIES_ESTIMATOR_SIGNATURES: RoyaltiesEstimatorConfig = {
-  combinedSalesSignature: [
-    "Royalty Date",
-    "Title", 
-    "Author Name",
-    "ASIN/ISBN",
-    "Marketplace",
-    "Royalty Type",
-    "Transaction Type",
-    "Units Sold",
-    "Units Refunded",
-    "Net Units Sold",
-    "Avg. List Price without tax",
-    "Avg. Offer Price without tax",
-    "Avg. Delivery/Manufacturing cost",
-    "Royalty",
-    "Currency"
-  ],
-  ebookRoyaltySignature: [
-    "Royalty Date",
-    "Title",
-    "Author Name", 
-    "ASIN",
-    "Marketplace",
-    "Royalty Type",
-    "Transaction Type",
-    "Units Sold",
-    "Units Refunded",
-    "Net Units Sold",
-    "Avg. List Price without tax",
-    "Avg. Offer Price without tax",
-    "Avg. File Size (MB)",
-    "Avg. Delivery Cost",
-    "Royalty",
-    "Currency"
-  ],
-  paperbackRoyaltySignature: [
-    "Royalty Date",
-    "Order Date",
-    "Title",
-    "Author Name",
-    "ISBN",
-    "Marketplace",
-    "Units Sold",
-    "Units Refunded"
-    // Note: Structure tronquée dans l'exemple, mais on vérifie les premiers champs
-  ],
-  hardcoverRoyaltySignature: [
-    "Royalty Date",
-    "Order Date", 
-    "Title",
-    "Author Name",
-    "ISBN",
-    "Marketplace"
-    // Structure similaire à paperback
-  ],
-  kenpReadSignature: [
-    "Date",
-    "Title",
-    "Author Name",
-    "ASIN",
-    "Marketplace",
-    "Kindle Edition Normalized Page (KENP) Read"
-  ],
-  ordersPlacedSignature: [
-    "Date",
-    "Title", 
-    "Author Name",
-    "ASIN",
-    "Marketplace",
-    "Paid Units",
-    "Free Units"
-  ]
-};
-
 export class KdpRoyaltiesEstimatorProcessor {
-  constructor(private storage: IStorage) {}
+  private static TARGET_TRANSACTION_TYPES = [
+    'Free - Promotion',
+    'Expanded Distribution Channels'
+  ];
 
   /**
-   * Détecte si un fichier est un KDP_Royalties_Estimator basé sur la structure des colonnes
+   * Détecte si un fichier Excel est un KDP_Royalties_Estimator
+   * en analysant la structure des colonnes dans les onglets
    */
-  public static detectFileType(workbook: XLSX.WorkBook): boolean {
+  static detectKdpRoyaltiesEstimator(workbook: XLSX.WorkBook): boolean {
+    const requiredSheets = ['eBook Royalty', 'Paperback Royalty', 'Hardcover Royalty'];
     const sheetNames = workbook.SheetNames;
     
-    // Vérifier la présence des onglets caractéristiques
-    const requiredSheets = ['Combined Sales', 'eBook Royalty'];
-    const hasRequiredSheets = requiredSheets.every(sheet => sheetNames.includes(sheet));
-    
-    if (!hasRequiredSheets) {
-      return false;
+    // Vérifier que les onglets de royalties existent
+    const hasRoyaltySheets = requiredSheets.some(name => sheetNames.includes(name));
+    if (!hasRoyaltySheets) return false;
+
+    // Vérifier la structure d'au moins un onglet royalty
+    for (const sheetName of sheetNames) {
+      if (sheetName.toLowerCase().includes('royalty')) {
+        const sheet = workbook.Sheets[sheetName];
+        const headerRow = XLSX.utils.sheet_to_json(sheet, { header: 1, range: 0 })[0] as string[];
+        
+        // Vérifier la présence des colonnes clés
+        const hasRoyaltyDate = headerRow.some(header => 
+          header && header.toLowerCase().includes('royalty date')
+        );
+        const hasTransactionType = headerRow.some(header => 
+          header && header.toLowerCase().includes('transaction type')
+        );
+        
+        if (hasRoyaltyDate && hasTransactionType) {
+          return true;
+        }
+      }
     }
-
-    // Vérifier la signature des colonnes de Combined Sales
-    const combinedSalesSheet = workbook.Sheets['Combined Sales'];
-    if (!combinedSalesSheet) return false;
-
-    const data = XLSX.utils.sheet_to_json(combinedSalesSheet, { header: 1 });
-    if (data.length === 0) return false;
-
-    const headers = data[0] as string[];
     
-    // Vérifier que les premières colonnes correspondent à la signature
-    const expectedHeaders = ROYALTIES_ESTIMATOR_SIGNATURES.combinedSalesSignature.slice(0, 8);
-    const actualHeaders = headers.slice(0, 8);
-    
-    return expectedHeaders.every((expected, index) => 
-      actualHeaders[index] === expected
-    );
+    return false;
   }
 
   /**
-   * Traite un fichier KDP_Royalties_Estimator complet
+   * Analyse tous les onglets du fichier KDP_Royalties_Estimator
    */
-  public async processFile(
-    workbook: XLSX.WorkBook,
-    importId: string,
-    userId: string
-  ): Promise<{ processedRecords: number; errorRecords: number }> {
-    let totalProcessed = 0;
-    let totalErrors = 0;
-
-    console.log('[ROYALTIES_ESTIMATOR] Début du traitement du fichier');
-
-    // Traiter chaque onglet pertinent
-    const sheetsToProcess = [
+  static analyzeWorkbook(workbook: XLSX.WorkBook): KdpRoyaltiesSheet[] {
+    const royaltySheets: KdpRoyaltiesSheet[] = [];
+    
+    const targetSheetNames = [
       'Combined Sales',
       'eBook Royalty', 
       'Paperback Royalty',
-      'Hardcover Royalty',
-      'KENP Read',
-      'eBook Orders Placed'
+      'Hardcover Royalty'
     ];
 
-    for (const sheetName of sheetsToProcess) {
-      if (workbook.Sheets[sheetName]) {
-        console.log(`[ROYALTIES_ESTIMATOR] Traitement de l'onglet: ${sheetName}`);
-        const { processed, errors } = await this.processSheet(
-          workbook.Sheets[sheetName],
-          sheetName,
-          importId,
-          userId
-        );
-        totalProcessed += processed;
-        totalErrors += errors;
+    for (const sheetName of targetSheetNames) {
+      if (workbook.SheetNames.includes(sheetName)) {
+        const sheet = workbook.Sheets[sheetName];
+        const fullData = XLSX.utils.sheet_to_json(sheet, { 
+          header: 1, 
+          defval: '', 
+          raw: false // Obtenir les valeurs formatées comme strings
+        }) as any[][];
+        
+        if (fullData.length > 0) {
+          const headers = fullData[0] as string[];
+          const data = fullData.slice(1);
+          
+          const hasTransactionType = headers.some(header => 
+            header && header.toLowerCase().includes('transaction type')
+          );
+
+          royaltySheets.push({
+            name: sheetName,
+            headers,
+            data,
+            hasTransactionType
+          });
+        }
       }
     }
 
-    console.log(`[ROYALTIES_ESTIMATOR] Terminé: ${totalProcessed} enregistrements traités, ${totalErrors} erreurs`);
-    return { processedRecords: totalProcessed, errorRecords: totalErrors };
+    return royaltySheets;
   }
 
   /**
-   * Traite un onglet spécifique
+   * Traite et filtre les données selon les Transaction Types ciblés
    */
-  private async processSheet(
-    worksheet: XLSX.WorkSheet,
-    sheetName: string,
+  static async processKdpRoyaltiesEstimator(
+    workbook: XLSX.WorkBook,
     importId: string,
     userId: string
-  ): Promise<{ processed: number; errors: number }> {
-    const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-    
-    if (data.length <= 1) {
-      return { processed: 0, errors: 0 };
-    }
+  ): Promise<{
+    totalProcessed: number;
+    filteredRecords: number;
+    processedSheets: string[];
+    errors: string[];
+  }> {
+    const sheets = this.analyzeWorkbook(workbook);
+    const errors: string[] = [];
+    let totalProcessed = 0;
+    let filteredRecords = 0;
+    const processedSheets: string[] = [];
 
-    const headers = data[0] as string[];
-    const rows = data.slice(1);
-    
-    let processed = 0;
-    let errors = 0;
-
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i] as any[];
-      
+    for (const sheet of sheets) {
       try {
-        const record = await this.parseRowToRecord(row, headers, sheetName, importId, userId, i + 2);
+        console.log(`[KDP_ROYALTIES] Traitement onglet: ${sheet.name}`);
         
-        // FILTRAGE CRITÈRE: Ne traiter que les types de transactions spécifiés
-        if (record.transactionType && 
-            !['Free - Promotion', 'Expanded Distribution Channels'].includes(record.transactionType)) {
-          continue; // Ignorer les autres types de transactions
+        if (!sheet.hasTransactionType) {
+          console.log(`[KDP_ROYALTIES] Onglet ${sheet.name} ignoré: pas de colonne Transaction Type`);
+          continue;
         }
 
-        await this.storage.createKdpRoyaltiesEstimatorRecord(record);
-        processed++;
+        const transactionTypeIndex = sheet.headers.findIndex(header => 
+          header && header.toLowerCase().includes('transaction type')
+        );
+
+        if (transactionTypeIndex === -1) {
+          errors.push(`Colonne Transaction Type non trouvée dans ${sheet.name}`);
+          continue;
+        }
+
+        // Filtrer les lignes selon les Transaction Types ciblés
+        const filteredRows = sheet.data.filter(row => {
+          const transactionType = row[transactionTypeIndex];
+          return transactionType && this.TARGET_TRANSACTION_TYPES.includes(transactionType);
+        });
+
+        console.log(`[KDP_ROYALTIES] ${sheet.name}: ${filteredRows.length} lignes filtrées sur ${sheet.data.length} total`);
+
+        // Traiter chaque ligne filtrée
+        for (let i = 0; i < filteredRows.length; i++) {
+          const row = filteredRows[i];
+          
+          try {
+            const mappedData = this.mapRowToSchema(sheet.name, sheet.headers, row, importId, userId, i);
+            await storage.createKdpRoyaltiesEstimatorData(mappedData);
+            filteredRecords++;
+          } catch (error) {
+            errors.push(`Erreur ligne ${i + 1} de ${sheet.name}: ${error}`);
+          }
+        }
+
+        totalProcessed += sheet.data.length;
+        processedSheets.push(sheet.name);
         
       } catch (error) {
-        console.error(`[ROYALTIES_ESTIMATOR] Erreur ligne ${i + 2}:`, error);
-        errors++;
+        errors.push(`Erreur traitement onglet ${sheet.name}: ${error}`);
       }
     }
 
-    return { processed, errors };
+    return {
+      totalProcessed,
+      filteredRecords,
+      processedSheets,
+      errors
+    };
   }
 
   /**
-   * Parse une ligne en enregistrement formaté
+   * Mappe une ligne de données vers le schéma de la base de données
    */
-  private async parseRowToRecord(
-    row: any[],
-    headers: string[],
+  private static mapRowToSchema(
     sheetName: string,
+    headers: string[],
+    row: any[],
     importId: string,
     userId: string,
     rowIndex: number
-  ): Promise<any> {
-    const record: any = {
-      id: nanoid(),
-      userId,
-      importId,
-      sheetName,
-      rowIndex,
-      rawRowData: JSON.stringify(row)
+  ): InsertKdpRoyaltiesEstimatorData {
+    const getColumnValue = (columnName: string): any => {
+      const index = headers.findIndex(h => 
+        h && h.toLowerCase() === columnName.toLowerCase()
+      );
+      return index !== -1 ? row[index] : null;
     };
 
-    // Mapping des colonnes selon l'onglet
-    for (let i = 0; i < headers.length; i++) {
-      const header = headers[i];
-      const value = row[i];
+    const getColumnValuePartial = (partialName: string): any => {
+      const index = headers.findIndex(h => 
+        h && h.toLowerCase().includes(partialName.toLowerCase())
+      );
+      return index !== -1 ? row[index] : null;
+    };
 
-      if (value === undefined || value === null || value === '') continue;
+    // Mapping des champs communs
+    const commonData: Partial<InsertKdpRoyaltiesEstimatorData> = {
+      importId,
+      userId,
+      sheetName,
+      rowIndex,
+      rawData: { headers, row },
+      
+      // Champs communs
+      royaltyDate: getColumnValue('Royalty Date'),
+      title: getColumnValue('Title'),
+      authorName: getColumnValue('Author Name'),
+      marketplace: getColumnValue('Marketplace'),
+      royaltyType: getColumnValue('Royalty Type'),
+      transactionType: getColumnValue('Transaction Type'),
+      unitsSold: parseInt(getColumnValue('Units Sold')) || 0,
+      unitsRefunded: parseInt(getColumnValue('Units Refunded')) || 0,
+      netUnitsSold: parseInt(getColumnValue('Net Units Sold')) || 0,
+      avgListPriceWithoutTax: getColumnValuePartial('Avg. List Price'),
+      avgOfferPriceWithoutTax: getColumnValuePartial('Avg. Offer Price'),
+      royalty: getColumnValue('Royalty'),
+      currency: getColumnValue('Currency'),
+    };
 
-      // Mapping des champs communs
-      switch (header) {
-        case 'Royalty Date':
-        case 'Date':
-          record.royaltyDate = this.parseDate(value);
-          break;
-        case 'Order Date':
-          record.orderDate = this.parseDate(value);
-          break;
-        case 'Title':
-          record.title = String(value);
-          break;
-        case 'Author Name':
-          record.authorName = String(value);
-          break;
-        case 'ASIN/ISBN':
-        case 'ASIN':
-        case 'ISBN':
-          record.asinIsbn = String(value);
-          break;
-        case 'Marketplace':
-          record.marketplace = String(value);
-          break;
-        case 'Royalty Type':
-          record.royaltyType = String(value);
-          break;
-        case 'Transaction Type':
-          record.transactionType = String(value);
-          break;
-        case 'Units Sold':
-          record.unitsSold = this.parseInteger(value);
-          break;
-        case 'Units Refunded':
-          record.unitsRefunded = this.parseInteger(value);
-          break;
-        case 'Net Units Sold':
-          record.netUnitsSold = this.parseInteger(value);
-          break;
-        case 'Avg. List Price without tax':
-          record.avgListPriceWithoutTax = this.parseDecimal(value);
-          break;
-        case 'Avg. Offer Price without tax':
-          record.avgOfferPriceWithoutTax = this.parseDecimal(value);
-          break;
-        case 'Avg. Delivery/Manufacturing cost':
-          record.avgDeliveryManufacturingCost = this.parseDecimal(value);
-          break;
-        case 'Avg. File Size (MB)':
-          record.avgFileSizeMb = this.parseDecimal(value);
-          break;
-        case 'Avg. Delivery Cost':
-          record.avgDeliveryCost = this.parseDecimal(value);
-          break;
-        case 'Printing Cost':
-          record.printingCost = this.parseDecimal(value);
-          break;
-        case 'Expanded Distribution Cost':
-          record.expandedDistributionCost = this.parseDecimal(value);
-          break;
-        case 'Royalty':
-          record.royalty = this.parseDecimal(value);
-          break;
-        case 'Currency':
-          record.currency = String(value);
-          break;
-        case 'Kindle Edition Normalized Page (KENP) Read':
-          record.kenpRead = this.parseInteger(value);
-          break;
-        case 'Paid Units':
-          record.paidUnits = this.parseInteger(value);
-          break;
-        case 'Free Units':
-          record.freeUnits = this.parseInteger(value);
-          break;
-      }
+    // Mapping spécifique selon l'onglet
+    if (sheetName === 'eBook Royalty') {
+      return {
+        ...commonData,
+        asin: getColumnValue('ASIN'),
+        avgFileSizeMb: getColumnValuePartial('Avg. File Size'),
+        avgDeliveryCost: getColumnValuePartial('Avg. Delivery Cost'),
+      };
+    } else if (sheetName === 'Combined Sales') {
+      return {
+        ...commonData,
+        asinIsbn: getColumnValue('ASIN/ISBN'),
+        avgDeliveryCost: getColumnValuePartial('Avg. Delivery'),
+      };
+    } else if (sheetName === 'Paperback Royalty' || sheetName === 'Hardcover Royalty') {
+      return {
+        ...commonData,
+        orderDate: getColumnValue('Order Date'),
+        isbn: getColumnValue('ISBN'),
+        avgManufacturingCost: getColumnValuePartial('Avg. Manufacturing Cost'),
+        asinRef: getColumnValue('ASIN'),
+      };
     }
 
-    return record;
-  }
-
-  private parseDate(value: any): string | null {
-    if (!value) return null;
-    if (value instanceof Date) return value.toISOString().split('T')[0];
-    return String(value);
-  }
-
-  private parseInteger(value: any): number | null {
-    if (value === null || value === undefined || value === '') return null;
-    const parsed = parseInt(String(value), 10);
-    return isNaN(parsed) ? null : parsed;
-  }
-
-  private parseDecimal(value: any): string | null {
-    if (value === null || value === undefined || value === '') return null;
-    const parsed = parseFloat(String(value));
-    return isNaN(parsed) ? null : String(parsed);
+    return commonData as InsertKdpRoyaltiesEstimatorData;
   }
 }
