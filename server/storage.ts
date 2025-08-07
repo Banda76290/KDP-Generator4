@@ -1967,7 +1967,22 @@ export class DatabaseStorage implements IStorage {
     if (!importRecord) return undefined;
 
     const [user] = await db.select().from(users).where(eq(users.id, importRecord.userId));
-    const importData = await db.select().from(kdpImportData).where(eq(kdpImportData.importId, importRecord.id));
+    
+    // Utiliser uniquement la nouvelle table kdpRoyaltiesEstimatorData  
+    let importData: any[] = [];
+    try {
+      if (importRecord.detectedType === 'royalties_estimator') {
+        // Pour les imports KDP_Royalties_Estimator, utiliser la nouvelle table
+        importData = await db.select().from(kdpRoyaltiesEstimatorData).where(eq(kdpRoyaltiesEstimatorData.importId, importRecord.id));
+      } else {
+        // Pour les autres types d'imports, retourner un tableau vide car nous utilisons maintenant uniquement kdpRoyaltiesEstimatorData
+        console.log(`[STORAGE] Type d'import ${importRecord.detectedType} non supporté - utilisation de kdpRoyaltiesEstimatorData uniquement`);
+        importData = [];
+      }
+    } catch (error) {
+      console.warn(`[STORAGE] Erreur récupération données import ${importId}:`, error);
+      importData = [];
+    }
 
     return {
       ...importRecord,
@@ -1997,8 +2012,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteKdpImport(importId: string, userId: string): Promise<void> {
-    // Delete related import data first
-    await db.delete(kdpImportData).where(eq(kdpImportData.importId, importId));
+    // Delete related import data first (utiliser la nouvelle table)
+    await db.delete(kdpRoyaltiesEstimatorData).where(eq(kdpRoyaltiesEstimatorData.importId, importId));
     
     // Delete the main import record
     await db
@@ -2006,28 +2021,19 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(kdpImports.id, importId), eq(kdpImports.userId, userId)));
   }
 
-  async createKdpImportData(data: InsertKdpImportData[]): Promise<KdpImportData[]> {
-    if (data.length === 0) return [];
-    
-    const insertedData = await db
-      .insert(kdpImportData)
-      .values(data)
-      .returning();
-    return insertedData;
+  // DEPRECATED: Ces fonctions utilisent l'ancienne table kdpImportData qui n'est plus utilisée
+  async createKdpImportData(data: any[]): Promise<any[]> {
+    console.warn('[STORAGE] createKdpImportData deprecated - utiliser createBulkKdpRoyaltiesEstimatorData');
+    return [];
   }
 
-  async getKdpImportData(importId: string): Promise<KdpImportData[]> {
-    return await db
-      .select()
-      .from(kdpImportData)
-      .where(eq(kdpImportData.importId, importId))
-      .orderBy(kdpImportData.rowIndex);
+  async getKdpImportData(importId: string): Promise<any[]> {
+    console.warn('[STORAGE] getKdpImportData deprecated - utiliser getKdpRoyaltiesEstimatorData');
+    return [];
   }
 
   async deleteKdpImportData(importId: string): Promise<void> {
-    await db
-      .delete(kdpImportData)
-      .where(eq(kdpImportData.importId, importId));
+    console.warn('[STORAGE] deleteKdpImportData deprecated - utiliser deleteKdpRoyaltiesEstimatorData');
   }
 
   // === KDP ROYALTIES ESTIMATOR MANAGEMENT ===
@@ -2111,14 +2117,12 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(kdpRoyaltiesEstimatorData.createdAt));
   }
 
-  async getAllKdpImportDataForUser(userId: string): Promise<KdpImportData[]> {
+  async getAllKdpImportDataForUser(userId: string): Promise<any[]> {
+    // Utiliser les données KDP Royalties Estimator à la place
     return await db
       .select()
-      .from(kdpImportData)
-      .where(and(
-        eq(kdpImportData.userId, userId),
-        eq(kdpImportData.isDuplicate, false)
-      ));
+      .from(kdpRoyaltiesEstimatorData)
+      .where(eq(kdpRoyaltiesEstimatorData.userId, userId));
   }
   // KDP Analytics methods - using real imported data with currency handling
   async getAnalyticsOverview(userId: string): Promise<any> {
@@ -2456,28 +2460,26 @@ export class DatabaseStorage implements IStorage {
   async consolidateKdpData(userId: string, exchangeRateService?: any): Promise<{ processed: number; updated: number }> {
     console.log(`[CONSOLIDATION] Démarrage de la consolidation pour l'utilisateur ${userId}`);
     
-    // Les données "payments" sont des paiements agrégés par devise et marketplace
-    // On va consolider par devise et marketplace plutôt que par ASIN
+    // Utiliser kdpRoyaltiesEstimatorData à la place de kdpImportData
     const rawData = await db.select({
-      currency: kdpImportData.currency,
-      marketplace: kdpImportData.marketplace,
-      totalRoyalty: sql<number>`COALESCE(SUM(${kdpImportData.royalty}), 0)`,
-      totalUnits: sql<number>`COALESCE(SUM(${kdpImportData.netUnitsSold}), 0)`,
-      importIds: sql<string[]>`array_agg(DISTINCT ${kdpImportData.importId})`,
+      currency: kdpRoyaltiesEstimatorData.currency,
+      marketplace: kdpRoyaltiesEstimatorData.marketplace,
+      totalRoyalty: sql<number>`COALESCE(SUM(${kdpRoyaltiesEstimatorData.royalty}), 0)`,
+      totalUnits: sql<number>`COALESCE(SUM(${kdpRoyaltiesEstimatorData.netUnitsSold}), 0)`,
+      importIds: sql<string[]>`array_agg(DISTINCT ${kdpRoyaltiesEstimatorData.importId})`,
       recordCount: sql<number>`COUNT(*)`,
-    }).from(kdpImportData)
-    .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
+    }).from(kdpRoyaltiesEstimatorData)
+    .innerJoin(kdpImports, eq(kdpRoyaltiesEstimatorData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
-      eq(kdpImportData.isDuplicate, false),
-      // INCLURE uniquement les fichiers "payments" pour éviter les doublons
-      sql`${kdpImports.detectedType} = 'payments'`,
-      isNotNull(kdpImportData.currency),
-      sql`${kdpImportData.royalty} > 0`
+      // INCLURE uniquement les fichiers "royalties_estimator" 
+      sql`${kdpImports.detectedType} = 'royalties_estimator'`,
+      isNotNull(kdpRoyaltiesEstimatorData.currency),
+      sql`${kdpRoyaltiesEstimatorData.royalty} > 0`
     ))
     .groupBy(
-      kdpImportData.currency,
-      kdpImportData.marketplace
+      kdpRoyaltiesEstimatorData.currency,
+      kdpRoyaltiesEstimatorData.marketplace
     );
 
     console.log(`[CONSOLIDATION] ${rawData.length} entrées uniques trouvées`);
