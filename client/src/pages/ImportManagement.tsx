@@ -249,6 +249,7 @@ export default function ImportManagement() {
         if (isFirstCheck) {
           previousStatus = progressResult?.status || null;
           isFirstCheck = false;
+          console.log(`[TOAST] Initial status set: ${previousStatus}`);
         }
         
         // If still processing or pending, schedule next check

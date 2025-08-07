@@ -116,12 +116,15 @@ export class KdpRoyaltiesEstimatorProcessor {
     let errorRecords = 0;
     const processedSheets: string[] = [];
     
-    // Calculer le nombre total de lignes à traiter
-    const totalRows = sheets.reduce((sum, sheet) => {
+    // Calculer le nombre total de lignes à traiter (seulement les lignes qui seront effectivement traitées)
+    let totalRows = 0;
+    for (const sheet of sheets) {
+      if (!sheet.hasTransactionType) continue;
+      
       const transactionTypeIndex = sheet.headers.findIndex(header => 
         header && header.toLowerCase().includes('transaction type')
       );
-      if (transactionTypeIndex === -1) return sum;
+      if (transactionTypeIndex === -1) continue;
       
       const filteredRows = sheet.name === 'Combined Sales' 
         ? sheet.data.filter(row => {
@@ -132,8 +135,10 @@ export class KdpRoyaltiesEstimatorProcessor {
             const transactionType = row[transactionTypeIndex];
             return transactionType && transactionType.trim() !== '';
           });
-      return sum + filteredRows.length;
-    }, 0);
+      totalRows += filteredRows.length;
+    }
+    
+    console.log(`[KDP_ROYALTIES] Total de lignes à traiter: ${totalRows}`);
 
     for (const sheet of sheets) {
       try {
