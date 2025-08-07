@@ -90,6 +90,7 @@ The application follows a modern full-stack architecture with clear separation b
 - **Development-to-Production Sync**: Comprehensive synchronization system with multiple export options (direct sync, SQL copy-paste, SQL file download, JSON export) for transferring marketplace categories from development to production environments with detailed logging and error handling. Manual "Copier SQL" method confirmed working as reliable alternative when direct sync fails due to CORS/authentication issues.
 - **AI Prompt Integration System**: Complete integration between AI prompt administration and execution systems. Database-configured prompts automatically appear in AI Functions interface and are used for content generation. Hybrid system combines database templates with static fallback functions, with database templates taking priority.
 - **Security Enhancements**: XSS vulnerability patched in author biography editor (August 2025). Replaced unsafe innerHTML assignment with DOMParser for secure HTML sanitization without script execution risk.
+- **Import Progress Widget**: Floating collapsible widget positioned bottom-right displaying real-time progress of KDP imports. Features expand/collapse functionality, individual progress bars per import, live percentage tracking, and dismissible interface. Respects CSS standards with proper error handling for React hooks compliance. Implemented August 2025.
 
 ## External Dependencies
 
