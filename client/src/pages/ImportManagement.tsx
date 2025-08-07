@@ -72,11 +72,16 @@ export default function ImportManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch user imports with shorter cache time
+  // Fetch user imports with aggressive refresh during processing
   const { data: imports = [], isLoading, refetch: refetchImports } = useQuery<KdpImportWithRelations[]>({
     queryKey: ['/api/kdp-imports'],
-    staleTime: 5 * 1000, // 5 seconds
-    refetchInterval: 10 * 1000, // Refetch every 10 seconds 
+    staleTime: 0, // No cache staleness
+    refetchInterval: (data) => {
+      // Si un import est en cours, rafraîchir chaque seconde
+      const hasProcessingImport = data?.some((imp: any) => imp.status === 'processing');
+      return hasProcessingImport ? 1000 : 5000; // 1s si processing, 5s sinon
+    },
+    refetchIntervalInBackground: true,
   });
 
   // Upload mutation
