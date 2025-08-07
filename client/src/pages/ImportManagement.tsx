@@ -270,14 +270,9 @@ export default function ImportManagement() {
             previousStatus = progressResult.status;
           }
           
-          // If we've been checking too long, assume it's completed and force a toast
+          // If we've been checking too long, stop monitoring
           if (checkCount >= maxChecks) {
-            console.log(`[TOAST] Maximum checks reached, forcing completion toast`);
-            toast({
-              title: "Import seems completed",
-              description: "Processing took longer than expected but appears to be finished",
-              variant: "success",
-            });
+            console.log(`[TOAST] Maximum checks reached, stopping monitoring`);
             return;
           }
           
@@ -291,12 +286,11 @@ export default function ImportManagement() {
           queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
           queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports', importId, 'progress'] });
           
-          // Always show notification for completed/failed imports
+          // Show completion notifications for newly completed imports
           console.log(`[TOAST] Final transition: ${previousStatus} → ${progressResult.status}`);
           
-          // Show success toast for completed imports
           if (progressResult.status === 'completed') {
-            console.log(`[TOAST] Showing success toast! (previousStatus: ${previousStatus})`);
+            console.log(`[TOAST] Showing success toast for completed import`);
             const newRecords = progressResult.processedRecords || 0;
             const duplicates = progressResult.duplicateRecords || 0;
             toast({
@@ -306,10 +300,8 @@ export default function ImportManagement() {
                 : `Updated ${duplicates} existing records (no new records added)`,
               variant: "success",
             });
-          } 
-          // Show error toast for failed imports
-          else if (progressResult.status === 'failed' || progressResult.status === 'error') {
-            console.log(`[TOAST] Showing error toast! (previousStatus: ${previousStatus})`);
+          } else if (progressResult.status === 'failed' || progressResult.status === 'error') {
+            console.log(`[TOAST] Showing error toast for failed import`);
             toast({
               title: "Import failed",
               description: progressResult.errorLog?.length > 0 
@@ -317,10 +309,6 @@ export default function ImportManagement() {
                 : "Check the error log for details",
               variant: "destructive",
             });
-          } 
-          // Fallback: if import seems stuck in pending for too long, force show toast
-          else {
-            console.log(`[TOAST] No toast condition met: previousStatus=${previousStatus}, currentStatus=${progressResult.status}`);
           }
         }
       } catch (error) {
@@ -513,25 +501,7 @@ export default function ImportManagement() {
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={async () => {
-                          console.log('[TOAST] Manual completion toast trigger');
-                          const newRecords = importRecord.processedRecords || 0;
-                          const duplicates = importRecord.duplicateRecords || 0;
-                          toast({
-                            title: "Import completed ✓",
-                            description: newRecords > 0 
-                              ? `Successfully processed ${newRecords} new records${duplicates > 0 ? ` and updated ${duplicates} existing records` : ''}`
-                              : `Updated ${duplicates} existing records (no new records added)`,
-                            variant: "success",
-                          });
-                        }}
-                        title="Manually trigger completion toast for testing"
-                      >
-                        Show Completion Toast
-                      </Button>
+
                       <Button
                         variant="ghost"
                         size="sm"
