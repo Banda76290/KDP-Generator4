@@ -144,9 +144,18 @@ export class KdpRoyaltiesEstimatorProcessor {
           
           try {
             const mappedData = this.mapRowToSchema(sheet.name, sheet.headers, row, importId, userId, i);
-            await storage.createKdpRoyaltiesEstimatorData(mappedData);
+            console.log(`[KDP_ROYALTIES] Sauvegarde ligne ${i + 1} de ${sheet.name}:`, {
+              transactionType: mappedData.transactionType,
+              title: mappedData.title,
+              asin: mappedData.asin || 'N/A',
+              royalty: mappedData.royalty
+            });
+            
+            const savedRecord = await storage.createKdpRoyaltiesEstimatorData(mappedData);
+            console.log(`[KDP_ROYALTIES] ✅ Ligne sauvegardée avec ID: ${savedRecord.id}`);
             filteredRecords++;
           } catch (error) {
+            console.log(`[KDP_ROYALTIES] ❌ Erreur sauvegarde ligne ${i + 1}:`, error);
             errors.push(`Erreur ligne ${i + 1} de ${sheet.name}: ${error}`);
           }
         }
@@ -159,6 +168,8 @@ export class KdpRoyaltiesEstimatorProcessor {
       }
     }
 
+    console.log(`[KDP_ROYALTIES] RÉSUMÉ FINAL: ${filteredRecords} lignes filtrées sur ${totalProcessed} total`);
+    
     return {
       totalProcessed,
       filteredRecords,
@@ -193,9 +204,9 @@ export class KdpRoyaltiesEstimatorProcessor {
     };
 
     // Mapping des champs communs
-    const commonData: Partial<InsertKdpRoyaltiesEstimatorData> = {
+    const commonData = {
       importId,
-      userId,
+      userId, 
       sheetName,
       rowIndex,
       rawData: { headers, row },
@@ -206,7 +217,7 @@ export class KdpRoyaltiesEstimatorProcessor {
       authorName: getColumnValue('Author Name'),
       marketplace: getColumnValue('Marketplace'),
       royaltyType: getColumnValue('Royalty Type'),
-      transactionType: getColumnValue('Transaction Type'),
+      transactionType: getColumnValue('Transaction Type'), // Ce champ est obligatoire
       unitsSold: parseInt(getColumnValue('Units Sold')) || 0,
       unitsRefunded: parseInt(getColumnValue('Units Refunded')) || 0,
       netUnitsSold: parseInt(getColumnValue('Net Units Sold')) || 0,
@@ -240,6 +251,9 @@ export class KdpRoyaltiesEstimatorProcessor {
       };
     }
 
-    return commonData as InsertKdpRoyaltiesEstimatorData;
+    return {
+      ...commonData,
+      // Champs par défaut pour les cas non couverts
+    } as InsertKdpRoyaltiesEstimatorData;
   }
 }

@@ -63,6 +63,8 @@ import {
   type KdpImportData,
   type InsertKdpImportData,
   type KdpImportWithRelations,
+  type InsertKdpRoyaltiesEstimatorData,
+  type SelectKdpRoyaltiesEstimatorData,
   insertConsolidatedSalesDataSchema,
   type MasterBook,
   type InsertMasterBook,
@@ -213,10 +215,10 @@ export interface IStorage {
   deleteKdpImportData(importId: string): Promise<void>;
   
   // KDP Royalties Estimator operations
-  createKdpRoyaltiesEstimatorRecord(data: any): Promise<any>;
-  getKdpRoyaltiesEstimatorData(importId: string): Promise<any[]>;
+  createKdpRoyaltiesEstimatorData(data: InsertKdpRoyaltiesEstimatorData): Promise<SelectKdpRoyaltiesEstimatorData>;
+  getKdpRoyaltiesEstimatorData(importId: string): Promise<SelectKdpRoyaltiesEstimatorData[]>;
   deleteKdpRoyaltiesEstimatorData(importId: string): Promise<void>;
-  getUserKdpRoyaltiesEstimatorData(userId: string): Promise<any[]>;
+  getUserKdpRoyaltiesEstimatorData(userId: string): Promise<SelectKdpRoyaltiesEstimatorData[]>;
   
   // Consolidated Sales Data operations
   consolidateKdpData(userId: string, exchangeRateService?: any): Promise<{ processed: number; updated: number }>;
