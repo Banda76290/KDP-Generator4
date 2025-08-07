@@ -10,6 +10,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { format } from 'date-fns';
 import Layout from '@/components/Layout';
 import type { KdpImportWithRelations } from '@shared/schema';
+import { KdpImportValidationDialog, type ImportOptions } from '@/components/KdpImportValidationDialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -81,6 +82,10 @@ export default function ImportManagement() {
   const [expandedImport, setExpandedImport] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [importToDelete, setImportToDelete] = useState<string | null>(null);
+  const [validationDialogOpen, setValidationDialogOpen] = useState(false);
+  const [selectedImportForValidation, setSelectedImportForValidation] = useState<string | null>(null);
+  const [importPreview, setImportPreview] = useState<any>(null);
+  const [validationLoading, setValidationLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -154,6 +159,61 @@ export default function ImportManagement() {
         variant: "destructive",
       });
       setSelectedFile(null);
+    },
+  });
+
+  // Validation and book creation mutations
+  const validateImportMutation = useMutation({
+    mutationFn: async (importId: string) => {
+      setValidationLoading(true);
+      return apiRequest(`/api/kdp-imports/${importId}/preview`, {
+        method: 'GET',
+      });
+    },
+    onSuccess: (data, importId) => {
+      setImportPreview(data);
+      setSelectedImportForValidation(importId);
+      setValidationDialogOpen(true);
+      setValidationLoading(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Validation failed",
+        description: error.message || "Failed to generate import preview",
+        variant: "destructive",
+      });
+      setValidationLoading(false);
+    },
+  });
+
+  const processBooksMutation = useMutation({
+    mutationFn: async ({ importId, options }: { importId: string; options: ImportOptions }) => {
+      return apiRequest(`/api/kdp-imports/${importId}/process-books`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(options),
+      });
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Books processed successfully",
+        description: data.message,
+        variant: "success",
+      });
+      setValidationDialogOpen(false);
+      setSelectedImportForValidation(null);
+      setImportPreview(null);
+      queryClient.invalidateQueries({ queryKey: ['/api/books'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Processing failed",
+        description: error.message || "Failed to process books",
+        variant: "destructive",
+      });
     },
   });
 
@@ -581,6 +641,26 @@ export default function ImportManagement() {
                     </div>
                     <div className="flex items-center gap-2">
                       {getStatusBadge(importRecord.status || 'unknown')}
+                      
+                      {/* Book Validation Button - only show for completed royalties_estimator imports */}
+                      {importRecord.status === 'completed' && importRecord.detectedType === 'royalties_estimator' && (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => validateImportMutation.mutate(importRecord.id)}
+                          disabled={validateImportMutation.isPending && selectedImportForValidation === importRecord.id}
+                          title="Create/Update Books from this import"
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          {validateImportMutation.isPending && selectedImportForValidation === importRecord.id ? (
+                            <Clock className="w-4 h-4 mr-1 animate-spin" />
+                          ) : (
+                            '📚'
+                          )}
+                          {validateImportMutation.isPending && selectedImportForValidation === importRecord.id ? 'Analyzing...' : 'Create Books'}
+                        </Button>
+                      )}
+                      
                       <Button
                         variant="ghost"
                         size="sm"
@@ -696,6 +776,35 @@ export default function ImportManagement() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* KDP Import Validation Dialog */}
+      <KdpImportValidationDialog
+        isOpen={validationDialogOpen}
+        onClose={() => {
+          setValidationDialogOpen(false);
+          setSelectedImportForValidation(null);
+          setImportPreview(null);
+        }}
+        onConfirm={(options) => {
+          if (selectedImportForValidation) {
+            processBooksMutation.mutate({
+              importId: selectedImportForValidation,
+              options
+            });
+          }
+        }}
+        importData={selectedImportForValidation}
+        preview={importPreview || {
+          totalBooks: 0,
+          existingBooks: 0,
+          newBooks: 0,
+          booksWithoutId: 0,
+          totalSalesData: 0,
+          duplicateSalesData: 0,
+          missingAuthorData: 0
+        }}
+        isLoading={validationLoading}
+      />
     </Layout>
   );
 }

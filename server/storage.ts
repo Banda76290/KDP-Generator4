@@ -2109,6 +2109,28 @@ export class DatabaseStorage implements IStorage {
         eq(kdpImportData.isDuplicate, false)
       ));
   }
+  // ====== BOOK SEARCH METHODS ======
+  
+  async findBookByAsinOrIsbn(userId: string, asin?: string, isbn?: string): Promise<Book | undefined> {
+    if (!asin && !isbn) {
+      return undefined;
+    }
+    
+    let whereConditions = [eq(books.userId, userId)];
+    
+    if (asin && isbn) {
+      // Search by either ASIN or ISBN
+      whereConditions.push(or(eq(books.asin, asin), eq(books.isbn, isbn))!);
+    } else if (asin) {
+      whereConditions.push(eq(books.asin, asin));
+    } else if (isbn) {
+      whereConditions.push(eq(books.isbn, isbn));
+    }
+    
+    const [book] = await this.db.select().from(books).where(and(...whereConditions));
+    return book || undefined;
+  }
+
   // KDP Analytics methods - using real imported data with currency handling
   async getAnalyticsOverview(userId: string): Promise<any> {
     const totalImports = await db.select({
