@@ -130,11 +130,19 @@ export class KdpRoyaltiesEstimatorProcessor {
           continue;
         }
 
-        // Filtrer les lignes selon les Transaction Types ciblés
-        const filteredRows = sheet.data.filter(row => {
-          const transactionType = row[transactionTypeIndex];
-          return transactionType && this.TARGET_TRANSACTION_TYPES.includes(transactionType);
-        });
+        // Filtrer selon l'onglet :
+        // - Combined Sales : filtrer par Transaction Types
+        // - Autres onglets : prendre toutes les lignes
+        const filteredRows = sheet.name === 'Combined Sales' 
+          ? sheet.data.filter(row => {
+              const transactionType = row[transactionTypeIndex];
+              return transactionType && this.TARGET_TRANSACTION_TYPES.includes(transactionType);
+            })
+          : sheet.data.filter(row => {
+              // Pour les autres onglets, prendre toutes les lignes avec des données valides
+              const transactionType = row[transactionTypeIndex];
+              return transactionType && transactionType.trim() !== '';
+            });
 
         console.log(`[KDP_ROYALTIES] ${sheet.name}: ${filteredRows.length} lignes filtrées sur ${sheet.data.length} total`);
 
