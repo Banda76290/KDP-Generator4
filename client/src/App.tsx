@@ -39,6 +39,7 @@ import AuthorsListPage from "@/pages/authors-list";
 import AuthorCreatePage from "@/pages/author-create";
 import AuthorViewPage from "@/pages/author-view";
 import ImportManagement from "@/pages/ImportManagement";
+import RoyaltiesEstimatorTest from "@/pages/royalties-estimator-test";
 import ExchangeRates from "@/pages/ExchangeRates";
 import MasterBooksPage from "@/pages/master-books";
 
@@ -64,6 +65,7 @@ function Router() {
       <Route path="/exchange-rates" component={ExchangeRates} />
       <Route path="/kdp-reports" component={KDPReports} />
       <Route path="/import-management" component={ImportManagement} />
+      <Route path="/royalties-estimator-test" component={RoyaltiesEstimatorTest} />
       <Route path="/ai-assistant" component={AIAssistant} />
       <Route path="/ai-functions" component={AIFunctions} />
       <Route path="/admin/ai-variables" component={AIVariables} />

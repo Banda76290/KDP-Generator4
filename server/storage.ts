@@ -18,6 +18,7 @@ import {
   aiPromptTemplates,
   kdpImports,
   kdpImportData,
+  kdpRoyaltiesEstimatorData,
   consolidatedSalesData,
   masterBooks,
   exchangeRates,
@@ -210,6 +211,12 @@ export interface IStorage {
   createKdpImportData(data: InsertKdpImportData[]): Promise<KdpImportData[]>;
   getKdpImportData(importId: string): Promise<KdpImportData[]>;
   deleteKdpImportData(importId: string): Promise<void>;
+  
+  // KDP Royalties Estimator operations
+  createKdpRoyaltiesEstimatorRecord(data: any): Promise<any>;
+  getKdpRoyaltiesEstimatorData(importId: string): Promise<any[]>;
+  deleteKdpRoyaltiesEstimatorData(importId: string): Promise<void>;
+  getUserKdpRoyaltiesEstimatorData(userId: string): Promise<any[]>;
   
   // Consolidated Sales Data operations
   consolidateKdpData(userId: string, exchangeRateService?: any): Promise<{ processed: number; updated: number }>;
@@ -2018,6 +2025,35 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(kdpImportData)
       .where(eq(kdpImportData.importId, importId));
+  }
+
+  // KDP Royalties Estimator operations
+  async createKdpRoyaltiesEstimatorRecord(data: any): Promise<any> {
+    const [record] = await db
+      .insert(kdpRoyaltiesEstimatorData)
+      .values(data)
+      .returning();
+    return record;
+  }
+
+  async getKdpRoyaltiesEstimatorData(importId: string): Promise<any[]> {
+    return await db
+      .select()
+      .from(kdpRoyaltiesEstimatorData)
+      .where(eq(kdpRoyaltiesEstimatorData.importId, importId))
+      .orderBy(kdpRoyaltiesEstimatorData.sheetName, kdpRoyaltiesEstimatorData.rowIndex);
+  }
+
+  async deleteKdpRoyaltiesEstimatorData(importId: string): Promise<void> {
+    await db.delete(kdpRoyaltiesEstimatorData).where(eq(kdpRoyaltiesEstimatorData.importId, importId));
+  }
+
+  async getUserKdpRoyaltiesEstimatorData(userId: string): Promise<any[]> {
+    return await db
+      .select()
+      .from(kdpRoyaltiesEstimatorData)
+      .where(eq(kdpRoyaltiesEstimatorData.userId, userId))
+      .orderBy(desc(kdpRoyaltiesEstimatorData.createdAt));
   }
 
   async getAllKdpImportDataForUser(userId: string): Promise<KdpImportData[]> {

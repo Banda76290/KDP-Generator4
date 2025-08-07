@@ -2945,6 +2945,74 @@ Please respond with only a JSON object containing the translated fields. For key
     }
   });
 
+  // Test route for KDP_Royalties_Estimator
+  app.post('/api/test-royalties-estimator', async (req: Request, res: Response) => {
+    try {
+      const userId = 'dev-user-123'; // User de développement
+      
+      console.log('[TEST] Début du test KDP_Royalties_Estimator');
+      
+      // Charger le fichier exemple
+      const filePath = require('path').join(process.cwd(), 'attached_assets', 'KDP_Royalties_Estimator-eb8d0632-c67a-44ff-bf18-40639556d72e_1754155427740.xlsx');
+      
+      if (!require('fs').existsSync(filePath)) {
+        return res.status(404).json({ error: 'Fichier de test non trouvé' });
+      }
+
+      const XLSX = require('xlsx');
+      const workbook = XLSX.readFile(filePath);
+      const { KdpImportService } = require('./services/kdpImportService');
+      const importService = new KdpImportService(storage);
+      
+      // Test de détection
+      const detectedType = importService.detectFileType(workbook);
+      console.log('[TEST] Type détecté:', detectedType);
+      
+      // Test de traitement
+      const result = await importService.processFile(
+        workbook,
+        'TEST_KDP_Royalties_Estimator.xlsx',
+        userId
+      );
+      
+      console.log('[TEST] Résultat:', result);
+      
+      // Récupérer les données traitées
+      const processedData = await importService.getImportData(
+        result.importId,
+        result.fileType
+      );
+      
+      console.log('[TEST] Nombre d\'enregistrements traités:', processedData.length);
+      
+      // Filtrer pour voir les "Free - Promotion" et "Expanded Distribution Channels"
+      const filteredData = processedData.filter((record: any) => 
+        record.transactionType === 'Free - Promotion' || 
+        record.transactionType === 'Expanded Distribution Channels'
+      );
+      
+      console.log('[TEST] Enregistrements filtrés:', filteredData.length);
+      
+      res.json({
+        success: true,
+        detectedType: detectedType,
+        totalProcessed: result.processedRecords,
+        errors: result.errorRecords,
+        importId: result.importId,
+        detectedSheets: result.detectedSheets,
+        filteredRecords: filteredData.length,
+        sampleRecords: filteredData.slice(0, 3) // Premiers exemples
+      });
+      
+    } catch (error) {
+      console.error('[TEST] Erreur:', error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : 'Erreur inconnue',
+        stack: error instanceof Error ? error.stack : undefined
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

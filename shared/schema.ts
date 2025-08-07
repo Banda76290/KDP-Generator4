@@ -524,6 +524,64 @@ export const kdpImportData = pgTable("kdp_import_data", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Nouvelle table dédiée spécifiquement aux fichiers KDP_Royalties_Estimator
+export const kdpRoyaltiesEstimatorData = pgTable("kdp_royalties_estimator_data", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  importId: varchar("import_id").notNull().references(() => kdpImports.id, { onDelete: "cascade" }),
+  sheetName: varchar("sheet_name").notNull(), // "Combined Sales", "eBook Royalty", etc.
+  
+  // Champs exacts du KDP_Royalties_Estimator
+  royaltyDate: varchar("royalty_date"),
+  orderDate: varchar("order_date"), // Pour Paperback/Hardcover
+  title: text("title"),
+  authorName: varchar("author_name"),
+  asinIsbn: varchar("asin_isbn"), // "ASIN/ISBN" ou "ASIN" ou "ISBN" selon l'onglet
+  marketplace: varchar("marketplace"),
+  royaltyType: varchar("royalty_type"),
+  transactionType: varchar("transaction_type"), // CRITÈRE DE FILTRAGE: "Free - Promotion" ou "Expanded Distribution Channels"
+  
+  // Données de ventes
+  unitsSold: integer("units_sold"),
+  unitsRefunded: integer("units_refunded"),
+  netUnitsSold: integer("net_units_sold"),
+  
+  // Prix et coûts (précision élevée pour exactitude)
+  avgListPriceWithoutTax: decimal("avg_list_price_without_tax", { precision: 12, scale: 4 }),
+  avgOfferPriceWithoutTax: decimal("avg_offer_price_without_tax", { precision: 12, scale: 4 }),
+  avgDeliveryManufacturingCost: decimal("avg_delivery_manufacturing_cost", { precision: 12, scale: 4 }),
+  
+  // Spécifique eBook
+  avgFileSizeMb: decimal("avg_file_size_mb", { precision: 8, scale: 4 }),
+  avgDeliveryCost: decimal("avg_delivery_cost", { precision: 12, scale: 4 }),
+  
+  // Spécifique Paperback/Hardcover
+  printingCost: decimal("printing_cost", { precision: 12, scale: 4 }),
+  expandedDistributionCost: decimal("expanded_distribution_cost", { precision: 12, scale: 4 }),
+  
+  // Royalties et devises (précision maximale pour exactitude)
+  royalty: decimal("royalty", { precision: 12, scale: 4 }),
+  currency: varchar("currency"),
+  
+  // KENP (pour onglet KENP Read)
+  kenpRead: integer("kenp_read"),
+  
+  // Orders data (pour Orders Placed)
+  paidUnits: integer("paid_units"),
+  freeUnits: integer("free_units"),
+  
+  // Métadonnées de traitement
+  rowIndex: integer("row_index"), // Position dans le fichier original
+  rawRowData: jsonb("raw_row_data"), // Données originales pour debug
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  // Index pour performance et détection de doublons
+  index("idx_royalties_estimator_import_sheet").on(table.importId, table.sheetName),
+  index("idx_royalties_estimator_asin_transaction").on(table.asinIsbn, table.transactionType),
+]);
+
 // Consolidated Sales Data - Table dédiée pour les données consolidées sans duplication
 export const consolidatedSalesData = pgTable("consolidated_sales_data", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
