@@ -30,7 +30,7 @@ interface KdpImportValidationDialogProps {
   onClose: () => void;
   onConfirm: (options: ImportOptions) => void;
   importData: any;
-  preview: ImportPreview;
+  preview: ImportPreview | null;
   isLoading: boolean;
 }
 
@@ -51,6 +51,17 @@ export function KdpImportValidationDialog({
   const [importType, setImportType] = useState<ImportOptions['importType']>('both');
   const [updateExistingBooks, setUpdateExistingBooks] = useState(false);
   const [updateExistingSalesData, setUpdateExistingSalesData] = useState(true);
+
+  // Safe preview with defaults
+  const safePreview: ImportPreview = preview || {
+    totalBooks: 0,
+    existingBooks: 0,
+    newBooks: 0,
+    booksWithoutId: 0,
+    totalSalesData: 0,
+    duplicateSalesData: 0,
+    missingAuthorData: 0
+  };
 
   const handleConfirm = () => {
     onConfirm({
@@ -118,20 +129,20 @@ export function KdpImportValidationDialog({
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
                       <span>Total des livres :</span>
-                      <Badge variant="secondary">{preview.totalBooks}</Badge>
+                      <Badge variant="secondary">{safePreview.totalBooks}</Badge>
                     </div>
                     <div className="flex justify-between">
                       <span>Livres existants :</span>
-                      <Badge className="bg-blue-50 text-blue-700 border-blue-200">{preview.existingBooks}</Badge>
+                      <Badge className="bg-blue-50 text-blue-700 border-blue-200">{safePreview.existingBooks}</Badge>
                     </div>
                     <div className="flex justify-between">
                       <span>Nouveaux livres :</span>
-                      <Badge className="bg-green-50 text-green-700 border-green-200">{preview.newBooks}</Badge>
+                      <Badge className="bg-green-50 text-green-700 border-green-200">{safePreview.newBooks}</Badge>
                     </div>
-                    {preview.booksWithoutId > 0 && (
+                    {safePreview.booksWithoutId > 0 && (
                       <div className="flex justify-between items-center">
                         <span className="text-orange-600">Sans ASIN/ISBN :</span>
-                        <Badge className="bg-orange-50 text-orange-700 border-orange-200">{preview.booksWithoutId}</Badge>
+                        <Badge className="bg-orange-50 text-orange-700 border-orange-200">{safePreview.booksWithoutId}</Badge>
                       </div>
                     )}
                   </div>
@@ -142,28 +153,28 @@ export function KdpImportValidationDialog({
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
                       <span>Total des entrées :</span>
-                      <Badge variant="secondary">{preview.totalSalesData}</Badge>
+                      <Badge variant="secondary">{safePreview.totalSalesData}</Badge>
                     </div>
                     <div className="flex justify-between">
                       <span>Doublons détectés :</span>
-                      <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200">{preview.duplicateSalesData}</Badge>
+                      <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200">{safePreview.duplicateSalesData}</Badge>
                     </div>
-                    {preview.missingAuthorData > 0 && (
+                    {safePreview.missingAuthorData > 0 && (
                       <div className="flex justify-between">
                         <span className="text-orange-600">Auteurs manquants :</span>
-                        <Badge className="bg-orange-50 text-orange-700 border-orange-200">{preview.missingAuthorData}</Badge>
+                        <Badge className="bg-orange-50 text-orange-700 border-orange-200">{safePreview.missingAuthorData}</Badge>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
               
-              {preview.booksWithoutId > 0 && (
+              {safePreview.booksWithoutId > 0 && (
                 <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
                   <div className="flex items-start gap-2">
                     <AlertCircle className="w-4 h-4 text-orange-600 mt-0.5" />
                     <div className="text-sm text-orange-800">
-                      <strong>Attention :</strong> {preview.booksWithoutId} livre(s) n'ont ni ASIN ni ISBN. 
+                      <strong>Attention :</strong> {safePreview.booksWithoutId} livre(s) n'ont ni ASIN ni ISBN. 
                       Ces livres ne seront pas créés/mis à jour car l'identifiant unique est requis.
                     </div>
                   </div>
@@ -249,9 +260,9 @@ export function KdpImportValidationDialog({
                       Si coché, les informations des livres existants seront mises à jour avec les nouvelles données (titre, auteur, etc.).
                       Si non coché, seuls les nouveaux livres seront créés.
                     </p>
-                    {preview.existingBooks > 0 && (
+                    {safePreview.existingBooks > 0 && (
                       <p className="text-sm text-blue-600 mt-2">
-                        Affectera {preview.existingBooks} livre(s) existant(s)
+                        Affectera {safePreview.existingBooks} livre(s) existant(s)
                       </p>
                     )}
                   </div>
@@ -284,9 +295,9 @@ export function KdpImportValidationDialog({
                       Si coché, les données de vente en doublon seront mises à jour.
                       Si non coché, les doublons seront ignorés.
                     </p>
-                    {preview.duplicateSalesData > 0 && (
+                    {safePreview.duplicateSalesData > 0 && (
                       <p className="text-sm text-blue-600 mt-2">
-                        Affectera {preview.duplicateSalesData} entrée(s) en doublon
+                        Affectera {safePreview.duplicateSalesData} entrée(s) en doublon
                       </p>
                     )}
                   </div>
