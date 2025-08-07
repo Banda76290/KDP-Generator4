@@ -7,12 +7,28 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bell, User as UserIcon, Shield, Palette, Download, Trash2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Bell, User as UserIcon, Shield, Palette, Download, Trash2, DollarSign } from "lucide-react";
 import Layout from "@/components/Layout";
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/hooks/useCurrency";
 
 
 export default function Settings() {
   const { user, isLoading } = useAuth() as { user: User | undefined; isLoading: boolean };
+  const { toast } = useToast();
+  const { preferredCurrency, updatePreferredCurrency, availableCurrencies } = useCurrency();
+
+  // Save preferred currency with toast notification
+  const handleCurrencyChange = (newCurrency: string) => {
+    updatePreferredCurrency(newCurrency);
+    toast({
+      title: "Currency Updated",
+      description: `Display currency changed to ${availableCurrencies.find(c => c.code === newCurrency)?.name}`,
+      variant: "success"
+    });
+  };
 
   const getUserInitials = (firstName?: string, lastName?: string) => {
     if (!firstName && !lastName) return "U";
@@ -208,7 +224,28 @@ export default function Settings() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="currency">Display Currency</Label>
+                    <Select value={preferredCurrency} onValueChange={handleCurrencyChange}>
+                      <SelectTrigger>
+                        <SelectValue>
+                          {availableCurrencies.find(c => c.code === preferredCurrency)?.symbol} {preferredCurrency} - {availableCurrencies.find(c => c.code === preferredCurrency)?.name}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableCurrencies.map((currency) => (
+                          <SelectItem key={currency.code} value={currency.code}>
+                            {currency.symbol} {currency.code} - {currency.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-sm text-muted-foreground">
+                      This currency will be used for displaying all monetary values throughout the application
+                    </p>
+                  </div>
 
+                  <Separator />
 
                   <div className="space-y-2">
                     <Label htmlFor="timezone">Timezone</Label>

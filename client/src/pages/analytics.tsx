@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
+import { useCurrency } from "@/hooks/useCurrency";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -85,6 +86,7 @@ export default function Analytics() {
   const { isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
   const [selectedPeriod, setSelectedPeriod] = useState("30");
+  const { formatCurrency: formatCurrencyHook, getCurrentCurrency } = useCurrency();
 
   // Analytics data queries
   const { data: overview, isLoading: overviewLoading } = useQuery<AnalyticsOverview>({
@@ -137,27 +139,9 @@ export default function Analytics() {
     return null;
   }
 
-  const formatCurrency = (amount: number, currency: string = 'USD') => {
-    // Handle invalid or unknown currencies
-    const validCurrency = ['USD', 'EUR', 'JPY', 'GBP', 'CAD', 'INR', 'AUD', 'BRL', 'MXN'].includes(currency) 
-      ? currency 
-      : 'USD';
-    
-    try {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: validCurrency,
-        minimumFractionDigits: validCurrency === 'JPY' ? 0 : 2,
-      }).format(amount);
-    } catch (error) {
-      // Fallback for any formatting errors
-      return `${amount.toFixed(2)} ${currency}`;
-    }
-  };
-
-  // Format currency converted to USD for unified display  
-  const formatConvertedCurrency = (amount: number): string => {
-    return formatCurrency(amount, 'USD');
+  // Use the global currency formatting from user preferences
+  const formatCurrency = (amount: number, originalCurrency?: string) => {
+    return formatCurrencyHook(amount, originalCurrency);
   };
 
 

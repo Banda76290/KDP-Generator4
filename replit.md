@@ -91,6 +91,7 @@ The application follows a modern full-stack architecture with clear separation b
 - **AI Prompt Integration System**: Complete integration between AI prompt administration and execution systems. Database-configured prompts automatically appear in AI Functions interface and are used for content generation. Hybrid system combines database templates with static fallback functions, with database templates taking priority.
 - **Security Enhancements**: XSS vulnerability patched in author biography editor (August 2025). Replaced unsafe innerHTML assignment with DOMParser for secure HTML sanitization without script execution risk.
 - **Import Progress Widget**: Floating collapsible widget positioned bottom-right displaying real-time progress of KDP imports. Features expand/collapse functionality, individual progress bars per import, live percentage tracking, and dismissible interface. Respects CSS standards with proper error handling for React hooks compliance. Implemented August 2025.
+- **User Currency Preferences System**: Complete currency selection system in Settings page allowing users to choose their preferred display currency from 10 major international currencies (USD, EUR, GBP, CAD, AUD, JPY, CHF, SEK, NOK, DKK). Implements persistent localStorage storage and useCurrency hook for global currency formatting throughout the application. All monetary values across the platform must respect the user's selected currency preference. Implemented August 2025.
 
 ## External Dependencies
 
