@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import { useGlobalToasts } from "@/hooks/useGlobalToasts";
 
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
@@ -45,6 +46,9 @@ import MasterBooksPage from "@/pages/master-books";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
+  
+  // Always call hook, but only enable monitoring when authenticated
+  useGlobalToasts();
 
   return (
     <Switch>
