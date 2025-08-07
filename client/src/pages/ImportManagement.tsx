@@ -140,11 +140,18 @@ export default function ImportManagement() {
     },
   });
 
-  // Fetch import progress (no polling - only manual refresh)
+  // Fetch import progress with automatic polling for processing/pending imports
   const { data: importProgress, refetch: refetchProgress } = useQuery<ImportProgress>({
     queryKey: ['/api/kdp-imports', expandedImport, 'progress'],
     enabled: !!expandedImport,
-    refetchInterval: false, // Disable polling completely
+    refetchInterval: (data) => {
+      // Poll every 2 seconds if import is still processing
+      if (data?.status === 'processing' || data?.status === 'pending') {
+        return 2000;
+      }
+      // Stop polling when completed or failed
+      return false;
+    },
   });
 
   const handleFileSelect = (files: File[]) => {
