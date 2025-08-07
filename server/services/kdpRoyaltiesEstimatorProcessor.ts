@@ -276,6 +276,22 @@ export class KdpRoyaltiesEstimatorProcessor {
       return index !== -1 ? row[index] : null;
     };
 
+    // Fonction helper pour convertir des valeurs numériques en tolérant "N/A"
+    const parseNumericValue = (value: any): number => {
+      if (!value || value === 'N/A' || value === '' || value === null || value === undefined) {
+        return 0;
+      }
+      const parsed = parseFloat(String(value).replace(/[^\d.-]/g, ''));
+      return isNaN(parsed) ? 0 : parsed;
+    };
+
+    const parseStringValue = (value: any): string => {
+      if (!value || value === 'N/A' || value === null || value === undefined) {
+        return '';
+      }
+      return String(value).trim();
+    };
+
     // Mapping des champs communs
     const commonData = {
       importId,
@@ -284,42 +300,42 @@ export class KdpRoyaltiesEstimatorProcessor {
       rowIndex,
       rawData: { headers, row },
       
-      // Champs communs
-      royaltyDate: getColumnValue('Royalty Date'),
-      title: getColumnValue('Title'),
-      authorName: getColumnValue('Author Name'),
-      marketplace: getColumnValue('Marketplace'),
-      royaltyType: getColumnValue('Royalty Type'),
-      transactionType: getColumnValue('Transaction Type'), // Ce champ est obligatoire
-      unitsSold: parseInt(getColumnValue('Units Sold')) || 0,
-      unitsRefunded: parseInt(getColumnValue('Units Refunded')) || 0,
-      netUnitsSold: parseInt(getColumnValue('Net Units Sold')) || 0,
-      avgListPriceWithoutTax: getColumnValuePartial('Avg. List Price'),
-      avgOfferPriceWithoutTax: getColumnValuePartial('Avg. Offer Price'),
-      royalty: getColumnValue('Royalty'),
-      currency: getColumnValue('Currency'),
+      // Champs communs avec gestion des "N/A"
+      royaltyDate: parseStringValue(getColumnValue('Royalty Date')),
+      title: parseStringValue(getColumnValue('Title')),
+      authorName: parseStringValue(getColumnValue('Author Name')),
+      marketplace: parseStringValue(getColumnValue('Marketplace')),
+      royaltyType: parseStringValue(getColumnValue('Royalty Type')),
+      transactionType: parseStringValue(getColumnValue('Transaction Type')), // Ce champ est obligatoire
+      unitsSold: parseNumericValue(getColumnValue('Units Sold')),
+      unitsRefunded: parseNumericValue(getColumnValue('Units Refunded')),
+      netUnitsSold: parseNumericValue(getColumnValue('Net Units Sold')),
+      avgListPriceWithoutTax: parseNumericValue(getColumnValuePartial('Avg. List Price')),
+      avgOfferPriceWithoutTax: parseNumericValue(getColumnValuePartial('Avg. Offer Price')),
+      royalty: parseNumericValue(getColumnValue('Royalty')),
+      currency: parseStringValue(getColumnValue('Currency')),
     };
 
-    // Mapping spécifique selon l'onglet
+    // Mapping spécifique selon l'onglet avec gestion des "N/A"
     if (sheetName === 'eBook Royalty') {
       return {
         ...commonData,
-        asin: getColumnValue('ASIN'), // ASIN pour eBooks
-        avgFileSizeMb: getColumnValuePartial('Avg. File Size'),
-        avgDeliveryCost: getColumnValuePartial('Avg. Delivery Cost'),
+        asin: parseStringValue(getColumnValue('ASIN')), // ASIN pour eBooks
+        avgFileSizeMb: parseNumericValue(getColumnValuePartial('Avg. File Size')),
+        avgDeliveryCost: parseNumericValue(getColumnValuePartial('Avg. Delivery Cost')),
       };
     } else if (sheetName === 'Combined Sales') {
       return {
         ...commonData,
-        asin: getColumnValue('ASIN/ISBN'), // Dans Combined Sales, c'est un ASIN
-        avgDeliveryCost: getColumnValuePartial('Avg. Delivery'),
+        asin: parseStringValue(getColumnValue('ASIN/ISBN')), // Dans Combined Sales, c'est un ASIN
+        avgDeliveryCost: parseNumericValue(getColumnValuePartial('Avg. Delivery')),
       };
     } else if (sheetName === 'Paperback Royalty' || sheetName === 'Hardcover Royalty') {
       return {
         ...commonData,
-        isbn: getColumnValue('ISBN'), // ISBN pour livres imprimés
-        orderDate: getColumnValue('Order Date'),
-        avgManufacturingCost: getColumnValuePartial('Avg. Manufacturing Cost'),
+        isbn: parseStringValue(getColumnValue('ISBN')), // ISBN pour livres imprimés
+        orderDate: parseStringValue(getColumnValue('Order Date')),
+        avgManufacturingCost: parseNumericValue(getColumnValuePartial('Avg. Manufacturing Cost')),
       };
     }
 
