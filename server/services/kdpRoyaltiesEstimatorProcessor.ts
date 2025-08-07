@@ -378,14 +378,14 @@ export class KdpRoyaltiesEstimatorProcessor {
       return {
         ...commonData,
         asin: parseStringValue(getColumnValue('ASIN')), // ASIN pour eBooks
-        avgFileSizeMb: parseNumericValue(getColumnValuePartial('Avg. File Size')),
-        avgDeliveryCost: parseNumericValue(getColumnValuePartial('Avg. Delivery Cost')),
+        avgFileSizeMb: parseNumericValue(getColumnValuePartial('Avg. File Size')).toString(),
+        avgDeliveryCost: parseNumericValue(getColumnValuePartial('Avg. Delivery Cost')).toString(),
       };
     } else if (sheetName === 'Combined Sales') {
       return {
         ...commonData,
         asin: parseStringValue(getColumnValue('ASIN/ISBN')), // Dans Combined Sales, c'est un ASIN
-        avgDeliveryCost: parseNumericValue(getColumnValuePartial('Avg. Delivery')),
+        avgDeliveryCost: parseNumericValue(getColumnValuePartial('Avg. Delivery')).toString(),
       };
     } else if (sheetName === 'Paperback Royalty' || sheetName === 'Hardcover Royalty') {
       return {
@@ -393,7 +393,7 @@ export class KdpRoyaltiesEstimatorProcessor {
         isbn: parseStringValue(getColumnValue('ISBN')), // ISBN pour livres imprimés
         asin: parseStringValue(getColumnValue('ASIN')), // ASIN aussi présent dans Paperback/Hardcover !
         orderDate: parseStringValue(getColumnValue('Order Date')),
-        avgManufacturingCost: parseNumericValue(getColumnValuePartial('Avg. Manufacturing Cost')),
+        avgManufacturingCost: parseNumericValue(getColumnValuePartial('Avg. Manufacturing Cost')).toString(),
       };
     }
 
