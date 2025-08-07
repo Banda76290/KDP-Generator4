@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileSpreadsheet, Eye, AlertCircle, CheckCircle, Clock, X, RefreshCw } from 'lucide-react';
+import { Upload, FileSpreadsheet, Eye, AlertCircle, CheckCircle, Clock, X, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { format } from 'date-fns';
 import Layout from '@/components/Layout';
@@ -84,6 +85,8 @@ export default function ImportManagement() {
   const [selectedImportForValidation, setSelectedImportForValidation] = useState<string | null>(null);
   const [importPreview, setImportPreview] = useState<any>(null);
   const [validationLoading, setValidationLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -565,11 +568,40 @@ export default function ImportManagement() {
       {/* Import History */}
       <Card>
         <CardHeader>
-          <div>
-            <CardTitle>Import History</CardTitle>
-            <CardDescription>
-              View and manage your previously uploaded KDP reports
-            </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Import History</CardTitle>
+              <CardDescription>
+                View and manage your previously uploaded KDP reports
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Afficher:</span>
+                <Select value={itemsPerPage.toString()} onValueChange={(value) => {
+                  setItemsPerPage(Number(value));
+                  setCurrentPage(1); // Reset to first page when changing items per page
+                }}>
+                  <SelectTrigger className="w-20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="20">20</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => refetchImports()}
+                disabled={isLoading}
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -589,8 +621,15 @@ export default function ImportManagement() {
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {imports.map((importRecord) => (
+            <>
+              <div className="space-y-4">
+                {(() => {
+                  // Calculate pagination
+                  const startIndex = (currentPage - 1) * itemsPerPage;
+                  const endIndex = startIndex + itemsPerPage;
+                  const paginatedImports = imports.slice(startIndex, endIndex);
+                  
+                  return paginatedImports.map((importRecord) => (
                 <div key={importRecord.id} className="border rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
@@ -715,9 +754,111 @@ export default function ImportManagement() {
                       )}
                     </div>
                   )}
+                    </div>
+                  ))
+                })()}
+              </div>
+              
+              {/* Pagination Controls */}
+              {imports.length > itemsPerPage && (
+                <div className="flex items-center justify-between pt-4 border-t">
+                  <div className="text-sm text-gray-600">
+                    Affichage {Math.min((currentPage - 1) * itemsPerPage + 1, imports.length)} à {Math.min(currentPage * itemsPerPage, imports.length)} sur {imports.length} imports
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      Précédent
+                    </Button>
+                    
+                    {/* Page numbers */}
+                    <div className="flex items-center gap-1">
+                      {(() => {
+                        const totalPages = Math.ceil(imports.length / itemsPerPage);
+                        const pages = [];
+                        
+                        // Show first page
+                        if (totalPages > 1) {
+                          pages.push(
+                            <Button
+                              key={1}
+                              variant={currentPage === 1 ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setCurrentPage(1)}
+                              className="w-8"
+                            >
+                              1
+                            </Button>
+                          );
+                        }
+                        
+                        // Show ellipsis if needed
+                        if (currentPage > 3 && totalPages > 4) {
+                          pages.push(<span key="ellipsis1" className="px-2">...</span>);
+                        }
+                        
+                        // Show pages around current page
+                        const startPage = Math.max(2, currentPage - 1);
+                        const endPage = Math.min(totalPages - 1, currentPage + 1);
+                        
+                        for (let i = startPage; i <= endPage; i++) {
+                          if (i !== 1 && i !== totalPages) {
+                            pages.push(
+                              <Button
+                                key={i}
+                                variant={currentPage === i ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => setCurrentPage(i)}
+                                className="w-8"
+                              >
+                                {i}
+                              </Button>
+                            );
+                          }
+                        }
+                        
+                        // Show ellipsis if needed
+                        if (currentPage < totalPages - 2 && totalPages > 4) {
+                          pages.push(<span key="ellipsis2" className="px-2">...</span>);
+                        }
+                        
+                        // Show last page
+                        if (totalPages > 1) {
+                          pages.push(
+                            <Button
+                              key={totalPages}
+                              variant={currentPage === totalPages ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setCurrentPage(totalPages)}
+                              className="w-8"
+                            >
+                              {totalPages}
+                            </Button>
+                          );
+                        }
+                        
+                        return pages;
+                      })()}
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(Math.min(Math.ceil(imports.length / itemsPerPage), currentPage + 1))}
+                      disabled={currentPage === Math.ceil(imports.length / itemsPerPage)}
+                    >
+                      Suivant
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
