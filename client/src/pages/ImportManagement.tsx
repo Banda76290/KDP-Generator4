@@ -146,14 +146,26 @@ export default function ImportManagement() {
       if (importId) {
         setExpandedImport(importId);
         
-        // If it's a royalties_estimator file, offer immediate validation
+        // If it's a royalties_estimator file, open validation dialog immediately
         if (data.parsedData.detectedType === 'royalties_estimator') {
-          // Show a toast suggesting the user can create books
-          toast({
-            title: "Book Creation Available",
-            description: "This file contains book data. You can create books automatically once processing completes.",
-            variant: "default",
-          });
+          // Create a basic preview from upload response data
+          const basicPreview = {
+            totalBooks: data.parsedData.summary?.estimatedRecords || 0,
+            existingBooks: 0, // Will be calculated during processing
+            newBooks: data.parsedData.summary?.estimatedRecords || 0,
+            booksWithoutId: 0,
+            totalSalesData: data.parsedData.summary?.estimatedRecords || 0,
+            duplicateSalesData: 0,
+            missingAuthorData: 0
+          };
+          
+          // Open validation dialog immediately
+          setImportPreview(basicPreview);
+          setSelectedImportForValidation(importId);
+          setValidationDialogOpen(true);
+          
+          // Don't start processing yet - wait for user confirmation
+          return; // Skip the automatic monitoring
         }
         
         // Start monitoring immediately for any new upload
@@ -198,23 +210,55 @@ export default function ImportManagement() {
 
   const processBooksMutation = useMutation({
     mutationFn: async ({ importId, options }: { importId: string; options: ImportOptions }) => {
-      return apiRequest(`/api/kdp-imports/${importId}/process-books`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(options),
+      // Check if this is a new import (pending status) that needs to start processing
+      const imports = await queryClient.fetchQuery({
+        queryKey: ['/api/kdp-imports'],
+        queryFn: () => apiRequest('/api/kdp-imports', { method: 'GET' })
       });
+      
+      const importRecord = imports.find((imp: any) => imp.id === importId);
+      
+      if (importRecord?.status === 'pending') {
+        // Use start-processing endpoint for new imports
+        return apiRequest(`/api/kdp-imports/${importId}/start-processing`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            importType: options.importType,
+            updateExistingBooks: options.updateExistingBooks,
+            updateExistingSalesData: options.updateExistingSalesData,
+          }),
+        });
+      } else {
+        // Use existing process-books endpoint for completed imports
+        return apiRequest(`/api/kdp-imports/${importId}/process-books`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(options),
+        });
+      }
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
+      const { importId } = variables;
+      
       toast({
-        title: "Books processed successfully",
-        description: data.message,
+        title: "Processing started successfully",
+        description: data.message || "Your import is being processed with your chosen settings",
         variant: "success",
       });
       setValidationDialogOpen(false);
       setSelectedImportForValidation(null);
       setImportPreview(null);
+      
+      // Start monitoring the import progress
+      setTimeout(() => {
+        monitorImportProgress(importId);
+      }, 500);
+      
       queryClient.invalidateQueries({ queryKey: ['/api/books'] });
       queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
     },
