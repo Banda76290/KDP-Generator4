@@ -120,29 +120,37 @@ export default function Analytics() {
     setAnalyticsCurrency(preferredCurrency);
   }, [preferredCurrency]);
 
-  // Analytics data queries with currency conversion
+  // Analytics data queries with currency conversion - Auto-refresh on page load
   const { data: overview, isLoading: overviewLoading } = useQuery<AnalyticsOverview>({
     queryKey: ['/api/analytics/overview', analyticsCurrency],
     queryFn: () => fetch(`/api/analytics/overview?currency=${analyticsCurrency}`).then(res => res.json()),
     enabled: isAuthenticated && !!analyticsCurrency,
+    staleTime: 0, // Always refetch fresh data
+    refetchOnMount: true, // Refetch when component mounts
   });
 
   const { data: salesTrends, isLoading: trendsLoading } = useQuery<SalesTrend[]>({
     queryKey: ['/api/analytics/sales-trends', selectedPeriod, analyticsCurrency],
     queryFn: () => fetch(`/api/analytics/sales-trends?period=${selectedPeriod}&currency=${analyticsCurrency}`).then(res => res.json()),
     enabled: isAuthenticated && !!analyticsCurrency,
+    staleTime: 0, // Always refetch fresh data
+    refetchOnMount: true, // Refetch when component mounts
   });
 
   const { data: topPerformers, isLoading: performersLoading } = useQuery<TopPerformer[]>({
     queryKey: ['/api/analytics/top-performers', analyticsCurrency],
     queryFn: () => fetch(`/api/analytics/top-performers?currency=${analyticsCurrency}`).then(res => res.json()),
     enabled: isAuthenticated && !!analyticsCurrency,
+    staleTime: 0, // Always refetch fresh data
+    refetchOnMount: true, // Refetch when component mounts
   });
 
   const { data: marketplaceData, isLoading: marketplaceLoading } = useQuery<MarketplaceData[]>({
     queryKey: ['/api/analytics/marketplace-breakdown', analyticsCurrency],
     queryFn: () => fetch(`/api/analytics/marketplace-breakdown?currency=${analyticsCurrency}`).then(res => res.json()),
     enabled: isAuthenticated && !!analyticsCurrency,
+    staleTime: 0, // Always refetch fresh data
+    refetchOnMount: true, // Refetch when component mounts
   });
 
   // Nouvelle requête pour Total Revenue avec conversion automatique USD 
@@ -150,6 +158,8 @@ export default function Analytics() {
     queryKey: ['/api/analytics/total-revenue', analyticsCurrency],
     queryFn: () => fetch(`/api/analytics/total-revenue?currency=${analyticsCurrency}`).then(res => res.json()),
     enabled: isAuthenticated && !!analyticsCurrency,
+    staleTime: 0, // Always refetch fresh data
+    refetchOnMount: true, // Refetch when component mounts
   });
 
 
@@ -198,10 +208,11 @@ export default function Analytics() {
   const applyAnalyticsOnly = () => {
     setAnalyticsCurrency(pendingCurrency);
     setShowCurrencyDialog(false);
+    const currency = availableCurrencies.find(c => c.code === pendingCurrency);
     toast({
       title: "Analytics Currency Updated",
-      description: `Analytics display currency changed to ${pendingCurrency}.`,
-      variant: "default",
+      description: `Analytics display currency changed to ${currency?.name || pendingCurrency}.`,
+      variant: "success",
     });
   };
 
@@ -210,9 +221,10 @@ export default function Analytics() {
     setAnalyticsCurrency(pendingCurrency);
     updatePreferredCurrency(pendingCurrency);
     setShowCurrencyDialog(false);
+    const currency = availableCurrencies.find(c => c.code === pendingCurrency);
     toast({
       title: "Currency Updated",
-      description: `Display currency changed to ${pendingCurrency} across the entire site.`,
+      description: `Display currency changed to ${currency?.name || pendingCurrency} across the entire site.`,
       variant: "success",
     });
   };
