@@ -17,6 +17,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { 
   LineChart, 
   Line, 
@@ -100,6 +110,10 @@ export default function Analytics() {
   
   // Local state for analytics currency display (can be different from global preference)
   const [analyticsCurrency, setAnalyticsCurrency] = useState<string>(preferredCurrency);
+  
+  // State for global currency change confirmation
+  const [showGlobalCurrencyDialog, setShowGlobalCurrencyDialog] = useState(false);
+  const [pendingGlobalCurrency, setPendingGlobalCurrency] = useState<string>('');
 
   // Sync local analytics currency with global preference when it changes
   useEffect(() => {
@@ -169,22 +183,31 @@ export default function Analytics() {
 
   // Handle currency selection for analytics
   const handleCurrencyChange = (currency: string, updateGlobal: boolean = false) => {
-    setAnalyticsCurrency(currency);
-    
     if (updateGlobal) {
-      updatePreferredCurrency(currency);
-      toast({
-        title: "Currency Updated",
-        description: `Display currency changed to ${currency} across the entire site.`,
-        variant: "success",
-      });
+      // Show confirmation dialog for global currency change
+      setPendingGlobalCurrency(currency);
+      setShowGlobalCurrencyDialog(true);
     } else {
+      // Direct change for analytics only
+      setAnalyticsCurrency(currency);
       toast({
         title: "Analytics Currency Updated",
         description: `Analytics display currency changed to ${currency}.`,
         variant: "default",
       });
     }
+  };
+
+  // Confirm global currency change
+  const confirmGlobalCurrencyChange = () => {
+    setAnalyticsCurrency(pendingGlobalCurrency);
+    updatePreferredCurrency(pendingGlobalCurrency);
+    setShowGlobalCurrencyDialog(false);
+    toast({
+      title: "Currency Updated",
+      description: `Display currency changed to ${pendingGlobalCurrency} across the entire site.`,
+      variant: "success",
+    });
   };
 
 
@@ -216,7 +239,6 @@ export default function Analytics() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="min-w-[120px]">
-                  <DollarSign className="h-4 w-4 mr-2" />
                   {analyticsCurrency}
                 </Button>
               </DropdownMenuTrigger>
@@ -271,6 +293,27 @@ export default function Analytics() {
           </div>
         </div>
       </div>
+
+      {/* Global Currency Change Confirmation Dialog */}
+      <AlertDialog open={showGlobalCurrencyDialog} onOpenChange={setShowGlobalCurrencyDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Change Site-wide Currency</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to change your site-wide display currency to {pendingGlobalCurrency}? 
+              This will affect all monetary values across the entire application and update your Settings preference.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowGlobalCurrencyDialog(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmGlobalCurrencyChange}>
+              Change Currency
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
