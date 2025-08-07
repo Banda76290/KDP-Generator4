@@ -103,8 +103,10 @@ export default function ImportManagement() {
       if (importId) {
         setExpandedImport(importId);
         
-        // Start monitoring immediately
-        monitorImportProgress(importId);
+        // Start monitoring immediately and force status refresh
+        setTimeout(() => {
+          monitorImportProgress(importId);
+        }, 500); // Small delay to allow server to update status
       }
     },
     onError: (error: any) => {
@@ -468,16 +470,18 @@ export default function ImportManagement() {
                   {/* Expanded Details */}
                   {expandedImport === importRecord.id && importProgress && (
                     <div className="mt-4 pt-4 border-t space-y-4">
-                      {/* Progress Bar */}
-                      {importProgress.status === 'processing' && (
+                      {/* Progress Bar - show during processing and pending */}
+                      {(importProgress.status === 'processing' || importProgress.status === 'pending') && (
                         <div className="space-y-2">
                           <div className="flex justify-between text-sm">
-                            <span>Processing...</span>
-                            <span>{importProgress.progress}%</span>
+                            <span>
+                              {importProgress.status === 'processing' ? 'Processing...' : 'Starting...'}
+                            </span>
+                            <span>{importProgress.progress || 0}%</span>
                           </div>
-                          <Progress value={importProgress.progress} className="w-full" />
+                          <Progress value={importProgress.progress || 0} className="w-full" />
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {importProgress.processedRecords} of {importProgress.totalRecords} records processed
+                            {importProgress.processedRecords || 0} of {importProgress.totalRecords || 0} records processed
                           </p>
                         </div>
                       )}
