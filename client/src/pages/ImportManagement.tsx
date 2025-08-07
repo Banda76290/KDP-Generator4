@@ -148,11 +148,15 @@ export default function ImportManagement() {
     queryKey: ['/api/kdp-imports', expandedImport, 'progress'],
     enabled: !!expandedImport,
     refetchInterval: (data) => {
-      // Poll every 2 seconds if import is still processing
+      // Stop polling if import is completed, failed, or error
+      if (data?.status === 'completed' || data?.status === 'failed' || data?.status === 'error') {
+        return false;
+      }
+      // Poll every 2 seconds if import is still processing or pending
       if (data?.status === 'processing' || data?.status === 'pending') {
         return 2000;
       }
-      // Stop polling when completed or failed
+      // Default: stop polling
       return false;
     },
   });
@@ -223,11 +227,30 @@ export default function ImportManagement() {
     const newExpandedImport = expandedImport === importId ? null : importId;
     setExpandedImport(newExpandedImport);
     
-    // If expanding an import, start monitoring its progress ONLY if it's still processing
+    // If expanding an import, refresh data and start monitoring if needed
     if (newExpandedImport) {
+      // Force refresh of imports list to get latest status
+      await refetchImports();
+      
       const currentImport = imports.find(imp => imp.id === importId);
-      if (currentImport && (currentImport.status === 'processing' || currentImport.status === 'pending')) {
-        await monitorImportProgress(newExpandedImport);
+      if (currentImport) {
+        // If import is completed but we haven't shown toast yet, show it now
+        if (currentImport.status === 'completed') {
+          console.log('[TOAST] Import already completed, showing success toast');
+          const newRecords = currentImport.processedRecords || 0;
+          const duplicates = currentImport.duplicateRecords || 0;
+          toast({
+            title: "Import completed ✓",
+            description: newRecords > 0 
+              ? `Successfully processed ${newRecords} new records${duplicates > 0 ? ` and updated ${duplicates} existing records` : ''}`
+              : `Updated ${duplicates} existing records (no new records added)`,
+            variant: "success",
+          });
+        }
+        // Only start monitoring if still in progress
+        else if (currentImport.status === 'processing' || currentImport.status === 'pending') {
+          await monitorImportProgress(newExpandedImport);
+        }
       }
     }
   };
@@ -512,17 +535,25 @@ export default function ImportManagement() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          console.log('[TOAST] Manual toast trigger');
-                          toast({
-                            title: "Manual Test ✓",
-                            description: "This confirms the toast system is working correctly",
-                            variant: "success",
-                          });
+                        onClick={async () => {
+                          console.log('[TOAST] Refreshing import status');
+                          await refetchImports();
+                          const refreshedImport = imports.find(imp => imp.id === importRecord.id);
+                          if (refreshedImport?.status === 'completed') {
+                            const newRecords = refreshedImport.processedRecords || 0;
+                            const duplicates = refreshedImport.duplicateRecords || 0;
+                            toast({
+                              title: "Import completed ✓",
+                              description: newRecords > 0 
+                                ? `Successfully processed ${newRecords} new records${duplicates > 0 ? ` and updated ${duplicates} existing records` : ''}`
+                                : `Updated ${duplicates} existing records (no new records added)`,
+                              variant: "success",
+                            });
+                          }
                         }}
-                        title="Test toast notification"
+                        title="Refresh status and show completion toast if ready"
                       >
-                        Test Toast
+                        Refresh & Toast
                       </Button>
                       <Button
                         variant="ghost"
