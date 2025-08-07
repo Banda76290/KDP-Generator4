@@ -38,15 +38,36 @@ export function ImportProgressWidget() {
     imp.status === 'pending' || imp.status === 'processing'
   ) || [];
 
-  // Fetch progress for each active import
-  const activeImportsWithProgress = activeImports.map(imp => {
-    const { data: progress } = useQuery<ImportProgress>({
-      queryKey: ['/api/kdp-imports', imp.id, 'progress'],
-      enabled: imp.status === 'processing' || imp.status === 'pending',
-      refetchInterval: 2000,
-    });
-    return { import: imp, progress };
+  // Fetch progress for all active imports using a single query per import ID
+  const progressQueries = useQuery<{ [key: string]: ImportProgress }>({
+    queryKey: ['/api/kdp-imports', 'all-progress'],
+    queryFn: async () => {
+      const progressData: { [key: string]: ImportProgress } = {};
+      
+      // Fetch progress for each active import
+      await Promise.all(
+        activeImports.map(async (imp) => {
+          try {
+            const response = await fetch(`/api/kdp-imports/${imp.id}/progress`);
+            if (response.ok) {
+              progressData[imp.id] = await response.json();
+            }
+          } catch (error) {
+            console.error(`Failed to fetch progress for ${imp.id}:`, error);
+          }
+        })
+      );
+      
+      return progressData;
+    },
+    enabled: activeImports.length > 0,
+    refetchInterval: 2000,
   });
+
+  const activeImportsWithProgress = activeImports.map(imp => ({
+    import: imp,
+    progress: progressQueries.data?.[imp.id]
+  }));
 
   // Don't show widget if no active imports or manually hidden
   if (!isVisible || activeImports.length === 0) {
