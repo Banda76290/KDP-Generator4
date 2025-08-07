@@ -111,7 +111,8 @@ export class KdpRoyaltiesEstimatorProcessor {
     let totalProcessed = 0;
     let filteredRecords = 0;
     let totalProcessedSoFar = 0; // Compteur global pour la progression
-    let duplicateRecords = 0;
+    let newRecords = 0; // Nouveaux records ajoutés
+    let duplicateRecords = 0; // Records existants mis à jour
     let errorRecords = 0;
     const processedSheets: string[] = [];
     
@@ -198,6 +199,7 @@ export class KdpRoyaltiesEstimatorProcessor {
               const dataWithKey = { ...mappedData, uniqueKey };
               const savedRecord = await storage.createKdpRoyaltiesEstimatorData(dataWithKey);
               console.log(`[KDP_ROYALTIES] ✅ Ligne sauvegardée avec ID: ${savedRecord.id}`);
+              newRecords++;
             }
             
             filteredRecords++;
@@ -210,8 +212,8 @@ export class KdpRoyaltiesEstimatorProcessor {
               await storage.updateKdpImport(importId, {
                 status: 'processing',
                 progress,
-                processedRecords: totalProcessedSoFar,
-                totalRecords: totalRows,
+                processedRecords: newRecords, // Seulement les nouveaux records
+                totalRecords: totalRows, // Total des lignes du fichier
                 errorRecords,
                 duplicateRecords,
                 errorLog: errors
@@ -233,14 +235,14 @@ export class KdpRoyaltiesEstimatorProcessor {
       }
     }
 
-    console.log(`[KDP_ROYALTIES] RÉSUMÉ FINAL: ${filteredRecords} lignes filtrées sur ${totalProcessed} total`);
+    console.log(`[KDP_ROYALTIES] RÉSUMÉ FINAL: ${newRecords} nouveaux records, ${duplicateRecords} duplicates, ${errorRecords} erreurs sur ${totalRows} lignes totales`);
     
     // Mise à jour finale du statut
     await storage.updateKdpImport(importId, {
       status: 'completed',
       progress: 100,
-      processedRecords: totalProcessedSoFar,
-      totalRecords: totalRows,
+      processedRecords: newRecords, // Seulement les nouveaux records
+      totalRecords: totalRows, // Total des lignes du fichier
       errorRecords,
       duplicateRecords,
       errorLog: errors

@@ -500,7 +500,7 @@ export default function ImportManagement() {
                           </div>
                           <Progress value={importRecord.progress || 0} className="w-full" />
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {importRecord.processedRecords || 0} of {importRecord.totalRecords || 0} records processed
+                            Processing {importRecord.totalRecords || 0} records from file
                           </p>
                         </div>
                       )}
@@ -511,13 +511,13 @@ export default function ImportManagement() {
                           <div className="text-2xl font-bold text-primary">
                             {importRecord.processedRecords || 0}
                           </div>
-                          <div className="text-sm text-primary/70 font-medium">Processed</div>
+                          <div className="text-sm text-primary/70 font-medium">New Records</div>
                         </div>
                         <div className="text-center p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
                           <div className="text-2xl font-bold text-slate-700 dark:text-slate-300">
                             {importRecord.totalRecords || 0}
                           </div>
-                          <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">Total</div>
+                          <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">File Records</div>
                         </div>
                         <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                           <div className="text-2xl font-bold text-red-600 dark:text-red-400">
