@@ -227,30 +227,11 @@ export default function ImportManagement() {
     const newExpandedImport = expandedImport === importId ? null : importId;
     setExpandedImport(newExpandedImport);
     
-    // If expanding an import, refresh data and start monitoring if needed
+    // If expanding an import, start monitoring its progress ONLY if it's still processing
     if (newExpandedImport) {
-      // Force refresh of imports list to get latest status
-      await refetchImports();
-      
       const currentImport = imports.find(imp => imp.id === importId);
-      if (currentImport) {
-        // If import is completed but we haven't shown toast yet, show it now
-        if (currentImport.status === 'completed') {
-          console.log('[TOAST] Import already completed, showing success toast');
-          const newRecords = currentImport.processedRecords || 0;
-          const duplicates = currentImport.duplicateRecords || 0;
-          toast({
-            title: "Import completed ✓",
-            description: newRecords > 0 
-              ? `Successfully processed ${newRecords} new records${duplicates > 0 ? ` and updated ${duplicates} existing records` : ''}`
-              : `Updated ${duplicates} existing records (no new records added)`,
-            variant: "success",
-          });
-        }
-        // Only start monitoring if still in progress
-        else if (currentImport.status === 'processing' || currentImport.status === 'pending') {
-          await monitorImportProgress(newExpandedImport);
-        }
+      if (currentImport && (currentImport.status === 'processing' || currentImport.status === 'pending')) {
+        await monitorImportProgress(newExpandedImport);
       }
     }
   };
@@ -536,24 +517,20 @@ export default function ImportManagement() {
                         variant="outline"
                         size="sm"
                         onClick={async () => {
-                          console.log('[TOAST] Refreshing import status');
-                          await refetchImports();
-                          const refreshedImport = imports.find(imp => imp.id === importRecord.id);
-                          if (refreshedImport?.status === 'completed') {
-                            const newRecords = refreshedImport.processedRecords || 0;
-                            const duplicates = refreshedImport.duplicateRecords || 0;
-                            toast({
-                              title: "Import completed ✓",
-                              description: newRecords > 0 
-                                ? `Successfully processed ${newRecords} new records${duplicates > 0 ? ` and updated ${duplicates} existing records` : ''}`
-                                : `Updated ${duplicates} existing records (no new records added)`,
-                              variant: "success",
-                            });
-                          }
+                          console.log('[TOAST] Manual completion toast trigger');
+                          const newRecords = importRecord.processedRecords || 0;
+                          const duplicates = importRecord.duplicateRecords || 0;
+                          toast({
+                            title: "Import completed ✓",
+                            description: newRecords > 0 
+                              ? `Successfully processed ${newRecords} new records${duplicates > 0 ? ` and updated ${duplicates} existing records` : ''}`
+                              : `Updated ${duplicates} existing records (no new records added)`,
+                            variant: "success",
+                          });
                         }}
-                        title="Refresh status and show completion toast if ready"
+                        title="Manually trigger completion toast for testing"
                       >
-                        Refresh & Toast
+                        Show Completion Toast
                       </Button>
                       <Button
                         variant="ghost"
