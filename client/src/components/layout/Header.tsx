@@ -49,7 +49,13 @@ export default function Header({ onMenuClick }: HeaderProps) {
         
         <div className="flex items-center space-x-4">
           {/* Global KDP Upload Button */}
-          <GlobalKdpUploader />
+          <GlobalKdpUploader 
+            variant="ghost" 
+            size="sm"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            Upload KDP Report
+          </GlobalKdpUploader>
           
           {/* Notification Bell */}
           <Button variant="ghost" size="sm" className="relative p-2 text-muted-foreground hover:text-foreground">
