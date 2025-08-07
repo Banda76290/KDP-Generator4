@@ -99,12 +99,14 @@ export default function ImportManagement() {
       const importId = data.import?.id;
       if (importId) {
         setExpandedImport(importId);
+        // Force refresh both import list and progress data
+        queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports', importId, 'progress'] });
+        
         // Start monitoring immediately after expansion
         setTimeout(() => {
-          // Force refresh the progress query first, then start monitoring
-          queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports', importId, 'progress'] });
           monitorImportProgress(importId);
-        }, 1000);
+        }, 500);
       }
     },
     onError: (error: any) => {
@@ -236,15 +238,15 @@ export default function ImportManagement() {
           queryFn: () => apiRequest(`/api/kdp-imports/${importId}/progress`),
         });
         
-        // If still processing, schedule next check
-        if (progressResult && progressResult.status === 'processing') {
-          // Wait 3 seconds before next check, but only if still expanded
+        // If still processing or pending, schedule next check
+        if (progressResult && (progressResult.status === 'processing' || progressResult.status === 'pending')) {
+          // Wait 2 seconds before next check, but only if still expanded
           setTimeout(() => {
             if (expandedImport === importId) {
               checkProgress();
             }
-          }, 3000);
-        } else if (progressResult && (progressResult.status === 'completed' || progressResult.status === 'failed')) {
+          }, 2000);
+        } else if (progressResult && (progressResult.status === 'completed' || progressResult.status === 'failed' || progressResult.status === 'error')) {
           // Import finished, refresh the import list to show final status
           queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
           queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports', importId, 'progress'] });
@@ -430,7 +432,13 @@ export default function ImportManagement() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => toggleExpandImport(importRecord.id)}
+                        onClick={() => {
+                          // Force refresh data before expanding
+                          queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
+                          queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports', importRecord.id, 'progress'] });
+                          toggleExpandImport(importRecord.id);
+                        }}
+                        title="View details"
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
@@ -439,6 +447,7 @@ export default function ImportManagement() {
                         size="sm"
                         onClick={() => handleDelete(importRecord.id)}
                         disabled={deleteMutation.isPending}
+                        title="Delete import"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
