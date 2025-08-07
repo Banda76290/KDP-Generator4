@@ -187,9 +187,10 @@ export const books = pgTable("books", {
   publicationInfo: jsonb("publication_info"),
   coverImageUrl: varchar("cover_image_url"),
   
-  // ISBN Information
+  // ISBN and ASIN Information
   isbn: varchar("isbn").unique(),
   isbnPlaceholder: varchar("isbn_placeholder").unique(),
+  asin: varchar("asin"), // Amazon Standard Identification Number
   
   // Sales tracking
   totalSales: integer("total_sales").default(0),
