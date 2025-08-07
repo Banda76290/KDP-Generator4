@@ -2487,7 +2487,7 @@ Please respond with only a JSON object containing the translated fields. For key
           systemLog(`Detected KDP_Royalties_Estimator file: ${req.file.originalname}`, 'info', 'KDP_ROYALTIES');
           
           parsedData = {
-            detectedType: 'kdp_royalties_estimator',
+            detectedType: 'royalties_estimator',
             summary: {
               estimatedRecords: 0, // Will be set during processing
               fileType: 'KDP_Royalties_Estimator'
@@ -2614,7 +2614,7 @@ Please respond with only a JSON object containing the translated fields. For key
       }
 
       // Check if this is a KDP_Royalties_Estimator import
-      if (importRecord.detectedType === 'kdp_royalties_estimator') {
+      if (importRecord.detectedType === 'royalties_estimator') {
         const importData = await storage.getKdpRoyaltiesEstimatorData(importId);
         
         // Apply pagination
@@ -2627,7 +2627,7 @@ Please respond with only a JSON object containing the translated fields. For key
           data: paginatedData,
           total: importData.length,
           limit: parseInt(limit as string),
-          fileType: 'kdp_royalties_estimator'
+          fileType: 'royalties_estimator'
         });
       } else {
         const importData = await storage.getKdpImportData(importId);
