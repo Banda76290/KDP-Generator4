@@ -2179,16 +2179,15 @@ export class DatabaseStorage implements IStorage {
    * Calcule le Total Revenue à partir de royalty_usd converti dans la devise spécifiée
    */
   async getTotalRevenue(userId: string, targetCurrency: string = 'USD'): Promise<{ totalRevenue: number; currency: string }> {
-    // D'abord récupérer le total en USD
+    // D'abord récupérer le total en USD - SANS filtre detected_type car tous les types contiennent des royalties
     const totalRevenueUSD = await db.select({
       sum: sql<number>`coalesce(sum(${kdpRoyaltiesEstimatorData.royaltyUsd}::decimal), 0)`
     }).from(kdpRoyaltiesEstimatorData)
     .innerJoin(kdpImports, eq(kdpRoyaltiesEstimatorData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
-      sql`${kdpImports.detectedType} = 'payments'`,
       isNotNull(kdpRoyaltiesEstimatorData.royaltyUsd),
-      sql`${kdpRoyaltiesEstimatorData.royaltyUsd} > 0`
+      sql`${kdpRoyaltiesEstimatorData.royaltyUsd}::decimal > 0`
     ));
 
     const totalUSD = Number(totalRevenueUSD[0]?.sum || 0);
