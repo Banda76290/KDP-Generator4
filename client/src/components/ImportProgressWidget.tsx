@@ -11,6 +11,7 @@ interface ImportItem {
   status: 'pending' | 'processing' | 'completed' | 'failed' | 'error';
   processedRecords?: number;
   totalRecords?: number;
+  progress?: number; // Add progress field from the import record
   createdAt: string;
 }
 
@@ -40,7 +41,7 @@ export function ImportProgressWidget() {
 
   // Fetch progress for all active imports using a single query per import ID
   const progressQueries = useQuery<{ [key: string]: ImportProgress }>({
-    queryKey: ['/api/kdp-imports', 'all-progress'],
+    queryKey: ['/api/kdp-imports', 'all-progress', activeImports.map(imp => imp.id).join(',')],
     queryFn: async () => {
       const progressData: { [key: string]: ImportProgress } = {};
       
@@ -48,12 +49,17 @@ export function ImportProgressWidget() {
       await Promise.all(
         activeImports.map(async (imp) => {
           try {
+            console.log(`[WIDGET] Fetching progress for import ${imp.id}`);
             const response = await fetch(`/api/kdp-imports/${imp.id}/progress`);
             if (response.ok) {
-              progressData[imp.id] = await response.json();
+              const data = await response.json();
+              progressData[imp.id] = data;
+              console.log(`[WIDGET] Progress for ${imp.id}:`, data);
+            } else {
+              console.log(`[WIDGET] Failed response for ${imp.id}:`, response.status);
             }
           } catch (error) {
-            console.error(`Failed to fetch progress for ${imp.id}:`, error);
+            console.error(`[WIDGET] Failed to fetch progress for ${imp.id}:`, error);
           }
         })
       );
@@ -61,7 +67,8 @@ export function ImportProgressWidget() {
       return progressData;
     },
     enabled: activeImports.length > 0,
-    refetchInterval: 2000,
+    refetchInterval: 1000, // Check more frequently
+    staleTime: 0, // Always fetch fresh data
   });
 
   const activeImportsWithProgress = activeImports.map(imp => ({
@@ -86,10 +93,27 @@ export function ImportProgressWidget() {
   };
 
   const getProgressValue = (item: { import: ImportItem; progress?: ImportProgress }) => {
-    if (item.progress) {
-      return item.progress.progress || 0;
+    // If we have progress data from the API, use it
+    if (item.progress?.progress !== undefined) {
+      return item.progress.progress;
     }
-    return item.import.status === 'pending' ? 0 : 10;
+    
+    // If we have processed/total records from the import record itself, calculate percentage
+    if (item.import.processedRecords !== undefined && item.import.totalRecords) {
+      return Math.round((item.import.processedRecords / item.import.totalRecords) * 100);
+    }
+    
+    // Default values based on status
+    switch (item.import.status) {
+      case 'pending':
+        return 0;
+      case 'processing':
+        return 5; // Show small progress for processing state
+      case 'completed':
+        return 100;
+      default:
+        return 0;
+    }
   };
 
   return (
@@ -150,7 +174,7 @@ export function ImportProgressWidget() {
                   />
                   <div className="flex justify-between text-xs text-gray-500">
                     <span>
-                      {progress?.processedRecords || 0} / {progress?.totalRecords || imp.totalRecords || '?'} records
+                      {progress?.processedRecords || imp.processedRecords || 0} / {progress?.totalRecords || imp.totalRecords || '?'} records
                     </span>
                     <span>{Math.round(getProgressValue({ import: imp, progress }))}%</span>
                   </div>
