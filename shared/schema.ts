@@ -546,17 +546,17 @@ export const kdpRoyaltiesEstimatorData = pgTable("kdp_royalties_estimator_data",
   royalty: decimal("royalty", { precision: 12, scale: 4 }), // "Royalty"
   currency: varchar("currency"), // "Currency"
   
-  // === CHAMPS SPÉCIFIQUES AUX eBOOKS (eBook Royalty, Combined Sales) ===
-  asin: varchar("asin"), // "ASIN" pour eBook Royalty
-  asinIsbn: varchar("asin_isbn"), // "ASIN/ISBN" pour Combined Sales
+  // === IDENTIFICATEURS PRODUITS (DISTINCTS POUR DÉDUPLICATION) ===
+  asin: varchar("asin"), // ASIN pour eBooks (eBook Royalty) et Combined Sales
+  isbn: varchar("isbn"), // ISBN pour livres imprimés (Paperback/Hardcover Royalty)
+  
+  // === CHAMPS SPÉCIFIQUES AUX eBOOKS ===
   avgFileSizeMb: decimal("avg_file_size_mb", { precision: 8, scale: 3 }), // "Avg. File Size (MB)" - eBook seulement
   avgDeliveryCost: decimal("avg_delivery_cost", { precision: 12, scale: 6 }), // "Avg. Delivery Cost" - eBook seulement
   
-  // === CHAMPS SPÉCIFIQUES AUX LIVRES IMPRIMÉS (Paperback/Hardcover Royalty) ===
+  // === CHAMPS SPÉCIFIQUES AUX LIVRES IMPRIMÉS ===
   orderDate: varchar("order_date"), // "Order Date" - Paperback/Hardcover seulement
-  isbn: varchar("isbn"), // "ISBN" - Paperback/Hardcover seulement
   avgManufacturingCost: decimal("avg_manufacturing_cost", { precision: 12, scale: 4 }), // "Avg. Manufacturing Cost" - Print seulement
-  asinRef: varchar("asin_ref"), // "ASIN" - colonne additionnelle dans Paperback/Hardcover
   
   // === MÉTADONNÉES ===
   rowIndex: integer("row_index"), // Position ligne dans le fichier Excel

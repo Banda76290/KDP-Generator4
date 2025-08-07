@@ -2086,10 +2086,7 @@ export class DatabaseStorage implements IStorage {
   async updateKdpRoyaltiesEstimatorData(id: string, data: Partial<InsertKdpRoyaltiesEstimatorData>): Promise<SelectKdpRoyaltiesEstimatorData> {
     const [result] = await db
       .update(kdpRoyaltiesEstimatorData)
-      .set({
-        ...data,
-        updatedAt: new Date(),
-      })
+      .set(data)
       .where(eq(kdpRoyaltiesEstimatorData.id, id))
       .returning();
     return result;

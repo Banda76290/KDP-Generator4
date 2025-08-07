@@ -247,23 +247,22 @@ export class KdpRoyaltiesEstimatorProcessor {
     if (sheetName === 'eBook Royalty') {
       return {
         ...commonData,
-        asin: getColumnValue('ASIN'),
+        asin: getColumnValue('ASIN'), // ASIN pour eBooks
         avgFileSizeMb: getColumnValuePartial('Avg. File Size'),
         avgDeliveryCost: getColumnValuePartial('Avg. Delivery Cost'),
       };
     } else if (sheetName === 'Combined Sales') {
       return {
         ...commonData,
-        asinIsbn: getColumnValue('ASIN/ISBN'),
+        asin: getColumnValue('ASIN/ISBN'), // Dans Combined Sales, c'est un ASIN
         avgDeliveryCost: getColumnValuePartial('Avg. Delivery'),
       };
     } else if (sheetName === 'Paperback Royalty' || sheetName === 'Hardcover Royalty') {
       return {
         ...commonData,
+        isbn: getColumnValue('ISBN'), // ISBN pour livres imprimés
         orderDate: getColumnValue('Order Date'),
-        isbn: getColumnValue('ISBN'),
         avgManufacturingCost: getColumnValuePartial('Avg. Manufacturing Cost'),
-        asinRef: getColumnValue('ASIN'),
       };
     }
 
@@ -274,20 +273,16 @@ export class KdpRoyaltiesEstimatorProcessor {
   }
 
   /**
-   * Crée une clé unique pour identifier les doublons
+   * Crée une clé unique pour identifier les doublons selon les 5 champs spécifiés
    */
   private static createUniqueKey(data: InsertKdpRoyaltiesEstimatorData): string {
-    // Utiliser plusieurs champs pour créer une clé unique
+    // Les 5 champs pour la déduplication
     const keyComponents = [
       data.royaltyDate || '',
-      data.title || '',
-      data.asin || data.isbn || data.asinIsbn || '',
+      data.asin || data.isbn || '', // ASIN ou ISBN selon l'onglet
       data.marketplace || '',
-      data.transactionType || '',
-      data.authorName || '',
-      data.royalty || '',
-      data.unitsSold || '',
-      data.sheetName || ''
+      data.royaltyType || '',
+      data.transactionType || ''
     ];
     
     return Buffer.from(keyComponents.join('|')).toString('base64').slice(0, 50);
