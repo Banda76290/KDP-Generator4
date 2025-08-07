@@ -110,6 +110,7 @@ export class KdpRoyaltiesEstimatorProcessor {
     const errors: string[] = [];
     let totalProcessed = 0;
     let filteredRecords = 0;
+    let totalProcessedSoFar = 0; // Compteur global pour la progression
     let duplicateRecords = 0;
     let errorRecords = 0;
     const processedSheets: string[] = [];
@@ -200,14 +201,16 @@ export class KdpRoyaltiesEstimatorProcessor {
             }
             
             filteredRecords++;
+            totalProcessedSoFar++; // Compteur global pour toutes les lignes traitées
             
-            // Mettre à jour la progression toutes les 10 lignes ou à la fin
-            if ((filteredRecords % 10 === 0) || (filteredRecords === totalRows)) {
-              const progress = Math.round((filteredRecords / totalRows) * 100);
+            // Mettre à jour la progression toutes les 10 lignes traitées
+            if ((totalProcessedSoFar % 10 === 0) || (totalProcessedSoFar === totalRows)) {
+              const progress = Math.round((totalProcessedSoFar / totalRows) * 100);
+              console.log(`[KDP_ROYALTIES] 📊 Progression: ${totalProcessedSoFar}/${totalRows} (${progress}%)`);
               await storage.updateKdpImport(importId, {
                 status: 'processing',
                 progress,
-                processedRecords: filteredRecords,
+                processedRecords: totalProcessedSoFar,
                 totalRecords: totalRows,
                 errorRecords,
                 duplicateRecords,
@@ -236,7 +239,7 @@ export class KdpRoyaltiesEstimatorProcessor {
     await storage.updateKdpImport(importId, {
       status: 'completed',
       progress: 100,
-      processedRecords: filteredRecords,
+      processedRecords: totalProcessedSoFar,
       totalRecords: totalRows,
       errorRecords,
       duplicateRecords,
@@ -307,12 +310,12 @@ export class KdpRoyaltiesEstimatorProcessor {
       marketplace: parseStringValue(getColumnValue('Marketplace')),
       royaltyType: parseStringValue(getColumnValue('Royalty Type')),
       transactionType: parseStringValue(getColumnValue('Transaction Type')), // Ce champ est obligatoire
-      unitsSold: parseNumericValue(getColumnValue('Units Sold')),
-      unitsRefunded: parseNumericValue(getColumnValue('Units Refunded')),
-      netUnitsSold: parseNumericValue(getColumnValue('Net Units Sold')),
-      avgListPriceWithoutTax: parseNumericValue(getColumnValuePartial('Avg. List Price')),
-      avgOfferPriceWithoutTax: parseNumericValue(getColumnValuePartial('Avg. Offer Price')),
-      royalty: parseNumericValue(getColumnValue('Royalty')),
+      unitsSold: parseNumericValue(getColumnValue('Units Sold')).toString(),
+      unitsRefunded: parseNumericValue(getColumnValue('Units Refunded')).toString(),
+      netUnitsSold: parseNumericValue(getColumnValue('Net Units Sold')).toString(),
+      avgListPriceWithoutTax: parseNumericValue(getColumnValuePartial('Avg. List Price')).toString(),
+      avgOfferPriceWithoutTax: parseNumericValue(getColumnValuePartial('Avg. Offer Price')).toString(),
+      royalty: parseNumericValue(getColumnValue('Royalty')).toString(),
       currency: parseStringValue(getColumnValue('Currency')),
     };
 
@@ -321,21 +324,21 @@ export class KdpRoyaltiesEstimatorProcessor {
       return {
         ...commonData,
         asin: parseStringValue(getColumnValue('ASIN')), // ASIN pour eBooks
-        avgFileSizeMb: parseNumericValue(getColumnValuePartial('Avg. File Size')),
-        avgDeliveryCost: parseNumericValue(getColumnValuePartial('Avg. Delivery Cost')),
+        avgFileSizeMb: parseNumericValue(getColumnValuePartial('Avg. File Size')).toString(),
+        avgDeliveryCost: parseNumericValue(getColumnValuePartial('Avg. Delivery Cost')).toString(),
       };
     } else if (sheetName === 'Combined Sales') {
       return {
         ...commonData,
         asin: parseStringValue(getColumnValue('ASIN/ISBN')), // Dans Combined Sales, c'est un ASIN
-        avgDeliveryCost: parseNumericValue(getColumnValuePartial('Avg. Delivery')),
+        avgDeliveryCost: parseNumericValue(getColumnValuePartial('Avg. Delivery')).toString(),
       };
     } else if (sheetName === 'Paperback Royalty' || sheetName === 'Hardcover Royalty') {
       return {
         ...commonData,
         isbn: parseStringValue(getColumnValue('ISBN')), // ISBN pour livres imprimés
         orderDate: parseStringValue(getColumnValue('Order Date')),
-        avgManufacturingCost: parseNumericValue(getColumnValuePartial('Avg. Manufacturing Cost')),
+        avgManufacturingCost: parseNumericValue(getColumnValuePartial('Avg. Manufacturing Cost')).toString(),
       };
     }
 
