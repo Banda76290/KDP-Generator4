@@ -4,7 +4,9 @@
 KDP Generator is a comprehensive web application designed to help authors manage their publishing projects, particularly for Amazon KDP (Kindle Direct Publishing). The platform combines project management, sales analytics, AI-powered content generation, and data import capabilities to provide a complete publishing workflow solution.
 
 ## User Preferences
-Preferred communication style: Simple, everyday language.
+- **Communication Style**: Simple, everyday language
+- **Development Priority**: ALWAYS respect CSS standards and UI/UX guidelines before implementing any new feature
+- **Quality Standard**: All UI components must follow the established design system without exception
 
 ## System Architecture
 
@@ -21,11 +23,56 @@ The application follows a modern full-stack architecture with clear separation b
 - **Backend**: Express.js with TypeScript, Drizzle ORM, Passport.js for authentication, Express sessions, Multer for file uploads, Zod for shared validation schemas.
 - **Database Schema**: Main entities include Users, Projects, Contributors, Sales Data, AI Generations, and Sessions.
 
-### UI/UX Decisions
-- **Brand Colors**: Uses Primary Blue (`#38b6ff`), Secondary Orange (`#ff9900`), and Accent Blue (`#146eb4`) consistently across UI elements. These are defined as CSS custom properties and utility classes.
-- **Consistent UI**: Replaces native browser popups with custom `AlertDialog` components for a consistent look.
-- **Layout System**: Implements a universal CSS Grid layout for consistent header positioning, responsiveness, and seamless integration of new pages.
-- **Mobile Navigation**: Features a responsive design with a hamburger menu and slide-out drawer for mobile devices, ensuring full feature parity with desktop navigation.
+### UI/UX Standards & Guidelines
+
+#### Brand Colors & Theme
+- **Primary Blue**: `#38b6ff` (hsl(206, 100%, 61%)) - Main brand color for primary actions, links, accents
+- **Secondary Orange**: `#ff9900` (hsl(36, 100%, 50%)) - Secondary actions, highlights, warnings
+- **Accent Blue**: `#146eb4` (hsl(208, 77%, 39%)) - Darker blue for hover states and emphasis
+- **Success Green**: `hsl(120, 100%, 27%)` - Success states, completed actions
+- **Error Red**: `hsl(0, 84%, 60%)` - Error states, destructive actions
+- **Warning Yellow**: `hsl(45, 100%, 51%)` - Warning states, caution indicators
+
+#### Mandatory CSS Standards
+1. **Toast Notifications**:
+   - Success toasts: MUST use `variant: "success"` with green theme
+   - Error toasts: MUST use `variant: "destructive"` with red theme
+   - Info toasts: MUST use `variant: "default"` with blue theme
+   - All toasts: Consistent positioning, auto-dismiss timing, and animation
+
+2. **Interactive Elements**:
+   - Buttons: Primary blue background, hover states with accent blue
+   - Links: Blue text with `hover:!text-blue-600` for consistency
+   - Form elements: Consistent border radius, focus states, validation styling
+
+3. **Layout & Spacing**:
+   - Universal CSS Grid layout for all pages
+   - Consistent container widths: `max-w-6xl mx-auto`
+   - Standard padding: `p-6` for containers, `p-4` for cards
+   - Responsive breakpoints: Mobile-first approach
+
+4. **Component Standards**:
+   - Replace ALL native browser popups with custom `AlertDialog` components
+   - Consistent card styling: `bg-white dark:bg-gray-800 border rounded-lg shadow-sm`
+   - Status badges: Color-coded with consistent styling patterns
+   - Loading states: Skeleton components or spinners with consistent theming
+
+5. **Typography & Accessibility**:
+   - Consistent heading hierarchy: `text-3xl font-bold` for h1, `text-xl font-semibold` for h2
+   - Readable text colors: `text-gray-900 dark:text-white` for primary text
+   - Sufficient contrast ratios for all text/background combinations
+   - Proper focus indicators for keyboard navigation
+
+6. **Dark Mode Compliance**:
+   - ALL components MUST support dark mode with explicit variants
+   - Use CSS variables for colors that change between themes
+   - Test both light and dark modes for every new feature
+
+#### Implementation Requirements
+- Before creating ANY new component or page, reference these standards
+- All UI elements must be responsive and work on mobile devices
+- Consistent spacing, colors, and typography across the entire application
+- No hardcoded colors - use CSS custom properties and Tailwind classes
 
 ### Feature Specifications
 - **Project Management**: Comprehensive creation, editing, duplication, and deletion of KDP projects, including intelligent naming and association with books and contributors.
