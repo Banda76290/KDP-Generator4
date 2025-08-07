@@ -182,19 +182,7 @@ export default function Analytics() {
             <h1 className="text-2xl font-bold text-gray-900">Sales Analytics</h1>
             <p className="text-gray-600 mt-1">Detailed analysis of your KDP performance based on your real data.</p>
           </div>
-          <div className="flex items-center gap-3">
-            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7">Last 7 days</SelectItem>
-                <SelectItem value="30">Last 30 days</SelectItem>
-                <SelectItem value="90">Last 90 days</SelectItem>
-                <SelectItem value="365">Last 12 months</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          
         </div>
       </div>
 
