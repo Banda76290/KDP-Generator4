@@ -469,20 +469,20 @@ export default function ImportManagement() {
                   </div>
 
                   {/* Expanded Details */}
-                  {expandedImport === importRecord.id && importProgress && (
+                  {expandedImport === importRecord.id && (
                     <div className="mt-4 pt-4 border-t space-y-4">
                       {/* Progress Bar - show during processing and pending */}
-                      {(importProgress.status === 'processing' || importProgress.status === 'pending') && (
+                      {(importRecord.status === 'processing' || importRecord.status === 'pending') && (
                         <div className="space-y-2">
                           <div className="flex justify-between text-sm">
                             <span>
-                              {importProgress.status === 'processing' ? 'Processing...' : 'Starting...'}
+                              {importRecord.status === 'processing' ? 'Processing...' : 'Starting...'}
                             </span>
-                            <span>{importProgress.progress || 0}%</span>
+                            <span>{importRecord.progress || 0}%</span>
                           </div>
-                          <Progress value={importProgress.progress || 0} className="w-full" />
+                          <Progress value={importRecord.progress || 0} className="w-full" />
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {importProgress.processedRecords || 0} of {importProgress.totalRecords || 0} records processed
+                            {importRecord.processedRecords || 0} of {importRecord.totalRecords || 0} records processed
                           </p>
                         </div>
                       )}
@@ -491,36 +491,36 @@ export default function ImportManagement() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="text-center p-4 bg-primary/10 dark:bg-primary/20 rounded-lg border border-primary/20">
                           <div className="text-2xl font-bold text-primary">
-                            {importProgress.processedRecords || 0}
+                            {importRecord.processedRecords || 0}
                           </div>
                           <div className="text-sm text-primary/70 font-medium">Processed</div>
                         </div>
                         <div className="text-center p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
                           <div className="text-2xl font-bold text-slate-700 dark:text-slate-300">
-                            {importProgress.totalRecords || 0}
+                            {importRecord.totalRecords || 0}
                           </div>
                           <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">Total</div>
                         </div>
                         <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                           <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-                            {importProgress.errorRecords || 0}
+                            {importRecord.errorRecords || 0}
                           </div>
                           <div className="text-sm text-red-600/70 dark:text-red-400/70 font-medium">Errors</div>
                         </div>
                         <div className="text-center p-4 bg-secondary/10 dark:bg-secondary/20 rounded-lg border border-secondary/20">
                           <div className="text-2xl font-bold text-secondary dark:text-secondary">
-                            {importProgress.duplicateRecords || 0}
+                            {importRecord.duplicateRecords || 0}
                           </div>
                           <div className="text-sm text-secondary/70 font-medium">Duplicates</div>
                         </div>
                       </div>
 
                       {/* Error Log */}
-                      {importProgress.errorLog && importProgress.errorLog.length > 0 && (
+                      {importRecord.errorLog && importRecord.errorLog.length > 0 && (
                         <div className="space-y-2">
                           <h4 className="font-medium text-red-600">Error Log</h4>
                           <div className="bg-red-50 dark:bg-red-950 p-3 rounded text-sm max-h-40 overflow-y-auto">
-                            {importProgress.errorLog.map((error, index) => (
+                            {importRecord.errorLog.map((error, index) => (
                               <div key={index} className="mb-1 text-red-700 dark:text-red-300">
                                 {error}
                               </div>
