@@ -110,7 +110,28 @@ export class KdpRoyaltiesEstimatorProcessor {
     const errors: string[] = [];
     let totalProcessed = 0;
     let filteredRecords = 0;
+    let duplicateRecords = 0;
+    let errorRecords = 0;
     const processedSheets: string[] = [];
+    
+    // Calculer le nombre total de lignes à traiter
+    const totalRows = sheets.reduce((sum, sheet) => {
+      const transactionTypeIndex = sheet.headers.findIndex(header => 
+        header && header.toLowerCase().includes('transaction type')
+      );
+      if (transactionTypeIndex === -1) return sum;
+      
+      const filteredRows = sheet.name === 'Combined Sales' 
+        ? sheet.data.filter(row => {
+            const transactionType = row[transactionTypeIndex];
+            return transactionType && this.TARGET_TRANSACTION_TYPES.includes(transactionType);
+          })
+        : sheet.data.filter(row => {
+            const transactionType = row[transactionTypeIndex];
+            return transactionType && transactionType.trim() !== '';
+          });
+      return sum + filteredRows.length;
+    }, 0);
 
     for (const sheet of sheets) {
       try {
@@ -146,7 +167,7 @@ export class KdpRoyaltiesEstimatorProcessor {
 
         console.log(`[KDP_ROYALTIES] ${sheet.name}: ${filteredRows.length} lignes filtrées sur ${sheet.data.length} total`);
 
-        // Traiter chaque ligne filtrée avec déduplication
+        // Traiter chaque ligne filtrée avec déduplication et progression en temps réel
         for (let i = 0; i < filteredRows.length; i++) {
           const row = filteredRows[i];
           
@@ -169,6 +190,7 @@ export class KdpRoyaltiesEstimatorProcessor {
                 mappedData
               );
               console.log(`[KDP_ROYALTIES] ✅ Ligne mise à jour avec ID: ${updatedRecord.id}`);
+              duplicateRecords++;
             } else {
               console.log(`[KDP_ROYALTIES] ➕ Nouvelle ligne ${i + 1} de ${sheet.name}`);
               // Ajouter la clé unique aux données à sauver
@@ -178,9 +200,25 @@ export class KdpRoyaltiesEstimatorProcessor {
             }
             
             filteredRecords++;
+            
+            // Mettre à jour la progression toutes les 10 lignes ou à la fin
+            if ((filteredRecords % 10 === 0) || (filteredRecords === totalRows)) {
+              const progress = Math.round((filteredRecords / totalRows) * 100);
+              await storage.updateKdpImport(importId, {
+                status: 'processing',
+                progress,
+                processedRecords: filteredRecords,
+                totalRecords: totalRows,
+                errorRecords,
+                duplicateRecords,
+                errorLog: errors
+              });
+            }
+            
           } catch (error) {
             console.log(`[KDP_ROYALTIES] ❌ Erreur traitement ligne ${i + 1}:`, error);
             errors.push(`Erreur ligne ${i + 1} de ${sheet.name}: ${error}`);
+            errorRecords++;
           }
         }
 
@@ -193,6 +231,17 @@ export class KdpRoyaltiesEstimatorProcessor {
     }
 
     console.log(`[KDP_ROYALTIES] RÉSUMÉ FINAL: ${filteredRecords} lignes filtrées sur ${totalProcessed} total`);
+    
+    // Mise à jour finale du statut
+    await storage.updateKdpImport(importId, {
+      status: 'completed',
+      progress: 100,
+      processedRecords: filteredRecords,
+      totalRecords: totalRows,
+      errorRecords,
+      duplicateRecords,
+      errorLog: errors
+    });
     
     return {
       totalProcessed,
