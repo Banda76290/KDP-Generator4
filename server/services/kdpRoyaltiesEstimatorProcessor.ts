@@ -11,7 +11,7 @@ interface KdpRoyaltiesSheet {
 }
 
 export class KdpRoyaltiesEstimatorProcessor {
-  // Types de transaction précédemment filtrés - maintenant utilisés seulement pour référence
+  // Types de transaction à garder UNIQUEMENT dans Combined Sales (éviter doublons)
   private static TARGET_TRANSACTION_TYPES = [
     'Free - Promotion',
     'Expanded Distribution Channels'
@@ -160,12 +160,19 @@ export class KdpRoyaltiesEstimatorProcessor {
           continue;
         }
 
-        // NOUVELLE LOGIQUE : Importer TOUTES les données valides de TOUS les onglets
-        // Plus de filtrage par Transaction Type - on importe tout
-        const filteredRows = sheet.data.filter(row => {
-          const transactionType = row[transactionTypeIndex];
-          return transactionType && transactionType.trim() !== '';
-        });
+        // LOGIQUE ORIGINALE RESTAURÉE : Filtrage intelligent selon l'onglet
+        // - Combined Sales : garder SEULEMENT Free-Promotion et Expanded Distribution (éviter doublons)
+        // - Autres onglets : garder TOUT SAUF Free-Promotion et Expanded Distribution (données détaillées)
+        const filteredRows = sheet.name === 'Combined Sales' 
+          ? sheet.data.filter(row => {
+              const transactionType = row[transactionTypeIndex];
+              return transactionType && this.TARGET_TRANSACTION_TYPES.includes(transactionType);
+            })
+          : sheet.data.filter(row => {
+              // Pour les autres onglets, EXCLURE les target types (éviter doublons avec Combined Sales)
+              const transactionType = row[transactionTypeIndex];
+              return transactionType && transactionType.trim() !== '' && !this.TARGET_TRANSACTION_TYPES.includes(transactionType);
+            });
 
         console.log(`[KDP_ROYALTIES] ${sheet.name}: ${filteredRows.length} lignes filtrées sur ${sheet.data.length} total`);
 
@@ -411,10 +418,11 @@ export class KdpRoyaltiesEstimatorProcessor {
   }
 
   /**
-   * Crée une clé unique pour identifier les doublons selon les 5 champs spécifiés
+   * Crée une clé unique pour identifier les doublons selon 7 champs spécifiés
+   * Ajout de sheet_name et row_index pour une déduplication plus précise
    */
   private static createUniqueKey(data: InsertKdpRoyaltiesEstimatorData): string {
-    // Les 5 champs pour la déduplication
+    // Les 7 champs pour la déduplication (amélioré pour éviter les faux positifs)
     // Pour Paperback/Hardcover qui ont ISBN ET ASIN, on privilégie l'ISBN comme identifiant principal
     const productId = data.isbn || data.asin || '';
     
@@ -423,7 +431,9 @@ export class KdpRoyaltiesEstimatorProcessor {
       productId,
       data.marketplace || '',
       data.royaltyType || '',
-      data.transactionType || ''
+      data.transactionType || '',
+      data.sheetName || '',      // Discriminant par onglet
+      data.rowIndex?.toString() || ''  // Position dans le fichier
     ];
     
     return Buffer.from(keyComponents.join('|')).toString('base64').slice(0, 50);
