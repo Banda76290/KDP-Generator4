@@ -2117,49 +2117,44 @@ export class DatabaseStorage implements IStorage {
 
     const totalRecords = await db.select({
       count: sql<number>`count(*)`
-    }).from(kdpImportData)
-    .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
+    }).from(kdpRoyaltiesEstimatorData)
+    .innerJoin(kdpImports, eq(kdpRoyaltiesEstimatorData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
-      eq(kdpImportData.isDuplicate, false),
       sql`${kdpImports.detectedType} = 'payments'`
     ));
 
-    // CORRECTION: Utiliser uniquement les fichiers "payments" qui contiennent les vrais totaux cumulés
-    // Les autres fichiers peuvent contenir des estimations ou des données partielles/dupliquées
+    // Using kdp_royalties_estimator_data for analytics
     const royaltiesByCurrency = await db.select({
-      currency: kdpImportData.currency,
-      sum: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`,
+      currency: kdpRoyaltiesEstimatorData.currency,
+      sum: sql<number>`coalesce(sum(${kdpRoyaltiesEstimatorData.royalty}), 0)`,
       count: sql<number>`count(*)`
-    }).from(kdpImportData)
-    .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
+    }).from(kdpRoyaltiesEstimatorData)
+    .innerJoin(kdpImports, eq(kdpRoyaltiesEstimatorData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
-      eq(kdpImportData.isDuplicate, false),
-      // INCLURE uniquement les fichiers "payments" qui contiennent les vrais totaux
       sql`${kdpImports.detectedType} = 'payments'`,
-      isNotNull(kdpImportData.royalty),
-      sql`${kdpImportData.royalty} > 0`
+      isNotNull(kdpRoyaltiesEstimatorData.royalty),
+      sql`${kdpRoyaltiesEstimatorData.royalty} > 0`
     ))
-    .groupBy(kdpImportData.currency);
+    .groupBy(kdpRoyaltiesEstimatorData.currency);
 
     const uniqueBooks = await db.select({
-      count: sql<number>`count(distinct ${kdpImportData.asin})`
-    }).from(kdpImportData)
-    .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
+      count: sql<number>`count(distinct ${kdpRoyaltiesEstimatorData.asin})`
+    }).from(kdpRoyaltiesEstimatorData)
+    .innerJoin(kdpImports, eq(kdpRoyaltiesEstimatorData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
-      eq(kdpImportData.isDuplicate, false),
       sql`${kdpImports.detectedType} = 'payments'`,
-      isNotNull(kdpImportData.asin),
-      sql`${kdpImportData.asin} != ''`
+      isNotNull(kdpRoyaltiesEstimatorData.asin),
+      sql`${kdpRoyaltiesEstimatorData.asin} != ''`
     ));
 
     return {
       totalImports: totalImports[0]?.count || 0,
       totalRecords: totalRecords[0]?.count || 0,
       royaltiesByCurrency: royaltiesByCurrency.map(r => ({
-        currency: r.currency || 'USD', // Default to USD instead of UNKNOWN
+        currency: r.currency || 'USD',
         amount: Number(r.sum),
         transactions: Number(r.count)
       })),
@@ -2173,13 +2168,12 @@ export class DatabaseStorage implements IStorage {
       date: sql<string>`date(${kdpImports.createdAt})`,
       importType: kdpImports.detectedType,
       sales: sql<number>`count(*)`,
-      royalty: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`
+      royalty: sql<number>`coalesce(sum(${kdpRoyaltiesEstimatorData.royalty}), 0)`
     })
-    .from(kdpImportData)
-    .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
+    .from(kdpRoyaltiesEstimatorData)
+    .innerJoin(kdpImports, eq(kdpRoyaltiesEstimatorData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
-      eq(kdpImportData.isDuplicate, false),
       sql`${kdpImports.detectedType} != 'payments'`,
       sql`${kdpImports.createdAt} >= current_date - interval '${days} days'`,
       isNotNull(kdpImports.createdAt)
@@ -2205,36 +2199,35 @@ export class DatabaseStorage implements IStorage {
   async getTopPerformers(userId: string, limit: number): Promise<any[]> {
     // Get top performers with currency information to avoid mixing currencies
     const topBooks = await db.select({
-      title: kdpImportData.title,
-      asin: kdpImportData.asin,
-      currency: kdpImportData.currency,  
-      marketplace: kdpImportData.marketplace,
+      title: kdpRoyaltiesEstimatorData.title,
+      asin: kdpRoyaltiesEstimatorData.asin,
+      currency: kdpRoyaltiesEstimatorData.currency,  
+      marketplace: kdpRoyaltiesEstimatorData.marketplace,
       totalSales: sql<number>`count(*)`,
-      totalRoyalty: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`,
-      avgRoyalty: sql<number>`coalesce(avg(${kdpImportData.royalty}), 0)`
+      totalRoyalty: sql<number>`coalesce(sum(${kdpRoyaltiesEstimatorData.royalty}), 0)`,
+      avgRoyalty: sql<number>`coalesce(avg(${kdpRoyaltiesEstimatorData.royalty}), 0)`
     })
-    .from(kdpImportData)
-    .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
+    .from(kdpRoyaltiesEstimatorData)
+    .innerJoin(kdpImports, eq(kdpRoyaltiesEstimatorData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
-      eq(kdpImportData.isDuplicate, false),
       sql`${kdpImports.detectedType} != 'payments'`,
-      isNotNull(kdpImportData.asin),
-      isNotNull(kdpImportData.title),
-      sql`${kdpImportData.royalty} > 0`
+      isNotNull(kdpRoyaltiesEstimatorData.asin),
+      isNotNull(kdpRoyaltiesEstimatorData.title),
+      sql`${kdpRoyaltiesEstimatorData.royalty} > 0`
     ))
-    .groupBy(kdpImportData.asin, kdpImportData.title, kdpImportData.currency, kdpImportData.marketplace)
-    .orderBy(sql`coalesce(sum(${kdpImportData.royalty}), 0) desc`)
+    .groupBy(kdpRoyaltiesEstimatorData.asin, kdpRoyaltiesEstimatorData.title, kdpRoyaltiesEstimatorData.currency, kdpRoyaltiesEstimatorData.marketplace)
+    .orderBy(sql`coalesce(sum(${kdpRoyaltiesEstimatorData.royalty}), 0) desc`)
     .limit(limit);
 
     return topBooks.map(book => ({
       title: book.title,
       asin: book.asin,
-      currency: book.currency || 'USD', // Default to USD instead of UNKNOWN
+      currency: book.currency || 'USD',
       marketplace: book.marketplace || 'N/A',
       totalSales: Number(book.totalSales),
       totalRoyalty: Number(book.totalRoyalty),
-      totalUnits: 0, // Units data not reliable in current dataset
+      totalUnits: 0,
       avgRoyaltyRate: Number(book.avgRoyalty)
     }));
   }
@@ -2242,31 +2235,30 @@ export class DatabaseStorage implements IStorage {
   async getMarketplaceBreakdown(userId: string): Promise<any[]> {
     // Group by marketplace AND currency to avoid mixing currencies
     const marketplaceData = await db.select({
-      marketplace: kdpImportData.marketplace,
-      currency: kdpImportData.currency,
+      marketplace: kdpRoyaltiesEstimatorData.marketplace,
+      currency: kdpRoyaltiesEstimatorData.currency,
       totalSales: sql<number>`count(*)`,
-      totalRoyalty: sql<number>`coalesce(sum(${kdpImportData.royalty}), 0)`,
-      uniqueBooks: sql<number>`count(distinct ${kdpImportData.asin})`
+      totalRoyalty: sql<number>`coalesce(sum(${kdpRoyaltiesEstimatorData.royalty}), 0)`,
+      uniqueBooks: sql<number>`count(distinct ${kdpRoyaltiesEstimatorData.asin})`
     })
-    .from(kdpImportData)
-    .innerJoin(kdpImports, eq(kdpImportData.importId, kdpImports.id))
+    .from(kdpRoyaltiesEstimatorData)
+    .innerJoin(kdpImports, eq(kdpRoyaltiesEstimatorData.importId, kdpImports.id))
     .where(and(
       eq(kdpImports.userId, userId),
-      eq(kdpImportData.isDuplicate, false),
       sql`${kdpImports.detectedType} != 'payments'`,
-      isNotNull(kdpImportData.marketplace),
-      sql`${kdpImportData.marketplace} != ''`,
-      sql`${kdpImportData.royalty} > 0`
+      isNotNull(kdpRoyaltiesEstimatorData.marketplace),
+      sql`${kdpRoyaltiesEstimatorData.marketplace} != ''`,
+      sql`${kdpRoyaltiesEstimatorData.royalty} > 0`
     ))
-    .groupBy(kdpImportData.marketplace, kdpImportData.currency)
-    .orderBy(sql`coalesce(sum(${kdpImportData.royalty}), 0) desc`);
+    .groupBy(kdpRoyaltiesEstimatorData.marketplace, kdpRoyaltiesEstimatorData.currency)
+    .orderBy(sql`coalesce(sum(${kdpRoyaltiesEstimatorData.royalty}), 0) desc`);
 
     return marketplaceData.map(item => ({
       marketplace: item.marketplace,
-      currency: item.currency || 'USD', // Default to USD instead of UNKNOWN
+      currency: item.currency || 'USD',
       totalSales: Number(item.totalSales),
       totalRoyalty: Number(item.totalRoyalty),
-      totalUnits: 0, // Not reliable data
+      totalUnits: 0,
       uniqueBooks: Number(item.uniqueBooks)
     }));
   }
