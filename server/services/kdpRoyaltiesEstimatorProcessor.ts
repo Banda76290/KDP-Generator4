@@ -138,7 +138,7 @@ export class KdpRoyaltiesEstimatorProcessor {
       totalRows += filteredRows.length;
     }
     
-    console.log(`[KDP_ROYALTIES] Total de lignes à traiter: ${totalRows}`);
+    console.log(`[KDP_ROYALTIES] Total de lignes filtrées à traiter: ${totalRows}`);
 
     for (const sheet of sheets) {
       try {
