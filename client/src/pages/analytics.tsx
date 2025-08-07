@@ -10,6 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel
+} from "@/components/ui/dropdown-menu";
+import { 
   LineChart, 
   Line, 
   XAxis, 
@@ -31,7 +39,9 @@ import {
   Calendar,
   Globe,
   Star,
-  Download
+  Download,
+  Settings,
+  Check
 } from "lucide-react";
 
 interface AnalyticsOverview {
@@ -86,34 +96,39 @@ export default function Analytics() {
   const { isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
   const [selectedPeriod, setSelectedPeriod] = useState("30");
-  const { formatCurrencySync, getCurrentCurrency } = useCurrency();
+  const { formatCurrencySync, getCurrentCurrency, preferredCurrency, updatePreferredCurrency, availableCurrencies } = useCurrency();
+  
+  // Local state for analytics currency display (can be different from global preference)
+  const [analyticsCurrency, setAnalyticsCurrency] = useState<string>(preferredCurrency);
 
-  // Get current user's preferred currency
-  const { preferredCurrency } = useCurrency();
+  // Sync local analytics currency with global preference when it changes
+  useEffect(() => {
+    setAnalyticsCurrency(preferredCurrency);
+  }, [preferredCurrency]);
 
   // Analytics data queries with currency conversion
   const { data: overview, isLoading: overviewLoading } = useQuery<AnalyticsOverview>({
-    queryKey: ['/api/analytics/overview', preferredCurrency],
-    queryFn: () => fetch(`/api/analytics/overview?currency=${preferredCurrency}`).then(res => res.json()),
-    enabled: isAuthenticated && !!preferredCurrency,
+    queryKey: ['/api/analytics/overview', analyticsCurrency],
+    queryFn: () => fetch(`/api/analytics/overview?currency=${analyticsCurrency}`).then(res => res.json()),
+    enabled: isAuthenticated && !!analyticsCurrency,
   });
 
   const { data: salesTrends, isLoading: trendsLoading } = useQuery<SalesTrend[]>({
-    queryKey: ['/api/analytics/sales-trends', selectedPeriod, preferredCurrency],
-    queryFn: () => fetch(`/api/analytics/sales-trends?period=${selectedPeriod}&currency=${preferredCurrency}`).then(res => res.json()),
-    enabled: isAuthenticated && !!preferredCurrency,
+    queryKey: ['/api/analytics/sales-trends', selectedPeriod, analyticsCurrency],
+    queryFn: () => fetch(`/api/analytics/sales-trends?period=${selectedPeriod}&currency=${analyticsCurrency}`).then(res => res.json()),
+    enabled: isAuthenticated && !!analyticsCurrency,
   });
 
   const { data: topPerformers, isLoading: performersLoading } = useQuery<TopPerformer[]>({
-    queryKey: ['/api/analytics/top-performers', preferredCurrency],
-    queryFn: () => fetch(`/api/analytics/top-performers?currency=${preferredCurrency}`).then(res => res.json()),
-    enabled: isAuthenticated && !!preferredCurrency,
+    queryKey: ['/api/analytics/top-performers', analyticsCurrency],
+    queryFn: () => fetch(`/api/analytics/top-performers?currency=${analyticsCurrency}`).then(res => res.json()),
+    enabled: isAuthenticated && !!analyticsCurrency,
   });
 
   const { data: marketplaceData, isLoading: marketplaceLoading } = useQuery<MarketplaceData[]>({
-    queryKey: ['/api/analytics/marketplace-breakdown', preferredCurrency],
-    queryFn: () => fetch(`/api/analytics/marketplace-breakdown?currency=${preferredCurrency}`).then(res => res.json()),
-    enabled: isAuthenticated && !!preferredCurrency,
+    queryKey: ['/api/analytics/marketplace-breakdown', analyticsCurrency],
+    queryFn: () => fetch(`/api/analytics/marketplace-breakdown?currency=${analyticsCurrency}`).then(res => res.json()),
+    enabled: isAuthenticated && !!analyticsCurrency,
   });
 
 
@@ -146,10 +161,30 @@ export default function Analytics() {
     return null;
   }
 
-  // Use the global currency formatting from user preferences
+  // Use the analytics currency for formatting
   const formatCurrency = (amount: number, originalCurrency?: string) => {
-    // For analytics, we assume the backend has already converted to user's preferred currency
-    return formatCurrencySync(amount, preferredCurrency);
+    // For analytics, we assume the backend has already converted to the analytics currency
+    return formatCurrencySync(amount, analyticsCurrency);
+  };
+
+  // Handle currency selection for analytics
+  const handleCurrencyChange = (currency: string, updateGlobal: boolean = false) => {
+    setAnalyticsCurrency(currency);
+    
+    if (updateGlobal) {
+      updatePreferredCurrency(currency);
+      toast({
+        title: "Currency Updated",
+        description: `Display currency changed to ${currency} across the entire site.`,
+        variant: "success",
+      });
+    } else {
+      toast({
+        title: "Analytics Currency Updated",
+        description: `Analytics display currency changed to ${currency}.`,
+        variant: "default",
+      });
+    }
   };
 
 
@@ -175,6 +210,65 @@ export default function Analytics() {
             <p className="text-gray-600 mt-1">Detailed analysis of your KDP performance based on your real data.</p>
           </div>
           
+          {/* Currency Selection Dropdown */}
+          <div className="flex items-center gap-2">
+            <Globe className="h-4 w-4 text-muted-foreground" />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="min-w-[120px]">
+                  <DollarSign className="h-4 w-4 mr-2" />
+                  {analyticsCurrency}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuLabel>Display Currency</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                
+                {/* Analytics-only currency selection */}
+                <div className="px-2 py-1 text-xs text-muted-foreground">
+                  Analytics Only
+                </div>
+                {availableCurrencies.map((currency) => (
+                  <DropdownMenuItem
+                    key={currency.code}
+                    onClick={() => handleCurrencyChange(currency.code, false)}
+                    className="flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-sm">{currency.code}</span>
+                      <span className="text-sm">{currency.name}</span>
+                    </div>
+                    {analyticsCurrency === currency.code && (
+                      <Check className="h-4 w-4 text-primary" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+                
+                <DropdownMenuSeparator />
+                
+                {/* Global currency selection */}
+                <div className="px-2 py-1 text-xs text-muted-foreground">
+                  Change Site-wide Currency
+                </div>
+                {availableCurrencies.map((currency) => (
+                  <DropdownMenuItem
+                    key={`global-${currency.code}`}
+                    onClick={() => handleCurrencyChange(currency.code, true)}
+                    className="flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Settings className="h-3 w-3" />
+                      <span className="font-mono text-sm">{currency.code}</span>
+                      <span className="text-sm">{currency.name}</span>
+                    </div>
+                    {preferredCurrency === currency.code && (
+                      <Check className="h-4 w-4 text-primary" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
