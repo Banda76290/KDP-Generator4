@@ -577,7 +577,7 @@ export default function ImportManagement() {
             </div>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">Afficher:</span>
+                <span className="text-sm text-gray-600">Show:</span>
                 <Select value={itemsPerPage.toString()} onValueChange={(value) => {
                   setItemsPerPage(Number(value));
                   setCurrentPage(1); // Reset to first page when changing items per page
@@ -760,10 +760,10 @@ export default function ImportManagement() {
               </div>
               
               {/* Pagination Controls */}
-              {imports.length > itemsPerPage && (
+              {imports.length > 0 && (
                 <div className="flex items-center justify-between pt-4 border-t">
                   <div className="text-sm text-gray-600">
-                    Affichage {Math.min((currentPage - 1) * itemsPerPage + 1, imports.length)} à {Math.min(currentPage * itemsPerPage, imports.length)} sur {imports.length} imports
+                    Showing {Math.min((currentPage - 1) * itemsPerPage + 1, imports.length)} to {Math.min(currentPage * itemsPerPage, imports.length)} of {imports.length} imports
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
@@ -773,7 +773,7 @@ export default function ImportManagement() {
                       disabled={currentPage === 1}
                     >
                       <ChevronLeft className="w-4 h-4" />
-                      Précédent
+                      Previous
                     </Button>
                     
                     {/* Page numbers */}
@@ -852,7 +852,7 @@ export default function ImportManagement() {
                       onClick={() => setCurrentPage(Math.min(Math.ceil(imports.length / itemsPerPage), currentPage + 1))}
                       disabled={currentPage === Math.ceil(imports.length / itemsPerPage)}
                     >
-                      Suivant
+                      Next
                       <ChevronRight className="w-4 h-4" />
                     </Button>
                   </div>

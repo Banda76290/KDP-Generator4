@@ -92,6 +92,7 @@ The application follows a modern full-stack architecture with clear separation b
 - **Security Enhancements**: XSS vulnerability patched in author biography editor (August 2025). Replaced unsafe innerHTML assignment with DOMParser for secure HTML sanitization without script execution risk.
 - **Import Progress Widget**: Floating collapsible widget positioned bottom-right displaying real-time progress of KDP imports. Features expand/collapse functionality, individual progress bars per import, live percentage tracking, and dismissible interface. Respects CSS standards with proper error handling for React hooks compliance. Implemented August 2025.
 - **User Currency Preferences System**: Complete currency selection system in Settings page allowing users to choose their preferred display currency from 10 major international currencies (USD, EUR, GBP, CAD, AUD, JPY, CHF, SEK, NOK, DKK). Implements persistent localStorage storage and useCurrency hook for global currency formatting throughout the application. All monetary values across the platform must respect the user's selected currency preference. Implemented August 2025.
+- **Import History Pagination**: Complete pagination system for KDP import history with dropdown selection for 20/50/100 items per page, navigation buttons (Previous/Next), clickable page numbers with ellipses for large datasets, and status display showing current range. Import deletion functionality removed for data security. All interface elements in American English. Implemented August 2025.
 
 ## External Dependencies
 
