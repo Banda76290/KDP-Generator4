@@ -8,12 +8,19 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 interface TestResult {
   success: boolean;
   detectedType: string;
-  totalProcessed: number;
-  errors: number;
-  importId: string;
-  detectedSheets: string[];
-  filteredRecords: number;
-  sampleRecords: any[];
+  sheetNames?: string[];
+  royaltySheets?: string[];
+  firstRowSample?: string[];
+  royaltyHeadersSample?: string[];
+  fileSize?: number;
+  message?: string;
+  // Legacy fields for compatibility
+  totalProcessed?: number;
+  errors?: number;
+  importId?: string;
+  detectedSheets?: string[];
+  filteredRecords?: number;
+  sampleRecords?: any[];
 }
 
 export default function RoyaltiesEstimatorTest() {
@@ -115,31 +122,33 @@ export default function RoyaltiesEstimatorTest() {
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Enregistrements Traités</CardTitle>
+                  <CardTitle className="text-sm font-medium">Taille du Fichier</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{testResult.totalProcessed}</div>
-                  <p className="text-xs text-gray-500 mt-1">Erreurs: {testResult.errors}</p>
+                  <div className="text-2xl font-bold">{testResult.fileSize ? Math.round(testResult.fileSize / 1024) : 0} KB</div>
+                  <p className="text-xs text-gray-500 mt-1">Fichier Excel</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Enregistrements Filtrés</CardTitle>
+                  <CardTitle className="text-sm font-medium">Onglets Trouvés</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-blue-600">{testResult.filteredRecords}</div>
-                  <p className="text-xs text-gray-500 mt-1">Transactions cibles</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Onglets Détectés</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{testResult.detectedSheets?.length || 0}</div>
+                  <div className="text-2xl font-bold text-blue-600">{testResult.sheetNames?.length || 0}</div>
                   <p className="text-xs text-gray-500 mt-1">Feuilles Excel</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Statut</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm font-bold text-green-600">
+                    {testResult.success ? '✓ Réussi' : '✗ Échec'}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">{testResult.message}</p>
                 </CardContent>
               </Card>
             </div>
@@ -153,14 +162,58 @@ export default function RoyaltiesEstimatorTest() {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {testResult.detectedSheets?.map((sheet, index) => (
-                    <Badge key={index} variant="outline">
+                  {testResult.sheetNames?.map((sheet, index) => (
+                    <Badge key={index} variant="outline" className={
+                      sheet.includes('Royalty') ? 'border-blue-500 text-blue-700' : ''
+                    }>
                       {sheet}
                     </Badge>
                   ))}
                 </div>
               </CardContent>
             </Card>
+
+            {testResult.royaltyHeadersSample && testResult.royaltyHeadersSample.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>En-têtes Royalties Détectés</CardTitle>
+                  <CardDescription>
+                    Colonnes trouvées dans les onglets de royalties KDP
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {testResult.royaltyHeadersSample.map((header, index) => (
+                      <Badge key={index} variant="default" className={
+                        header && header.toLowerCase().includes('royalty') ? 'bg-blue-600' : ''
+                      }>
+                        {header || 'Vide'}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {testResult.royaltySheets && testResult.royaltySheets.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Onglets Royalties Trouvés</CardTitle>
+                  <CardDescription>
+                    Onglets contenant des données de royalties avec structure KDP
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {testResult.royaltySheets.map((sheet, index) => (
+                      <Badge key={index} variant="default" className="bg-green-600">
+                        {sheet}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {testResult.sampleRecords && testResult.sampleRecords.length > 0 && (
               <Card>
