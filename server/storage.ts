@@ -2039,6 +2039,17 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
+  // OPTIMISATION : Insertion groupée pour améliorer les performances
+  async createBulkKdpRoyaltiesEstimatorData(data: InsertKdpRoyaltiesEstimatorData[]): Promise<SelectKdpRoyaltiesEstimatorData[]> {
+    if (data.length === 0) return [];
+    
+    const results = await db
+      .insert(kdpRoyaltiesEstimatorData)
+      .values(data)
+      .returning();
+    return results;
+  }
+
   async getKdpRoyaltiesEstimatorData(importId: string): Promise<SelectKdpRoyaltiesEstimatorData[]> {
     return await db
       .select()
@@ -2500,7 +2511,8 @@ export class DatabaseStorage implements IStorage {
         await db
           .insert(consolidatedSalesData)
           .values({
-            user_id: userId,
+            userId: userId,
+            asin: consolidatedKey, // Utiliser la clé consolidée comme ASIN unique
             title: `Paiements agrégés ${data.currency}`,
             authorName: 'Données de paiement',
             currency: data.currency,
@@ -2510,7 +2522,7 @@ export class DatabaseStorage implements IStorage {
             exchangeRate: exchangeRate.toString(),
             exchangeRateDate,
             marketplace: data.marketplace || 'Multiple',
-            format: 'payments',
+            format: 'payments' as any,
             lastUpdateDate: new Date().toISOString().split('T')[0],
             sourceImportIds: data.importIds,
           })

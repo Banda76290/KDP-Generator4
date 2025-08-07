@@ -176,45 +176,63 @@ export class KdpRoyaltiesEstimatorProcessor {
 
         console.log(`[KDP_ROYALTIES] ${sheet.name}: ${filteredRows.length} lignes filtrées sur ${sheet.data.length} total`);
 
-        // Traiter chaque ligne filtrée avec déduplication et progression en temps réel
-        for (let i = 0; i < filteredRows.length; i++) {
-          const row = filteredRows[i];
+        // OPTIMISATION : Traitement par chunks de 100 records avec transactions groupées
+        const CHUNK_SIZE = 100;
+        const PROGRESS_UPDATE_INTERVAL = 50;
+        
+        for (let chunkStart = 0; chunkStart < filteredRows.length; chunkStart += CHUNK_SIZE) {
+          const chunkEnd = Math.min(chunkStart + CHUNK_SIZE, filteredRows.length);
+          const chunk = filteredRows.slice(chunkStart, chunkEnd);
           
-          try {
-            const mappedData = await this.mapRowToSchemaWithUsdConversion(sheet.name, sheet.headers, row, importId, userId, i);
+          console.log(`[KDP_ROYALTIES] 📦 Traitement chunk ${Math.floor(chunkStart / CHUNK_SIZE) + 1}: lignes ${chunkStart + 1}-${chunkEnd} de ${sheet.name}`);
+          
+          // Préparer toutes les données du chunk
+          const chunkData = [];
+          for (let i = 0; i < chunk.length; i++) {
+            const row = chunk[i];
+            const globalRowIndex = chunkStart + i;
             
-            // Créer une clé unique pour détecter les doublons
-            const uniqueKey = this.createUniqueKey(mappedData);
-            
-            // Import complet sans déduplication - données complètes historiques
-            console.log(`[KDP_ROYALTIES] ➕ Nouvelle ligne ${i + 1} de ${sheet.name}`);
-            const dataWithKey = { ...mappedData, uniqueKey };
-            const savedRecord = await storage.createKdpRoyaltiesEstimatorData(dataWithKey);
-            console.log(`[KDP_ROYALTIES] ✅ Ligne sauvegardée avec ID: ${savedRecord.id}`);
-            newRecords++;
-            
-            filteredRecords++;
-            totalProcessedSoFar++; // Compteur global pour toutes les lignes traitées
-            
-            // Mettre à jour la progression toutes les 10 lignes traitées
-            if ((totalProcessedSoFar % 10 === 0) || (totalProcessedSoFar === totalRows)) {
-              const progress = Math.round((totalProcessedSoFar / totalRows) * 100);
-              console.log(`[KDP_ROYALTIES] 📊 Progression: ${totalProcessedSoFar}/${totalRows} (${progress}%)`);
-              await storage.updateKdpImport(importId, {
-                status: 'processing',
-                progress,
-                processedRecords: newRecords, // Seulement les nouveaux records
-                totalRecords: totalRows, // Total des lignes du fichier
-                errorRecords,
-                duplicateRecords,
-                errorLog: errors
-              });
+            try {
+              const mappedData = await this.mapRowToSchemaWithUsdConversion(sheet.name, sheet.headers, row, importId, userId, globalRowIndex);
+              const uniqueKey = this.createUniqueKey(mappedData);
+              chunkData.push({ ...mappedData, uniqueKey });
+            } catch (error) {
+              console.log(`[KDP_ROYALTIES] ❌ Erreur mapping ligne ${globalRowIndex + 1}:`, error);
+              errors.push(`Erreur ligne ${globalRowIndex + 1} de ${sheet.name}: ${error}`);
+              errorRecords++;
             }
-            
-          } catch (error) {
-            console.log(`[KDP_ROYALTIES] ❌ Erreur traitement ligne ${i + 1}:`, error);
-            errors.push(`Erreur ligne ${i + 1} de ${sheet.name}: ${error}`);
-            errorRecords++;
+          }
+          
+          // Insertion groupée du chunk
+          if (chunkData.length > 0) {
+            try {
+              console.log(`[KDP_ROYALTIES] 💾 Insertion groupée de ${chunkData.length} records...`);
+              const savedRecords = await storage.createBulkKdpRoyaltiesEstimatorData(chunkData);
+              console.log(`[KDP_ROYALTIES] ✅ ${savedRecords.length} records sauvegardés en bloc`);
+              newRecords += savedRecords.length;
+            } catch (error) {
+              console.log(`[KDP_ROYALTIES] ❌ Erreur insertion groupée:`, error);
+              errors.push(`Erreur insertion groupée chunk ${Math.floor(chunkStart / CHUNK_SIZE) + 1}: ${error}`);
+              errorRecords += chunkData.length;
+            }
+          }
+          
+          filteredRecords += chunk.length;
+          totalProcessedSoFar += chunk.length;
+          
+          // Mettre à jour la progression toutes les 50 lignes traitées
+          if ((totalProcessedSoFar % PROGRESS_UPDATE_INTERVAL === 0) || (totalProcessedSoFar === totalRows)) {
+            const progress = Math.round((totalProcessedSoFar / totalRows) * 100);
+            console.log(`[KDP_ROYALTIES] 📊 Progression: ${totalProcessedSoFar}/${totalRows} (${progress}%)`);
+            await storage.updateKdpImport(importId, {
+              status: 'processing',
+              progress,
+              processedRecords: newRecords,
+              totalRecords: totalRows,
+              errorRecords,
+              duplicateRecords,
+              errorLog: errors
+            });
           }
         }
 
