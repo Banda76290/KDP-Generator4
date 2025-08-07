@@ -2069,6 +2069,32 @@ export class DatabaseStorage implements IStorage {
       .where(eq(kdpRoyaltiesEstimatorData.importId, importId));
   }
 
+  async findKdpRoyaltiesEstimatorDataByKey(userId: string, uniqueKey: string): Promise<SelectKdpRoyaltiesEstimatorData | undefined> {
+    const [result] = await db
+      .select()
+      .from(kdpRoyaltiesEstimatorData)
+      .where(
+        and(
+          eq(kdpRoyaltiesEstimatorData.userId, userId),
+          eq(kdpRoyaltiesEstimatorData.uniqueKey, uniqueKey)
+        )
+      )
+      .limit(1);
+    return result;
+  }
+
+  async updateKdpRoyaltiesEstimatorData(id: string, data: Partial<InsertKdpRoyaltiesEstimatorData>): Promise<SelectKdpRoyaltiesEstimatorData> {
+    const [result] = await db
+      .update(kdpRoyaltiesEstimatorData)
+      .set({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .where(eq(kdpRoyaltiesEstimatorData.id, id))
+      .returning();
+    return result;
+  }
+
   async getUserKdpRoyaltiesEstimatorData(userId: string): Promise<SelectKdpRoyaltiesEstimatorData[]> {
     return await db
       .select()

@@ -561,6 +561,7 @@ export const kdpRoyaltiesEstimatorData = pgTable("kdp_royalties_estimator_data",
   // === MÉTADONNÉES ===
   rowIndex: integer("row_index"), // Position ligne dans le fichier Excel
   rawData: jsonb("raw_data"), // Données brutes pour débogage
+  uniqueKey: varchar("unique_key", { length: 50 }), // Clé unique pour déduplication
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

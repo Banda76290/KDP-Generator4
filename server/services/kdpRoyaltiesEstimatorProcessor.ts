@@ -138,24 +138,40 @@ export class KdpRoyaltiesEstimatorProcessor {
 
         console.log(`[KDP_ROYALTIES] ${sheet.name}: ${filteredRows.length} lignes filtrées sur ${sheet.data.length} total`);
 
-        // Traiter chaque ligne filtrée
+        // Traiter chaque ligne filtrée avec déduplication
         for (let i = 0; i < filteredRows.length; i++) {
           const row = filteredRows[i];
           
           try {
             const mappedData = this.mapRowToSchema(sheet.name, sheet.headers, row, importId, userId, i);
-            console.log(`[KDP_ROYALTIES] Sauvegarde ligne ${i + 1} de ${sheet.name}:`, {
-              transactionType: mappedData.transactionType,
-              title: mappedData.title,
-              asin: mappedData.asin || 'N/A',
-              royalty: mappedData.royalty
-            });
             
-            const savedRecord = await storage.createKdpRoyaltiesEstimatorData(mappedData);
-            console.log(`[KDP_ROYALTIES] ✅ Ligne sauvegardée avec ID: ${savedRecord.id}`);
+            // Créer une clé unique pour détecter les doublons
+            const uniqueKey = this.createUniqueKey(mappedData);
+            
+            // Vérifier si l'enregistrement existe déjà
+            const existingRecord = await storage.findKdpRoyaltiesEstimatorDataByKey(
+              mappedData.userId,
+              uniqueKey
+            );
+            
+            if (existingRecord) {
+              console.log(`[KDP_ROYALTIES] 🔄 Mise à jour ligne ${i + 1} de ${sheet.name} (existe déjà)`);
+              const updatedRecord = await storage.updateKdpRoyaltiesEstimatorData(
+                existingRecord.id,
+                mappedData
+              );
+              console.log(`[KDP_ROYALTIES] ✅ Ligne mise à jour avec ID: ${updatedRecord.id}`);
+            } else {
+              console.log(`[KDP_ROYALTIES] ➕ Nouvelle ligne ${i + 1} de ${sheet.name}`);
+              // Ajouter la clé unique aux données à sauver
+              const dataWithKey = { ...mappedData, uniqueKey };
+              const savedRecord = await storage.createKdpRoyaltiesEstimatorData(dataWithKey);
+              console.log(`[KDP_ROYALTIES] ✅ Ligne sauvegardée avec ID: ${savedRecord.id}`);
+            }
+            
             filteredRecords++;
           } catch (error) {
-            console.log(`[KDP_ROYALTIES] ❌ Erreur sauvegarde ligne ${i + 1}:`, error);
+            console.log(`[KDP_ROYALTIES] ❌ Erreur traitement ligne ${i + 1}:`, error);
             errors.push(`Erreur ligne ${i + 1} de ${sheet.name}: ${error}`);
           }
         }
@@ -255,5 +271,25 @@ export class KdpRoyaltiesEstimatorProcessor {
       ...commonData,
       // Champs par défaut pour les cas non couverts
     } as InsertKdpRoyaltiesEstimatorData;
+  }
+
+  /**
+   * Crée une clé unique pour identifier les doublons
+   */
+  private static createUniqueKey(data: InsertKdpRoyaltiesEstimatorData): string {
+    // Utiliser plusieurs champs pour créer une clé unique
+    const keyComponents = [
+      data.royaltyDate || '',
+      data.title || '',
+      data.asin || data.isbn || data.asinIsbn || '',
+      data.marketplace || '',
+      data.transactionType || '',
+      data.authorName || '',
+      data.royalty || '',
+      data.unitsSold || '',
+      data.sheetName || ''
+    ];
+    
+    return Buffer.from(keyComponents.join('|')).toString('base64').slice(0, 50);
   }
 }
