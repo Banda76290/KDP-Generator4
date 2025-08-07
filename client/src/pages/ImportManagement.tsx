@@ -93,6 +93,29 @@ export default function ImportManagement() {
     refetchIntervalInBackground: true,
   });
 
+  // Clear data mutation
+  const clearDataMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest('/api/kdp-reports/clear-data', {
+        method: 'POST',
+      });
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Sales data cleared",
+        description: `${data.deletedCount} records have been removed. You can now upload your complete historical sales file.`,
+        variant: "success",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Clear failed",
+        description: error.message || "Failed to clear sales data",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Upload mutation
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -363,7 +386,7 @@ export default function ImportManagement() {
             Upload KDP Report
           </CardTitle>
           <CardDescription>
-            Select or drag & drop your KDP export files (.xlsx, .xls, .csv). Import processing continues in the background - you can navigate to other pages while it runs.
+            Upload your complete historical KDP Royalties Estimator file containing all sales since the beginning. This will replace all existing sales data.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -398,14 +421,61 @@ export default function ImportManagement() {
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
+                {/* Warning Message in American English */}
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <div className="text-sm">
+                      <p className="font-semibold text-amber-800 mb-2">
+                        Complete Historical Sales Data Required
+                      </p>
+                      <p className="text-amber-700 mb-3">
+                        This import will reset all your existing sales data and requires a complete historical sales file containing all your sales from the beginning. If you upload a partial file, your data will be incomplete.
+                      </p>
+                      <p className="text-amber-700">
+                        Please ensure your file contains your complete sales history before proceeding.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex gap-2 justify-center">
-                  <Button 
-                    onClick={handleUpload}
-                    disabled={uploadMutation.isPending}
-                    className="bg-primary hover:bg-primary/90 text-white"
-                  >
-                    {uploadMutation.isPending ? 'Uploading...' : 'Upload & Process'}
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        disabled={uploadMutation.isPending || clearDataMutation.isPending}
+                        className="bg-primary hover:bg-primary/90 text-white"
+                      >
+                        {uploadMutation.isPending ? 'Uploading...' : clearDataMutation.isPending ? 'Clearing...' : 'Confirm & Upload Complete History'}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="max-w-md">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="text-amber-800">
+                          Reset Sales Data & Import Complete History
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-gray-700">
+                          This action will permanently delete all your existing sales data and import the new file. 
+                          <br /><br />
+                          <strong>Are you sure this file contains your complete sales history from the beginning?</strong>
+                          <br /><br />
+                          This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={async () => {
+                            await clearDataMutation.mutateAsync();
+                            handleUpload();
+                          }}
+                          className="bg-amber-600 hover:bg-amber-700"
+                        >
+                          Yes, Reset & Import Complete History
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                   <Button 
                     variant="outline" 
                     onClick={() => setSelectedFile(null)}

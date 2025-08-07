@@ -564,6 +564,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // KDP Reports routes
+  // Clear all sales data before import route
+  app.post('/api/kdp-reports/clear-data', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      // Clear all KDP royalties estimator data for this user
+      const deletedCount = await storage.clearAllKdpRoyaltiesEstimatorData(userId);
+      
+      console.log(`[KDP_CLEAR] Deleted ${deletedCount} records for user ${userId}`);
+      
+      res.json({ 
+        message: "All sales data cleared successfully", 
+        deletedCount 
+      });
+    } catch (error) {
+      console.error("Error clearing KDP data:", error);
+      res.status(500).json({ message: "Failed to clear sales data" });
+    }
+  });
+
   app.post('/api/kdp-reports/upload', isAuthenticated, upload.single('kdpReport'), async (req: AuthenticatedRequest, res: Response) => {
     try {
       if (!req.file) {

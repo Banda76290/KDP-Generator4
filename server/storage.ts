@@ -2604,6 +2604,14 @@ export class DatabaseStorage implements IStorage {
     await MasterBooksService.updateFromImportData(userId, importId);
   }
 
+  // Clear all KDP royalties estimator data for user before full historical import
+  async clearAllKdpRoyaltiesEstimatorData(userId: string): Promise<number> {
+    const result = await db.delete(kdpRoyaltiesEstimatorData)
+      .where(eq(kdpRoyaltiesEstimatorData.userId, userId));
+    
+    return result.rowCount || 0;
+  }
+
   async getCurrenciesForUserPreferences(): Promise<Array<{code: string, name: string, symbol: string}>> {
     // Define the 8 major currencies in the specified order
     const majorCurrencies = ['USD', 'EUR', 'CNY', 'JPY', 'GBP', 'CHF', 'CAD', 'AUD'];

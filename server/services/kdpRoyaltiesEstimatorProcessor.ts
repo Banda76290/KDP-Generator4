@@ -186,13 +186,11 @@ export class KdpRoyaltiesEstimatorProcessor {
             // Créer une clé unique pour détecter les doublons
             const uniqueKey = this.createUniqueKey(mappedData);
             
-            // TEMPORAIRE : Désactiver la déduplication pour tester les vrais chiffres
-            console.log(`[TEST] Ligne ${i + 1} de ${sheet.name} - Transaction: ${mappedData.transactionType}`);
-            
-            // Insérer directement sans vérification de doublon (pour test)
+            // Import complet sans déduplication - données complètes historiques
+            console.log(`[KDP_ROYALTIES] ➕ Nouvelle ligne ${i + 1} de ${sheet.name}`);
             const dataWithKey = { ...mappedData, uniqueKey };
             const savedRecord = await storage.createKdpRoyaltiesEstimatorData(dataWithKey);
-            console.log(`[TEST] ✅ Ligne sauvegardée avec ID: ${savedRecord.id}`);
+            console.log(`[KDP_ROYALTIES] ✅ Ligne sauvegardée avec ID: ${savedRecord.id}`);
             newRecords++;
             
             filteredRecords++;
