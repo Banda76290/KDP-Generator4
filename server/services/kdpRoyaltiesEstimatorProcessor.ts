@@ -186,28 +186,14 @@ export class KdpRoyaltiesEstimatorProcessor {
             // Créer une clé unique pour détecter les doublons
             const uniqueKey = this.createUniqueKey(mappedData);
             
-            // Vérifier si l'enregistrement existe déjà
-            const existingRecord = await storage.findKdpRoyaltiesEstimatorDataByKey(
-              mappedData.userId,
-              uniqueKey
-            );
+            // TEMPORAIRE : Désactiver la déduplication pour tester les vrais chiffres
+            console.log(`[TEST] Ligne ${i + 1} de ${sheet.name} - Transaction: ${mappedData.transactionType}`);
             
-            if (existingRecord) {
-              console.log(`[KDP_ROYALTIES] 🔄 Mise à jour ligne ${i + 1} de ${sheet.name} (existe déjà)`);
-              const updatedRecord = await storage.updateKdpRoyaltiesEstimatorData(
-                existingRecord.id,
-                mappedData
-              );
-              console.log(`[KDP_ROYALTIES] ✅ Ligne mise à jour avec ID: ${updatedRecord.id}`);
-              duplicateRecords++; // Compte seulement les mises à jour
-            } else {
-              console.log(`[KDP_ROYALTIES] ➕ Nouvelle ligne ${i + 1} de ${sheet.name}`);
-              // Ajouter la clé unique aux données à sauver
-              const dataWithKey = { ...mappedData, uniqueKey };
-              const savedRecord = await storage.createKdpRoyaltiesEstimatorData(dataWithKey);
-              console.log(`[KDP_ROYALTIES] ✅ Ligne sauvegardée avec ID: ${savedRecord.id}`);
-              newRecords++; // Compte seulement les nouveaux
-            }
+            // Insérer directement sans vérification de doublon (pour test)
+            const dataWithKey = { ...mappedData, uniqueKey };
+            const savedRecord = await storage.createKdpRoyaltiesEstimatorData(dataWithKey);
+            console.log(`[TEST] ✅ Ligne sauvegardée avec ID: ${savedRecord.id}`);
+            newRecords++;
             
             filteredRecords++;
             totalProcessedSoFar++; // Compteur global pour toutes les lignes traitées
@@ -378,9 +364,9 @@ export class KdpRoyaltiesEstimatorProcessor {
       marketplace: parseStringValue(getColumnValue('Marketplace')),
       royaltyType: parseStringValue(getColumnValue('Royalty Type')),
       transactionType: parseStringValue(getColumnValue('Transaction Type')), // Ce champ est obligatoire
-      unitsSold: parseNumericValue(getColumnValue('Units Sold')).toString(),
-      unitsRefunded: parseNumericValue(getColumnValue('Units Refunded')).toString(),
-      netUnitsSold: parseNumericValue(getColumnValue('Net Units Sold')).toString(),
+      unitsSold: parseNumericValue(getColumnValue('Units Sold')),
+      unitsRefunded: parseNumericValue(getColumnValue('Units Refunded')),
+      netUnitsSold: parseNumericValue(getColumnValue('Net Units Sold')),
       avgListPriceWithoutTax: parseNumericValue(getColumnValuePartial('Avg. List Price')).toString(),
       avgOfferPriceWithoutTax: parseNumericValue(getColumnValuePartial('Avg. Offer Price')).toString(),
       royalty: parseNumericValue(getColumnValue('Royalty')).toString(),
@@ -392,14 +378,14 @@ export class KdpRoyaltiesEstimatorProcessor {
       return {
         ...commonData,
         asin: parseStringValue(getColumnValue('ASIN')), // ASIN pour eBooks
-        avgFileSizeMb: parseNumericValue(getColumnValuePartial('Avg. File Size')).toString(),
-        avgDeliveryCost: parseNumericValue(getColumnValuePartial('Avg. Delivery Cost')).toString(),
+        avgFileSizeMb: parseNumericValue(getColumnValuePartial('Avg. File Size')),
+        avgDeliveryCost: parseNumericValue(getColumnValuePartial('Avg. Delivery Cost')),
       };
     } else if (sheetName === 'Combined Sales') {
       return {
         ...commonData,
         asin: parseStringValue(getColumnValue('ASIN/ISBN')), // Dans Combined Sales, c'est un ASIN
-        avgDeliveryCost: parseNumericValue(getColumnValuePartial('Avg. Delivery')).toString(),
+        avgDeliveryCost: parseNumericValue(getColumnValuePartial('Avg. Delivery')),
       };
     } else if (sheetName === 'Paperback Royalty' || sheetName === 'Hardcover Royalty') {
       return {
@@ -407,7 +393,7 @@ export class KdpRoyaltiesEstimatorProcessor {
         isbn: parseStringValue(getColumnValue('ISBN')), // ISBN pour livres imprimés
         asin: parseStringValue(getColumnValue('ASIN')), // ASIN aussi présent dans Paperback/Hardcover !
         orderDate: parseStringValue(getColumnValue('Order Date')),
-        avgManufacturingCost: parseNumericValue(getColumnValuePartial('Avg. Manufacturing Cost')).toString(),
+        avgManufacturingCost: parseNumericValue(getColumnValuePartial('Avg. Manufacturing Cost')),
       };
     }
 
