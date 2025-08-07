@@ -2486,6 +2486,10 @@ Please respond with only a JSON object containing the translated fields. For key
           // Process as KDP_Royalties_Estimator
           systemLog(`Detected KDP_Royalties_Estimator file: ${req.file.originalname}`, 'info', 'KDP_ROYALTIES');
           
+          // Récupérer l'option de gestion des doublons
+          const duplicateHandling = req.body.duplicateHandling === 'skip' ? 'skip' : 'replace';
+          console.log(`[UPLOAD] Mode de gestion des doublons: ${duplicateHandling}`);
+          
           parsedData = {
             detectedType: 'royalties_estimator',
             summary: {
@@ -2528,7 +2532,8 @@ Please respond with only a JSON object containing the translated fields. For key
             const result = await KdpRoyaltiesEstimatorProcessor.processKdpRoyaltiesEstimator(
               workbook, 
               newImport.id, 
-              userId
+              userId,
+              duplicateHandling
             );
             
             // Note: The update is already done in processKdpRoyaltiesEstimator

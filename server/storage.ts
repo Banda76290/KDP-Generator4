@@ -2083,6 +2083,12 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
+  async deleteAllKdpRoyaltiesEstimatorDataForUser(userId: string): Promise<void> {
+    await db
+      .delete(kdpRoyaltiesEstimatorData)
+      .where(eq(kdpRoyaltiesEstimatorData.userId, userId));
+  }
+
   async updateKdpRoyaltiesEstimatorData(id: string, data: Partial<InsertKdpRoyaltiesEstimatorData>): Promise<SelectKdpRoyaltiesEstimatorData> {
     const [result] = await db
       .update(kdpRoyaltiesEstimatorData)
