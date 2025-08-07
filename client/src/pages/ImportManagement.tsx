@@ -162,13 +162,14 @@ export default function ImportManagement() {
   const { data: importProgress, refetch: refetchProgress } = useQuery<ImportProgress>({
     queryKey: ['/api/kdp-imports', expandedImport, 'progress'],
     enabled: !!expandedImport,
-    refetchInterval: (data) => {
+    refetchInterval: (query) => {
+      const data = query?.state?.data;
       // Stop polling if import is completed, failed, or error
-      if (data?.status === 'completed' || data?.status === 'failed' || data?.status === 'error') {
+      if (data && (data.status === 'completed' || data.status === 'failed' || data.status === 'error')) {
         return false;
       }
       // Poll every 2 seconds if import is still processing or pending
-      if (data?.status === 'processing' || data?.status === 'pending') {
+      if (data && (data.status === 'processing' || data.status === 'pending')) {
         return 2000;
       }
       // Default: stop polling
@@ -362,7 +363,7 @@ export default function ImportManagement() {
             Upload KDP Report
           </CardTitle>
           <CardDescription>
-            Select or drag & drop your KDP export files (.xlsx, .xls, .csv)
+            Select or drag & drop your KDP export files (.xlsx, .xls, .csv). Import processing continues in the background - you can navigate to other pages while it runs.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -494,22 +495,22 @@ export default function ImportManagement() {
                             {importRecord.fileName}
                           </h3>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {getDetectedTypeDescription(importRecord.detectedType)}
+                            {getDetectedTypeDescription(importRecord.detectedType || '')}
                           </p>
                         </div>
                       </div>
                       <div className="mt-2 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                         <span>{formatFileSize(importRecord.fileSize)}</span>
                         <span>
-                          {format(new Date(importRecord.createdAt), 'MMM dd, yyyy HH:mm')}
+                          {format(new Date(importRecord.createdAt || new Date()), 'MMM dd, yyyy HH:mm')}
                         </span>
-                        {importRecord.totalRecords > 0 && (
+                        {(importRecord.totalRecords || 0) > 0 && (
                           <span>{importRecord.totalRecords} records</span>
                         )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      {getStatusBadge(importRecord.status)}
+                      {getStatusBadge(importRecord.status || 'unknown')}
                       <Button
                         variant="ghost"
                         size="sm"
