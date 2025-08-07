@@ -101,7 +101,8 @@ export class KdpRoyaltiesEstimatorProcessor {
   static async processKdpRoyaltiesEstimator(
     workbook: XLSX.WorkBook,
     importId: string,
-    userId: string
+    userId: string,
+    duplicateHandling: 'replace' | 'skip' = 'replace'
   ): Promise<{
     totalProcessed: number;
     filteredRecords: number;
