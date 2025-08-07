@@ -362,7 +362,7 @@ export default function Analytics() {
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              Converti depuis les données USD des royalties
+              Automatically converted using today's currency exchange rates
             </p>
           </CardContent>
         </Card>
