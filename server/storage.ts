@@ -1930,21 +1930,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   // KDP Import operations
-  async getUserKdpImports(userId: string): Promise<KdpImportWithRelations[]> {
+  async getUserKdpImports(userId: string, limit = 20): Promise<KdpImportWithRelations[]> {
     const userImports = await db
       .select()
       .from(kdpImports)
       .where(eq(kdpImports.userId, userId))
-      .orderBy(desc(kdpImports.createdAt));
+      .orderBy(desc(kdpImports.createdAt))
+      .limit(limit);
 
     return await Promise.all(userImports.map(async (importRecord) => {
       const [user] = await db.select().from(users).where(eq(users.id, importRecord.userId));
-      const importData = await db.select().from(kdpImportData).where(eq(kdpImportData.importId, importRecord.id));
+      // Don't load import data by default for performance - only on demand
       
       return {
         ...importRecord,
         user,
-        importData,
+        importData: [], // Empty by default
       };
     }));
   }

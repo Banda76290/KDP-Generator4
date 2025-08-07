@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileSpreadsheet, Trash2, Eye, AlertCircle, CheckCircle, Clock, X } from 'lucide-react';
+import { Upload, FileSpreadsheet, Trash2, Eye, AlertCircle, CheckCircle, Clock, X, RefreshCw } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { format } from 'date-fns';
 import Layout from '@/components/Layout';
@@ -72,9 +72,11 @@ export default function ImportManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch user imports
-  const { data: imports = [], isLoading } = useQuery<KdpImportWithRelations[]>({
+  // Fetch user imports with shorter cache time
+  const { data: imports = [], isLoading, refetch: refetchImports } = useQuery<KdpImportWithRelations[]>({
     queryKey: ['/api/kdp-imports'],
+    staleTime: 5 * 1000, // 5 seconds
+    refetchInterval: 10 * 1000, // Refetch every 10 seconds 
   });
 
   // Upload mutation
@@ -92,21 +94,17 @@ export default function ImportManagement() {
         title: "File uploaded successfully",
         description: `Detected: ${getDetectedTypeDescription(data.parsedData.detectedType)}`,
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
+      // Force immediate refresh of imports list 
+      await refetchImports();
       setSelectedFile(null);
       
       // Auto-expand and monitor the newly uploaded import
       const importId = data.import?.id;
       if (importId) {
         setExpandedImport(importId);
-        // Force refresh both import list and progress data
-        queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports', importId, 'progress'] });
         
-        // Start monitoring immediately after expansion
-        setTimeout(() => {
-          monitorImportProgress(importId);
-        }, 500);
+        // Start monitoring immediately
+        monitorImportProgress(importId);
       }
     },
     onError: (error: any) => {
@@ -379,10 +377,23 @@ export default function ImportManagement() {
       {/* Import History */}
       <Card>
         <CardHeader>
-          <CardTitle>Import History</CardTitle>
-          <CardDescription>
-            View and manage your previously uploaded KDP reports
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Import History</CardTitle>
+              <CardDescription>
+                View and manage your previously uploaded KDP reports
+              </CardDescription>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => refetchImports()}
+              disabled={isLoading}
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (

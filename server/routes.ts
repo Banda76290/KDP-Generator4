@@ -2420,7 +2420,7 @@ Please respond with only a JSON object containing the translated fields. For key
         return res.status(401).json({ message: "User not authenticated" });
       }
 
-      const imports = await storage.getUserKdpImports(userId);
+      const imports = await storage.getUserKdpImports(userId, 20);
       res.json(imports);
     } catch (error) {
       console.error("Error fetching KDP imports:", error);
