@@ -111,9 +111,9 @@ export default function Analytics() {
   // Local state for analytics currency display (can be different from global preference)
   const [analyticsCurrency, setAnalyticsCurrency] = useState<string>(preferredCurrency);
   
-  // State for global currency change confirmation
-  const [showGlobalCurrencyDialog, setShowGlobalCurrencyDialog] = useState(false);
-  const [pendingGlobalCurrency, setPendingGlobalCurrency] = useState<string>('');
+  // State for currency change confirmation
+  const [showCurrencyDialog, setShowCurrencyDialog] = useState(false);
+  const [pendingCurrency, setPendingCurrency] = useState<string>('');
 
   // Sync local analytics currency with global preference when it changes
   useEffect(() => {
@@ -181,31 +181,31 @@ export default function Analytics() {
     return formatCurrencySync(amount, analyticsCurrency);
   };
 
-  // Handle currency selection for analytics
-  const handleCurrencyChange = (currency: string, updateGlobal: boolean = false) => {
-    if (updateGlobal) {
-      // Show confirmation dialog for global currency change
-      setPendingGlobalCurrency(currency);
-      setShowGlobalCurrencyDialog(true);
-    } else {
-      // Direct change for analytics only
-      setAnalyticsCurrency(currency);
-      toast({
-        title: "Analytics Currency Updated",
-        description: `Analytics display currency changed to ${currency}.`,
-        variant: "default",
-      });
-    }
+  // Handle currency selection - show confirmation dialog
+  const handleCurrencySelect = (currency: string) => {
+    setPendingCurrency(currency);
+    setShowCurrencyDialog(true);
   };
 
-  // Confirm global currency change
-  const confirmGlobalCurrencyChange = () => {
-    setAnalyticsCurrency(pendingGlobalCurrency);
-    updatePreferredCurrency(pendingGlobalCurrency);
-    setShowGlobalCurrencyDialog(false);
+  // Apply currency change for analytics only
+  const applyAnalyticsOnly = () => {
+    setAnalyticsCurrency(pendingCurrency);
+    setShowCurrencyDialog(false);
+    toast({
+      title: "Analytics Currency Updated",
+      description: `Analytics display currency changed to ${pendingCurrency}.`,
+      variant: "default",
+    });
+  };
+
+  // Apply currency change globally (site-wide)
+  const applyGlobally = () => {
+    setAnalyticsCurrency(pendingCurrency);
+    updatePreferredCurrency(pendingCurrency);
+    setShowCurrencyDialog(false);
     toast({
       title: "Currency Updated",
-      description: `Display currency changed to ${pendingGlobalCurrency} across the entire site.`,
+      description: `Display currency changed to ${pendingCurrency} across the entire site.`,
       variant: "success",
     });
   };
@@ -243,17 +243,13 @@ export default function Analytics() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64">
-                <DropdownMenuLabel>Display Currency</DropdownMenuLabel>
+                <DropdownMenuLabel>Select Display Currency</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 
-                {/* Analytics-only currency selection */}
-                <div className="px-2 py-1 text-xs text-muted-foreground">
-                  Analytics Only
-                </div>
                 {availableCurrencies.map((currency) => (
                   <DropdownMenuItem
                     key={currency.code}
-                    onClick={() => handleCurrencyChange(currency.code, false)}
+                    onClick={() => handleCurrencySelect(currency.code)}
                     className="flex items-center justify-between"
                   >
                     <div className="flex items-center gap-2">
@@ -265,51 +261,39 @@ export default function Analytics() {
                     )}
                   </DropdownMenuItem>
                 ))}
-                
-                <DropdownMenuSeparator />
-                
-                {/* Global currency selection */}
-                <div className="px-2 py-1 text-xs text-muted-foreground">
-                  Change Site-wide Currency
-                </div>
-                {availableCurrencies.map((currency) => (
-                  <DropdownMenuItem
-                    key={`global-${currency.code}`}
-                    onClick={() => handleCurrencyChange(currency.code, true)}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Settings className="h-3 w-3" />
-                      <span className="font-mono text-sm">{currency.code}</span>
-                      <span className="text-sm">{currency.name}</span>
-                    </div>
-                    {preferredCurrency === currency.code && (
-                      <Check className="h-4 w-4 text-primary" />
-                    )}
-                  </DropdownMenuItem>
-                ))}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
       </div>
 
-      {/* Global Currency Change Confirmation Dialog */}
-      <AlertDialog open={showGlobalCurrencyDialog} onOpenChange={setShowGlobalCurrencyDialog}>
+      {/* Currency Change Options Dialog */}
+      <AlertDialog open={showCurrencyDialog} onOpenChange={setShowCurrencyDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Change Site-wide Currency</AlertDialogTitle>
+            <AlertDialogTitle>Change Display Currency to {pendingCurrency}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to change your site-wide display currency to {pendingGlobalCurrency}? 
-              This will affect all monetary values across the entire application and update your Settings preference.
+              How would you like to apply this currency change?
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowGlobalCurrencyDialog(false)}>
+          <AlertDialogFooter className="flex flex-col sm:flex-row gap-2">
+            <AlertDialogCancel onClick={() => setShowCurrencyDialog(false)}>
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction onClick={confirmGlobalCurrencyChange}>
-              Change Currency
+            <Button 
+              variant="outline" 
+              onClick={applyAnalyticsOnly}
+              className="flex items-center gap-2"
+            >
+              <BarChart3 className="h-4 w-4" />
+              Analytics Only
+            </Button>
+            <AlertDialogAction 
+              onClick={applyGlobally}
+              className="flex items-center gap-2"
+            >
+              <Settings className="h-4 w-4" />
+              Apply Site-wide
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
