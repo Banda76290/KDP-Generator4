@@ -81,7 +81,6 @@ export default function ImportManagement() {
   const [expandedImport, setExpandedImport] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [importToDelete, setImportToDelete] = useState<string | null>(null);
-  const [duplicateHandling, setDuplicateHandling] = useState<'replace' | 'skip'>('replace');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -99,7 +98,6 @@ export default function ImportManagement() {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('duplicateHandling', duplicateHandling);
       return apiRequest('/api/kdp-imports/upload', {
         method: 'POST',
         body: formData,
@@ -400,44 +398,6 @@ export default function ImportManagement() {
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
-                
-                {/* Duplicate Handling Options */}
-                <div className="p-3 bg-gray-50 rounded-lg border">
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">
-                    Gestion des doublons
-                  </label>
-                  <div className="space-y-2">
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="duplicateHandling"
-                        value="replace"
-                        checked={duplicateHandling === 'replace'}
-                        onChange={(e) => setDuplicateHandling(e.target.value as 'replace' | 'skip')}
-                        className="mr-2"
-                      />
-                      <div>
-                        <span className="text-sm font-medium text-gray-900">Remplacement complet (recommandé)</span>
-                        <p className="text-xs text-gray-600">Vide la table puis importe toutes les données. Utilisez un fichier KDP complet (toute la période).</p>
-                      </div>
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="duplicateHandling"
-                        value="skip"
-                        checked={duplicateHandling === 'skip'}
-                        onChange={(e) => setDuplicateHandling(e.target.value as 'replace' | 'skip')}
-                        className="mr-2"
-                      />
-                      <div>
-                        <span className="text-sm font-medium text-gray-900">Ajout incrémental</span>
-                        <p className="text-xs text-gray-600">Ajoute seulement les nouvelles données. Ignore automatiquement les doublons détectés.</p>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
                 <div className="flex gap-2 justify-center">
                   <Button 
                     onClick={handleUpload}

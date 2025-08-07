@@ -101,8 +101,7 @@ export class KdpRoyaltiesEstimatorProcessor {
   static async processKdpRoyaltiesEstimator(
     workbook: XLSX.WorkBook,
     importId: string,
-    userId: string,
-    duplicateHandling: 'replace' | 'skip' = 'replace'
+    userId: string
   ): Promise<{
     totalProcessed: number;
     filteredRecords: number;
@@ -142,13 +141,6 @@ export class KdpRoyaltiesEstimatorProcessor {
     }
     
     console.log(`[KDP_ROYALTIES] Total de lignes filtrées à traiter: ${totalRows}`);
-
-    // Mode remplacement complet : vider la table avant import
-    if (duplicateHandling === 'replace') {
-      console.log(`[REPLACE_MODE] 🗑️ Suppression de toutes les données existantes pour l'utilisateur ${userId}`);
-      await storage.deleteAllKdpRoyaltiesEstimatorDataForUser(userId);
-      console.log(`[REPLACE_MODE] ✅ Table vidée, import des nouvelles données`);
-    }
 
     for (const sheet of sheets) {
       try {
@@ -194,31 +186,14 @@ export class KdpRoyaltiesEstimatorProcessor {
             // Créer une clé unique pour détecter les doublons
             const uniqueKey = this.createUniqueKey(mappedData);
             
-            if (duplicateHandling === 'replace') {
-              // Mode remplacement complet : pas de vérification de doublon
-              console.log(`[REPLACE] Ligne ${i + 1} de ${sheet.name} - Direct insert`);
-              const dataWithKey = { ...mappedData, uniqueKey };
-              const savedRecord = await storage.createKdpRoyaltiesEstimatorData(dataWithKey);
-              console.log(`[REPLACE] ✅ Ligne sauvegardée avec ID: ${savedRecord.id}`);
-              newRecords++;
-            } else {
-              // Mode skip : vérifier les doublons avec votre stratégie intelligente
-              const existingRecord = await storage.findKdpRoyaltiesEstimatorDataByKey(
-                mappedData.userId,
-                uniqueKey
-              );
-              
-              if (existingRecord) {
-                console.log(`[SKIP] 🔄 Doublon détecté ligne ${i + 1} de ${sheet.name} (ignoré)`);
-                duplicateRecords++;
-              } else {
-                console.log(`[SKIP] ➕ Nouvelle ligne ${i + 1} de ${sheet.name}`);
-                const dataWithKey = { ...mappedData, uniqueKey };
-                const savedRecord = await storage.createKdpRoyaltiesEstimatorData(dataWithKey);
-                console.log(`[SKIP] ✅ Ligne sauvegardée avec ID: ${savedRecord.id}`);
-                newRecords++;
-              }
-            }
+            // TEMPORAIRE : Désactiver la déduplication pour tester les vrais chiffres
+            console.log(`[TEST] Ligne ${i + 1} de ${sheet.name} - Transaction: ${mappedData.transactionType}`);
+            
+            // Insérer directement sans vérification de doublon (pour test)
+            const dataWithKey = { ...mappedData, uniqueKey };
+            const savedRecord = await storage.createKdpRoyaltiesEstimatorData(dataWithKey);
+            console.log(`[TEST] ✅ Ligne sauvegardée avec ID: ${savedRecord.id}`);
+            newRecords++;
             
             filteredRecords++;
             totalProcessedSoFar++; // Compteur global pour toutes les lignes traitées
