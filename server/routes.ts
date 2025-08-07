@@ -2691,6 +2691,7 @@ Please respond with only a JSON object containing the translated fields. For key
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
+      const { currency = 'USD' } = req.query;
       const analytics = await storage.getAnalyticsOverviewUSD(userId, exchangeRateService);
       res.json(analytics);
     } catch (error: any) {
@@ -2705,7 +2706,7 @@ Please respond with only a JSON object containing the translated fields. For key
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
-      const { period = '30' } = req.query;
+      const { period = '30', currency = 'USD' } = req.query;
       const salesTrends = await storage.getSalesTrendsUSD(userId, parseInt(period as string), exchangeRateService);
       res.json(salesTrends);
     } catch (error: any) {
@@ -2720,7 +2721,7 @@ Please respond with only a JSON object containing the translated fields. For key
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
-      const { limit = '10' } = req.query;
+      const { limit = '10', currency = 'USD' } = req.query;
       const topPerformers = await storage.getTopPerformersUSD(userId, parseInt(limit as string), exchangeRateService);
       res.json(topPerformers);
     } catch (error: any) {
@@ -2735,6 +2736,7 @@ Please respond with only a JSON object containing the translated fields. For key
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
+      const { currency = 'USD' } = req.query;
       const marketplaceData = await storage.getMarketplaceBreakdownUSD(userId, exchangeRateService);
       res.json(marketplaceData);
     } catch (error: any) {

@@ -41,23 +41,45 @@ export function useCurrency() {
     return availableCurrencies.find(c => c.code === preferredCurrency) || availableCurrencies[0] || { code: 'USD', name: 'US Dollar', symbol: '$' };
   };
 
-  // Format amount in preferred currency
-  const formatCurrency = (amount: number, originalCurrency?: string): string => {
+  // Format amount in preferred currency with automatic conversion
+  const formatCurrency = async (amount: number, originalCurrency?: string): Promise<string> => {
     const currency = getCurrentCurrency();
+    let displayAmount = amount;
     
-    // If originalCurrency is provided and different from preferred, add note
+    // Convert currency if needed
+    if (originalCurrency && originalCurrency !== currency.code) {
+      try {
+        const response = await fetch(`/api/convert-currency?amount=${amount}&from=${originalCurrency}&to=${currency.code}`);
+        if (response.ok) {
+          const data = await response.json();
+          displayAmount = data.convertedAmount;
+        }
+      } catch (error) {
+        console.warn('Currency conversion failed, using original amount:', error);
+      }
+    }
+    
+    // Format in preferred currency
     const formattedAmount = new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency.code,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(amount);
-
-    if (originalCurrency && originalCurrency !== currency.code) {
-      return `${formattedAmount} (orig. ${originalCurrency})`;
-    }
+    }).format(displayAmount);
 
     return formattedAmount;
+  };
+
+  // Synchronous version for immediate display (without conversion)
+  const formatCurrencySync = (amount: number, targetCurrency?: string): string => {
+    const currency = targetCurrency ? { code: targetCurrency } : getCurrentCurrency();
+    
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency.code,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
   };
 
   return {
@@ -65,6 +87,7 @@ export function useCurrency() {
     updatePreferredCurrency,
     getCurrentCurrency,
     formatCurrency,
+    formatCurrencySync,
     availableCurrencies
   };
 }

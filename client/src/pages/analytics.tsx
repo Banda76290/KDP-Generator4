@@ -86,27 +86,34 @@ export default function Analytics() {
   const { isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
   const [selectedPeriod, setSelectedPeriod] = useState("30");
-  const { formatCurrency: formatCurrencyHook, getCurrentCurrency } = useCurrency();
+  const { formatCurrencySync, getCurrentCurrency } = useCurrency();
 
-  // Analytics data queries
+  // Get current user's preferred currency
+  const { preferredCurrency } = useCurrency();
+
+  // Analytics data queries with currency conversion
   const { data: overview, isLoading: overviewLoading } = useQuery<AnalyticsOverview>({
-    queryKey: ['/api/analytics/overview'],
-    enabled: isAuthenticated,
+    queryKey: ['/api/analytics/overview', preferredCurrency],
+    queryFn: () => fetch(`/api/analytics/overview?currency=${preferredCurrency}`).then(res => res.json()),
+    enabled: isAuthenticated && !!preferredCurrency,
   });
 
   const { data: salesTrends, isLoading: trendsLoading } = useQuery<SalesTrend[]>({
-    queryKey: ['/api/analytics/sales-trends', selectedPeriod],
-    enabled: isAuthenticated,
+    queryKey: ['/api/analytics/sales-trends', selectedPeriod, preferredCurrency],
+    queryFn: () => fetch(`/api/analytics/sales-trends?period=${selectedPeriod}&currency=${preferredCurrency}`).then(res => res.json()),
+    enabled: isAuthenticated && !!preferredCurrency,
   });
 
   const { data: topPerformers, isLoading: performersLoading } = useQuery<TopPerformer[]>({
-    queryKey: ['/api/analytics/top-performers'],
-    enabled: isAuthenticated,
+    queryKey: ['/api/analytics/top-performers', preferredCurrency],
+    queryFn: () => fetch(`/api/analytics/top-performers?currency=${preferredCurrency}`).then(res => res.json()),
+    enabled: isAuthenticated && !!preferredCurrency,
   });
 
   const { data: marketplaceData, isLoading: marketplaceLoading } = useQuery<MarketplaceData[]>({
-    queryKey: ['/api/analytics/marketplace-breakdown'],
-    enabled: isAuthenticated,
+    queryKey: ['/api/analytics/marketplace-breakdown', preferredCurrency],
+    queryFn: () => fetch(`/api/analytics/marketplace-breakdown?currency=${preferredCurrency}`).then(res => res.json()),
+    enabled: isAuthenticated && !!preferredCurrency,
   });
 
 
@@ -141,7 +148,8 @@ export default function Analytics() {
 
   // Use the global currency formatting from user preferences
   const formatCurrency = (amount: number, originalCurrency?: string) => {
-    return formatCurrencyHook(amount, originalCurrency);
+    // For analytics, we assume the backend has already converted to user's preferred currency
+    return formatCurrencySync(amount, preferredCurrency);
   };
 
 
