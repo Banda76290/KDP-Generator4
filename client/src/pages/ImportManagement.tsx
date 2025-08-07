@@ -104,7 +104,7 @@ export default function ImportManagement() {
       if (importId) {
         setExpandedImport(importId);
         
-        // Start monitoring immediately and force status refresh
+        // Start monitoring immediately for any new upload
         setTimeout(() => {
           monitorImportProgress(importId);
         }, 500); // Small delay to allow server to update status
@@ -235,6 +235,7 @@ export default function ImportManagement() {
   // Monitor import progress with intelligent refresh
   const monitorImportProgress = async (importId: string) => {
     let previousStatus: string | null = null;
+    let isFirstCheck = true;
     
     const checkProgress = async () => {
       try {
@@ -244,26 +245,35 @@ export default function ImportManagement() {
           queryFn: () => apiRequest(`/api/kdp-imports/${importId}/progress`),
         });
         
+        // Set initial status on first check
+        if (isFirstCheck) {
+          previousStatus = progressResult?.status || null;
+          isFirstCheck = false;
+        }
+        
         // If still processing or pending, schedule next check
         if (progressResult && (progressResult.status === 'processing' || progressResult.status === 'pending')) {
-          previousStatus = progressResult.status;
-          // Wait 2 seconds before next check, but only if still expanded
+          // Update previous status for transition tracking
+          if (progressResult.status !== previousStatus) {
+            previousStatus = progressResult.status;
+          }
+          
+          // Wait 2 seconds before next check
           setTimeout(() => {
-            if (expandedImport === importId) {
-              checkProgress();
-            }
+            checkProgress();
           }, 2000);
         } else if (progressResult && (progressResult.status === 'completed' || progressResult.status === 'failed' || progressResult.status === 'error')) {
           // Import finished, refresh the import list to show final status
           queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
           queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports', importId, 'progress'] });
           
-          // Show completion notification ONLY if there was a status change from processing
-          if (previousStatus && (previousStatus === 'processing' || previousStatus === 'pending')) {
+          // Show completion notification if there was a real status change from processing
+          if (previousStatus && (previousStatus === 'processing' || previousStatus === 'pending') && progressResult.status !== previousStatus) {
             if (progressResult.status === 'completed') {
               toast({
                 title: "Import completed",
                 description: `Successfully processed ${progressResult.processedRecords} records`,
+                variant: "success",
               });
             } else if (progressResult.status === 'failed') {
               toast({
