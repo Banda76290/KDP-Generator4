@@ -5,7 +5,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Bell, ChevronDown, Settings, LogOut, Crown, Menu } from "lucide-react";
 import logoImage from "@assets/image_1753719885932.png";
-import { GlobalKdpUploader } from "@/components/GlobalKdpUploader";
 
 
 interface HeaderProps {
@@ -48,14 +47,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
         </div>
         
         <div className="flex items-center space-x-4">
-          {/* Global KDP Upload Button */}
-          <GlobalKdpUploader 
-            variant="ghost" 
-            size="sm"
-            className="text-muted-foreground hover:text-foreground"
-          >
-            Upload KDP Report
-          </GlobalKdpUploader>
+
           
           {/* Notification Bell */}
           <Button variant="ghost" size="sm" className="relative p-2 text-muted-foreground hover:text-foreground">

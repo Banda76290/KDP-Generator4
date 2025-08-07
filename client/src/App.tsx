@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { useGlobalToasts } from "@/hooks/useGlobalToasts";
 import { ImportProgressWidget } from "@/components/ImportProgressWidget";
-import { GlobalKdpImportProvider } from "@/hooks/useGlobalKdpImport";
 
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
@@ -101,11 +100,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <GlobalKdpImportProvider>
-          <Toaster />
-          <ImportProgressWidget />
-          <Router />
-        </GlobalKdpImportProvider>
+        <Toaster />
+        <ImportProgressWidget />
+        <Router />
       </TooltipProvider>
     </QueryClientProvider>
   );

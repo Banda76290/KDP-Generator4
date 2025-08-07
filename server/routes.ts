@@ -2548,9 +2548,37 @@ Please respond with only a JSON object containing the translated fields. For key
 
       const newImport = await storage.createKdpImport(importData);
 
-      // For royalties_estimator files, DON'T start processing automatically
-      // The user will configure options first, then trigger processing manually
-      if (!isKdpRoyaltiesEstimator) {
+      // Process the import asynchronously based on detected type
+      if (isKdpRoyaltiesEstimator) {
+        // Process KDP_Royalties_Estimator in background
+        setImmediate(async () => {
+          try {
+            systemLog(`Starting KDP_Royalties_Estimator processing for ${newImport.id}`, 'info', 'KDP_ROYALTIES');
+            
+            const result = await KdpRoyaltiesEstimatorProcessor.processKdpRoyaltiesEstimator(
+              workbook, 
+              newImport.id, 
+              userId
+            );
+            
+            // Note: The update is already done in processKdpRoyaltiesEstimator
+            // We just need to set completedAt
+            await storage.updateKdpImport(newImport.id, {
+              status: 'completed'
+            });
+            
+            systemLog(`KDP_Royalties_Estimator processing completed: ${result.filteredRecords} filtered records from ${result.totalProcessed} total`, 'info', 'KDP_ROYALTIES');
+            
+          } catch (error) {
+            systemLog(`KDP_Royalties_Estimator processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error', 'KDP_ROYALTIES');
+            
+            await storage.updateKdpImport(newImport.id, {
+              status: 'failed',
+              errorLog: [error instanceof Error ? error.message : 'Unknown error occurred'],
+            });
+          }
+        });
+      } else {
         // Use legacy processor for other file types
         const backgroundProcessor = new KdpImportProcessor(newImport.id, userId);
         
@@ -2595,83 +2623,6 @@ Please respond with only a JSON object containing the translated fields. For key
     }
   });
 
-  // New endpoint to start processing with user-configured options
-  app.post('/api/kdp-imports/:importId/start-processing', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-
-      const { importId } = req.params;
-      const { importType, updateExistingBooks, updateExistingSalesData } = req.body;
-
-      // Get the import record to check its status
-      const importRecord = await storage.getKdpImport(importId, userId);
-      if (!importRecord) {
-        return res.status(404).json({ message: "Import not found" });
-      }
-
-      if (importRecord.status !== 'pending') {
-        return res.status(400).json({ message: "Import has already been processed or is in progress" });
-      }
-
-      // Start processing asynchronously with user options
-      setImmediate(async () => {
-        try {
-          systemLog(`Starting KDP_Royalties_Estimator processing for ${importId} with user options`, 'info', 'KDP_ROYALTIES');
-          
-          // Update status to processing
-          await storage.updateKdpImport(importId, { status: 'processing' });
-          
-          // Load the workbook again (in real implementation, you'd store it temporarily)
-          // For now, we need to process from the uploaded file data
-          // This would need the original workbook - this is a simplified version
-          
-          // Process the sales data first
-          // const result = await KdpRoyaltiesEstimatorProcessor.processKdpRoyaltiesEstimator(
-          //   workbook, importId, userId
-          // );
-          
-          // Then process books if requested
-          if (importType === 'books_only' || importType === 'both') {
-            const { BookAutoCreationService } = await import('./services/bookAutoCreationService');
-            const bookResult = await BookAutoCreationService.processKdpRoyaltiesForBooks(
-              userId, 
-              importId, 
-              { updateExistingBooks, updateExistingSalesData }
-            );
-            
-            systemLog(`Book processing completed: ${bookResult.booksCreated} created, ${bookResult.booksUpdated} updated`, 'info', 'KDP_ROYALTIES');
-          }
-          
-          // Mark as completed
-          await storage.updateKdpImport(importId, { status: 'completed' });
-          
-          systemLog(`KDP_Royalties_Estimator processing completed for ${importId}`, 'info', 'KDP_ROYALTIES');
-          
-        } catch (error) {
-          systemLog(`KDP_Royalties_Estimator processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error', 'KDP_ROYALTIES');
-          
-          await storage.updateKdpImport(importId, {
-            status: 'failed',
-            errorLog: [error instanceof Error ? error.message : 'Unknown error occurred'],
-          });
-        }
-      });
-
-      res.json({
-        success: true,
-        message: "Processing started with your configuration",
-        importId
-      });
-      
-    } catch (error) {
-      console.error("Error starting import processing:", error);
-      res.status(500).json({ message: "Failed to start import processing" });
-    }
-  });
-
   app.post('/api/kdp-imports/:importId/process-books', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.user?.claims?.sub;
@@ -2682,59 +2633,39 @@ Please respond with only a JSON object containing the translated fields. For key
       const { importId } = req.params;
       const { importType, updateExistingBooks, updateExistingSalesData } = req.body;
       
-      // Check if this is a new import that needs to start processing
-      const importRecord = await storage.getKdpImport(importId, userId);
-      if (!importRecord) {
-        return res.status(404).json({ message: "Import not found" });
-      }
-
-      // If import is still pending, trigger the full processing workflow
-      if (importRecord.status === 'pending') {
-        // Use the new start-processing endpoint logic
-        return req.app._router.handle({
-          ...req,
-          url: `/api/kdp-imports/${importId}/start-processing`,
-          method: 'POST'
-        }, res);
-      }
+      // Import BookAutoCreationService here to avoid circular dependencies
+      const { BookAutoCreationService } = await import('./services/bookAutoCreationService');
       
-      // If import is already completed, just process books
-      if (importRecord.status === 'completed') {
-        const { BookAutoCreationService } = await import('./services/bookAutoCreationService');
+      const options = {
+        updateExistingBooks,
+        updateExistingSalesData
+      };
+      
+      if (importType === 'books_only' || importType === 'both') {
+        const result = await BookAutoCreationService.processKdpRoyaltiesForBooks(
+          userId, 
+          importId, 
+          options
+        );
         
-        const options = {
-          updateExistingBooks,
-          updateExistingSalesData
-        };
-        
-        if (importType === 'books_only' || importType === 'both') {
-          const result = await BookAutoCreationService.processKdpRoyaltiesForBooks(
-            userId, 
-            importId, 
-            options
-          );
-          
-          res.json({
-            success: true,
-            result,
-            message: `Processed ${result.booksCreated} new books and ${result.booksUpdated} updated books`
-          });
-        } else {
-          res.json({
-            success: true,
-            result: {
-              booksCreated: 0,
-              booksUpdated: 0,
-              authorsCreated: 0,
-              authorsUpdated: 0,
-              errors: [],
-              skipped: 0
-            },
-            message: 'Sales data processing not implemented yet'
-          });
-        }
+        res.json({
+          success: true,
+          result,
+          message: `Processed ${result.booksCreated} new books and ${result.booksUpdated} updated books`
+        });
       } else {
-        res.status(400).json({ message: "Import is currently processing or has failed" });
+        res.json({
+          success: true,
+          result: {
+            booksCreated: 0,
+            booksUpdated: 0,
+            authorsCreated: 0,
+            authorsUpdated: 0,
+            errors: [],
+            skipped: 0
+          },
+          message: 'Sales data processing not implemented yet'
+        });
       }
       
     } catch (error) {

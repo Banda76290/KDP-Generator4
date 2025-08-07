@@ -146,28 +146,6 @@ export default function ImportManagement() {
       if (importId) {
         setExpandedImport(importId);
         
-        // If it's a royalties_estimator file, open validation dialog immediately
-        if (data.parsedData.detectedType === 'royalties_estimator') {
-          // Create a basic preview from upload response data
-          const basicPreview = {
-            totalBooks: data.parsedData.summary?.estimatedRecords || 0,
-            existingBooks: 0, // Will be calculated during processing
-            newBooks: data.parsedData.summary?.estimatedRecords || 0,
-            booksWithoutId: 0,
-            totalSalesData: data.parsedData.summary?.estimatedRecords || 0,
-            duplicateSalesData: 0,
-            missingAuthorData: 0
-          };
-          
-          // Open validation dialog immediately
-          setImportPreview(basicPreview);
-          setSelectedImportForValidation(importId);
-          setValidationDialogOpen(true);
-          
-          // Don't start processing yet - wait for user confirmation
-          return; // Skip the automatic monitoring
-        }
-        
         // Start monitoring immediately for any new upload
         setTimeout(() => {
           monitorImportProgress(importId);
@@ -210,55 +188,23 @@ export default function ImportManagement() {
 
   const processBooksMutation = useMutation({
     mutationFn: async ({ importId, options }: { importId: string; options: ImportOptions }) => {
-      // Check if this is a new import (pending status) that needs to start processing
-      const imports = await queryClient.fetchQuery({
-        queryKey: ['/api/kdp-imports'],
-        queryFn: () => apiRequest('/api/kdp-imports', { method: 'GET' })
+      return apiRequest(`/api/kdp-imports/${importId}/process-books`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(options),
       });
-      
-      const importRecord = imports.find((imp: any) => imp.id === importId);
-      
-      if (importRecord?.status === 'pending') {
-        // Use start-processing endpoint for new imports
-        return apiRequest(`/api/kdp-imports/${importId}/start-processing`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            importType: options.importType,
-            updateExistingBooks: options.updateExistingBooks,
-            updateExistingSalesData: options.updateExistingSalesData,
-          }),
-        });
-      } else {
-        // Use existing process-books endpoint for completed imports
-        return apiRequest(`/api/kdp-imports/${importId}/process-books`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(options),
-        });
-      }
     },
-    onSuccess: (data, variables) => {
-      const { importId } = variables;
-      
+    onSuccess: (data) => {
       toast({
-        title: "Processing started successfully",
-        description: data.message || "Your import is being processed with your chosen settings",
+        title: "Books processed successfully",
+        description: data.message,
         variant: "success",
       });
       setValidationDialogOpen(false);
       setSelectedImportForValidation(null);
       setImportPreview(null);
-      
-      // Start monitoring the import progress
-      setTimeout(() => {
-        monitorImportProgress(importId);
-      }, 500);
-      
       queryClient.invalidateQueries({ queryKey: ['/api/books'] });
       queryClient.invalidateQueries({ queryKey: ['/api/kdp-imports'] });
     },
@@ -696,49 +642,22 @@ export default function ImportManagement() {
                     <div className="flex items-center gap-2">
                       {getStatusBadge(importRecord.status || 'unknown')}
                       
-                      {/* Book Validation Button - show for royalties_estimator imports (completed or processing) */}
-                      {importRecord.detectedType === 'royalties_estimator' && (
+                      {/* Book Validation Button - only show for completed royalties_estimator imports */}
+                      {importRecord.status === 'completed' && importRecord.detectedType === 'royalties_estimator' && (
                         <Button
                           variant="default"
                           size="sm"
-                          onClick={() => {
-                            if (importRecord.status === 'completed') {
-                              validateImportMutation.mutate(importRecord.id);
-                            } else {
-                              // For processing imports, show a preview of what will be available
-                              toast({
-                                title: "Processing in progress",
-                                description: "Book creation will be available once processing completes. You'll be notified when ready.",
-                                variant: "default",
-                              });
-                            }
-                          }}
-                          disabled={
-                            (validateImportMutation.isPending && selectedImportForValidation === importRecord.id) ||
-                            (importRecord.status !== 'completed' && importRecord.status !== 'processing')
-                          }
-                          title={
-                            importRecord.status === 'completed' 
-                              ? "Create/Update Books from this import" 
-                              : "Book creation will be available when processing completes"
-                          }
-                          className={
-                            importRecord.status === 'completed'
-                              ? "bg-blue-600 hover:bg-blue-700 text-white"
-                              : "bg-blue-400 text-white cursor-wait"
-                          }
+                          onClick={() => validateImportMutation.mutate(importRecord.id)}
+                          disabled={validateImportMutation.isPending && selectedImportForValidation === importRecord.id}
+                          title="Create/Update Books from this import"
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
                         >
                           {validateImportMutation.isPending && selectedImportForValidation === importRecord.id ? (
                             <Clock className="w-4 h-4 mr-1 animate-spin" />
                           ) : (
                             '📚'
                           )}
-                          {validateImportMutation.isPending && selectedImportForValidation === importRecord.id 
-                            ? 'Analyzing...' 
-                            : importRecord.status === 'completed' 
-                            ? 'Create Books' 
-                            : 'Books Soon'
-                          }
+                          {validateImportMutation.isPending && selectedImportForValidation === importRecord.id ? 'Analyzing...' : 'Create Books'}
                         </Button>
                       )}
                       
