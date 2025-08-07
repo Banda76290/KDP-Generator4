@@ -2577,8 +2577,9 @@ export class DatabaseStorage implements IStorage {
     const currencyMappings: Record<string, {name: string, symbol: string}> = {
       'USD': { name: 'US Dollar', symbol: '$' },
       'EUR': { name: 'Euro', symbol: '€' },
-      'GBP': { name: 'British Pound', symbol: '£' },
+      'CNY': { name: 'Chinese Yuan', symbol: '¥' },
       'JPY': { name: 'Japanese Yen', symbol: '¥' },
+      'GBP': { name: 'British Pound', symbol: '£' },
       'CHF': { name: 'Swiss Franc', symbol: 'CHF' },
       'CAD': { name: 'Canadian Dollar', symbol: 'C$' },
       'AUD': { name: 'Australian Dollar', symbol: 'A$' },

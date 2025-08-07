@@ -60,7 +60,10 @@ export default function ExchangeRates() {
   const usdRate = { currency: 'USD', rate: '1.00000000', updatedAt: lastUpdated.toISOString() };
   const filteredRates = rates.filter((rate: any) => rate.currency !== 'USD');
   const allRates = [usdRate, ...filteredRates];
-  const majorRates = allRates.filter((rate: any) => majorCurrencies.includes(rate.currency));
+  // Sort major rates according to the predefined order
+  const majorRates = majorCurrencies
+    .map(currency => allRates.find((rate: any) => rate.currency === currency))
+    .filter(rate => rate !== undefined);
   const otherRates = filteredRates.filter((rate: any) => !majorCurrencies.includes(rate.currency));
 
   if (error) {
