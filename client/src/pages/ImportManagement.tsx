@@ -146,6 +146,16 @@ export default function ImportManagement() {
       if (importId) {
         setExpandedImport(importId);
         
+        // If it's a royalties_estimator file, offer immediate validation
+        if (data.parsedData.detectedType === 'royalties_estimator') {
+          // Show a toast suggesting the user can create books
+          toast({
+            title: "Book Creation Available",
+            description: "This file contains book data. You can create books automatically once processing completes.",
+            variant: "default",
+          });
+        }
+        
         // Start monitoring immediately for any new upload
         setTimeout(() => {
           monitorImportProgress(importId);
@@ -642,22 +652,49 @@ export default function ImportManagement() {
                     <div className="flex items-center gap-2">
                       {getStatusBadge(importRecord.status || 'unknown')}
                       
-                      {/* Book Validation Button - only show for completed royalties_estimator imports */}
-                      {importRecord.status === 'completed' && importRecord.detectedType === 'royalties_estimator' && (
+                      {/* Book Validation Button - show for royalties_estimator imports (completed or processing) */}
+                      {importRecord.detectedType === 'royalties_estimator' && (
                         <Button
                           variant="default"
                           size="sm"
-                          onClick={() => validateImportMutation.mutate(importRecord.id)}
-                          disabled={validateImportMutation.isPending && selectedImportForValidation === importRecord.id}
-                          title="Create/Update Books from this import"
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                          onClick={() => {
+                            if (importRecord.status === 'completed') {
+                              validateImportMutation.mutate(importRecord.id);
+                            } else {
+                              // For processing imports, show a preview of what will be available
+                              toast({
+                                title: "Processing in progress",
+                                description: "Book creation will be available once processing completes. You'll be notified when ready.",
+                                variant: "default",
+                              });
+                            }
+                          }}
+                          disabled={
+                            (validateImportMutation.isPending && selectedImportForValidation === importRecord.id) ||
+                            (importRecord.status !== 'completed' && importRecord.status !== 'processing')
+                          }
+                          title={
+                            importRecord.status === 'completed' 
+                              ? "Create/Update Books from this import" 
+                              : "Book creation will be available when processing completes"
+                          }
+                          className={
+                            importRecord.status === 'completed'
+                              ? "bg-blue-600 hover:bg-blue-700 text-white"
+                              : "bg-blue-400 text-white cursor-wait"
+                          }
                         >
                           {validateImportMutation.isPending && selectedImportForValidation === importRecord.id ? (
                             <Clock className="w-4 h-4 mr-1 animate-spin" />
                           ) : (
                             '📚'
                           )}
-                          {validateImportMutation.isPending && selectedImportForValidation === importRecord.id ? 'Analyzing...' : 'Create Books'}
+                          {validateImportMutation.isPending && selectedImportForValidation === importRecord.id 
+                            ? 'Analyzing...' 
+                            : importRecord.status === 'completed' 
+                            ? 'Create Books' 
+                            : 'Books Soon'
+                          }
                         </Button>
                       )}
                       
