@@ -11,6 +11,7 @@ interface KdpRoyaltiesSheet {
 }
 
 export class KdpRoyaltiesEstimatorProcessor {
+  // Types de transaction précédemment filtrés - maintenant utilisés seulement pour référence
   private static TARGET_TRANSACTION_TYPES = [
     'Free - Promotion',
     'Expanded Distribution Channels'
@@ -159,19 +160,12 @@ export class KdpRoyaltiesEstimatorProcessor {
           continue;
         }
 
-        // Filtrer selon l'onglet :
-        // - Combined Sales : filtrer par Transaction Types ciblés (garder seulement Free-Promotion et Expanded Distribution)
-        // - Autres onglets : exclure les Transaction Types ciblés (garder tout sauf Free-Promotion et Expanded Distribution)
-        const filteredRows = sheet.name === 'Combined Sales' 
-          ? sheet.data.filter(row => {
-              const transactionType = row[transactionTypeIndex];
-              return transactionType && this.TARGET_TRANSACTION_TYPES.includes(transactionType);
-            })
-          : sheet.data.filter(row => {
-              // Pour les autres onglets, EXCLURE les target types (garder tout le reste)
-              const transactionType = row[transactionTypeIndex];
-              return transactionType && transactionType.trim() !== '' && !this.TARGET_TRANSACTION_TYPES.includes(transactionType);
-            });
+        // NOUVELLE LOGIQUE : Importer TOUTES les données valides de TOUS les onglets
+        // Plus de filtrage par Transaction Type - on importe tout
+        const filteredRows = sheet.data.filter(row => {
+          const transactionType = row[transactionTypeIndex];
+          return transactionType && transactionType.trim() !== '';
+        });
 
         console.log(`[KDP_ROYALTIES] ${sheet.name}: ${filteredRows.length} lignes filtrées sur ${sheet.data.length} total`);
 
