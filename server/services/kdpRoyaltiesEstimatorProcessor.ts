@@ -1,5 +1,6 @@
 import XLSX from 'xlsx';
 import { storage } from '../storage';
+import { ExchangeRateService } from './exchangeRateService';
 import type { InsertKdpRoyaltiesEstimatorData } from '@shared/schema';
 
 interface KdpRoyaltiesSheet {
@@ -179,7 +180,7 @@ export class KdpRoyaltiesEstimatorProcessor {
           const row = filteredRows[i];
           
           try {
-            const mappedData = this.mapRowToSchema(sheet.name, sheet.headers, row, importId, userId, i);
+            const mappedData = await this.mapRowToSchemaWithUsdConversion(sheet.name, sheet.headers, row, importId, userId, i);
             
             // Créer une clé unique pour détecter les doublons
             const uniqueKey = this.createUniqueKey(mappedData);
@@ -262,7 +263,66 @@ export class KdpRoyaltiesEstimatorProcessor {
   }
 
   /**
-   * Mappe une ligne de données vers le schéma de la base de données
+   * Mapping des données d'une ligne Excel vers le schéma de base de données AVEC conversion USD automatique
+   */
+  private static async mapRowToSchemaWithUsdConversion(
+    sheetName: string,
+    headers: string[],
+    row: any[],
+    importId: string,
+    userId: string,
+    rowIndex: number
+  ): Promise<InsertKdpRoyaltiesEstimatorData> {
+    const exchangeService = new ExchangeRateService();
+    
+    // Mapper les données de base
+    const baseData = this.mapRowToSchema(sheetName, headers, row, importId, userId, rowIndex);
+    
+    // Obtenir la devise de la ligne
+    const currency = baseData.currency || 'USD';
+    
+    // Fonction helper pour convertir en USD avec gestion des erreurs
+    const convertToUsd = async (amount: string, fromCurrency: string): Promise<string> => {
+      try {
+        if (!amount || amount === '0' || fromCurrency === 'USD') {
+          return amount;
+        }
+        
+        const numericAmount = parseFloat(amount);
+        if (isNaN(numericAmount) || numericAmount === 0) {
+          return '0';
+        }
+        
+        const convertedAmount = await exchangeService.convertCurrency(numericAmount, fromCurrency, 'USD');
+        return convertedAmount.toFixed(4);
+      } catch (error) {
+        console.warn(`[USD_CONVERSION] Échec conversion ${amount} ${fromCurrency} -> USD:`, error);
+        return '0'; // Valeur par défaut en cas d'échec
+      }
+    };
+    
+    // Convertir tous les montants monétaires en USD
+    const usdConversions = await Promise.all([
+      convertToUsd(baseData.avgListPriceWithoutTax || '0', currency),
+      convertToUsd(baseData.avgOfferPriceWithoutTax || '0', currency),
+      convertToUsd(baseData.royalty || '0', currency),
+      convertToUsd(baseData.avgDeliveryCost || '0', currency),
+      convertToUsd(baseData.avgManufacturingCost || '0', currency)
+    ]);
+    
+    return {
+      ...baseData,
+      // Ajouter les colonnes USD converties
+      avgListPriceWithoutTaxUsd: usdConversions[0],
+      avgOfferPriceWithoutTaxUsd: usdConversions[1],
+      royaltyUsd: usdConversions[2],
+      avgDeliveryCostUsd: usdConversions[3],
+      avgManufacturingCostUsd: usdConversions[4]
+    };
+  }
+
+  /**
+   * Mappe une ligne de données vers le schéma de la base de données (version originale)
    */
   private static mapRowToSchema(
     sheetName: string,

@@ -546,6 +546,11 @@ export const kdpRoyaltiesEstimatorData = pgTable("kdp_royalties_estimator_data",
   royalty: decimal("royalty", { precision: 12, scale: 4 }), // "Royalty"
   currency: varchar("currency"), // "Currency"
   
+  // === COLONNES USD CONVERTIES AUTOMATIQUEMENT ===
+  avgListPriceWithoutTaxUsd: decimal("avg_list_price_without_tax_usd", { precision: 12, scale: 4 }), // Version USD de "Avg. List Price without tax"
+  avgOfferPriceWithoutTaxUsd: decimal("avg_offer_price_without_tax_usd", { precision: 12, scale: 4 }), // Version USD de "Avg. Offer Price without tax"
+  royaltyUsd: decimal("royalty_usd", { precision: 12, scale: 4 }), // Version USD de "Royalty"
+  
   // === IDENTIFICATEURS PRODUITS (DISTINCTS POUR DÉDUPLICATION) ===
   asin: varchar("asin"), // ASIN pour eBooks (eBook Royalty) et Combined Sales
   isbn: varchar("isbn"), // ISBN pour livres imprimés (Paperback/Hardcover Royalty)
@@ -553,10 +558,12 @@ export const kdpRoyaltiesEstimatorData = pgTable("kdp_royalties_estimator_data",
   // === CHAMPS SPÉCIFIQUES AUX eBOOKS ===
   avgFileSizeMb: decimal("avg_file_size_mb", { precision: 8, scale: 3 }), // "Avg. File Size (MB)" - eBook seulement
   avgDeliveryCost: decimal("avg_delivery_cost", { precision: 12, scale: 6 }), // "Avg. Delivery Cost" - eBook seulement
+  avgDeliveryCostUsd: decimal("avg_delivery_cost_usd", { precision: 12, scale: 6 }), // Version USD de "Avg. Delivery Cost"
   
   // === CHAMPS SPÉCIFIQUES AUX LIVRES IMPRIMÉS ===
   orderDate: varchar("order_date"), // "Order Date" - Paperback/Hardcover seulement
   avgManufacturingCost: decimal("avg_manufacturing_cost", { precision: 12, scale: 4 }), // "Avg. Manufacturing Cost" - Print seulement
+  avgManufacturingCostUsd: decimal("avg_manufacturing_cost_usd", { precision: 12, scale: 4 }), // Version USD de "Avg. Manufacturing Cost"
   
   // === MÉTADONNÉES ===
   rowIndex: integer("row_index"), // Position ligne dans le fichier Excel
