@@ -912,8 +912,8 @@ export default function AuthorViewPage() {
           </div>
         </div>
 
-        {/* Global Action Buttons - Fixed at bottom right */}
-        <div className="fixed bottom-6 right-6 flex items-center gap-3 z-40">
+        {/* Global Action Buttons - Bottom of page */}
+        <div className="flex justify-end items-center gap-3 mt-8">
           {!isCreating && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
