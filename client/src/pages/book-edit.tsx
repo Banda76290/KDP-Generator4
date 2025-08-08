@@ -1253,6 +1253,12 @@ export default function EditBook() {
     queryKey: ["/api/authors"],
   });
 
+  // Load existing contributors for this book
+  const { data: existingContributors = [] } = useQuery<any[]>({
+    queryKey: [`/api/contributors/book/${bookId}`],
+    enabled: !!bookId && !isCreating,
+  });
+
   // Auto-detect author from book data when authors and book are loaded
   useEffect(() => {
     if (authors.length > 0 && book && !hasRestoredFromStorage && !selectedAuthorId && !authorExplicitlyRemoved) {
@@ -1275,14 +1281,22 @@ export default function EditBook() {
     }
   }, [authors, book, hasRestoredFromStorage, selectedAuthorId, authorExplicitlyRemoved]);
 
-  // Auto-detect contributors from book data when authors and book are loaded
+  // Load existing contributors when editing a book
   useEffect(() => {
-    if (authors.length > 0 && book && !hasRestoredFromStorage && contributors.length === 0) {
-      // Check if book has any existing contributors that should be auto-detected
-      // This will be implemented when we add contributor data to the book schema
-      console.log('Contributor auto-detection placeholder - ready for future implementation');
+    if (!isCreating && existingContributors.length > 0 && contributors.length === 0 && !hasRestoredFromStorage) {
+      console.log('Loading existing contributors:', existingContributors);
+      const loadedContributors = existingContributors.map((contrib: any) => ({
+        id: contrib.id,
+        role: contrib.role,
+        prefix: contrib.prefix || '',
+        firstName: contrib.firstName || '',
+        middleName: contrib.middleName || '',
+        lastName: contrib.lastName || '',
+        suffix: contrib.suffix || '',
+      }));
+      setContributors(loadedContributors);
     }
-  }, [authors, book, hasRestoredFromStorage, contributors.length]);
+  }, [existingContributors, isCreating, contributors.length, hasRestoredFromStorage]);
 
   const saveBook = useMutation({
     mutationFn: async (data: { bookData: BookFormData; shouldNavigate?: boolean; nextTab?: string }) => {
@@ -1302,9 +1316,14 @@ export default function EditBook() {
         const createdBook = await apiRequest(`/api/books`, { method: "POST", body: formattedData });
         console.log('Received created book response:', createdBook);
         
-        // Save contributors after book creation
+        // Save contributors after book creation - only save valid ones
         if (contributors.length > 0) {
-          for (const contributor of contributors) {
+          const validContributors = contributors.filter(contributor => 
+            contributor.firstName?.trim() && contributor.lastName?.trim()
+          );
+          
+          console.log('Saving valid contributors after creation:', validContributors);
+          for (const contributor of validContributors) {
             await apiRequest("/api/contributors", {
               method: "POST",
               body: {
@@ -1341,11 +1360,15 @@ export default function EditBook() {
             console.log('No existing contributors or error deleting:', error);
           }
           
-          // Add new contributors
+          // Add new contributors - only save valid ones
           if (contributors.length > 0) {
-            console.log('Adding contributors:', contributors);
+            const validContributors = contributors.filter(contributor => 
+              contributor.firstName?.trim() && contributor.lastName?.trim()
+            );
+            
+            console.log('Adding valid contributors:', validContributors);
             console.log('Project ID for contributors:', formattedData.projectId);
-            for (const contributor of contributors) {
+            for (const contributor of validContributors) {
               const contributorData = {
                 bookId: bookId,
                 projectId: formattedData.projectId, // Add projectId for database compatibility
@@ -1377,6 +1400,11 @@ export default function EditBook() {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       if (!isCreating) {
         queryClient.invalidateQueries({ queryKey: [`/api/books/${bookId}`] });
+      }
+      
+      // Invalidate contributors cache for this book
+      if (result.book?.id) {
+        queryClient.invalidateQueries({ queryKey: [`/api/contributors/book/${result.book.id}`] });
       }
       
       toast({
