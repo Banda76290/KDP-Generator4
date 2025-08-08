@@ -3184,89 +3184,8 @@ Please respond with only a JSON object containing the translated fields. For key
     }
   });
 
-  // Master Books routes
-  app.get('/api/master-books', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      const masterBooks = await storage.getMasterBooks(userId);
-      res.json(masterBooks);
-    } catch (error) {
-      console.error('Error fetching master books:', error);
-      res.status(500).json({ error: 'Failed to fetch master books' });
-    }
-  });
 
-  app.get('/api/master-books/:asin', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const { asin } = req.params;
-      const masterBook = await storage.getMasterBookByAsin(asin);
-      
-      if (!masterBook) {
-        return res.status(404).json({ error: 'Master book not found' });
-      }
-      
-      res.json(masterBook);
-    } catch (error) {
-      console.error('Error fetching master book:', error);
-      res.status(500).json({ error: 'Failed to fetch master book' });
-    }
-  });
 
-  app.post('/api/master-books/update/:importId', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      const { importId } = req.params;
-      
-      // Update master books from import
-      // await storage.updateMasterBooksFromImport(userId, importId);
-      
-      res.json({ message: 'Master books updated successfully' });
-    } catch (error) {
-      console.error('Error updating master books:', error);
-      res.status(500).json({ error: 'Failed to update master books' });
-    }
-  });
-
-  // Rebuild master books from all existing imports
-  app.post('/api/test/rebuild-master-books', async (req, res) => {
-    try {
-      const { MasterBooksService } = await import('./services/masterBooksService');
-      await MasterBooksService.init();
-      
-      // Get all imports for the user
-      const imports = await storage.getAllKdpImportsForUser('dev-user-123');
-      
-      systemLog(`Rebuilding master books from ${imports.length} imports`, 'info', 'REBUILD');
-      
-      for (const importRecord of imports) {
-        try {
-          await MasterBooksService.updateFromImportData('dev-user-123', importRecord.id);
-          systemLog(`Processed import ${importRecord.id.slice(0, 8)}`, 'info', 'REBUILD');
-        } catch (error) {
-          systemLog(`Error processing import ${importRecord.id.slice(0, 8)}: ${error}`, 'error', 'REBUILD');
-        }
-      }
-      
-      // Get final count
-      const masterBooks = await storage.getMasterBooks('dev-user-123');
-      systemLog(`Rebuild complete: ${masterBooks.length} master books created`, 'info', 'REBUILD');
-      
-      res.json({ 
-        message: 'Master books rebuilt successfully',
-        importCount: imports.length,
-        masterBooksCount: masterBooks.length
-      });
-    } catch (error) {
-      systemLog(`Rebuild failed: ${error}`, 'error', 'REBUILD');
-      res.status(500).json({ error: 'Failed to rebuild master books' });
-    }
-  });
 
   // Test route for KDP_Royalties_Estimator - Simple version
   app.post('/api/test-royalties-estimator', async (req: Request, res: Response) => {
