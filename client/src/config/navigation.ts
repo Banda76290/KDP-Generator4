@@ -52,7 +52,7 @@ export const navigation: NavigationItem[] = [
       { name: "Amazon Ads", href: "/amazon-ads", icon: Target },
     ]
   },
-  { name: "Livres Maîtres", href: "/master-books", icon: FileText, badge: "ASIN" },
+
   { name: "Exchange Rates", href: "/exchange-rates", icon: DollarSign },
   { name: "KDP Reports", href: "/kdp-reports", icon: Upload },
   { name: "Import Management", href: "/import-management", icon: Download, badge: "NEW" },
