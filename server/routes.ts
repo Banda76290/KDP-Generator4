@@ -1772,6 +1772,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Endpoint for setting author profile image after upload
   app.put("/api/authors/:authorId/profile-image", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    console.log("Profile image request body:", req.body);
+    console.log("Profile image request body type:", typeof req.body);
+    
     if (!req.body.profileImageURL) {
       return res.status(400).json({ error: "profileImageURL is required" });
     }

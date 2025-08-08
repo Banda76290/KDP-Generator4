@@ -49,7 +49,7 @@ export default function AuthorViewPage() {
     mutationFn: ({ authorId, profileImageURL }: { authorId: string; profileImageURL: string }) =>
       apiRequest(`/api/authors/${authorId}/profile-image`, { 
         method: "PUT", 
-        body: JSON.stringify({ profileImageURL }) 
+        body: { profileImageURL } 
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId] });
@@ -304,7 +304,7 @@ export default function AuthorViewPage() {
       const targetAuthorId = newAuthorId || authorId;
       return apiRequest(`/api/authors/${targetAuthorId}/biography/${selectedLanguage}`, { 
         method: "PUT", 
-        body: JSON.stringify({ biography }) 
+        body: { biography } 
       });
     },
     onSuccess: (_, variables) => {
