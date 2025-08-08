@@ -33,7 +33,6 @@ import {
   LineChart
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
-import Layout from "@/components/Layout";
 
 // Types
 interface AmazonAdsCampaign {
@@ -280,9 +279,8 @@ export default function AmazonAdsPage() {
   const avgRoas = performanceTotals.spend > 0 ? (performanceTotals.sales / performanceTotals.spend) : 0;
 
   return (
-    <Layout>
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex items-center justify-between">
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Amazon Ads</h1>
           <p className="text-gray-600 mt-1">Manage your Amazon advertising campaigns</p>
@@ -791,7 +789,6 @@ export default function AmazonAdsPage() {
           </div>
         </TabsContent>
       </Tabs>
-      </div>
-    </Layout>
+    </div>
   );
 }
