@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { useGlobalToasts } from "@/hooks/useGlobalToasts";
 import { ImportProgressWidget } from "@/components/ImportProgressWidget";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
@@ -103,13 +104,15 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <ImportProgressWidget />
-        <Router />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <ImportProgressWidget />
+          <Router />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
