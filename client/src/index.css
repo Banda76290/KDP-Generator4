@@ -253,3 +253,171 @@
    3. Respect sidebar positioning
    4. No manual padding-top adjustments needed
    5. No page-specific CSS required */
+
+/* Custom Uppy Upload Modal Styling */
+/* Override Uppy default styles to match KDP Generator design system */
+
+.uppy-Dashboard-overlay {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+.uppy-Dashboard-modal {
+  border-radius: 0.75rem !important; /* rounded-xl */
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid hsl(195, 15%, 90%) !important;
+  background-color: white !important;
+}
+
+.uppy-Dashboard-inner {
+  border-radius: 0.75rem !important;
+  background-color: white !important;
+  border: none !important;
+}
+
+/* Header styling */
+.uppy-Dashboard-title {
+  font-size: 1.25rem !important; /* text-xl */
+  font-weight: 600 !important; /* font-semibold */
+  color: #1a1a1a !important;
+  font-family: inherit !important;
+}
+
+.uppy-Dashboard-note {
+  color: #6b7280 !important; /* text-gray-500 */
+  font-size: 0.875rem !important; /* text-sm */
+}
+
+/* Upload area styling */
+.uppy-Dashboard-AddFiles {
+  border: 2px dashed hsl(195, 15%, 90%) !important;
+  border-radius: 0.5rem !important; /* rounded-lg */
+  background-color: #f9fafb !important; /* bg-gray-50 */
+  transition: all 0.2s ease !important;
+}
+
+.uppy-Dashboard-AddFiles:hover,
+.uppy-Dashboard-AddFiles:focus {
+  border-color: var(--kdp-primary-blue) !important;
+  background-color: #f0f8ff !important;
+}
+
+.uppy-Dashboard-AddFiles-title {
+  color: #374151 !important; /* text-gray-700 */
+  font-weight: 500 !important;
+  font-size: 1rem !important;
+}
+
+.uppy-Dashboard-browse {
+  color: var(--kdp-primary-blue) !important;
+  text-decoration: underline !important;
+  font-weight: 500 !important;
+}
+
+.uppy-Dashboard-browse:hover {
+  color: var(--kdp-accent-blue) !important;
+}
+
+/* Button styling */
+.uppy-c-btn-primary {
+  background-color: var(--kdp-primary-blue) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 0.5rem !important; /* rounded-lg */
+  font-weight: 500 !important;
+  padding: 0.5rem 1rem !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.uppy-c-btn-primary:hover {
+  background-color: var(--kdp-accent-blue) !important;
+}
+
+.uppy-c-btn-primary:focus {
+  box-shadow: 0 0 0 2px rgba(56, 182, 255, 0.2) !important;
+  outline: none !important;
+}
+
+/* Cancel/close button */
+.uppy-Dashboard-close {
+  color: #6b7280 !important;
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0.5rem !important;
+  border-radius: 0.375rem !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.uppy-Dashboard-close:hover {
+  background-color: #f3f4f6 !important;
+  color: #374151 !important;
+}
+
+/* File items styling */
+.uppy-Dashboard-Item {
+  border: 1px solid hsl(195, 15%, 90%) !important;
+  border-radius: 0.5rem !important;
+  background-color: white !important;
+}
+
+.uppy-Dashboard-Item-preview {
+  border-radius: 0.375rem !important;
+}
+
+.uppy-Dashboard-Item-name {
+  color: #1a1a1a !important;
+  font-weight: 500 !important;
+}
+
+.uppy-Dashboard-Item-status {
+  color: #6b7280 !important;
+}
+
+/* Progress bar styling */
+.uppy-Dashboard-Item-progress {
+  background-color: #e5e7eb !important;
+  border-radius: 9999px !important;
+}
+
+.uppy-Dashboard-Item-progressIndicator {
+  background-color: var(--kdp-primary-blue) !important;
+  border-radius: 9999px !important;
+}
+
+/* Success state */
+.uppy-Dashboard-Item--complete .uppy-Dashboard-Item-progress {
+  background-color: hsl(142, 76%, 36%) !important;
+}
+
+/* Error state */
+.uppy-Dashboard-Item--error {
+  border-color: hsl(0, 84%, 60%) !important;
+  background-color: #fef2f2 !important;
+}
+
+.uppy-Dashboard-Item--error .uppy-Dashboard-Item-name {
+  color: hsl(0, 84%, 60%) !important;
+}
+
+/* Informer (notification area) */
+.uppy-Informer {
+  background-color: #f0f8ff !important;
+  color: #1a1a1a !important;
+  border: 1px solid var(--kdp-primary-blue) !important;
+  border-radius: 0.5rem !important;
+}
+
+/* Remove Uppy branding/powered by text */
+.uppy-Dashboard-poweredBy {
+  display: none !important;
+}
+
+/* Drag and drop overlay */
+.uppy-Dashboard-AddFiles-list {
+  color: #6b7280 !important;
+}
+
+/* File type icons */
+.uppy-Dashboard-Item-previewIcon {
+  color: var(--kdp-primary-blue) !important;
+}
