@@ -36,7 +36,15 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey.join("/") as string, {
+    // Ensure queryKey is always an array and handle edge cases
+    const normalizedQueryKey = Array.isArray(queryKey) ? queryKey : [queryKey].filter(Boolean);
+    const url = normalizedQueryKey.join("/");
+    
+    if (!url || url === '/') {
+      throw new Error('Invalid query key: cannot be empty');
+    }
+    
+    const res = await fetch(url, {
       credentials: "include",
     });
 
