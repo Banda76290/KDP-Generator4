@@ -544,7 +544,7 @@ export default function AuthorViewPage() {
                       <img 
                         src={author.profileImageUrl} 
                         alt={`${author.fullName}'s profile`}
-                        className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+                        className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
                       />
                     ) : (
                       <User className="w-5 h-5" />
