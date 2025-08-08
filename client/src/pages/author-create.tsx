@@ -24,7 +24,10 @@ export default function AuthorCreatePage() {
 
   // Create author mutation
   const createAuthorMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("POST", "/api/authors", data),
+    mutationFn: (data: any) => apiRequest("/api/authors", {
+      method: "POST",
+      body: data
+    }),
     onSuccess: (author) => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors"] });
       toast({ title: "Author created successfully" });
