@@ -3436,6 +3436,190 @@ Please respond with only a JSON object containing the translated fields. For key
     }
   });
 
+  // Amazon Ads Management Routes
+  app.get('/api/amazon-ads/campaigns', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const campaigns = await storage.getAmazonAdsCampaigns(userId);
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error fetching Amazon Ads campaigns:", error);
+      res.status(500).json({ message: "Failed to fetch campaigns" });
+    }
+  });
+
+  app.get('/api/amazon-ads/campaigns/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const campaign = await storage.getAmazonAdsCampaign(req.params.id, userId);
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      res.json(campaign);
+    } catch (error) {
+      console.error("Error fetching Amazon Ads campaign:", error);
+      res.status(500).json({ message: "Failed to fetch campaign" });
+    }
+  });
+
+  app.post('/api/amazon-ads/campaigns', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const campaignData = { ...req.body, userId };
+      const campaign = await storage.createAmazonAdsCampaign(campaignData);
+      res.status(201).json(campaign);
+    } catch (error) {
+      console.error("Error creating Amazon Ads campaign:", error);
+      res.status(500).json({ message: "Failed to create campaign" });
+    }
+  });
+
+  app.put('/api/amazon-ads/campaigns/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const campaign = await storage.updateAmazonAdsCampaign(req.params.id, userId, req.body);
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      res.json(campaign);
+    } catch (error) {
+      console.error("Error updating Amazon Ads campaign:", error);
+      res.status(500).json({ message: "Failed to update campaign" });
+    }
+  });
+
+  app.delete('/api/amazon-ads/campaigns/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const deleted = await storage.deleteAmazonAdsCampaign(req.params.id, userId);
+      if (!deleted) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      res.json({ message: "Campaign deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting Amazon Ads campaign:", error);
+      res.status(500).json({ message: "Failed to delete campaign" });
+    }
+  });
+
+  // Amazon Ads Keywords Routes
+  app.get('/api/amazon-ads/campaigns/:campaignId/keywords', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const keywords = await storage.getAmazonAdsKeywords(req.params.campaignId, userId);
+      res.json(keywords);
+    } catch (error) {
+      console.error("Error fetching Amazon Ads keywords:", error);
+      res.status(500).json({ message: "Failed to fetch keywords" });
+    }
+  });
+
+  app.post('/api/amazon-ads/keywords', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const keyword = await storage.createAmazonAdsKeyword(req.body);
+      res.status(201).json(keyword);
+    } catch (error) {
+      console.error("Error creating Amazon Ads keyword:", error);
+      res.status(500).json({ message: "Failed to create keyword" });
+    }
+  });
+
+  app.put('/api/amazon-ads/keywords/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const { campaignId } = req.body;
+      const keyword = await storage.updateAmazonAdsKeyword(req.params.id, campaignId, userId, req.body);
+      if (!keyword) {
+        return res.status(404).json({ message: "Keyword not found" });
+      }
+      res.json(keyword);
+    } catch (error) {
+      console.error("Error updating Amazon Ads keyword:", error);
+      res.status(500).json({ message: "Failed to update keyword" });
+    }
+  });
+
+  app.delete('/api/amazon-ads/keywords/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const { campaignId } = req.body;
+      const deleted = await storage.deleteAmazonAdsKeyword(req.params.id, campaignId, userId);
+      if (!deleted) {
+        return res.status(404).json({ message: "Keyword not found" });
+      }
+      res.json({ message: "Keyword deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting Amazon Ads keyword:", error);
+      res.status(500).json({ message: "Failed to delete keyword" });
+    }
+  });
+
+  // Amazon Ads Performance Routes
+  app.get('/api/amazon-ads/campaigns/:campaignId/performance', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const performance = await storage.getAmazonAdsPerformance(req.params.campaignId, userId);
+      res.json(performance);
+    } catch (error) {
+      console.error("Error fetching Amazon Ads performance:", error);
+      res.status(500).json({ message: "Failed to fetch performance data" });
+    }
+  });
+
+  app.post('/api/amazon-ads/performance', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const performance = await storage.createAmazonAdsPerformance(req.body);
+      res.status(201).json(performance);
+    } catch (error) {
+      console.error("Error creating Amazon Ads performance data:", error);
+      res.status(500).json({ message: "Failed to create performance data" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

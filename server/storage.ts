@@ -23,6 +23,9 @@ import {
   masterBooks,
   exchangeRates,
   aContent,
+  amazonAdsCampaigns,
+  amazonAdsKeywords,
+  amazonAdsPerformance,
   type User,
   type UpsertUser,
   type Project,
@@ -71,6 +74,12 @@ import {
   type InsertMasterBook,
   type AContent,
   type InsertAContent,
+  type AmazonAdsCampaign,
+  type InsertAmazonAdsCampaign,
+  type AmazonAdsKeyword,
+  type InsertAmazonAdsKeyword,
+  type AmazonAdsPerformance,
+  type InsertAmazonAdsPerformance,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, sum, count, like, or, isNotNull, asc, inArray } from "drizzle-orm";
@@ -238,6 +247,23 @@ export interface IStorage {
   createAContent(content: InsertAContent): Promise<AContent>;
   updateAContent(id: string, userId: string, updates: Partial<InsertAContent>): Promise<AContent | undefined>;
   deleteAContent(id: string, userId: string): Promise<boolean>;
+
+  // Amazon Ads operations
+  getAmazonAdsCampaigns(userId: string): Promise<AmazonAdsCampaign[]>;
+  getAmazonAdsCampaign(id: string, userId: string): Promise<AmazonAdsCampaign | undefined>;
+  createAmazonAdsCampaign(campaignData: InsertAmazonAdsCampaign): Promise<AmazonAdsCampaign>;
+  updateAmazonAdsCampaign(id: string, userId: string, updates: Partial<InsertAmazonAdsCampaign>): Promise<AmazonAdsCampaign | undefined>;
+  deleteAmazonAdsCampaign(id: string, userId: string): Promise<boolean>;
+  
+  // Amazon Ads Keywords
+  getAmazonAdsKeywords(campaignId: string, userId: string): Promise<AmazonAdsKeyword[]>;
+  createAmazonAdsKeyword(keywordData: InsertAmazonAdsKeyword): Promise<AmazonAdsKeyword>;
+  updateAmazonAdsKeyword(id: string, campaignId: string, userId: string, updates: Partial<InsertAmazonAdsKeyword>): Promise<AmazonAdsKeyword | undefined>;
+  deleteAmazonAdsKeyword(id: string, campaignId: string, userId: string): Promise<boolean>;
+  
+  // Amazon Ads Performance
+  getAmazonAdsPerformance(campaignId: string, userId: string): Promise<AmazonAdsPerformance[]>;
+  createAmazonAdsPerformance(performanceData: InsertAmazonAdsPerformance): Promise<AmazonAdsPerformance>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2740,6 +2766,142 @@ export class DatabaseStorage implements IStorage {
       .delete(aContent)
       .where(and(eq(aContent.id, id), eq(aContent.userId, userId)));
     return result.rowCount > 0;
+  }
+
+  // Amazon Ads operations implementation
+  async getAmazonAdsCampaigns(userId: string): Promise<AmazonAdsCampaign[]> {
+    return await db
+      .select()
+      .from(amazonAdsCampaigns)
+      .where(eq(amazonAdsCampaigns.userId, userId))
+      .orderBy(desc(amazonAdsCampaigns.createdAt));
+  }
+
+  async getAmazonAdsCampaign(id: string, userId: string): Promise<AmazonAdsCampaign | undefined> {
+    const [campaign] = await db
+      .select()
+      .from(amazonAdsCampaigns)
+      .where(and(eq(amazonAdsCampaigns.id, id), eq(amazonAdsCampaigns.userId, userId)));
+    return campaign;
+  }
+
+  async createAmazonAdsCampaign(campaignData: InsertAmazonAdsCampaign): Promise<AmazonAdsCampaign> {
+    const [campaign] = await db
+      .insert(amazonAdsCampaigns)
+      .values({
+        ...campaignData,
+        id: nanoid(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return campaign;
+  }
+
+  async updateAmazonAdsCampaign(id: string, userId: string, updates: Partial<InsertAmazonAdsCampaign>): Promise<AmazonAdsCampaign | undefined> {
+    const [campaign] = await db
+      .update(amazonAdsCampaigns)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(amazonAdsCampaigns.id, id), eq(amazonAdsCampaigns.userId, userId)))
+      .returning();
+    return campaign;
+  }
+
+  async deleteAmazonAdsCampaign(id: string, userId: string): Promise<boolean> {
+    const result = await db
+      .delete(amazonAdsCampaigns)
+      .where(and(eq(amazonAdsCampaigns.id, id), eq(amazonAdsCampaigns.userId, userId)));
+    return result.rowCount > 0;
+  }
+
+  // Amazon Ads Keywords operations
+  async getAmazonAdsKeywords(campaignId: string, userId: string): Promise<AmazonAdsKeyword[]> {
+    // First verify user owns the campaign
+    const campaign = await this.getAmazonAdsCampaign(campaignId, userId);
+    if (!campaign) {
+      throw new Error('Campaign not found or unauthorized');
+    }
+
+    return await db
+      .select()
+      .from(amazonAdsKeywords)
+      .where(eq(amazonAdsKeywords.campaignId, campaignId))
+      .orderBy(desc(amazonAdsKeywords.createdAt));
+  }
+
+  async createAmazonAdsKeyword(keywordData: InsertAmazonAdsKeyword): Promise<AmazonAdsKeyword> {
+    const [keyword] = await db
+      .insert(amazonAdsKeywords)
+      .values({
+        ...keywordData,
+        id: nanoid(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return keyword;
+  }
+
+  async updateAmazonAdsKeyword(id: string, campaignId: string, userId: string, updates: Partial<InsertAmazonAdsKeyword>): Promise<AmazonAdsKeyword | undefined> {
+    // First verify user owns the campaign
+    const campaign = await this.getAmazonAdsCampaign(campaignId, userId);
+    if (!campaign) {
+      throw new Error('Campaign not found or unauthorized');
+    }
+
+    const [keyword] = await db
+      .update(amazonAdsKeywords)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(amazonAdsKeywords.id, id), eq(amazonAdsKeywords.campaignId, campaignId)))
+      .returning();
+    return keyword;
+  }
+
+  async deleteAmazonAdsKeyword(id: string, campaignId: string, userId: string): Promise<boolean> {
+    // First verify user owns the campaign
+    const campaign = await this.getAmazonAdsCampaign(campaignId, userId);
+    if (!campaign) {
+      throw new Error('Campaign not found or unauthorized');
+    }
+
+    const result = await db
+      .delete(amazonAdsKeywords)
+      .where(and(eq(amazonAdsKeywords.id, id), eq(amazonAdsKeywords.campaignId, campaignId)));
+    return result.rowCount > 0;
+  }
+
+  // Amazon Ads Performance operations
+  async getAmazonAdsPerformance(campaignId: string, userId: string): Promise<AmazonAdsPerformance[]> {
+    // First verify user owns the campaign
+    const campaign = await this.getAmazonAdsCampaign(campaignId, userId);
+    if (!campaign) {
+      throw new Error('Campaign not found or unauthorized');
+    }
+
+    return await db
+      .select()
+      .from(amazonAdsPerformance)
+      .where(eq(amazonAdsPerformance.campaignId, campaignId))
+      .orderBy(desc(amazonAdsPerformance.date));
+  }
+
+  async createAmazonAdsPerformance(performanceData: InsertAmazonAdsPerformance): Promise<AmazonAdsPerformance> {
+    const [performance] = await db
+      .insert(amazonAdsPerformance)
+      .values({
+        ...performanceData,
+        id: nanoid(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return performance;
   }
 }
 
