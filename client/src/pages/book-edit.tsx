@@ -2689,12 +2689,12 @@ export default function EditBook() {
                               </div>
                               
                               {/* Author/Contributor Selection or Display */}
-                              {selectedContributorId ? (
-                                // Show selected contributor with edit/remove buttons
+                              {contributor.firstName && contributor.lastName ? (
+                                // Show existing contributor with edit/remove buttons
                                 <div className="flex-1 p-3 rounded-md border border-green-200 bg-[#f9fafb]">
                                   <div className="flex items-center justify-between">
                                     <div className="text-base font-medium text-gray-900">
-                                      {authors.find(a => a.id === selectedContributorId)?.fullName || "Unknown Contributor"}
+                                      {`${contributor.prefix || ''} ${contributor.firstName} ${contributor.middleName || ''} ${contributor.lastName} ${contributor.suffix || ''}`.trim()}
                                     </div>
                                     <div className="flex gap-2">
                                       <Button
@@ -2702,12 +2702,9 @@ export default function EditBook() {
                                         variant="outline"
                                         size="sm"
                                         onClick={() => {
-                                          const selectedContributor = authors.find(a => a.id === selectedContributorId);
-                                          if (selectedContributor) {
-                                            sessionStorage.setItem('returnToBookEdit', bookId || 'new');
-                                            saveFormDataToSession();
-                                            setLocation(`/authors/${selectedContributor.id}`);
-                                          }
+                                          sessionStorage.setItem('returnToBookEdit', bookId || 'new');
+                                          saveFormDataToSession();
+                                          setLocation(`/authors/create`);
                                         }}
                                       >
                                         Edit details
@@ -2732,7 +2729,7 @@ export default function EditBook() {
                                           <AlertDialogFooter>
                                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                                             <AlertDialogAction
-                                              onClick={() => removeContributorSelection(index)}
+                                              onClick={() => deleteContributor(index)}
                                               className="bg-destructive hover:bg-destructive/90"
                                             >
                                               Remove contributor
