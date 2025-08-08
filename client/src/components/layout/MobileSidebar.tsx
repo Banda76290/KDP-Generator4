@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { Shield, X, ChevronDown, ChevronRight } from "lucide-react";
@@ -22,18 +22,51 @@ interface MobileSidebarProps {
 export default function MobileSidebar({ open, onOpenChange }: MobileSidebarProps) {
   const [location] = useLocation();
   const { isAdmin } = useAdmin();
-  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(() => {
+    const saved = localStorage.getItem('mobile-sidebar-expanded-groups');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // Auto-expand groups that contain the current active page on initial load
+  useEffect(() => {
+    const activeGroup = navigation.find(item => 
+      item.children?.some(child => location === child.href)
+    );
+    
+    // Only auto-expand if we're on initial load or if the group was never manually collapsed
+    const hasBeenManuallyClosed = localStorage.getItem(`mobile-sidebar-group-${activeGroup?.name}-closed`) === 'true';
+    
+    if (activeGroup && !expandedGroups.includes(activeGroup.name) && !hasBeenManuallyClosed) {
+      const newExpanded = [...expandedGroups, activeGroup.name];
+      setExpandedGroups(newExpanded);
+      localStorage.setItem('mobile-sidebar-expanded-groups', JSON.stringify(newExpanded));
+    }
+  }, [location]);
+
+  // Persist expanded groups to localStorage
+  useEffect(() => {
+    localStorage.setItem('mobile-sidebar-expanded-groups', JSON.stringify(expandedGroups));
+  }, [expandedGroups]);
 
   const handleLinkClick = () => {
     onOpenChange(false);
   };
 
   const toggleGroup = (groupName: string) => {
-    setExpandedGroups(prev => 
-      prev.includes(groupName) 
-        ? prev.filter(name => name !== groupName)
-        : [...prev, groupName]
-    );
+    const isCurrentlyExpanded = expandedGroups.includes(groupName);
+    const newExpanded = isCurrentlyExpanded 
+      ? expandedGroups.filter(name => name !== groupName)
+      : [...expandedGroups, groupName];
+    
+    setExpandedGroups(newExpanded);
+    localStorage.setItem('mobile-sidebar-expanded-groups', JSON.stringify(newExpanded));
+    
+    // Remember if user manually closed a group to prevent auto-expansion
+    if (isCurrentlyExpanded) {
+      localStorage.setItem(`mobile-sidebar-group-${groupName}-closed`, 'true');
+    } else {
+      localStorage.removeItem(`mobile-sidebar-group-${groupName}-closed`);
+    }
   };
 
   const renderNavigationItem = (item: any) => {
