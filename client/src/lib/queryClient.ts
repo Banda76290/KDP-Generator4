@@ -36,31 +36,7 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    // Robust protection against all undefined/invalid queryKey scenarios
-    if (!queryKey) {
-      throw new Error('QueryKey is required');
-    }
-    
-    // Ensure queryKey is always a valid array
-    const normalizedQueryKey = Array.isArray(queryKey) 
-      ? queryKey.filter(key => key !== undefined && key !== null) 
-      : [queryKey].filter(key => key !== undefined && key !== null);
-    
-    if (normalizedQueryKey.length === 0) {
-      throw new Error('QueryKey cannot be empty after normalization');
-    }
-    
-    // Convert to URL path with enhanced safety
-    const url = normalizedQueryKey.map(key => 
-      typeof key === 'string' ? key : JSON.stringify(key)
-    ).join("/");
-    
-    if (!url || url === '/' || url.includes('undefined')) {
-      console.error('Invalid queryKey detected:', queryKey, 'normalized:', normalizedQueryKey);
-      throw new Error(`Invalid query key: ${JSON.stringify(queryKey)}`);
-    }
-    
-    const res = await fetch(url, {
+    const res = await fetch(queryKey.join("/") as string, {
       credentials: "include",
     });
 
