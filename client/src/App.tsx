@@ -38,7 +38,7 @@ import SeriesEdit from "@/pages/series-edit";
 import SeriesCreate from "@/pages/series-create";
 import SeriesSetup from "@/pages/series-setup";
 import AuthorsListPage from "@/pages/authors-list";
-import AuthorCreateNewPage from "@/pages/author-create-new";
+
 import AuthorViewPage from "@/pages/author-view";
 import ImportManagement from "@/pages/ImportManagement";
 import RoyaltiesEstimatorTest from "@/pages/royalties-estimator-test";
@@ -58,7 +58,7 @@ function Router() {
       <Route path="/projects" component={Projects} />
       <Route path="/books" component={Books} />
       <Route path="/authors" component={AuthorsListPage} />
-      <Route path="/authors/create" component={AuthorCreateNewPage} />
+      <Route path="/authors/create" component={AuthorViewPage} />
       <Route path="/authors/:authorId" component={AuthorViewPage} />
       <Route path="/manage-series" component={ManageSeries} />
       <Route path="/series-create" component={SeriesCreate} />
