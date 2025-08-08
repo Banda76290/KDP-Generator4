@@ -861,146 +861,6 @@ export const masterBooksRelations = relations(masterBooks, ({ one }) => ({
   }),
 }));
 
-// A+ Content status enum
-export const aContentStatusEnum = pgEnum("a_content_status", [
-  "draft",
-  "submitted", 
-  "approved",
-  "rejected"
-]);
-
-// A+ Content table
-export const aContent = pgTable("a_content", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  title: text("title").notNull(),
-  asin: varchar("asin", { length: 20 }).notNull(),
-  status: aContentStatusEnum("status").default("draft"),
-  content: text("content"), // Description of the A+ Content
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-// A+ Content relations
-export const aContentRelations = relations(aContent, ({ one }) => ({
-  user: one(users, {
-    fields: [aContent.userId],
-    references: [users.id],
-  }),
-}));
-
-// Amazon Ads Campaign types and status enums
-export const adsCampaignTypeEnum = pgEnum("ads_campaign_type", [
-  "sponsored_products",
-  "sponsored_brands", 
-  "sponsored_display"
-]);
-
-export const adsCampaignStatusEnum = pgEnum("ads_campaign_status", [
-  "enabled",
-  "paused",
-  "archived"
-]);
-
-export const adsTargetingTypeEnum = pgEnum("ads_targeting_type", [
-  "auto",
-  "manual"
-]);
-
-export const adsBidStrategyEnum = pgEnum("ads_bid_strategy", [
-  "legacy_for_sales",
-  "auto_for_sales",
-  "manual"
-]);
-
-// Amazon Ads Campaigns table
-export const amazonAdsCampaigns = pgTable("amazon_ads_campaigns", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  campaignId: varchar("campaign_id").unique(), // Amazon Campaign ID
-  name: text("name").notNull(),
-  campaignType: adsCampaignTypeEnum("campaign_type").notNull(),
-  targetingType: adsTargetingTypeEnum("targeting_type").default("auto"),
-  status: adsCampaignStatusEnum("status").default("enabled"),
-  bidStrategy: adsBidStrategyEnum("bid_strategy").default("legacy_for_sales"),
-  defaultBid: decimal("default_bid", { precision: 8, scale: 2 }),
-  budget: decimal("budget", { precision: 10, scale: 2 }),
-  budgetType: varchar("budget_type").default("daily"), // daily or lifetime
-  startDate: varchar("start_date", { length: 10 }), // YYYY-MM-DD
-  endDate: varchar("end_date", { length: 10 }), // YYYY-MM-DD
-  portfolioId: varchar("portfolio_id"),
-  servingStatus: varchar("serving_status"),
-  creationDate: varchar("creation_date", { length: 10 }),
-  lastUpdatedDate: varchar("last_updated_date", { length: 10 }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-// Amazon Ads Keywords table
-export const amazonAdsKeywords = pgTable("amazon_ads_keywords", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  campaignId: varchar("campaign_id").notNull().references(() => amazonAdsCampaigns.id, { onDelete: "cascade" }),
-  keywordId: varchar("keyword_id").unique(), // Amazon Keyword ID
-  adGroupId: varchar("ad_group_id"),
-  keywordText: text("keyword_text").notNull(),
-  matchType: varchar("match_type").notNull(), // exact, phrase, broad
-  status: varchar("status").default("enabled"), // enabled, paused, archived
-  bid: decimal("bid", { precision: 8, scale: 2 }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-// Amazon Ads Performance table (metrics)
-export const amazonAdsPerformance = pgTable("amazon_ads_performance", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  campaignId: varchar("campaign_id").notNull().references(() => amazonAdsCampaigns.id, { onDelete: "cascade" }),
-  keywordId: varchar("keyword_id").references(() => amazonAdsKeywords.id, { onDelete: "cascade" }),
-  reportDate: varchar("report_date", { length: 10 }).notNull(), // YYYY-MM-DD
-  impressions: integer("impressions").default(0),
-  clicks: integer("clicks").default(0),
-  spend: decimal("spend", { precision: 10, scale: 2 }).default("0"),
-  sales: decimal("sales", { precision: 10, scale: 2 }).default("0"),
-  orders: integer("orders").default(0),
-  units: integer("units").default(0),
-  conversionRate: decimal("conversion_rate", { precision: 5, scale: 2 }).default("0"),
-  acos: decimal("acos", { precision: 5, scale: 2 }).default("0"), // Advertising Cost of Sales
-  roas: decimal("roas", { precision: 5, scale: 2 }).default("0"), // Return on Advertising Spend
-  ctr: decimal("ctr", { precision: 5, scale: 2 }).default("0"), // Click-through Rate
-  cpc: decimal("cpc", { precision: 8, scale: 2 }).default("0"), // Cost Per Click
-  createdAt: timestamp("created_at").defaultNow(),
-}, (table) => [
-  index("idx_ads_performance_campaign_date").on(table.campaignId, table.reportDate),
-]);
-
-// Amazon Ads relations
-export const amazonAdsCampaignsRelations = relations(amazonAdsCampaigns, ({ one, many }) => ({
-  user: one(users, {
-    fields: [amazonAdsCampaigns.userId],
-    references: [users.id],
-  }),
-  keywords: many(amazonAdsKeywords),
-  performance: many(amazonAdsPerformance),
-}));
-
-export const amazonAdsKeywordsRelations = relations(amazonAdsKeywords, ({ one, many }) => ({
-  campaign: one(amazonAdsCampaigns, {
-    fields: [amazonAdsKeywords.campaignId],
-    references: [amazonAdsCampaigns.id],
-  }),
-  performance: many(amazonAdsPerformance),
-}));
-
-export const amazonAdsPerformanceRelations = relations(amazonAdsPerformance, ({ one }) => ({
-  campaign: one(amazonAdsCampaigns, {
-    fields: [amazonAdsPerformance.campaignId],
-    references: [amazonAdsCampaigns.id],
-  }),
-  keyword: one(amazonAdsKeywords, {
-    fields: [amazonAdsPerformance.keywordId],
-    references: [amazonAdsKeywords.id],
-  }),
-}));
-
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -1093,29 +953,6 @@ export const insertConsolidatedSalesDataSchema = createInsertSchema(consolidated
   updatedAt: true,
 });
 
-export const insertAContentSchema = createInsertSchema(aContent).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertAmazonAdsCampaignSchema = createInsertSchema(amazonAdsCampaigns).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertAmazonAdsKeywordSchema = createInsertSchema(amazonAdsKeywords).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertAmazonAdsPerformanceSchema = createInsertSchema(amazonAdsPerformance).omit({
-  id: true,
-  createdAt: true,
-});
-
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -1199,22 +1036,6 @@ export type InsertSystemConfig = z.infer<typeof insertSystemConfigSchema>;
 export type SystemConfig = typeof systemConfig.$inferSelect;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 export type AuditLog = typeof adminAuditLog.$inferSelect;
-
-export type InsertAContent = z.infer<typeof insertAContentSchema>;
-export type AContent = typeof aContent.$inferSelect;
-
-export type InsertAmazonAdsCampaign = z.infer<typeof insertAmazonAdsCampaignSchema>;
-export type AmazonAdsCampaign = typeof amazonAdsCampaigns.$inferSelect;
-export type InsertAmazonAdsKeyword = z.infer<typeof insertAmazonAdsKeywordSchema>;
-export type AmazonAdsKeyword = typeof amazonAdsKeywords.$inferSelect;
-export type InsertAmazonAdsPerformance = z.infer<typeof insertAmazonAdsPerformanceSchema>;
-export type AmazonAdsPerformance = typeof amazonAdsPerformance.$inferSelect;
-
-// Amazon Ads with relations
-export type AmazonAdsCampaignWithRelations = AmazonAdsCampaign & {
-  keywords: AmazonAdsKeyword[];
-  performance: AmazonAdsPerformance[];
-};
 
 // Project with relations type
 export type ProjectWithRelations = Project & {
