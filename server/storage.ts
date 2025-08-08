@@ -1724,6 +1724,7 @@ export class DatabaseStorage implements IStorage {
     if (!authorData) return [];
 
     const authorFullName = authorData.fullName;
+    console.log(`[DEBUG] Looking for projects for author: "${authorFullName}" (ID: ${authorId})`);
 
     // Find books where this author is listed as main author or contributor
     const bookAuthors = await db
@@ -1745,6 +1746,9 @@ export class DatabaseStorage implements IStorage {
       ...bookAuthors.map(book => book.id),
       ...bookContributors.map(contrib => contrib.bookId).filter(Boolean)
     ]);
+
+    console.log(`[DEBUG] Found ${bookAuthors.length} books as main author, ${bookContributors.length} as contributor`);
+    console.log(`[DEBUG] Total unique book IDs: ${authorBookIds.size}`);
 
     if (authorBookIds.size === 0) return [];
 
@@ -1778,6 +1782,7 @@ export class DatabaseStorage implements IStorage {
     if (!authorData) return [];
 
     const authorFullName = authorData.fullName;
+    console.log(`[DEBUG] Looking for books for author: "${authorFullName}" (ID: ${authorId})`);
 
     // Find books where this author is the main author
     const mainAuthorBooks = await db
@@ -1809,6 +1814,9 @@ export class DatabaseStorage implements IStorage {
     const uniqueBooks = Array.from(
       new Map(allBooks.map(book => [book.id, book])).values()
     );
+
+    console.log(`[DEBUG] Found ${mainAuthorBooks.length} books as main author, ${contributorBooks.filter(Boolean).length} as contributor`);
+    console.log(`[DEBUG] Total unique books: ${uniqueBooks.length}`);
 
     return uniqueBooks;
   }
