@@ -46,11 +46,17 @@ export default function AuthorViewPage() {
 
   // Profile image upload mutations
   const profileImageUploadMutation = useMutation({
-    mutationFn: ({ authorId, profileImageURL }: { authorId: string; profileImageURL: string }) =>
-      apiRequest(`/api/authors/${authorId}/profile-image`, { 
-        method: "PUT", 
-        body: { profileImageURL } 
-      }),
+    mutationFn: async ({ authorId, profileImageURL }: { authorId: string; profileImageURL: string }) => {
+      const response = await fetch(`/api/authors/${authorId}/profile-image`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ profileImageURL }),
+      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId] });
       toast({ title: "Profile image updated successfully", variant: "success" });
@@ -300,12 +306,17 @@ export default function AuthorViewPage() {
 
   // Update biography mutation
   const updateBiographyMutation = useMutation({
-    mutationFn: ({ biography, newAuthorId }: { biography: string; newAuthorId?: string }) => {
+    mutationFn: async ({ biography, newAuthorId }: { biography: string; newAuthorId?: string }) => {
       const targetAuthorId = newAuthorId || authorId;
-      return apiRequest(`/api/authors/${targetAuthorId}/biography/${selectedLanguage}`, { 
-        method: "PUT", 
-        body: { biography } 
+      const response = await fetch(`/api/authors/${targetAuthorId}/biography/${selectedLanguage}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ biography }),
       });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return response.json();
     },
     onSuccess: (_, variables) => {
       if (variables.newAuthorId) {
@@ -599,6 +610,47 @@ export default function AuthorViewPage() {
                       </div>
                     </div>
 
+                    {/* Profile Image Upload Section (Edit Mode) */}
+                    {!isCreating && (
+                      <div className="border-t pt-4">
+                        <div className="flex items-center gap-4">
+                          {/* Current Profile Image Display */}
+                          <div className="flex-shrink-0">
+                            {author?.profileImageUrl ? (
+                              <img 
+                                src={author.profileImageUrl} 
+                                alt={`${author.fullName}'s profile`}
+                                className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                              />
+                            ) : (
+                              <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300">
+                                <User className="w-8 h-8 text-gray-400" />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Profile Image Upload */}
+                          <div className="flex-1">
+                            <Label className="text-sm font-medium">Profile Image</Label>
+                            <div className="mt-2">
+                              <ObjectUploader
+                                maxNumberOfFiles={1}
+                                maxFileSize={5242880} // 5MB
+                                onGetUploadParameters={handleGetUploadParameters}
+                                onComplete={handleUploadComplete}
+                                buttonClassName="w-full"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Upload className="w-4 h-4" />
+                                  <span>Upload Profile Image</span>
+                                </div>
+                              </ObjectUploader>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex justify-end pt-4">
                       <Button 
                         onClick={handleSaveAuthor} 
@@ -614,19 +666,58 @@ export default function AuthorViewPage() {
                     </div>
                   </>
                 ) : (
-                  <div className="space-y-2">
-                    <div className="text-lg font-medium">
-                      {isCreating 
-                        ? "New Author - Fill in the fields and click Save"
-                        : [authorForm.prefix, authorForm.firstName, authorForm.middleName, authorForm.lastName, authorForm.suffix]
-                            .filter(Boolean)
-                            .join(' ')
-                      }
-                    </div>
+                  <div className="space-y-4">
                     {!isCreating && (
-                      <p className="text-sm text-gray-600">
-                        Click Edit to modify author information
-                      </p>
+                      <div className="flex items-center gap-4">
+                        {/* Profile Image Display */}
+                        <div className="flex-shrink-0">
+                          {author?.profileImageUrl ? (
+                            <img 
+                              src={author.profileImageUrl} 
+                              alt={`${author.fullName}'s profile`}
+                              className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+                            />
+                          ) : (
+                            <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300">
+                              <User className="w-6 h-6 text-gray-400" />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex-1">
+                          <div className="text-lg font-medium">
+                            {[authorForm.prefix, authorForm.firstName, authorForm.middleName, authorForm.lastName, authorForm.suffix]
+                                .filter(Boolean)
+                                .join(' ')
+                            }
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            Click Edit to modify author information
+                          </p>
+
+                          {/* Profile Image Upload */}
+                          <div className="mt-2">
+                            <ObjectUploader
+                              maxNumberOfFiles={1}
+                              maxFileSize={5242880} // 5MB
+                              onGetUploadParameters={handleGetUploadParameters}
+                              onComplete={handleUploadComplete}
+                              buttonClassName="text-sm px-3 py-1"
+                            >
+                              <div className="flex items-center gap-2">
+                                <Camera className="w-3 h-3" />
+                                <span>Change Photo</span>
+                              </div>
+                            </ObjectUploader>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {isCreating && (
+                      <div className="text-lg font-medium text-center">
+                        New Author - Fill in the fields and click Save
+                      </div>
                     )}
                   </div>
                 )}
@@ -766,58 +857,8 @@ export default function AuthorViewPage() {
             </Card>
           </div>
 
-          {/* Right Column - Profile Image, Projects & Books */}
+          {/* Right Column - Projects & Books */}
           <div className="space-y-6">
-            {/* Author Profile Image */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Camera className="w-5 h-5 mr-2" />
-                  Profile Image
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-center space-y-4">
-                {/* Current Profile Image Display */}
-                {!isCreating && author?.profileImageUrl ? (
-                  <div className="flex justify-center">
-                    <img 
-                      src={author.profileImageUrl} 
-                      alt={`${author.fullName}'s profile`}
-                      className="w-32 h-32 rounded-full object-cover border-4 border-gray-200"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex justify-center">
-                    <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center border-4 border-gray-300">
-                      <User className="w-12 h-12 text-gray-400" />
-                    </div>
-                  </div>
-                )}
-
-                {/* Profile Image Upload */}
-                {!isCreating && (
-                  <ObjectUploader
-                    maxNumberOfFiles={1}
-                    maxFileSize={5242880} // 5MB
-                    onGetUploadParameters={handleGetUploadParameters}
-                    onComplete={handleUploadComplete}
-                    buttonClassName="w-full"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Upload className="w-4 h-4" />
-                      <span>Upload Profile Image</span>
-                    </div>
-                  </ObjectUploader>
-                )}
-
-                {isCreating && (
-                  <p className="text-sm text-gray-500 italic">
-                    Save the author first to upload a profile image
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-
             {/* Author Projects */}
             <Card>
               <CardHeader>
