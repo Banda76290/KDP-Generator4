@@ -1,21 +1,29 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { useState } from "react";
 import { apiRequest } from "@/lib/queryClient";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, User, BookOpen, FolderOpen } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Plus, User, BookOpen, FolderOpen, Search } from "lucide-react";
 import type { AuthorWithRelations } from "@shared/schema";
 
 export default function AuthorsListPage() {
   const [, setLocation] = useLocation();
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch authors with counts
   const { data: authors = [], isLoading: authorsLoading } = useQuery({
     queryKey: ["/api/authors", "withCounts"],
     queryFn: () => apiRequest("/api/authors?withCounts=true"),
   });
+
+  // Filter authors based on search query
+  const filteredAuthors = authors.filter((author: AuthorWithRelations & { bookCount: number; projectCount: number }) => 
+    author.fullName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <Layout>
@@ -30,6 +38,20 @@ export default function AuthorsListPage() {
             <Plus className="w-4 h-4 mr-2" />
             Create Author
           </Button>
+        </div>
+
+        {/* Search Bar */}
+        <div className="max-w-md">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              type="text"
+              placeholder="Search authors..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4 py-2"
+            />
+          </div>
         </div>
 
         {/* Authors Grid */}
@@ -48,8 +70,16 @@ export default function AuthorsListPage() {
                 Create First Author
               </Button>
             </div>
+          ) : filteredAuthors.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <Search className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-[#1a1a1a] dark:text-white mb-2">No authors found</h3>
+              <p className="text-gray-500 dark:text-gray-400 mb-4">
+                No authors match your search criteria "{searchQuery}"
+              </p>
+            </div>
           ) : (
-            authors.map((author: AuthorWithRelations & { bookCount: number; projectCount: number }) => (
+            filteredAuthors.map((author: AuthorWithRelations & { bookCount: number; projectCount: number }) => (
               <Card key={author.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center justify-between">
