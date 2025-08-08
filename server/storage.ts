@@ -2171,7 +2171,7 @@ export class DatabaseStorage implements IStorage {
       whereConditions.push(eq(books.isbn, isbn));
     }
     
-    const [book] = await this.db.select().from(books).where(and(...whereConditions));
+    const [book] = await db.select().from(books).where(and(...whereConditions));
     return book || undefined;
   }
 
@@ -2743,7 +2743,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(aContent)
       .where(and(eq(aContent.id, id), eq(aContent.userId, userId)));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   // Amazon Ads operations implementation
@@ -2792,7 +2792,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(amazonAdsCampaigns)
       .where(and(eq(amazonAdsCampaigns.id, id), eq(amazonAdsCampaigns.userId, userId)));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   // Amazon Ads Keywords operations
@@ -2851,7 +2851,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(amazonAdsKeywords)
       .where(and(eq(amazonAdsKeywords.id, id), eq(amazonAdsKeywords.campaignId, campaignId)));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   // Amazon Ads Performance operations
@@ -2880,6 +2880,30 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return performance;
+  }
+
+  // Missing methods from IStorage interface
+  async getMasterBooks(userId: string): Promise<MasterBook[]> {
+    return await db
+      .select()
+      .from(masterBooks)
+      .where(eq(masterBooks.userId, userId))
+      .orderBy(desc(masterBooks.createdAt));
+  }
+
+  async getMasterBookByAsin(asin: string): Promise<MasterBook | null> {
+    const [book] = await db
+      .select()
+      .from(masterBooks)
+      .where(eq(masterBooks.asin, asin))
+      .limit(1);
+    return book || null;
+  }
+
+  async updateMasterBooksFromImport(userId: string, importId: string): Promise<void> {
+    // Implementation for updating master books from import
+    // This would typically sync data from KDP imports to the master books table
+    console.log(`Updating master books for user ${userId} from import ${importId}`);
   }
 }
 
