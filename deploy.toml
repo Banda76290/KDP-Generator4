@@ -1,5 +1,0 @@
-[deployment]
-deploymentTarget = "autoscale"
-build = ["npm", "run", "build"]
-migrate = ["node", "scripts/run-migrations-node.mjs"]
-run = ["node", "scripts/start-prod.mjs"]

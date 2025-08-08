@@ -1,14 +1,14 @@
-// drizzle.config.ts — version autonome sans import
-const { DATABASE_URL } = process.env;
+import { defineConfig } from "drizzle-kit";
 
-if (!DATABASE_URL) {
-  throw new Error('DATABASE_URL manquant pour drizzle-kit');
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL, ensure the database is provisioned");
 }
 
-export default {
-  out: './migrations',
-  schema: './shared/schema.ts', // adapte si ton chemin diffère
-  dialect: 'postgresql',
-  dbCredentials: { url: DATABASE_URL },
-  // migrations: { table: '__drizzle_migrations', schema: 'drizzle' }, // optionnel
-};
+export default defineConfig({
+  out: "./migrations",
+  schema: "./shared/schema.ts",
+  dialect: "postgresql",
+  dbCredentials: {
+    url: process.env.DATABASE_URL,
+  },
+});

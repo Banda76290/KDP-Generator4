@@ -38,8 +38,7 @@ import SeriesEdit from "@/pages/series-edit";
 import SeriesCreate from "@/pages/series-create";
 import SeriesSetup from "@/pages/series-setup";
 import AuthorsListPage from "@/pages/authors-list";
-import AContentPage from "@/pages/AContentPage";
-import AmazonAdsPage from "@/pages/AmazonAdsPage";
+
 import AuthorViewPage from "@/pages/author-view";
 import ImportManagement from "@/pages/ImportManagement";
 import RoyaltiesEstimatorTest from "@/pages/royalties-estimator-test";
@@ -61,8 +60,6 @@ function Router() {
       <Route path="/authors" component={AuthorsListPage} />
       <Route path="/authors/create" component={AuthorViewPage} />
       <Route path="/authors/:authorId" component={AuthorViewPage} />
-      <Route path="/a-content" component={AContentPage} />
-      <Route path="/amazon-ads" component={AmazonAdsPage} />
       <Route path="/manage-series" component={ManageSeries} />
       <Route path="/series-create" component={SeriesCreate} />
       <Route path="/series-setup" component={SeriesSetup} />
