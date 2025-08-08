@@ -540,7 +540,29 @@ export default function AuthorViewPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-3">
-                    {!isCreating && author?.profileImageUrl ? (
+                    {!isCreating && isEditingAuthor ? (
+                      <div className="relative">
+                        <ObjectUploader
+                          maxNumberOfFiles={1}
+                          maxFileSize={5242880} // 5MB
+                          onGetUploadParameters={handleGetUploadParameters}
+                          onComplete={handleUploadComplete}
+                          buttonClassName="p-0 h-auto bg-transparent hover:bg-transparent border-0 shadow-none"
+                        >
+                          {author?.profileImageUrl ? (
+                            <img 
+                              src={author.profileImageUrl} 
+                              alt={`${author.fullName}'s profile`}
+                              className="w-20 h-20 rounded-full object-cover border-2 border-gray-200 hover:border-blue-400 cursor-pointer transition-colors"
+                            />
+                          ) : (
+                            <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300 hover:border-blue-400 cursor-pointer transition-colors">
+                              <User className="w-8 h-8 text-gray-400" />
+                            </div>
+                          )}
+                        </ObjectUploader>
+                      </div>
+                    ) : !isCreating && author?.profileImageUrl ? (
                       <img 
                         src={author.profileImageUrl} 
                         alt={`${author.fullName}'s profile`}
@@ -618,46 +640,7 @@ export default function AuthorViewPage() {
                       </div>
                     </div>
 
-                    {/* Profile Image Upload Section (Edit Mode) */}
-                    {!isCreating && (
-                      <div className="border-t pt-4">
-                        <div className="flex items-center gap-4">
-                          {/* Current Profile Image Display */}
-                          <div className="flex-shrink-0">
-                            {author?.profileImageUrl ? (
-                              <img 
-                                src={author.profileImageUrl} 
-                                alt={`${author.fullName}'s profile`}
-                                className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
-                              />
-                            ) : (
-                              <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300">
-                                <User className="w-8 h-8 text-gray-400" />
-                              </div>
-                            )}
-                          </div>
 
-                          {/* Profile Image Upload */}
-                          <div className="flex-1">
-                            <Label className="text-sm font-medium">Profile Image</Label>
-                            <div className="mt-2">
-                              <ObjectUploader
-                                maxNumberOfFiles={1}
-                                maxFileSize={5242880} // 5MB
-                                onGetUploadParameters={handleGetUploadParameters}
-                                onComplete={handleUploadComplete}
-                                buttonClassName="w-full"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <Upload className="w-4 h-4" />
-                                  <span>Upload Profile Image</span>
-                                </div>
-                              </ObjectUploader>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
 
                     <div className="flex justify-end pt-4">
                       <Button 
