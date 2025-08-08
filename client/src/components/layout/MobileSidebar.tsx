@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
-import { Shield, X } from "lucide-react";
+import { Shield, X, ChevronDown, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -21,9 +22,118 @@ interface MobileSidebarProps {
 export default function MobileSidebar({ open, onOpenChange }: MobileSidebarProps) {
   const [location] = useLocation();
   const { isAdmin } = useAdmin();
+  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
 
   const handleLinkClick = () => {
     onOpenChange(false);
+  };
+
+  const toggleGroup = (groupName: string) => {
+    setExpandedGroups(prev => 
+      prev.includes(groupName) 
+        ? prev.filter(name => name !== groupName)
+        : [...prev, groupName]
+    );
+  };
+
+  const renderNavigationItem = (item: any) => {
+    if (item.children) {
+      // Group with sub-items
+      const isExpanded = expandedGroups.includes(item.name);
+      const hasActiveChild = item.children.some((child: any) => location === child.href);
+      
+      return (
+        <div key={item.name}>
+          <button
+            onClick={() => toggleGroup(item.name)}
+            className={cn(
+              "w-full flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer text-left",
+              hasActiveChild
+                ? "text-white"
+                : "text-foreground hover:bg-muted"
+            )}
+            style={hasActiveChild ? { backgroundColor: '#38b6ff' } : {}}
+          >
+            <item.icon className="w-5 h-5" />
+            <span className="flex-1">{item.name}</span>
+            {isExpanded ? (
+              <ChevronDown className="w-4 h-4" />
+            ) : (
+              <ChevronRight className="w-4 h-4" />
+            )}
+          </button>
+          
+          {isExpanded && (
+            <div className="ml-8 mt-1 space-y-1">
+              {item.children.map((child: any) => {
+                const isChildActive = location === child.href;
+                return (
+                  <Link key={child.name} href={child.href!}>
+                    <span
+                      className={cn(
+                        "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer text-sm",
+                        isChildActive
+                          ? "text-white"
+                          : "text-foreground hover:bg-muted"
+                      )}
+                      style={isChildActive ? { backgroundColor: '#38b6ff' } : {}}
+                      onClick={handleLinkClick}
+                    >
+                      <child.icon className="w-4 h-4" />
+                      <span>{child.name}</span>
+                      {child.badge && (
+                        <Badge 
+                          className={cn(
+                            "text-xs",
+                            isChildActive 
+                              ? "bg-white text-primary" 
+                              : "bg-secondary text-secondary-foreground"
+                          )}
+                        >
+                          {child.badge}
+                        </Badge>
+                      )}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      );
+    } else {
+      // Regular item
+      const isActive = location === item.href;
+      return (
+        <Link key={item.name} href={item.href!}>
+          <span
+            className={cn(
+              "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",
+              isActive
+                ? "text-white"
+                : "text-foreground hover:bg-muted"
+            )}
+            style={isActive ? { backgroundColor: '#38b6ff' } : {}}
+            onClick={handleLinkClick}
+          >
+            <item.icon className="w-5 h-5" />
+            <span>{item.name}</span>
+            {item.badge && (
+              <Badge 
+                className={cn(
+                  "text-xs",
+                  isActive 
+                    ? "bg-white text-primary" 
+                    : "bg-secondary text-secondary-foreground"
+                )}
+              >
+                {item.badge}
+              </Badge>
+            )}
+          </span>
+        </Link>
+      );
+    }
   };
 
   return (
@@ -42,38 +152,7 @@ export default function MobileSidebar({ open, onOpenChange }: MobileSidebarProps
         
         <div className="flex-1 overflow-y-auto h-full max-h-[calc(100vh-120px)]">
         <nav className="p-4 space-y-2">
-          {navigation.map((item) => {
-            const isActive = location === item.href;
-            return (
-              <Link key={item.name} href={item.href}>
-                <span
-                  className={cn(
-                    "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",
-                    isActive
-                      ? "text-white"
-                      : "text-foreground hover:bg-muted"
-                  )}
-                  style={isActive ? { backgroundColor: '#38b6ff' } : {}}
-                  onClick={handleLinkClick}
-                >
-                  <item.icon className="w-5 h-5" />
-                  <span>{item.name}</span>
-                  {item.badge && (
-                    <Badge 
-                      className={cn(
-                        "text-xs",
-                        isActive 
-                          ? "bg-white text-primary" 
-                          : "bg-secondary text-secondary-foreground"
-                      )}
-                    >
-                      {item.badge}
-                    </Badge>
-                  )}
-                </span>
-              </Link>
-            );
-          })}
+          {navigation.map(renderNavigationItem)}
           
           {/* Admin Section */}
           {isAdmin && (
@@ -87,7 +166,7 @@ export default function MobileSidebar({ open, onOpenChange }: MobileSidebarProps
                 {adminNavigation.map((item) => {
                   const isActive = location === item.href;
                   return (
-                    <Link key={item.name} href={item.href}>
+                    <Link key={item.name} href={item.href!}>
                       <span
                         className={cn(
                           "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",
@@ -129,7 +208,7 @@ export default function MobileSidebar({ open, onOpenChange }: MobileSidebarProps
                   {blogAdminNavigation.map((item) => {
                     const isActive = location === item.href;
                     return (
-                      <Link key={item.name} href={item.href}>
+                      <Link key={item.name} href={item.href!}>
                         <span
                           className={cn(
                             "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer",
@@ -156,7 +235,7 @@ export default function MobileSidebar({ open, onOpenChange }: MobileSidebarProps
               {accountNavigation.map((item) => {
                 const isActive = location === item.href;
                 return (
-                  <Link key={item.name} href={item.href}>
+                  <Link key={item.name} href={item.href!}>
                     <span
                       className={cn(
                         "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer",
