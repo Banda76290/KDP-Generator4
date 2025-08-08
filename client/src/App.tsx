@@ -44,6 +44,7 @@ import AuthorViewPage from "@/pages/author-view";
 import ImportManagement from "@/pages/ImportManagement";
 import RoyaltiesEstimatorTest from "@/pages/royalties-estimator-test";
 import ExchangeRates from "@/pages/ExchangeRates";
+import KdpGenMethodPage from "@/pages/kdp-gen-method";
 
 
 function Router() {
@@ -76,6 +77,7 @@ function Router() {
       <Route path="/royalties-estimator-test" component={RoyaltiesEstimatorTest} />
       <Route path="/ai-assistant" component={AIAssistant} />
       <Route path="/ai-functions" component={AIFunctions} />
+      <Route path="/kdp-gen-method" component={KdpGenMethodPage} />
       <Route path="/admin/ai-variables" component={AIVariables} />
       <Route path="/subscription" component={Subscription} />
       <Route path="/settings" component={Settings} />
