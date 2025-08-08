@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { Shield, X, ChevronDown, ChevronRight } from "lucide-react";
@@ -22,28 +22,7 @@ interface MobileSidebarProps {
 export default function MobileSidebar({ open, onOpenChange }: MobileSidebarProps) {
   const [location] = useLocation();
   const { isAdmin } = useAdmin();
-  const [expandedGroups, setExpandedGroups] = useState<string[]>(() => {
-    const saved = localStorage.getItem('mobile-sidebar-expanded-groups');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  // Auto-expand groups that contain the current active page and persist state
-  useEffect(() => {
-    const activeGroup = navigation.find(item => 
-      item.children?.some(child => location === child.href)
-    );
-    
-    if (activeGroup && !expandedGroups.includes(activeGroup.name)) {
-      const newExpanded = [...expandedGroups, activeGroup.name];
-      setExpandedGroups(newExpanded);
-      localStorage.setItem('mobile-sidebar-expanded-groups', JSON.stringify(newExpanded));
-    }
-  }, [location, expandedGroups]);
-
-  // Persist expanded groups to localStorage
-  useEffect(() => {
-    localStorage.setItem('mobile-sidebar-expanded-groups', JSON.stringify(expandedGroups));
-  }, [expandedGroups]);
+  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
 
   const handleLinkClick = () => {
     onOpenChange(false);
