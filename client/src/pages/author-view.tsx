@@ -44,28 +44,28 @@ export default function AuthorViewPage() {
   // Fetch author details
   const { data: author, isLoading: authorLoading } = useQuery({
     queryKey: ["/api/authors", authorId],
-    queryFn: () => apiRequest("GET", `/api/authors/${authorId}`),
+    queryFn: () => apiRequest(`/api/authors/${authorId}`),
     enabled: !!authorId,
   });
 
   // Fetch biography for selected language
   const { data: biographyData, isLoading: biographyLoading } = useQuery({
     queryKey: ["/api/authors", authorId, "biography", selectedLanguage],
-    queryFn: () => apiRequest("GET", `/api/authors/${authorId}/biography/${selectedLanguage}`),
+    queryFn: () => apiRequest(`/api/authors/${authorId}/biography/${selectedLanguage}`),
     enabled: !!authorId,
   });
 
   // Fetch author projects
   const { data: authorProjects = [] } = useQuery({
     queryKey: ["/api/authors", authorId, "projects"],
-    queryFn: () => apiRequest("GET", `/api/authors/${authorId}/projects`),
+    queryFn: () => apiRequest(`/api/authors/${authorId}/projects`),
     enabled: !!authorId,
   });
 
   // Fetch author books  
   const { data: authorBooks = [] } = useQuery({
     queryKey: ["/api/authors", authorId, "books"],
-    queryFn: () => apiRequest("GET", `/api/authors/${authorId}/books`),
+    queryFn: () => apiRequest(`/api/authors/${authorId}/books`),
     enabled: !!authorId,
   });
 
@@ -249,7 +249,10 @@ export default function AuthorViewPage() {
   // Update biography mutation
   const updateBiographyMutation = useMutation({
     mutationFn: ({ biography }: { biography: string }) =>
-      apiRequest("PUT", `/api/authors/${authorId}/biography/${selectedLanguage}`, { biography }),
+      apiRequest(`/api/authors/${authorId}/biography/${selectedLanguage}`, {
+        method: "PUT",
+        body: { biography }
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId, "biography", selectedLanguage] });
       setIsEditing(false);
@@ -275,7 +278,10 @@ export default function AuthorViewPage() {
   // Update author mutation
   const updateAuthorMutation = useMutation({
     mutationFn: (authorData: typeof authorForm) =>
-      apiRequest("PUT", `/api/authors/${authorId}`, authorData),
+      apiRequest(`/api/authors/${authorId}`, {
+        method: "PUT",
+        body: authorData
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId] });
       setIsEditingAuthor(false);
@@ -300,7 +306,9 @@ export default function AuthorViewPage() {
 
   // Delete author mutation
   const deleteAuthorMutation = useMutation({
-    mutationFn: () => apiRequest("DELETE", `/api/authors/${authorId}`),
+    mutationFn: () => apiRequest(`/api/authors/${authorId}`, {
+      method: "DELETE"
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors"] });
       toast({ title: "Author deleted successfully" });
