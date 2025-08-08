@@ -27,21 +27,18 @@ export default function MobileSidebar({ open, onOpenChange }: MobileSidebarProps
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Auto-expand groups that contain the current active page on initial load
+  // Auto-expand groups that contain the current active page and persist state
   useEffect(() => {
     const activeGroup = navigation.find(item => 
       item.children?.some(child => location === child.href)
     );
     
-    // Only auto-expand if we're on initial load or if the group was never manually collapsed
-    const hasBeenManuallyClosed = localStorage.getItem(`mobile-sidebar-group-${activeGroup?.name}-closed`) === 'true';
-    
-    if (activeGroup && !expandedGroups.includes(activeGroup.name) && !hasBeenManuallyClosed) {
+    if (activeGroup && !expandedGroups.includes(activeGroup.name)) {
       const newExpanded = [...expandedGroups, activeGroup.name];
       setExpandedGroups(newExpanded);
       localStorage.setItem('mobile-sidebar-expanded-groups', JSON.stringify(newExpanded));
     }
-  }, [location]);
+  }, [location, expandedGroups]);
 
   // Persist expanded groups to localStorage
   useEffect(() => {
@@ -53,20 +50,11 @@ export default function MobileSidebar({ open, onOpenChange }: MobileSidebarProps
   };
 
   const toggleGroup = (groupName: string) => {
-    const isCurrentlyExpanded = expandedGroups.includes(groupName);
-    const newExpanded = isCurrentlyExpanded 
-      ? expandedGroups.filter(name => name !== groupName)
-      : [...expandedGroups, groupName];
-    
-    setExpandedGroups(newExpanded);
-    localStorage.setItem('mobile-sidebar-expanded-groups', JSON.stringify(newExpanded));
-    
-    // Remember if user manually closed a group to prevent auto-expansion
-    if (isCurrentlyExpanded) {
-      localStorage.setItem(`mobile-sidebar-group-${groupName}-closed`, 'true');
-    } else {
-      localStorage.removeItem(`mobile-sidebar-group-${groupName}-closed`);
-    }
+    setExpandedGroups(prev => 
+      prev.includes(groupName) 
+        ? prev.filter(name => name !== groupName)
+        : [...prev, groupName]
+    );
   };
 
   const renderNavigationItem = (item: any) => {
