@@ -5,7 +5,7 @@ import { apiRequest } from "@/lib/queryClient";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, User, BookOpen, Eye, FolderOpen } from "lucide-react";
+import { Plus, User, BookOpen, FolderOpen } from "lucide-react";
 import type { AuthorWithRelations } from "@shared/schema";
 
 export default function AuthorsListPage() {
@@ -65,9 +65,13 @@ export default function AuthorsListPage() {
                           <User className="w-8 h-8 text-gray-400" />
                         </div>
                       )}
-                      <span className="truncate text-base font-semibold" title={author.fullName}>
+                      <button 
+                        onClick={() => setLocation(`/authors/${author.id}`)}
+                        className="truncate text-base font-semibold hover:!text-blue-600 transition-colors text-left cursor-pointer bg-transparent border-none p-0" 
+                        title={author.fullName}
+                      >
                         {author.fullName}
-                      </span>
+                      </button>
                     </div>
                   </CardTitle>
                 </CardHeader>
@@ -85,17 +89,7 @@ export default function AuthorsListPage() {
                     </div>
                   </div>
                   
-                  <div className="flex justify-end gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => setLocation(`/authors/${author.id}`)}
-                      className="flex items-center gap-1"
-                    >
-                      <Eye className="w-4 h-4" />
-                      View Details
-                    </Button>
-                  </div>
+
                 </CardContent>
               </Card>
             ))
