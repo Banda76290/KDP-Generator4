@@ -368,7 +368,7 @@ export default function AuthorViewPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId] });
       setIsEditingAuthor(false);
-      toast({ title: "Author updated successfully" });
+      toast({ title: "Author updated successfully", variant: "success" });
       
       // Check if we need to return to book edit page (like in series-edit.tsx)
       const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
@@ -392,7 +392,7 @@ export default function AuthorViewPage() {
     mutationFn: () => apiRequest(`/api/authors/${authorId}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors"] });
-      toast({ title: "Author deleted successfully" });
+      toast({ title: "Author deleted successfully", variant: "success" });
       setLocation("/authors");
     },
     onError: () => {
