@@ -51,7 +51,7 @@ export default function AdminBlogCategories() {
 
   const createCategoryMutation = useMutation({
     mutationFn: async (categoryData: typeof formData) => {
-      return await apiRequest("/api/admin/blog/categories", { method: "POST", body: categoryData });
+      return await apiRequest("/api/admin/blog/categories", { method: "POST", body: categoryData as any });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/categories"] });
@@ -73,7 +73,7 @@ export default function AdminBlogCategories() {
 
   const updateCategoryMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: typeof formData }) => {
-      return await apiRequest(`/api/admin/blog/categories/${id}`, { method: "PUT", body: data });
+      return await apiRequest(`/api/admin/blog/categories/${id}`, { method: "PUT", body: data as any });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/blog/categories"] });

@@ -251,7 +251,7 @@ export default function AuthorViewPage() {
 
   // Create author mutation (for creation mode)
   const createAuthorMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("POST", "/api/authors", data),
+    mutationFn: (data: any) => apiRequest("/api/authors", { method: "POST", body: data }),
     onSuccess: (newAuthor) => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors"] });
       toast({ title: "Author created successfully", variant: "success" });
@@ -286,7 +286,7 @@ export default function AuthorViewPage() {
   const updateBiographyMutation = useMutation({
     mutationFn: ({ biography, newAuthorId }: { biography: string; newAuthorId?: string }) => {
       const targetAuthorId = newAuthorId || authorId;
-      return apiRequest("PUT", `/api/authors/${targetAuthorId}/biography/${selectedLanguage}`, { biography });
+      return apiRequest(`/api/authors/${targetAuthorId}/biography/${selectedLanguage}`, { method: "PUT", body: { biography } as any });
     },
     onSuccess: (_, variables) => {
       if (variables.newAuthorId) {
@@ -328,7 +328,7 @@ export default function AuthorViewPage() {
   // Update author mutation
   const updateAuthorMutation = useMutation({
     mutationFn: (authorData: typeof authorForm) =>
-      apiRequest("PUT", `/api/authors/${authorId}`, authorData),
+      apiRequest(`/api/authors/${authorId}`, { method: "PUT", body: authorData as any }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId] });
       setIsEditingAuthor(false);
@@ -353,7 +353,7 @@ export default function AuthorViewPage() {
 
   // Delete author mutation
   const deleteAuthorMutation = useMutation({
-    mutationFn: () => apiRequest("DELETE", `/api/authors/${authorId}`),
+    mutationFn: () => apiRequest(`/api/authors/${authorId}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors"] });
       toast({ title: "Author deleted successfully" });
