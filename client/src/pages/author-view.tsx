@@ -11,7 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ArrowLeft, Edit3, Save, BookOpen, FolderOpen, Trash2, User } from "lucide-react";
 import type { AuthorWithRelations, ProjectWithRelations, Book } from "@shared/schema";
 
@@ -735,42 +734,15 @@ export default function AuthorViewPage() {
                 ) : (
                   <div className="space-y-4">
                     {authorProjects.map((project: ProjectWithRelations) => (
-                      <div 
-                        key={project.id} 
-                        className="border rounded-lg p-4 hover:shadow-lg transition-all duration-200 cursor-pointer hover:border-[#38b6ff]/20"
-                        onClick={() => setLocation(`/projects/edit/${project.id}`)}
-                      >
+                      <div key={project.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <h4 className="font-semibold text-lg text-gray-900 hover:text-[#38b6ff] transition-colors cursor-pointer">
-                                  {project.title}
-                                </h4>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Click to edit project: {project.title}</p>
-                              </TooltipContent>
-                            </Tooltip>
+                            <h4 className="font-semibold text-lg">{project.title}</h4>
                             {project.subtitle && (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <p className="text-sm text-gray-600 mt-1 cursor-help">{project.subtitle}</p>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{project.subtitle}</p>
-                                </TooltipContent>
-                              </Tooltip>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{project.subtitle}</p>
                             )}
                             {project.description && (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <p className="text-sm text-gray-500 mt-2 line-clamp-2 cursor-help">{project.description}</p>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{project.description}</p>
-                                </TooltipContent>
-                              </Tooltip>
+                              <p className="text-sm text-gray-500 mt-2 line-clamp-2">{project.description}</p>
                             )}
                             <div className="flex items-center gap-2 mt-3">
                               <Badge variant="secondary">{project.status}</Badge>
@@ -801,32 +773,12 @@ export default function AuthorViewPage() {
                 ) : (
                   <div className="space-y-4">
                     {authorBooks.map((book: Book) => (
-                      <div 
-                        key={book.id} 
-                        className="border rounded-lg p-4 hover:shadow-lg transition-all duration-200 cursor-pointer hover:border-[#38b6ff]/20"
-                        onClick={() => setLocation(`/books/edit/${book.id}`)}
-                      >
+                      <div key={book.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <h4 className="font-semibold text-lg text-gray-900 hover:!text-blue-600 transition-colors cursor-pointer">
-                                  {book.title}
-                                </h4>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Click to edit book: {book.title}</p>
-                              </TooltipContent>
-                            </Tooltip>
+                            <h4 className="font-semibold text-lg">{book.title}</h4>
                             {book.subtitle && (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <p className="text-sm text-gray-600 mt-1 cursor-help">{book.subtitle}</p>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{book.subtitle}</p>
-                                </TooltipContent>
-                              </Tooltip>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{book.subtitle}</p>
                             )}
                             <div className="flex items-center gap-2 mt-3">
                               <Badge variant="secondary">{book.status}</Badge>
