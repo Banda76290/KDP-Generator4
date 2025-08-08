@@ -2564,7 +2564,8 @@ export class DatabaseStorage implements IStorage {
         await db
           .insert(consolidatedSalesData)
           .values({
-            user_id: userId,
+            userId: userId,
+            asin: consolidatedKey,
             title: `Paiements agrégés ${data.currency}`,
             authorName: 'Données de paiement',
             currency: data.currency,
@@ -2574,7 +2575,7 @@ export class DatabaseStorage implements IStorage {
             exchangeRate: exchangeRate.toString(),
             exchangeRateDate,
             marketplace: data.marketplace || 'Multiple',
-            format: 'payments',
+            format: 'ebook',
             lastUpdateDate: new Date().toISOString().split('T')[0],
             sourceImportIds: data.importIds,
           })
@@ -2872,9 +2873,7 @@ export class DatabaseStorage implements IStorage {
       .insert(amazonAdsPerformance)
       .values({
         ...performanceData,
-        id: nanoid(),
         createdAt: new Date(),
-        updatedAt: new Date(),
       })
       .returning();
     return performance;
