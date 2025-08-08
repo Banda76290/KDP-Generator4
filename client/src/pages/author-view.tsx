@@ -539,12 +539,12 @@ export default function AuthorViewPage() {
             <Card className="border-2" style={{ borderColor: 'var(--kdp-primary-blue)', backgroundColor: '#f0f8ff' }}>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-3">
                     {!isCreating && author?.profileImageUrl ? (
                       <img 
                         src={author.profileImageUrl} 
                         alt={`${author.fullName}'s profile`}
-                        className="w-6 h-6 rounded-full object-cover border border-gray-200"
+                        className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
                       />
                     ) : (
                       <User className="w-5 h-5" />
@@ -674,42 +674,19 @@ export default function AuthorViewPage() {
                     </div>
                   </>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="text-lg font-medium">
+                      {isCreating 
+                        ? "New Author - Fill in the fields and click Save"
+                        : [authorForm.prefix, authorForm.firstName, authorForm.middleName, authorForm.lastName, authorForm.suffix]
+                            .filter(Boolean)
+                            .join(' ')
+                      }
+                    </div>
                     {!isCreating && (
-                      <div className="flex items-center gap-4">
-                        {/* Profile Image Display */}
-                        <div className="flex-shrink-0">
-                          {author?.profileImageUrl ? (
-                            <img 
-                              src={author.profileImageUrl} 
-                              alt={`${author.fullName}'s profile`}
-                              className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
-                            />
-                          ) : (
-                            <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300">
-                              <User className="w-6 h-6 text-gray-400" />
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex-1">
-                          <div className="text-lg font-medium">
-                            {[authorForm.prefix, authorForm.firstName, authorForm.middleName, authorForm.lastName, authorForm.suffix]
-                                .filter(Boolean)
-                                .join(' ')
-                            }
-                          </div>
-                          <p className="text-sm text-gray-600">
-                            Click Edit to modify author information
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {isCreating && (
-                      <div className="text-lg font-medium text-center">
-                        New Author - Fill in the fields and click Save
-                      </div>
+                      <p className="text-sm text-gray-600">
+                        Click Edit to modify author information
+                      </p>
                     )}
                   </div>
                 )}
