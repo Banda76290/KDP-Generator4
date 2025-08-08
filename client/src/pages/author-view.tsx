@@ -11,8 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Edit3, Save, BookOpen, FolderOpen, Trash2, User } from "lucide-react";
+import { ArrowLeft, Edit3, Save, BookOpen, FolderOpen, Trash2, User, Upload, Camera } from "lucide-react";
 import type { AuthorWithRelations, ProjectWithRelations, Book } from "@shared/schema";
+import { ObjectUploader } from "@/components/ObjectUploader";
+import type { UploadResult } from "@uppy/core";
 
 const LANGUAGES = [
   { value: "English", label: "English" },
@@ -40,6 +42,22 @@ export default function AuthorViewPage() {
     middleName: "",
     lastName: "",
     suffix: ""
+  });
+
+  // Profile image upload mutations
+  const profileImageUploadMutation = useMutation({
+    mutationFn: ({ authorId, profileImageURL }: { authorId: string; profileImageURL: string }) =>
+      apiRequest(`/api/authors/${authorId}/profile-image`, { 
+        method: "PUT", 
+        body: JSON.stringify({ profileImageURL }) 
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId] });
+      toast({ title: "Profile image updated successfully", variant: "success" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update profile image", variant: "destructive" });
+    },
   });
 
   // Fetch author details (disabled if creating)
@@ -249,7 +267,7 @@ export default function AuthorViewPage() {
 
   // Create author mutation (for creation mode)
   const createAuthorMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("POST", "/api/authors", data),
+    mutationFn: (data: any) => apiRequest("/api/authors", { method: "POST", body: JSON.stringify(data) }),
     onSuccess: (newAuthor) => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors"] });
       toast({ title: "Author created successfully", variant: "success" });
@@ -284,7 +302,10 @@ export default function AuthorViewPage() {
   const updateBiographyMutation = useMutation({
     mutationFn: ({ biography, newAuthorId }: { biography: string; newAuthorId?: string }) => {
       const targetAuthorId = newAuthorId || authorId;
-      return apiRequest("PUT", `/api/authors/${targetAuthorId}/biography/${selectedLanguage}`, { biography });
+      return apiRequest(`/api/authors/${targetAuthorId}/biography/${selectedLanguage}`, { 
+        method: "PUT", 
+        body: JSON.stringify({ biography }) 
+      });
     },
     onSuccess: (_, variables) => {
       if (variables.newAuthorId) {
@@ -326,7 +347,7 @@ export default function AuthorViewPage() {
   // Update author mutation
   const updateAuthorMutation = useMutation({
     mutationFn: (authorData: typeof authorForm) =>
-      apiRequest("PUT", `/api/authors/${authorId}`, authorData),
+      apiRequest(`/api/authors/${authorId}`, { method: "PUT", body: JSON.stringify(authorData) }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId] });
       setIsEditingAuthor(false);
@@ -351,7 +372,7 @@ export default function AuthorViewPage() {
 
   // Delete author mutation
   const deleteAuthorMutation = useMutation({
-    mutationFn: () => apiRequest("DELETE", `/api/authors/${authorId}`),
+    mutationFn: () => apiRequest(`/api/authors/${authorId}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors"] });
       toast({ title: "Author deleted successfully" });
@@ -364,6 +385,35 @@ export default function AuthorViewPage() {
 
   const handleSaveBiography = () => {
     updateBiographyMutation.mutate({ biography });
+  };
+
+  // Handle profile image upload
+  const handleGetUploadParameters = async () => {
+    const response = await apiRequest("/api/objects/upload", { method: "POST" });
+    return {
+      method: "PUT" as const,
+      url: response.uploadURL,
+    };
+  };
+
+  const handleUploadComplete = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    if (result.successful && result.successful.length > 0) {
+      const uploadedFile = result.successful[0];
+      const uploadURL = uploadedFile.uploadURL;
+      
+      if (uploadURL && authorId && !isCreating) {
+        profileImageUploadMutation.mutate({ 
+          authorId, 
+          profileImageURL: uploadURL 
+        });
+      } else {
+        toast({ 
+          title: "Profile image uploaded", 
+          description: "Save the author first to set the profile image",
+          variant: "default" 
+        });
+      }
+    }
   };
 
   const handleSaveAuthor = () => {
@@ -716,8 +766,58 @@ export default function AuthorViewPage() {
             </Card>
           </div>
 
-          {/* Right Column - Projects & Books */}
+          {/* Right Column - Profile Image, Projects & Books */}
           <div className="space-y-6">
+            {/* Author Profile Image */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Camera className="w-5 h-5 mr-2" />
+                  Profile Image
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-center space-y-4">
+                {/* Current Profile Image Display */}
+                {!isCreating && author?.profileImageUrl ? (
+                  <div className="flex justify-center">
+                    <img 
+                      src={author.profileImageUrl} 
+                      alt={`${author.fullName}'s profile`}
+                      className="w-32 h-32 rounded-full object-cover border-4 border-gray-200"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex justify-center">
+                    <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center border-4 border-gray-300">
+                      <User className="w-12 h-12 text-gray-400" />
+                    </div>
+                  </div>
+                )}
+
+                {/* Profile Image Upload */}
+                {!isCreating && (
+                  <ObjectUploader
+                    maxNumberOfFiles={1}
+                    maxFileSize={5242880} // 5MB
+                    onGetUploadParameters={handleGetUploadParameters}
+                    onComplete={handleUploadComplete}
+                    buttonClassName="w-full"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Upload className="w-4 h-4" />
+                      <span>Upload Profile Image</span>
+                    </div>
+                  </ObjectUploader>
+                )}
+
+                {isCreating && (
+                  <p className="text-sm text-gray-500 italic">
+                    Save the author first to upload a profile image
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Author Projects */}
             <Card>
               <CardHeader>
