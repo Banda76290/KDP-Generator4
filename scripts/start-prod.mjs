@@ -1,4 +1,5 @@
 // scripts/start-prod.mjs - Point d'entrée pour la production
+// Remplace drizzle-kit push par migration programmatique
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { migrate } from 'drizzle-orm/neon-http/migrator';
