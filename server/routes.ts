@@ -1740,11 +1740,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const objectFile = await objectStorageService.getObjectEntityFile(
         req.path,
       );
+      
+      // For newly uploaded images in uploads folder, allow access to authenticated user
+      if (req.path.includes('/uploads/')) {
+        // Allow temporary access for uploaded images (before ACL is set)
+        return objectStorageService.downloadObject(objectFile, res);
+      }
+      
+      // For other objects, check ACL policy
       const canAccess = await objectStorageService.canAccessObjectEntity({
         objectFile,
         userId: userId,
         requestedPermission: ObjectPermission.READ,
       });
+      
       if (!canAccess) {
         return res.sendStatus(401);
       }
