@@ -54,7 +54,17 @@ export default function AuthorsListPage() {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center min-w-0 flex-1">
-                      <User className="w-5 h-5 mr-2 flex-shrink-0" style={{ color: 'var(--kdp-primary-blue)' }} />
+                      {author.profileImageUrl ? (
+                        <img 
+                          src={author.profileImageUrl} 
+                          alt={`${author.fullName}'s profile`}
+                          className="w-20 h-20 rounded-full object-cover border-2 border-gray-200 mr-3 flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300 mr-3 flex-shrink-0">
+                          <User className="w-8 h-8 text-gray-400" />
+                        </div>
+                      )}
                       <span className="truncate text-base font-semibold" title={author.fullName}>
                         {author.fullName}
                       </span>
