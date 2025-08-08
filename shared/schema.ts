@@ -861,6 +861,34 @@ export const masterBooksRelations = relations(masterBooks, ({ one }) => ({
   }),
 }));
 
+// A+ Content status enum
+export const aContentStatusEnum = pgEnum("a_content_status", [
+  "draft",
+  "submitted", 
+  "approved",
+  "rejected"
+]);
+
+// A+ Content table
+export const aContent = pgTable("a_content", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  asin: varchar("asin", { length: 20 }).notNull(),
+  status: aContentStatusEnum("status").default("draft"),
+  content: text("content"), // Description of the A+ Content
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// A+ Content relations
+export const aContentRelations = relations(aContent, ({ one }) => ({
+  user: one(users, {
+    fields: [aContent.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -953,6 +981,12 @@ export const insertConsolidatedSalesDataSchema = createInsertSchema(consolidated
   updatedAt: true,
 });
 
+export const insertAContentSchema = createInsertSchema(aContent).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -1036,6 +1070,9 @@ export type InsertSystemConfig = z.infer<typeof insertSystemConfigSchema>;
 export type SystemConfig = typeof systemConfig.$inferSelect;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 export type AuditLog = typeof adminAuditLog.$inferSelect;
+
+export type InsertAContent = z.infer<typeof insertAContentSchema>;
+export type AContent = typeof aContent.$inferSelect;
 
 // Project with relations type
 export type ProjectWithRelations = Project & {

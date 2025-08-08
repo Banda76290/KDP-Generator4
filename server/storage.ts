@@ -22,6 +22,7 @@ import {
   consolidatedSalesData,
   masterBooks,
   exchangeRates,
+  aContent,
   type User,
   type UpsertUser,
   type Project,
@@ -68,6 +69,8 @@ import {
   insertConsolidatedSalesDataSchema,
   type MasterBook,
   type InsertMasterBook,
+  type AContent,
+  type InsertAContent,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, sum, count, like, or, isNotNull, asc, inArray } from "drizzle-orm";
@@ -228,6 +231,13 @@ export interface IStorage {
   getMasterBooks(userId: string): Promise<MasterBook[]>;
   getMasterBookByAsin(asin: string): Promise<MasterBook | null>;
   updateMasterBooksFromImport(userId: string, importId: string): Promise<void>;
+
+  // A+ Content operations
+  getAContents(userId: string): Promise<AContent[]>;
+  getAContent(id: string, userId: string): Promise<AContent | undefined>;
+  createAContent(content: InsertAContent): Promise<AContent>;
+  updateAContent(id: string, userId: string, updates: Partial<InsertAContent>): Promise<AContent | undefined>;
+  deleteAContent(id: string, userId: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2690,6 +2700,46 @@ export class DatabaseStorage implements IStorage {
       name: currencyMappings[code]?.name || code,
       symbol: currencyMappings[code]?.symbol || code
     }));
+  }
+
+  // A+ Content operations
+  async getAContents(userId: string): Promise<AContent[]> {
+    return await db.select().from(aContent).where(eq(aContent.userId, userId)).orderBy(desc(aContent.createdAt));
+  }
+
+  async getAContent(id: string, userId: string): Promise<AContent | undefined> {
+    const [content] = await db
+      .select()
+      .from(aContent)
+      .where(and(eq(aContent.id, id), eq(aContent.userId, userId)));
+    return content;
+  }
+
+  async createAContent(contentData: InsertAContent): Promise<AContent> {
+    const [content] = await db
+      .insert(aContent)
+      .values(contentData)
+      .returning();
+    return content;
+  }
+
+  async updateAContent(id: string, userId: string, updates: Partial<InsertAContent>): Promise<AContent | undefined> {
+    const [content] = await db
+      .update(aContent)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(aContent.id, id), eq(aContent.userId, userId)))
+      .returning();
+    return content;
+  }
+
+  async deleteAContent(id: string, userId: string): Promise<boolean> {
+    const result = await db
+      .delete(aContent)
+      .where(and(eq(aContent.id, id), eq(aContent.userId, userId)));
+    return result.rowCount > 0;
   }
 }
 

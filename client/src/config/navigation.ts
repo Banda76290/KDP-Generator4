@@ -31,6 +31,7 @@ export const navigation: NavigationItem[] = [
   { name: "Projects", href: "/projects", icon: FolderOpen },
   { name: "Books", href: "/books", icon: FileText },
   { name: "Authors & Contributors", href: "/authors", icon: User },
+  { name: "A+ Content", href: "/a-content", icon: BarChart3 },
   { name: "Series", href: "/manage-series", icon: Tags },
   { name: "Sales Analytics", href: "/analytics", icon: TrendingUp },
   { name: "Livres Maîtres", href: "/master-books", icon: FileText, badge: "ASIN" },

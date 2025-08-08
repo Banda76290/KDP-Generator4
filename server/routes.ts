@@ -5,7 +5,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { exchangeRateService } from "./services/exchangeRateService";
 import { cronService } from "./services/cronService";
-import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema, insertAuthorSchema, insertAuthorBiographySchema, insertContentRecommendationSchema, insertAiPromptTemplateSchema, insertKdpImportSchema, insertKdpImportDataSchema } from "@shared/schema";
+import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema, insertAuthorSchema, insertAuthorBiographySchema, insertContentRecommendationSchema, insertAiPromptTemplateSchema, insertKdpImportSchema, insertKdpImportDataSchema, insertAContentSchema } from "@shared/schema";
 import { aiService } from "./services/aiService";
 import { parseKDPReport } from "./services/kdpParser";
 import { KdpImportProcessor } from "./services/kdpImportProcessor";
@@ -3334,6 +3334,105 @@ Please respond with only a JSON object containing the translated fields. For key
         success: false,
         error: error instanceof Error ? error.message : 'Erreur inconnue'
       });
+    }
+  });
+
+  // A+ Content Management Routes
+  app.get('/api/a-content', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const aContents = await storage.getAContents(userId);
+      res.json(aContents);
+    } catch (error) {
+      console.error("Error fetching A+ Contents:", error);
+      res.status(500).json({ message: "Failed to fetch A+ Contents" });
+    }
+  });
+
+  app.get('/api/a-content/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const aContent = await storage.getAContent(req.params.id, userId);
+      if (!aContent) {
+        return res.status(404).json({ message: "A+ Content not found" });
+      }
+      
+      res.json(aContent);
+    } catch (error) {
+      console.error("Error fetching A+ Content:", error);
+      res.status(500).json({ message: "Failed to fetch A+ Content" });
+    }
+  });
+
+  app.post('/api/a-content', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const validatedData = insertAContentSchema.parse({
+        ...req.body,
+        userId
+      });
+      
+      const aContent = await storage.createAContent(validatedData);
+      res.status(201).json(aContent);
+    } catch (error) {
+      console.error("Error creating A+ Content:", error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to create A+ Content" 
+      });
+    }
+  });
+
+  app.put('/api/a-content/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const updates = insertAContentSchema.partial().parse(req.body);
+      const aContent = await storage.updateAContent(req.params.id, userId, updates);
+      
+      if (!aContent) {
+        return res.status(404).json({ message: "A+ Content not found" });
+      }
+      
+      res.json(aContent);
+    } catch (error) {
+      console.error("Error updating A+ Content:", error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to update A+ Content" 
+      });
+    }
+  });
+
+  app.delete('/api/a-content/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const success = await storage.deleteAContent(req.params.id, userId);
+      if (!success) {
+        return res.status(404).json({ message: "A+ Content not found" });
+      }
+      
+      res.json({ message: "A+ Content deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting A+ Content:", error);
+      res.status(500).json({ message: "Failed to delete A+ Content" });
     }
   });
 
