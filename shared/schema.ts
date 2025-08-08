@@ -416,6 +416,7 @@ export const authors = pgTable("authors", {
   lastName: varchar("last_name").notNull(),
   suffix: varchar("suffix"),
   fullName: varchar("full_name").notNull(), // Computed field for easy searching
+  imageUrl: varchar("image_url"), // Author profile image URL
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
