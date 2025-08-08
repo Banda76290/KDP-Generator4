@@ -36,6 +36,7 @@ export default function AuthorViewPage() {
   const [biography, setBiography] = useState<string>("");
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingAuthor, setIsEditingAuthor] = useState(isCreating);
+  const [pendingProfileImage, setPendingProfileImage] = useState<string | null>(null);
   const [authorForm, setAuthorForm] = useState({
     prefix: "",
     firstName: "",
@@ -412,15 +413,12 @@ export default function AuthorViewPage() {
       const uploadedFile = result.successful[0];
       const uploadURL = uploadedFile.uploadURL;
       
-      if (uploadURL && authorId && !isCreating) {
-        profileImageUploadMutation.mutate({ 
-          authorId, 
-          profileImageURL: uploadURL 
-        });
-      } else {
+      if (uploadURL) {
+        // Store the uploaded image temporarily, don't save it immediately
+        setPendingProfileImage(uploadURL);
         toast({ 
-          title: "Profile image uploaded", 
-          description: "Save the author first to set the profile image",
+          title: "Image uploaded", 
+          description: "Click 'Save Changes' to apply the new profile image",
           variant: "default" 
         });
       }
@@ -439,7 +437,7 @@ export default function AuthorViewPage() {
     }
   };
 
-  // Global save function that handles both author info and biography
+  // Global save function that handles author info, biography and pending profile image
   const handleGlobalSave = () => {
     // First save author info if we're editing it
     if (isEditingAuthor || isCreating) {
@@ -450,10 +448,26 @@ export default function AuthorViewPage() {
     if (!isCreating && biography) {
       handleSaveBiography();
     }
+    
+    // Finally save the pending profile image if there's one
+    if (pendingProfileImage && authorId && !isCreating) {
+      profileImageUploadMutation.mutate({ 
+        authorId, 
+        profileImageURL: pendingProfileImage 
+      });
+      // Clear pending image after saving
+      setPendingProfileImage(null);
+    }
   };
 
   const handleAuthorFormChange = (field: keyof typeof authorForm, value: string) => {
     setAuthorForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Reset pending image when cancelling edit mode
+  const handleCancelEdit = () => {
+    setIsEditingAuthor(false);
+    setPendingProfileImage(null);
   };
 
   const handleLanguageChange = (language: string) => {
@@ -536,34 +550,61 @@ export default function AuthorViewPage() {
                           onComplete={handleUploadComplete}
                           buttonClassName="p-0 h-auto bg-transparent hover:bg-transparent border-0 shadow-none"
                         >
-                          {author?.profileImageUrl ? (
-                            <img 
-                              src={author.profileImageUrl} 
-                              alt={`${author.fullName}'s profile`}
-                              className="w-20 h-20 rounded-full object-cover border-2 border-gray-200 hover:border-blue-400 cursor-pointer transition-colors"
-                            />
-                          ) : (
-                            <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300 hover:border-blue-400 cursor-pointer transition-colors">
-                              <User className="w-8 h-8 text-gray-400" />
-                            </div>
-                          )}
+                          <div className="relative">
+                            {pendingProfileImage ? (
+                              <img 
+                                src={pendingProfileImage} 
+                                alt="Profile image preview"
+                                className="w-20 h-20 rounded-full object-cover border-2 border-orange-400 hover:border-orange-500 cursor-pointer transition-colors"
+                              />
+                            ) : author?.profileImageUrl ? (
+                              <img 
+                                src={author.profileImageUrl} 
+                                alt={`${author.fullName}'s profile`}
+                                className="w-20 h-20 rounded-full object-cover border-2 border-gray-200 hover:border-blue-400 cursor-pointer transition-colors"
+                              />
+                            ) : (
+                              <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300 hover:border-blue-400 cursor-pointer transition-colors">
+                                <User className="w-8 h-8 text-gray-400" />
+                              </div>
+                            )}
+                            {pendingProfileImage && (
+                              <div className="absolute -top-1 -right-1 w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                                !
+                              </div>
+                            )}
+                          </div>
                         </ObjectUploader>
                       </div>
-                    ) : !isCreating && author?.profileImageUrl ? (
-                      <img 
-                        src={author.profileImageUrl} 
-                        alt={`${author.fullName}'s profile`}
-                        className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
-                      />
+                    ) : !isCreating && (pendingProfileImage || author?.profileImageUrl) ? (
+                      <div className="relative">
+                        <img 
+                          src={pendingProfileImage || author?.profileImageUrl} 
+                          alt={`${author?.fullName}'s profile`}
+                          className={`w-20 h-20 rounded-full object-cover border-2 ${
+                            pendingProfileImage ? 'border-orange-400' : 'border-gray-200'
+                          }`}
+                        />
+                        {pendingProfileImage && (
+                          <div className="absolute -top-1 -right-1 w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                            !
+                          </div>
+                        )}
+                      </div>
                     ) : (
                       <User className="w-5 h-5" />
                     )}
                     Author Information
+                    {pendingProfileImage && (
+                      <span className="text-sm text-orange-600 font-medium ml-2">
+                        (New image pending)
+                      </span>
+                    )}
                   </CardTitle>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setIsEditingAuthor(!isEditingAuthor)}
+                    onClick={isEditingAuthor ? handleCancelEdit : () => setIsEditingAuthor(true)}
                     disabled={isCreating}
                   >
                     <Edit3 className="w-4 h-4 mr-1" />
