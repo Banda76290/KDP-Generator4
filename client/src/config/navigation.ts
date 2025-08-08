@@ -18,14 +18,16 @@ import {
   MessageSquare,
   DollarSign,
   Target,
-  Star
+  Star,
+  Megaphone
 } from "lucide-react";
 
 interface NavigationItem {
   name: string;
-  href: string;
+  href?: string;
   icon: LucideIcon;
   badge?: string;
+  children?: NavigationItem[];
 }
 
 export const navigation: NavigationItem[] = [
@@ -33,10 +35,16 @@ export const navigation: NavigationItem[] = [
   { name: "Projects", href: "/projects", icon: FolderOpen },
   { name: "Books", href: "/books", icon: FileText },
   { name: "Authors & Contributors", href: "/authors", icon: User },
-  { name: "A+ Content", href: "/a-content", icon: Star },
-  { name: "Amazon Ads", href: "/amazon-ads", icon: Target },
   { name: "Series", href: "/manage-series", icon: Tags },
-  { name: "Sales Analytics", href: "/analytics", icon: TrendingUp },
+  { 
+    name: "Marketing", 
+    icon: Megaphone, 
+    children: [
+      { name: "Sales Analytics", href: "/analytics", icon: TrendingUp },
+      { name: "A+ Content", href: "/a-content", icon: Star },
+      { name: "Amazon Ads", href: "/amazon-ads", icon: Target },
+    ]
+  },
   { name: "Livres Maîtres", href: "/master-books", icon: FileText, badge: "ASIN" },
   { name: "Exchange Rates", href: "/exchange-rates", icon: DollarSign },
   { name: "KDP Reports", href: "/kdp-reports", icon: Upload },
