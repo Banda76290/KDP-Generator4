@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
@@ -11,8 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Edit3, Save, BookOpen, FolderOpen, Trash2, User } from "lucide-react";
+import { ArrowLeft, Edit3, Save, BookOpen, FolderOpen, Trash2, User, Upload, Camera } from "lucide-react";
 import type { AuthorWithRelations, ProjectWithRelations, Book } from "@shared/schema";
+import { ObjectUploader } from "@/components/ObjectUploader";
+import type { UploadResult } from "@uppy/core";
 
 const LANGUAGES = [
   { value: "English", label: "English" },
@@ -34,12 +36,40 @@ export default function AuthorViewPage() {
   const [biography, setBiography] = useState<string>("");
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingAuthor, setIsEditingAuthor] = useState(isCreating);
+  const [pendingProfileImage, setPendingProfileImage] = useState<string | null>(null);
+  
+  // Debug pending profile image
+  useEffect(() => {
+    console.log("Pending profile image state changed:", pendingProfileImage);
+  }, [pendingProfileImage]);
   const [authorForm, setAuthorForm] = useState({
     prefix: "",
     firstName: "",
     middleName: "",
     lastName: "",
     suffix: ""
+  });
+
+  // Profile image upload mutations
+  const profileImageUploadMutation = useMutation({
+    mutationFn: async ({ authorId, profileImageURL }: { authorId: string; profileImageURL: string }) => {
+      const response = await fetch(`/api/authors/${authorId}/profile-image`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ profileImageURL }),
+      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId] });
+      toast({ title: "Profile image updated successfully", variant: "success" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update profile image", variant: "destructive" });
+    },
   });
 
   // Fetch author details (disabled if creating)
@@ -249,7 +279,7 @@ export default function AuthorViewPage() {
 
   // Create author mutation (for creation mode)
   const createAuthorMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("POST", "/api/authors", data),
+    mutationFn: (data: any) => apiRequest("/api/authors", { method: "POST", body: JSON.stringify(data) }),
     onSuccess: (newAuthor) => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors"] });
       toast({ title: "Author created successfully", variant: "success" });
@@ -282,9 +312,17 @@ export default function AuthorViewPage() {
 
   // Update biography mutation
   const updateBiographyMutation = useMutation({
-    mutationFn: ({ biography, newAuthorId }: { biography: string; newAuthorId?: string }) => {
+    mutationFn: async ({ biography, newAuthorId }: { biography: string; newAuthorId?: string }) => {
       const targetAuthorId = newAuthorId || authorId;
-      return apiRequest("PUT", `/api/authors/${targetAuthorId}/biography/${selectedLanguage}`, { biography });
+      const response = await fetch(`/api/authors/${targetAuthorId}/biography/${selectedLanguage}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ biography }),
+      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return response.json();
     },
     onSuccess: (_, variables) => {
       if (variables.newAuthorId) {
@@ -326,11 +364,11 @@ export default function AuthorViewPage() {
   // Update author mutation
   const updateAuthorMutation = useMutation({
     mutationFn: (authorData: typeof authorForm) =>
-      apiRequest("PUT", `/api/authors/${authorId}`, authorData),
+      apiRequest(`/api/authors/${authorId}`, { method: "PUT", body: JSON.stringify(authorData) }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId] });
       setIsEditingAuthor(false);
-      toast({ title: "Author updated successfully" });
+      toast({ title: "Author updated successfully", variant: "success" });
       
       // Check if we need to return to book edit page (like in series-edit.tsx)
       const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
@@ -351,10 +389,10 @@ export default function AuthorViewPage() {
 
   // Delete author mutation
   const deleteAuthorMutation = useMutation({
-    mutationFn: () => apiRequest("DELETE", `/api/authors/${authorId}`),
+    mutationFn: () => apiRequest(`/api/authors/${authorId}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors"] });
-      toast({ title: "Author deleted successfully" });
+      toast({ title: "Author deleted successfully", variant: "success" });
       setLocation("/authors");
     },
     onError: () => {
@@ -364,6 +402,44 @@ export default function AuthorViewPage() {
 
   const handleSaveBiography = () => {
     updateBiographyMutation.mutate({ biography });
+  };
+
+  // Handle profile image upload
+  const handleGetUploadParameters = async () => {
+    const response = await apiRequest("/api/objects/upload", { method: "POST" });
+    return {
+      method: "PUT" as const,
+      url: response.uploadURL,
+    };
+  };
+
+  const handleUploadComplete = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    console.log("Upload result:", result);
+    if (result.successful && result.successful.length > 0) {
+      const uploadedFile = result.successful[0];
+      const uploadURL = uploadedFile.uploadURL;
+      
+      console.log("Upload URL:", uploadURL);
+      
+      if (uploadURL) {
+        // Convert Google Storage URL to our object path
+        // URL format: https://storage.googleapis.com/bucket/.private/uploads/id
+        // Convert to: /objects/uploads/id
+        const urlParts = uploadURL.split('/.private/');
+        const objectPath = urlParts.length > 1 ? `/objects/${urlParts[1]}` : uploadURL;
+        
+        console.log("Converted to object path:", objectPath);
+        
+        // Store the uploaded image temporarily, don't save it immediately
+        setPendingProfileImage(objectPath);
+        console.log("Set pending profile image to:", objectPath);
+        toast({ 
+          title: "Image uploaded", 
+          description: "Click 'Save Changes' to apply the new profile image",
+          variant: "default" 
+        });
+      }
+    }
   };
 
   const handleSaveAuthor = () => {
@@ -378,8 +454,37 @@ export default function AuthorViewPage() {
     }
   };
 
+  // Global save function that handles author info, biography and pending profile image
+  const handleGlobalSave = () => {
+    // First save author info if we're editing it
+    if (isEditingAuthor || isCreating) {
+      handleSaveAuthor();
+    }
+    
+    // Then save biography if we're not creating and there's content
+    if (!isCreating && biography) {
+      handleSaveBiography();
+    }
+    
+    // Finally save the pending profile image if there's one
+    if (pendingProfileImage && authorId && !isCreating) {
+      profileImageUploadMutation.mutate({ 
+        authorId, 
+        profileImageURL: pendingProfileImage 
+      });
+      // Clear pending image after saving
+      setPendingProfileImage(null);
+    }
+  };
+
   const handleAuthorFormChange = (field: keyof typeof authorForm, value: string) => {
     setAuthorForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Reset pending image when cancelling edit mode
+  const handleCancelEdit = () => {
+    setIsEditingAuthor(false);
+    setPendingProfileImage(null);
   };
 
   const handleLanguageChange = (language: string) => {
@@ -442,33 +547,7 @@ export default function AuthorViewPage() {
               <p className="text-gray-600">Author profile and multilingual biographies</p>
             </div>
           </div>
-          {!isCreating && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete Author
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Author</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to delete "{author?.fullName}"? This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => deleteAuthorMutation.mutate()}
-                    className="bg-destructive hover:bg-destructive/90"
-                  >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
+
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -478,14 +557,66 @@ export default function AuthorViewPage() {
             <Card className="border-2" style={{ borderColor: 'var(--kdp-primary-blue)', backgroundColor: '#f0f8ff' }}>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="w-5 h-5" />
+                  <CardTitle className="flex items-center gap-3">
+                    {!isCreating && isEditingAuthor ? (
+                      <div className="relative">
+                        <ObjectUploader
+                          maxNumberOfFiles={1}
+                          maxFileSize={5242880} // 5MB
+                          onGetUploadParameters={handleGetUploadParameters}
+                          onComplete={handleUploadComplete}
+                          buttonClassName="p-0 h-auto bg-transparent hover:bg-transparent border-0 shadow-none"
+                        >
+                          <div className="relative">
+                            {pendingProfileImage ? (
+                              <img 
+                                src={pendingProfileImage} 
+                                alt="Profile image preview"
+                                className="w-20 h-20 rounded-full object-cover border-2 border-orange-400 hover:border-orange-500 cursor-pointer transition-colors"
+                              />
+                            ) : author?.profileImageUrl ? (
+                              <img 
+                                src={author.profileImageUrl} 
+                                alt={`${author.fullName}'s profile`}
+                                className="w-20 h-20 rounded-full object-cover border-2 border-gray-200 hover:border-blue-400 cursor-pointer transition-colors"
+                              />
+                            ) : (
+                              <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300 hover:border-blue-400 cursor-pointer transition-colors">
+                                <User className="w-8 h-8 text-gray-400" />
+                              </div>
+                            )}
+                            {pendingProfileImage && (
+                              <div className="absolute -top-1 -right-1 w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                                !
+                              </div>
+                            )}
+                          </div>
+                        </ObjectUploader>
+                      </div>
+                    ) : !isCreating && (pendingProfileImage || author?.profileImageUrl) ? (
+                      <div className="relative">
+                        <img 
+                          src={pendingProfileImage || author?.profileImageUrl} 
+                          alt={`${author?.fullName}'s profile`}
+                          className={`w-20 h-20 rounded-full object-cover border-2 ${
+                            pendingProfileImage ? 'border-orange-400' : 'border-gray-200'
+                          }`}
+                        />
+                        {pendingProfileImage && (
+                          <div className="absolute -top-1 -right-1 w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                            !
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <User className="w-5 h-5" />
+                    )}
                     Author Information
                   </CardTitle>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setIsEditingAuthor(!isEditingAuthor)}
+                    onClick={isEditingAuthor ? handleCancelEdit : () => setIsEditingAuthor(true)}
                     disabled={isCreating}
                   >
                     <Edit3 className="w-4 h-4 mr-1" />
@@ -549,19 +680,9 @@ export default function AuthorViewPage() {
                       </div>
                     </div>
 
-                    <div className="flex justify-end pt-4">
-                      <Button 
-                        onClick={handleSaveAuthor} 
-                        disabled={isCreating ? createAuthorMutation.isPending : updateAuthorMutation.isPending || !authorForm.firstName || !authorForm.lastName}
-                        className="kdp-btn-primary"
-                      >
-                        <Save className="w-4 h-4 mr-2" />
-                        {isCreating 
-                          ? (createAuthorMutation.isPending ? "Creating..." : "Create Author")
-                          : (updateAuthorMutation.isPending ? "Saving..." : "Save Author Info")
-                        }
-                      </Button>
-                    </div>
+
+
+
                   </>
                 ) : (
                   <div className="space-y-2">
@@ -700,16 +821,7 @@ export default function AuthorViewPage() {
                     </div>
                   </div>
 
-                  <div className="flex justify-end">
-                    <Button 
-                      onClick={handleSaveBiography} 
-                      disabled={updateBiographyMutation.isPending}
-                      className="kdp-btn-primary"
-                    >
-                      <Save className="w-4 h-4 mr-2" />
-                      {updateBiographyMutation.isPending ? "Saving..." : "Save Biography"}
-                    </Button>
-                  </div>
+
                 </div>
               )}
               </CardContent>
@@ -798,6 +910,63 @@ export default function AuthorViewPage() {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Global Action Buttons - Bottom of page */}
+        <div className="flex justify-end items-center gap-3 mt-8">
+          {!isCreating && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="destructive" 
+                  size="lg"
+                  className="shadow-lg"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Author
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Author</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete "{author?.fullName}"? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => deleteAuthorMutation.mutate()}
+                    className="bg-destructive hover:bg-destructive/90"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+          
+          <Button 
+            onClick={handleGlobalSave}
+            disabled={
+              (isCreating ? createAuthorMutation.isPending : updateAuthorMutation.isPending) ||
+              updateBiographyMutation.isPending ||
+              (isCreating && (!authorForm.firstName || !authorForm.lastName))
+            }
+            size="lg"
+            className="shadow-lg"
+            style={{ 
+              backgroundColor: 'var(--kdp-secondary-orange)', 
+              color: 'white',
+              border: 'none'
+            }}
+          >
+            <Save className="w-4 h-4 mr-2" />
+            {isCreating ? 
+              (createAuthorMutation.isPending ? "Creating..." : "Create Author") :
+              ((updateAuthorMutation.isPending || updateBiographyMutation.isPending) ? "Saving..." : "Save Changes")
+            }
+          </Button>
         </div>
       </div>
     </Layout>

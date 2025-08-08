@@ -17,6 +17,11 @@ import fs from 'fs';
 import { seedDatabase, forceSeedDatabase } from "./seedDatabase.js";
 import { z } from "zod";
 import OpenAI from "openai";
+import {
+  ObjectStorageService,
+  ObjectNotFoundError,
+} from "./objectStorage";
+import { ObjectPermission } from "./objectAcl";
 
 // Global logs storage for persistent logging
 interface LogEntry {
@@ -1706,6 +1711,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching author books:", error);
       res.status(500).json({ message: "Failed to fetch author books" });
+    }
+  });
+
+  // Object Storage routes for image uploads
+  
+  // Endpoint for serving public assets
+  app.get("/public-objects/:filePath(*)", async (req, res) => {
+    const filePath = req.params.filePath;
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const file = await objectStorageService.searchPublicObject(filePath);
+      if (!file) {
+        return res.status(404).json({ error: "File not found" });
+      }
+      objectStorageService.downloadObject(file, res);
+    } catch (error) {
+      console.error("Error searching for public object:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Endpoint for serving private objects (with ACL check)
+  app.get("/objects/:objectPath(*)", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    const userId = req.user?.claims?.sub;
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const objectFile = await objectStorageService.getObjectEntityFile(
+        req.path,
+      );
+      
+      // For newly uploaded images in uploads folder, allow access to authenticated user
+      if (req.path.includes('/uploads/')) {
+        // Allow temporary access for uploaded images (before ACL is set)
+        return objectStorageService.downloadObject(objectFile, res);
+      }
+      
+      // For other objects, check ACL policy
+      const canAccess = await objectStorageService.canAccessObjectEntity({
+        objectFile,
+        userId: userId,
+        requestedPermission: ObjectPermission.READ,
+      });
+      
+      if (!canAccess) {
+        return res.sendStatus(401);
+      }
+      objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      console.error("Error checking object access:", error);
+      if (error instanceof ObjectNotFoundError) {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
+    }
+  });
+
+  // Endpoint for getting upload URL for author profile images
+  app.post("/api/objects/upload", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error("Error getting upload URL:", error);
+      res.status(500).json({ error: "Failed to generate upload URL" });
+    }
+  });
+
+  // Endpoint for setting author profile image after upload
+  app.put("/api/authors/:authorId/profile-image", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    console.log("Profile image request body:", req.body);
+    console.log("Profile image request body type:", typeof req.body);
+    
+    if (!req.body.profileImageURL) {
+      return res.status(400).json({ error: "profileImageURL is required" });
+    }
+
+    const userId = req.user?.claims?.sub;
+    const { authorId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
+    try {
+      // Verify user owns the author
+      const author = await storage.getAuthor(authorId, userId);
+      if (!author) {
+        return res.status(404).json({ message: "Author not found" });
+      }
+
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
+        req.body.profileImageURL,
+        {
+          owner: userId,
+          visibility: "public", // Author profile images are public
+        },
+      );
+
+      // Update author with profile image URL
+      const updatedAuthor = await storage.updateAuthor(authorId, userId, {
+        profileImageUrl: objectPath
+      });
+
+      res.status(200).json({
+        message: "Profile image updated successfully",
+        author: updatedAuthor,
+        objectPath: objectPath,
+      });
+    } catch (error) {
+      console.error("Error setting profile image:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 
