@@ -1,0 +1,95 @@
+objectif
+faire réussir la phase “database migration” sans modifier package.json ni .replit, en s’assurant que drizzle-kit (devDependency) est installé pendant le déploiement.
+
+contraintes à respecter
+ne pas éditer package.json, .replit ni les scripts existants.
+
+rester sur le flux standard build → database migration (auto) → start.
+
+plan d’action (zéro modif des fichiers protégés)
+forcer l’installation des devDependencies pendant le déploiement
+
+ajoute exclusivement via configuration (pas dans les fichiers) la variable d’environnement :
+
+NPM_CONFIG_PRODUCTION=false
+
+vérifie aussi que rien ne force npm ci --omit=dev côté déploiement.
+
+montre la version npm et l’état des flags :
+
+bash
+Copier
+Modifier
+npm -v
+node -v
+npm config get production
+npm config get omit
+je veux voir production = false.
+
+vérifier que drizzle-kit existe dans l’environnement de déploiement
+
+après l’étape d’installation, exécute :
+
+bash
+Copier
+Modifier
+npx drizzle-kit --version
+puis un “smoke test” de la migration (sans rien changer à la config) :
+
+bash
+Copier
+Modifier
+npx drizzle-kit push --verbose --config=drizzle.config.ts || true
+l’objectif est juste de confirmer que la commande existe et se connecte à la DB.
+note : la base contient déjà 31 tables et le dossier ./migrations ne contient que meta/_journal.json, donc push ne doit rien appliquer et réussir.
+
+relancer un déploiement standard
+
+build command : npm run build (inchangé)
+
+database migration : auto-détection (laisser replit faire)
+
+start command : npm run start (inchangé)
+
+fournis les 150 dernières lignes des logs de la phase “database migration” puis du start.
+
+si la phase de migration échoue encore alors que drizzle-kit est présent
+
+affiche l’erreur exacte de drizzle-kit push (message brut).
+
+si l’erreur dit que la config ts n’est pas chargée, exporte les infos suivantes sans modifier de fichiers :
+
+contenu de drizzle.config.ts (pour lecture),
+
+résultat de :
+
+bash
+Copier
+Modifier
+node -e "console.log('type module:',require('fs').readFileSync('package.json','utf8').includes('\"type\": \"module\"'))"
+npm ls tsx --depth=0 || true
+si l’erreur est uniquement “aucune migration à appliquer”, considère la phase réussie.
+
+aucun fallback qui modifie le repo
+
+ne pas déplacer drizzle-kit dans dependencies,
+
+ne pas éditer package.json,
+
+ne pas renommer drizzle.config.ts.
+
+critères de succès
+npx drizzle-kit --version fonctionne en environnement de déploiement,
+
+la phase “database migration” s’exécute sans erreur (même si elle n’applique rien),
+
+le start se lance ensuite (node dist/index.js) et l’app répond.
+
+en sortie, je veux
+la preuve que NPM_CONFIG_PRODUCTION=false est bien pris en compte,
+
+la version de drizzle-kit,
+
+l’extrait de logs de la phase migration montrant qu’elle passe,
+
+puis les premières lignes du start (port d’écoute).
