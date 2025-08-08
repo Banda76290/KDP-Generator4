@@ -37,6 +37,11 @@ export default function AuthorViewPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingAuthor, setIsEditingAuthor] = useState(isCreating);
   const [pendingProfileImage, setPendingProfileImage] = useState<string | null>(null);
+  
+  // Debug pending profile image
+  useEffect(() => {
+    console.log("Pending profile image state changed:", pendingProfileImage);
+  }, [pendingProfileImage]);
   const [authorForm, setAuthorForm] = useState({
     prefix: "",
     firstName: "",
@@ -409,13 +414,17 @@ export default function AuthorViewPage() {
   };
 
   const handleUploadComplete = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    console.log("Upload result:", result);
     if (result.successful && result.successful.length > 0) {
       const uploadedFile = result.successful[0];
       const uploadURL = uploadedFile.uploadURL;
       
+      console.log("Upload URL:", uploadURL);
+      
       if (uploadURL) {
         // Store the uploaded image temporarily, don't save it immediately
         setPendingProfileImage(uploadURL);
+        console.log("Set pending profile image to:", uploadURL);
         toast({ 
           title: "Image uploaded", 
           description: "Click 'Save Changes' to apply the new profile image",
