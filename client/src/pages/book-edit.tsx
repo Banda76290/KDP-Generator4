@@ -583,7 +583,10 @@ const CategorySelector = ({ marketplaceCategories, selectedCategories, tempUISel
 export default function EditBook() {
   const { bookId } = useParams();
   const [location, setLocation] = useLocation();
+  // Contributors state - Enhanced UX similar to Authors
   const [contributors, setContributors] = useState<Contributor[]>([]);
+  const [selectedContributorIds, setSelectedContributorIds] = useState<string[]>([]);
+  const [contributorsExplicitlyRemoved, setContributorsExplicitlyRemoved] = useState<boolean[]>([]);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState("details");
@@ -1272,6 +1275,15 @@ export default function EditBook() {
     }
   }, [authors, book, hasRestoredFromStorage, selectedAuthorId, authorExplicitlyRemoved]);
 
+  // Auto-detect contributors from book data when authors and book are loaded
+  useEffect(() => {
+    if (authors.length > 0 && book && !hasRestoredFromStorage && contributors.length === 0) {
+      // Check if book has any existing contributors that should be auto-detected
+      // This will be implemented when we add contributor data to the book schema
+      console.log('Contributor auto-detection placeholder - ready for future implementation');
+    }
+  }, [authors, book, hasRestoredFromStorage, contributors.length]);
+
   const saveBook = useMutation({
     mutationFn: async (data: { bookData: BookFormData; shouldNavigate?: boolean; nextTab?: string }) => {
       const formattedData = {
@@ -1424,7 +1436,10 @@ export default function EditBook() {
     },
   });
 
-  const addContributor = () => {
+  // Enhanced contributor functions with author-like UX
+  const addNewContributor = () => {
+    if (contributors.length >= 9) return;
+    
     const newContributor: Contributor = {
       id: Date.now().toString(),
       role: "Author",
@@ -1435,16 +1450,77 @@ export default function EditBook() {
       suffix: "",
     };
     setContributors([...contributors, newContributor]);
+    setSelectedContributorIds([...selectedContributorIds, ""]);
+    setContributorsExplicitlyRemoved([...contributorsExplicitlyRemoved, false]);
   };
 
-  const updateContributor = (id: string, field: keyof Contributor, value: string) => {
-    setContributors(contributors.map(c => 
-      c.id === id ? { ...c, [field]: value } : c
-    ));
+  const handleContributorSelection = (index: number, authorId: string) => {
+    if (authorId && authors) {
+      const selectedAuthor = authors.find(author => author.id === authorId);
+      if (selectedAuthor) {
+        // Reset explicitly removed flag
+        const newExplicitlyRemoved = [...contributorsExplicitlyRemoved];
+        newExplicitlyRemoved[index] = false;
+        setContributorsExplicitlyRemoved(newExplicitlyRemoved);
+        
+        // Update selected contributor ID
+        const newSelectedIds = [...selectedContributorIds];
+        newSelectedIds[index] = authorId;
+        setSelectedContributorIds(newSelectedIds);
+        
+        // Update contributor data with selected author
+        const newContributors = [...contributors];
+        newContributors[index] = {
+          ...newContributors[index],
+          prefix: selectedAuthor.prefix || "",
+          firstName: selectedAuthor.firstName || "",
+          middleName: selectedAuthor.middleName || "",
+          lastName: selectedAuthor.lastName || "",
+          suffix: selectedAuthor.suffix || "",
+        };
+        setContributors(newContributors);
+      }
+    }
   };
 
-  const removeContributor = (id: string) => {
-    setContributors(contributors.filter(c => c.id !== id));
+  const removeContributorSelection = (index: number) => {
+    // Mark as explicitly removed
+    const newExplicitlyRemoved = [...contributorsExplicitlyRemoved];
+    newExplicitlyRemoved[index] = true;
+    setContributorsExplicitlyRemoved(newExplicitlyRemoved);
+    
+    // Clear selection
+    const newSelectedIds = [...selectedContributorIds];
+    newSelectedIds[index] = "";
+    setSelectedContributorIds(newSelectedIds);
+    
+    // Clear contributor data
+    const newContributors = [...contributors];
+    newContributors[index] = {
+      ...newContributors[index],
+      prefix: "",
+      firstName: "",
+      middleName: "",
+      lastName: "",
+      suffix: "",
+    };
+    setContributors(newContributors);
+  };
+
+  const deleteContributor = (index: number) => {
+    const newContributors = contributors.filter((_, i) => i !== index);
+    const newSelectedIds = selectedContributorIds.filter((_, i) => i !== index);
+    const newExplicitlyRemoved = contributorsExplicitlyRemoved.filter((_, i) => i !== index);
+    
+    setContributors(newContributors);
+    setSelectedContributorIds(newSelectedIds);
+    setContributorsExplicitlyRemoved(newExplicitlyRemoved);
+  };
+
+  const updateContributorRole = (index: number, role: string) => {
+    const newContributors = [...contributors];
+    newContributors[index] = { ...newContributors[index], role };
+    setContributors(newContributors);
   };
 
   // Function to handle author selection from dropdown
@@ -2538,88 +2614,175 @@ export default function EditBook() {
                     )}
                   </div>
 
-                  {/* Contributors Section */}
-                  <div className="space-y-4">
+                  {/* Contributors Section - Enhanced UX */}
+                  <div className="space-y-6">
                     <div>
                       <Label className="font-medium text-[16px]">Contributors</Label>
                       <p className="text-sm text-gray-600 mt-1">
-                        Add up to 9 contributors. They'll display on Amazon using the order you enter below.
+                        Add up to 9 contributors with their roles. They'll display on Amazon using the order you enter below.
                       </p>
                     </div>
                     
-                    <div>
-                      <Label className="font-medium text-[14px]">Contributors <span className="text-sm font-normal text-gray-500">(Optional)</span></Label>
+                    {/* Contributor List */}
+                    <div className="space-y-4">
+                      {contributors.map((contributor, index) => {
+                        const selectedContributorId = selectedContributorIds[index] || "";
+                        const contributorExplicitlyRemoved = contributorsExplicitlyRemoved[index] || false;
+                        
+                        return (
+                          <div key={contributor.id} className="space-y-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-8 bg-blue-100 rounded flex items-center justify-center text-sm font-medium text-blue-600">
+                                {index + 1}
+                              </div>
+                              
+                              {/* Role Selection */}
+                              <div className="min-w-[140px]">
+                                <Select 
+                                  value={contributor.role} 
+                                  onValueChange={(value) => updateContributorRole(index, value)}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Role" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="Author">Author</SelectItem>
+                                    <SelectItem value="Editor">Editor</SelectItem>
+                                    <SelectItem value="Foreword">Foreword</SelectItem>
+                                    <SelectItem value="Illustrator">Illustrator</SelectItem>
+                                    <SelectItem value="Introduction">Introduction</SelectItem>
+                                    <SelectItem value="Narrator">Narrator</SelectItem>
+                                    <SelectItem value="Photographer">Photographer</SelectItem>
+                                    <SelectItem value="Preface">Preface</SelectItem>
+                                    <SelectItem value="Translator">Translator</SelectItem>
+                                    <SelectItem value="Contributions by">Contributions by</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              
+                              {/* Author/Contributor Selection or Display */}
+                              {selectedContributorId ? (
+                                // Show selected contributor with edit/remove buttons
+                                <div className="flex-1 p-3 rounded-md border border-green-200 bg-[#f9fafb]">
+                                  <div className="flex items-center justify-between">
+                                    <div className="text-base font-medium text-gray-900">
+                                      {authors.find(a => a.id === selectedContributorId)?.fullName || "Unknown Contributor"}
+                                    </div>
+                                    <div className="flex gap-2">
+                                      <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                          const selectedContributor = authors.find(a => a.id === selectedContributorId);
+                                          if (selectedContributor) {
+                                            sessionStorage.setItem('returnToBookEdit', bookId || 'new');
+                                            saveFormDataToSession();
+                                            setLocation(`/authors/${selectedContributor.id}`);
+                                          }
+                                        }}
+                                      >
+                                        Edit details
+                                      </Button>
+                                      <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                          <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                          >
+                                            Remove
+                                          </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                          <AlertDialogHeader>
+                                            <AlertDialogTitle>Remove contributor from book</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                              Are you sure you want to remove this contributor from the book? This action cannot be undone.
+                                            </AlertDialogDescription>
+                                          </AlertDialogHeader>
+                                          <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction
+                                              onClick={() => removeContributorSelection(index)}
+                                              className="bg-destructive hover:bg-destructive/90"
+                                            >
+                                              Remove contributor
+                                            </AlertDialogAction>
+                                          </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                      </AlertDialog>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                // Show contributor selection dropdown
+                                <div className="flex-1 flex gap-2">
+                                  <div className="flex-1">
+                                    <Select 
+                                      value={selectedContributorId} 
+                                      onValueChange={(authorId) => handleContributorSelection(index, authorId)}
+                                    >
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select existing contributor..." />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {authors.length > 0 ? (
+                                          authors.map((author) => (
+                                            <SelectItem key={author.id} value={author.id}>
+                                              {author.fullName}
+                                            </SelectItem>
+                                          ))
+                                        ) : (
+                                          <SelectItem value="no-contributors" disabled>
+                                            No contributors available - Create one first
+                                          </SelectItem>
+                                        )}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <Button 
+                                    type="button" 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => {
+                                      sessionStorage.setItem('returnToBookEdit', bookId || 'new');
+                                      saveFormDataToSession();
+                                      window.location.href = '/authors/create';
+                                    }}
+                                  >
+                                    Create contributor
+                                  </Button>
+                                </div>
+                              )}
+                              
+                              {/* Delete Contributor Button */}
+                              <Button 
+                                type="button" 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => deleteContributor(index)}
+                                className="text-gray-600 hover:text-red-600"
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
                       
-                      {contributors.map((contributor, index) => (
-                    <div key={contributor.id} className="grid grid-cols-7 gap-3 mt-2 items-center">
-                      <Select 
-                        value={contributor.role} 
-                        onValueChange={(value) => updateContributor(contributor.id, 'role', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Role" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Author">Author</SelectItem>
-                          <SelectItem value="Editor">Editor</SelectItem>
-                          <SelectItem value="Foreword">Foreword</SelectItem>
-                          <SelectItem value="Illustrator">Illustrator</SelectItem>
-                          <SelectItem value="Introduction">Introduction</SelectItem>
-                          <SelectItem value="Narrator">Narrator</SelectItem>
-                          <SelectItem value="Photographer">Photographer</SelectItem>
-                          <SelectItem value="Preface">Preface</SelectItem>
-                          <SelectItem value="Translator">Translator</SelectItem>
-                          <SelectItem value="Contributions by">Contributions by</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Input
-                        placeholder="Prefix"
-                        value={contributor.prefix || ""}
-                        onChange={(e) => updateContributor(contributor.id, 'prefix', e.target.value)}
-                      />
-                      <Input
-                        placeholder="First name"
-                        value={contributor.firstName}
-                        onChange={(e) => updateContributor(contributor.id, 'firstName', e.target.value)}
-                      />
-                      <Input
-                        placeholder="Middle name"
-                        value={contributor.middleName || ""}
-                        onChange={(e) => updateContributor(contributor.id, 'middleName', e.target.value)}
-                      />
-                      <Input
-                        placeholder="Last name"
-                        value={contributor.lastName}
-                        onChange={(e) => updateContributor(contributor.id, 'lastName', e.target.value)}
-                      />
-                      <Input
-                        placeholder="Suffix"
-                        value={contributor.suffix || ""}
-                        onChange={(e) => updateContributor(contributor.id, 'suffix', e.target.value)}
-                      />
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => removeContributor(contributor.id)}
-                        className="text-gray-600 hover:text-red-600"
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  ))}
-                  
-                  {contributors.length < 9 && (
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={addContributor}
-                      className="mt-3"
-                    >
-                      Add Another
-                    </Button>
-                  )}
+                      {/* Add New Contributor Button */}
+                      {contributors.length < 9 && (
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={addNewContributor}
+                          className="mt-3"
+                        >
+                          Add New Contributor
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
