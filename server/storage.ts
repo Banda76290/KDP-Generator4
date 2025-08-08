@@ -2888,7 +2888,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(amazonAdsPerformance)
       .where(eq(amazonAdsPerformance.campaignId, campaignId))
-      .orderBy(desc(amazonAdsPerformance.date));
+      .orderBy(desc(amazonAdsPerformance.reportDate));
   }
 
   async createAmazonAdsPerformance(performanceData: InsertAmazonAdsPerformance): Promise<AmazonAdsPerformance> {
