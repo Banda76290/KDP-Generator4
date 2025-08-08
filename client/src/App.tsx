@@ -44,7 +44,8 @@ import AuthorViewPage from "@/pages/author-view";
 import ImportManagement from "@/pages/ImportManagement";
 import RoyaltiesEstimatorTest from "@/pages/royalties-estimator-test";
 import ExchangeRates from "@/pages/ExchangeRates";
-import MasterBooksPage from "@/pages/master-books";
+import KdpGenMethodPage from "@/pages/kdp-gen-method";
+
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -69,13 +70,14 @@ function Router() {
       <Route path="/series-setup/:seriesId" component={SeriesSetup} />
       <Route path="/series-edit/:seriesId" component={SeriesEdit} />
       <Route path="/analytics" component={Analytics} />
-      <Route path="/master-books" component={MasterBooksPage} />
+
       <Route path="/exchange-rates" component={ExchangeRates} />
       <Route path="/kdp-reports" component={KDPReports} />
       <Route path="/import-management" component={ImportManagement} />
       <Route path="/royalties-estimator-test" component={RoyaltiesEstimatorTest} />
       <Route path="/ai-assistant" component={AIAssistant} />
       <Route path="/ai-functions" component={AIFunctions} />
+      <Route path="/kdp-gen-method" component={KdpGenMethodPage} />
       <Route path="/admin/ai-variables" component={AIVariables} />
       <Route path="/subscription" component={Subscription} />
       <Route path="/settings" component={Settings} />

@@ -2646,29 +2646,7 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  // Master Books operations
-  async getMasterBooks(userId: string): Promise<MasterBook[]> {
-    return await db.select()
-      .from(masterBooks)
-      .where(eq(masterBooks.userId, userId))
-      .orderBy(sql`${masterBooks.totalRoyaltiesUSD} DESC`);
-  }
 
-  async getMasterBookByAsin(asin: string): Promise<MasterBook | null> {
-    const result = await db.select()
-      .from(masterBooks)
-      .where(eq(masterBooks.asin, asin))
-      .limit(1);
-    
-    return result[0] || null;
-  }
-
-  async updateMasterBooksFromImport(userId: string, importId: string): Promise<void> {
-    // Import du service MasterBooks
-    const { MasterBooksService } = await import('./services/masterBooksService');
-    await MasterBooksService.init();
-    await MasterBooksService.updateFromImportData(userId, importId);
-  }
 
   // Clear all KDP royalties estimator data for user before full historical import
   async clearAllKdpRoyaltiesEstimatorData(userId: string): Promise<number> {
@@ -2888,7 +2866,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(amazonAdsPerformance)
       .where(eq(amazonAdsPerformance.campaignId, campaignId))
-      .orderBy(desc(amazonAdsPerformance.date));
+      .orderBy(desc(amazonAdsPerformance.reportDate));
   }
 
   async createAmazonAdsPerformance(performanceData: InsertAmazonAdsPerformance): Promise<AmazonAdsPerformance> {
