@@ -52,13 +52,12 @@ export const navigation: NavigationItem[] = [
       { name: "Amazon Ads", href: "/amazon-ads", icon: Target },
     ]
   },
-
+  { name: "Livres Maîtres", href: "/master-books", icon: FileText, badge: "ASIN" },
   { name: "Exchange Rates", href: "/exchange-rates", icon: DollarSign },
   { name: "KDP Reports", href: "/kdp-reports", icon: Upload },
   { name: "Import Management", href: "/import-management", icon: Download, badge: "NEW" },
   { name: "AI Assistant", href: "/ai-assistant", icon: Bot, badge: "PRO" },
   { name: "AI Functions", href: "/ai-functions", icon: Zap, badge: "NEW" },
-  { name: "KDP Gen Method Pro Assist", href: "/kdp-gen-method", icon: Bot, badge: "PRO" },
 ];
 
 export const accountNavigation: NavigationItem[] = [
