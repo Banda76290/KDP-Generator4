@@ -96,7 +96,6 @@ The application follows a modern full-stack architecture with clear separation b
 - **Toast Notification Standards Enforcement**: Complete audit and correction of all toast notifications across the application to enforce mandatory CSS standards. Success toasts now use `variant: "success"` with green theme, error toasts use `variant: "destructive"` with red theme, and warning/info toasts use `variant: "default"` with blue theme. Fixed author creation success toast and book editing toast variants. August 2025.
 - **Authors & Contributors Page Renaming**: Complete terminology update from "Authors" to "Authors & Contributors" throughout the interface to support broader contributor management (authors, illustrators, editors, translators, designers, etc.). Updated navigation menu, page titles, form headers ("Contributor Information"), search placeholders, and all user-facing text. Maintains backward compatibility with existing author functionality while preparing for expanded contributor role management. August 2025.
 - **Hierarchical Navigation System**: Implemented collapsible navigation groups with "Production" parent containing Projects, Books, Authors & Contributors, and Series, plus "Marketing" parent containing Sales Analytics, A+ Content, and Amazon Ads as sub-menu items. Features persistent localStorage state management, auto-expansion for active pages, chevron indicators (right/down), and consistent behavior across desktop and mobile interfaces. Groups remain expanded after navigating between child items until manually collapsed by user, with intelligent memory of user preferences to prevent auto-reopening of manually closed groups. August 2025.
-- **Unified Database Configuration**: Simplified database architecture to use a single PostgreSQL environment without production/development distinction. Database connection configured via single DATABASE_URL environment variable. Custom migration script (migrate-db.mjs) handles schema initialization. All core tables created including users, projects, books, kdp_imports, sales_data, contributors, cron_jobs, and marketplace_categories. Authentication and cron services fully operational. August 2025.
 
 ## External Dependencies
 
@@ -107,9 +106,8 @@ The application follows a modern full-stack architecture with clear separation b
 - **Stripe**: Payment processing and subscription management.
 
 ### Production Deployment
-- **Single Database Environment**: Configured to use one PostgreSQL database for both development and production, eliminating environment-specific database distinctions. Simplifies deployment and data management.
-- **Database Seeding**: Manual initialization with 249 marketplace categories via Admin System page. Automatic seeding disabled for controlled data management.
-- **Replit Deployments**: Configured for autoscale deployment with unified database configuration.
+- **Database Seeding**: Automatic initialization with 249 marketplace categories from `complete-categories.sql` on first startup.
+- **Replit Deployments**: Configured for autoscale deployment with build/run commands optimized for database seeding.
 
 ### Key Libraries
 - **Frontend**: React, TanStack Query, React Hook Form, Recharts, Radix UI.

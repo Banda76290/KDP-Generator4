@@ -58,7 +58,6 @@ export const navigation: NavigationItem[] = [
   { name: "Import Management", href: "/import-management", icon: Download, badge: "NEW" },
   { name: "AI Assistant", href: "/ai-assistant", icon: Bot, badge: "PRO" },
   { name: "AI Functions", href: "/ai-functions", icon: Zap, badge: "NEW" },
-  { name: "KDP Gen Method Pro Assist", href: "/kdp-gen-method", icon: Bot, badge: "PRO" },
 ];
 
 export const accountNavigation: NavigationItem[] = [

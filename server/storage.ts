@@ -1444,12 +1444,14 @@ export class DatabaseStorage implements IStorage {
                         (format === 'paperback' || format === 'hardcover') ? 'print_kdp_paperback' : 
                         null;
 
-    // Use marketplace name as-is since they are stored with proper casing
+    // Normalize marketplace name to lowercase for database query
+    const normalizedMarketplace = marketplace.toLowerCase();
+
     let categories = await db
       .select()
       .from(marketplaceCategories)
       .where(and(
-        eq(marketplaceCategories.marketplace, marketplace),
+        eq(marketplaceCategories.marketplace, normalizedMarketplace),
         eq(marketplaceCategories.isActive, true)
       ))
       .orderBy(marketplaceCategories.level, marketplaceCategories.sortOrder, marketplaceCategories.displayName);
@@ -1471,7 +1473,7 @@ export class DatabaseStorage implements IStorage {
         return belongsToPath;
       });
       
-      console.log(`Found ${filteredCategories.length} categories for ${discriminant} in ${marketplace}`);
+      console.log(`Found ${filteredCategories.length} categories for ${discriminant} in ${normalizedMarketplace}`);
       
       // RÉTROCOMPATIBILITÉ: Si aucune catégorie filtrée n'est trouvée, 
       // retourner toutes les catégories pour éviter de casser l'interface
@@ -2169,7 +2171,7 @@ export class DatabaseStorage implements IStorage {
       whereConditions.push(eq(books.isbn, isbn));
     }
     
-    const [book] = await db.select().from(books).where(and(...whereConditions));
+    const [book] = await this.db.select().from(books).where(and(...whereConditions));
     return book || undefined;
   }
 
@@ -2564,8 +2566,7 @@ export class DatabaseStorage implements IStorage {
         await db
           .insert(consolidatedSalesData)
           .values({
-            userId: userId,
-            asin: consolidatedKey,
+            user_id: userId,
             title: `Paiements agrégés ${data.currency}`,
             authorName: 'Données de paiement',
             currency: data.currency,
@@ -2575,7 +2576,7 @@ export class DatabaseStorage implements IStorage {
             exchangeRate: exchangeRate.toString(),
             exchangeRateDate,
             marketplace: data.marketplace || 'Multiple',
-            format: 'ebook',
+            format: 'payments',
             lastUpdateDate: new Date().toISOString().split('T')[0],
             sourceImportIds: data.importIds,
           })
@@ -2645,7 +2646,29 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
+  // Master Books operations
+  async getMasterBooks(userId: string): Promise<MasterBook[]> {
+    return await db.select()
+      .from(masterBooks)
+      .where(eq(masterBooks.userId, userId))
+      .orderBy(sql`${masterBooks.totalRoyaltiesUSD} DESC`);
+  }
 
+  async getMasterBookByAsin(asin: string): Promise<MasterBook | null> {
+    const result = await db.select()
+      .from(masterBooks)
+      .where(eq(masterBooks.asin, asin))
+      .limit(1);
+    
+    return result[0] || null;
+  }
+
+  async updateMasterBooksFromImport(userId: string, importId: string): Promise<void> {
+    // Import du service MasterBooks
+    const { MasterBooksService } = await import('./services/masterBooksService');
+    await MasterBooksService.init();
+    await MasterBooksService.updateFromImportData(userId, importId);
+  }
 
   // Clear all KDP royalties estimator data for user before full historical import
   async clearAllKdpRoyaltiesEstimatorData(userId: string): Promise<number> {
@@ -2742,7 +2765,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(aContent)
       .where(and(eq(aContent.id, id), eq(aContent.userId, userId)));
-    return (result.rowCount ?? 0) > 0;
+    return result.rowCount > 0;
   }
 
   // Amazon Ads operations implementation
@@ -2791,7 +2814,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(amazonAdsCampaigns)
       .where(and(eq(amazonAdsCampaigns.id, id), eq(amazonAdsCampaigns.userId, userId)));
-    return (result.rowCount ?? 0) > 0;
+    return result.rowCount > 0;
   }
 
   // Amazon Ads Keywords operations
@@ -2850,7 +2873,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(amazonAdsKeywords)
       .where(and(eq(amazonAdsKeywords.id, id), eq(amazonAdsKeywords.campaignId, campaignId)));
-    return (result.rowCount ?? 0) > 0;
+    return result.rowCount > 0;
   }
 
   // Amazon Ads Performance operations
@@ -2873,34 +2896,12 @@ export class DatabaseStorage implements IStorage {
       .insert(amazonAdsPerformance)
       .values({
         ...performanceData,
+        id: nanoid(),
         createdAt: new Date(),
+        updatedAt: new Date(),
       })
       .returning();
     return performance;
-  }
-
-  // Missing methods from IStorage interface
-  async getMasterBooks(userId: string): Promise<MasterBook[]> {
-    return await db
-      .select()
-      .from(masterBooks)
-      .where(eq(masterBooks.userId, userId))
-      .orderBy(desc(masterBooks.createdAt));
-  }
-
-  async getMasterBookByAsin(asin: string): Promise<MasterBook | null> {
-    const [book] = await db
-      .select()
-      .from(masterBooks)
-      .where(eq(masterBooks.asin, asin))
-      .limit(1);
-    return book || null;
-  }
-
-  async updateMasterBooksFromImport(userId: string, importId: string): Promise<void> {
-    // Implementation for updating master books from import
-    // This would typically sync data from KDP imports to the master books table
-    console.log(`Updating master books for user ${userId} from import ${importId}`);
   }
 }
 
