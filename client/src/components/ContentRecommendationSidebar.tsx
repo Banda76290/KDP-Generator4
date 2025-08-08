@@ -94,7 +94,7 @@ export default function ContentRecommendationSidebar({
       isUseful: boolean; 
       isApplied?: boolean; 
     }) => 
-      apiRequest(`/api/recommendations/${recommendationId}/feedback`, { method: 'PUT', body: { isUseful, isApplied } as any }),
+      apiRequest(`/api/recommendations/${recommendationId}/feedback`, { method: 'PUT', body: { isUseful, isApplied } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ 
         queryKey: ['/api/books', bookId, 'recommendations'] 

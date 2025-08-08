@@ -1,7 +1,6 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
-import { ImageProcessingService } from "./services/imageProcessingService";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { exchangeRateService } from "./services/exchangeRateService";
@@ -1676,71 +1675,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Author Image Upload Endpoints
-  app.post("/api/authors/:authorId/image/upload-url", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      // Generate upload URL for author image
-      const uploadURL = `${req.protocol}://${req.get('host')}/api/authors/${req.params.authorId}/image/upload`;
-      res.json({ uploadURL });
-    } catch (error) {
-      console.error('Error generating upload URL:', error);
-      res.status(500).json({ error: 'Failed to generate upload URL' });
-    }
-  });
-
-  app.post("/api/authors/:authorId/image/upload", isAuthenticated, upload.single('image'), async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const { authorId } = req.params;
-      const userId = req.user?.claims?.sub;
-
-      if (!userId) {
-        return res.status(401).json({ error: 'User not authenticated' });
-      }
-
-      if (!req.file) {
-        return res.status(400).json({ error: 'No image file provided' });
-      }
-
-      // Validate author exists and user has permission
-      const author = await storage.getAuthor(authorId, userId);
-      if (!author) {
-        return res.status(404).json({ error: 'Author not found' });
-      }
-
-      // Validate image file
-      const validation = ImageProcessingService.validateImageFile(req.file);
-      if (!validation.isValid) {
-        return res.status(400).json({ error: validation.error });
-      }
-
-      // Process the image
-      const processedBuffer = await ImageProcessingService.processAuthorImage(req.file.buffer, req.file.originalname);
-
-      // Generate a unique filename for the processed image
-      const fileName = `author-${authorId}-${Date.now()}.png`;
-      const imagePath = `/objects/authors/${fileName}`;
-
-      // TODO: Save to object storage
-      // For now, we'll return a mock URL
-      const imageUrl = `${req.protocol}://${req.get('host')}${imagePath}`;
-
-      // Update author with new image URL
-      const updatedAuthor = await storage.updateAuthor(authorId, userId, { imageUrl });
-
-      systemLog(`Image uploaded successfully for author ${authorId}`, 'info', 'AUTHOR');
-
-      res.json({ 
-        success: true, 
-        imageUrl,
-        author: updatedAuthor
-      });
-    } catch (error) {
-      console.error('Error uploading author image:', error);
-      systemLog(`Error uploading image for author ${req.params.authorId}: ${error}`, 'error', 'AUTHOR');
-      res.status(500).json({ error: 'Failed to upload image' });
-    }
-  });
-
   app.get('/api/authors/:authorId/projects', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.user?.claims?.sub;
@@ -1774,8 +1708,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch author books" });
     }
   });
-
-
 
   // New AI Configuration routes for database fields
   app.post("/api/ai/generate-configured", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {

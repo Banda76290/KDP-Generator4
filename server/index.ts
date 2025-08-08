@@ -1,8 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes.js";
-import { setupVite, serveStatic, log } from "./vite.js";
+import { registerRoutes } from "./routes";
+import { setupVite, serveStatic, log } from "./vite";
 import { seedDatabase } from "./seedDatabase.js";
-import { cronService } from "./services/cronService.js";
+import { cronService } from "./services/cronService";
 
 const app = express();
 // Increase payload limit to handle rich text content (10MB)

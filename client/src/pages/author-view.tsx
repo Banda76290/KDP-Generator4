@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { AuthorImageUploader } from "@/components/AuthorImageUploader";
 import { useToast } from "@/hooks/use-toast";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ArrowLeft, Edit3, Save, BookOpen, FolderOpen, Trash2, User } from "lucide-react";
@@ -45,7 +44,7 @@ export default function AuthorViewPage() {
   });
 
   // Fetch author details (disabled if creating)
-  const { data: author, isLoading: authorLoading, refetch } = useQuery({
+  const { data: author, isLoading: authorLoading } = useQuery({
     queryKey: ["/api/authors", authorId],
     queryFn: () => apiRequest(`/api/authors/${authorId}`),
     enabled: !!authorId && !isCreating,
@@ -251,7 +250,7 @@ export default function AuthorViewPage() {
 
   // Create author mutation (for creation mode)
   const createAuthorMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("/api/authors", { method: "POST", body: data }),
+    mutationFn: (data: any) => apiRequest("POST", "/api/authors", data),
     onSuccess: (newAuthor) => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors"] });
       toast({ title: "Author created successfully", variant: "success" });
@@ -286,7 +285,7 @@ export default function AuthorViewPage() {
   const updateBiographyMutation = useMutation({
     mutationFn: ({ biography, newAuthorId }: { biography: string; newAuthorId?: string }) => {
       const targetAuthorId = newAuthorId || authorId;
-      return apiRequest(`/api/authors/${targetAuthorId}/biography/${selectedLanguage}`, { method: "PUT", body: { biography } as any });
+      return apiRequest("PUT", `/api/authors/${targetAuthorId}/biography/${selectedLanguage}`, { biography });
     },
     onSuccess: (_, variables) => {
       if (variables.newAuthorId) {
@@ -328,7 +327,7 @@ export default function AuthorViewPage() {
   // Update author mutation
   const updateAuthorMutation = useMutation({
     mutationFn: (authorData: typeof authorForm) =>
-      apiRequest(`/api/authors/${authorId}`, { method: "PUT", body: authorData as any }),
+      apiRequest("PUT", `/api/authors/${authorId}`, authorData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId] });
       setIsEditingAuthor(false);
@@ -353,7 +352,7 @@ export default function AuthorViewPage() {
 
   // Delete author mutation
   const deleteAuthorMutation = useMutation({
-    mutationFn: () => apiRequest(`/api/authors/${authorId}`, { method: "DELETE" }),
+    mutationFn: () => apiRequest("DELETE", `/api/authors/${authorId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors"] });
       toast({ title: "Author deleted successfully" });
@@ -519,18 +518,6 @@ export default function AuthorViewPage() {
                       </div>
                     </div>
                     
-                    {/* Author Image Upload - Only for existing authors in edit mode */}
-                    {!isCreating && isEditingAuthor && (
-                      <AuthorImageUploader
-                        authorId={authorId}
-                        currentImageUrl={author?.imageUrl || null}
-                        onImageUploaded={() => {
-                          // Refresh author data after successful upload
-                          queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId] });
-                        }}
-                      />
-                    )}
-
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="author-firstname">First Name *</Label>
