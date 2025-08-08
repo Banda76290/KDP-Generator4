@@ -164,24 +164,87 @@ try {
     );
   `);
 
-  // Basic KDP imports table
+  // Import file type and status enums
+  try {
+    await db.execute(sql`CREATE TYPE "import_file_type" AS ENUM('sales_data', 'royalty_payments', 'advertisement_report', 'other');`);
+  } catch (e) { /* ignore if exists */ }
+  try {
+    await db.execute(sql`CREATE TYPE "import_status" AS ENUM('pending', 'processing', 'completed', 'failed', 'cancelled');`);
+  } catch (e) { /* ignore if exists */ }
+
+  // KDP imports table (complete)
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS "kdp_imports" (
       "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
       "user_id" varchar NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
       "file_name" varchar NOT NULL,
-      "original_file_name" varchar NOT NULL,
-      "file_size" integer,
-      "mime_type" varchar,
-      "status" varchar DEFAULT 'pending',
-      "total_rows" integer DEFAULT 0,
-      "processed_rows" integer DEFAULT 0,
-      "error_rows" integer DEFAULT 0,
-      "errors" text[],
-      "processing_log" text[],
+      "file_type" varchar NOT NULL,
+      "file_size" integer NOT NULL,
+      "detected_type" "import_file_type",
+      "status" "import_status" DEFAULT 'pending',
+      "progress" integer DEFAULT 0,
+      "total_records" integer DEFAULT 0,
+      "processed_records" integer DEFAULT 0,
+      "error_records" integer DEFAULT 0,
+      "duplicate_records" integer DEFAULT 0,
+      "raw_data" jsonb,
+      "mapping_config" jsonb,
+      "error_log" text[] DEFAULT '{}',
+      "summary" jsonb,
       "created_at" timestamp DEFAULT now(),
       "updated_at" timestamp DEFAULT now(),
       "completed_at" timestamp
+    );
+  `);
+
+  // Sales data table  
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS "sales_data" (
+      "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+      "user_id" varchar NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
+      "book_id" varchar NOT NULL REFERENCES "books"("id") ON DELETE CASCADE,
+      "report_date" timestamp NOT NULL,
+      "format" "format" NOT NULL,
+      "marketplace" varchar NOT NULL,
+      "units_sold" integer DEFAULT 0,
+      "revenue" decimal(10,2) DEFAULT 0.00,
+      "royalty" decimal(10,2) DEFAULT 0.00,
+      "file_name" varchar,
+      "created_at" timestamp DEFAULT now()
+    );
+  `);
+
+  // Contributors table
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS "contributors" (
+      "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+      "project_id" varchar,
+      "book_id" varchar REFERENCES "books"("id") ON DELETE CASCADE,
+      "name" text NOT NULL,
+      "role" varchar NOT NULL,
+      "prefix" varchar,
+      "first_name" varchar NOT NULL,
+      "middle_name" varchar,
+      "last_name" varchar NOT NULL,
+      "suffix" varchar,
+      "created_at" timestamp DEFAULT now()
+    );
+  `);
+
+  // Marketplace categories table
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS "marketplace_categories" (
+      "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+      "marketplace" varchar NOT NULL,
+      "category_path" text NOT NULL,
+      "parent_path" text,
+      "level" integer NOT NULL DEFAULT 1,
+      "display_name" varchar NOT NULL,
+      "is_selectable" boolean DEFAULT true,
+      "sort_order" integer DEFAULT 0,
+      "is_active" boolean DEFAULT true,
+      "created_at" timestamp DEFAULT now(),
+      "updated_at" timestamp DEFAULT now()
     );
   `);
 
