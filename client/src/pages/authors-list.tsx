@@ -14,7 +14,7 @@ export default function AuthorsListPage() {
   // Fetch authors with counts
   const { data: authors = [], isLoading: authorsLoading } = useQuery({
     queryKey: ["/api/authors", "withCounts"],
-    queryFn: () => apiRequest("GET", "/api/authors?withCounts=true"),
+    queryFn: () => apiRequest("/api/authors?withCounts=true"),
   });
 
   return (
