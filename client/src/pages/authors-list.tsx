@@ -31,12 +31,12 @@ export default function AuthorsListPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Authors</h1>
-            <p className="text-gray-600 dark:text-gray-400">Manage your publishing authors</p>
+            <h1 className="text-3xl font-bold">Authors & Contributors</h1>
+            <p className="text-gray-600 dark:text-gray-400">Manage your publishing authors and contributors</p>
           </div>
           <Button onClick={() => setLocation("/authors/create")} className="kdp-btn-primary">
             <Plus className="w-4 h-4 mr-2" />
-            Create Author
+            Create Contributor
           </Button>
         </div>
 
@@ -46,7 +46,7 @@ export default function AuthorsListPage() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               type="text"
-              placeholder="Search authors..."
+              placeholder="Search authors & contributors..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 pr-4 py-2"
@@ -61,21 +61,21 @@ export default function AuthorsListPage() {
           ) : authors.length === 0 ? (
             <div className="col-span-full text-center py-12">
               <User className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-[#1a1a1a] dark:text-white mb-2">No authors yet</h3>
+              <h3 className="text-lg font-medium text-[#1a1a1a] dark:text-white mb-2">No contributors yet</h3>
               <p className="text-gray-500 dark:text-gray-400 mb-4">
-                Get started by creating your first author
+                Get started by creating your first author or contributor
               </p>
               <Button onClick={() => setLocation("/authors/create")} className="kdp-btn-primary">
                 <Plus className="w-4 h-4 mr-2" />
-                Create First Author
+                Create First Contributor
               </Button>
             </div>
           ) : filteredAuthors.length === 0 ? (
             <div className="col-span-full text-center py-12">
               <Search className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-[#1a1a1a] dark:text-white mb-2">No authors found</h3>
+              <h3 className="text-lg font-medium text-[#1a1a1a] dark:text-white mb-2">No contributors found</h3>
               <p className="text-gray-500 dark:text-gray-400 mb-4">
-                No authors match your search criteria "{searchQuery}"
+                No contributors match your search criteria "{searchQuery}"
               </p>
             </div>
           ) : (
