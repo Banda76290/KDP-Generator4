@@ -422,9 +422,17 @@ export default function AuthorViewPage() {
       console.log("Upload URL:", uploadURL);
       
       if (uploadURL) {
+        // Convert Google Storage URL to our object path
+        // URL format: https://storage.googleapis.com/bucket/.private/uploads/id
+        // Convert to: /objects/uploads/id
+        const urlParts = uploadURL.split('/.private/');
+        const objectPath = urlParts.length > 1 ? `/objects/${urlParts[1]}` : uploadURL;
+        
+        console.log("Converted to object path:", objectPath);
+        
         // Store the uploaded image temporarily, don't save it immediately
-        setPendingProfileImage(uploadURL);
-        console.log("Set pending profile image to:", uploadURL);
+        setPendingProfileImage(objectPath);
+        console.log("Set pending profile image to:", objectPath);
         toast({ 
           title: "Image uploaded", 
           description: "Click 'Save Changes' to apply the new profile image",
