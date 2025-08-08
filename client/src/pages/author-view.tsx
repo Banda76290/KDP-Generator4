@@ -439,6 +439,19 @@ export default function AuthorViewPage() {
     }
   };
 
+  // Global save function that handles both author info and biography
+  const handleGlobalSave = () => {
+    // First save author info if we're editing it
+    if (isEditingAuthor || isCreating) {
+      handleSaveAuthor();
+    }
+    
+    // Then save biography if we're not creating and there's content
+    if (!isCreating && biography) {
+      handleSaveBiography();
+    }
+  };
+
   const handleAuthorFormChange = (field: keyof typeof authorForm, value: string) => {
     setAuthorForm(prev => ({ ...prev, [field]: value }));
   };
@@ -503,33 +516,7 @@ export default function AuthorViewPage() {
               <p className="text-gray-600">Author profile and multilingual biographies</p>
             </div>
           </div>
-          {!isCreating && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete Author
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Author</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to delete "{author?.fullName}"? This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => deleteAuthorMutation.mutate()}
-                    className="bg-destructive hover:bg-destructive/90"
-                  >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
+
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -642,19 +629,7 @@ export default function AuthorViewPage() {
 
 
 
-                    <div className="flex justify-end pt-4">
-                      <Button 
-                        onClick={handleSaveAuthor} 
-                        disabled={isCreating ? createAuthorMutation.isPending : updateAuthorMutation.isPending || !authorForm.firstName || !authorForm.lastName}
-                        className="kdp-btn-primary"
-                      >
-                        <Save className="w-4 h-4 mr-2" />
-                        {isCreating 
-                          ? (createAuthorMutation.isPending ? "Creating..." : "Create Author")
-                          : (updateAuthorMutation.isPending ? "Saving..." : "Save Author Info")
-                        }
-                      </Button>
-                    </div>
+
                   </>
                 ) : (
                   <div className="space-y-2">
@@ -793,16 +768,7 @@ export default function AuthorViewPage() {
                     </div>
                   </div>
 
-                  <div className="flex justify-end">
-                    <Button 
-                      onClick={handleSaveBiography} 
-                      disabled={updateBiographyMutation.isPending}
-                      className="kdp-btn-primary"
-                    >
-                      <Save className="w-4 h-4 mr-2" />
-                      {updateBiographyMutation.isPending ? "Saving..." : "Save Biography"}
-                    </Button>
-                  </div>
+
                 </div>
               )}
               </CardContent>
@@ -891,6 +857,63 @@ export default function AuthorViewPage() {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Global Action Buttons - Fixed at bottom right */}
+        <div className="fixed bottom-6 right-6 flex items-center gap-3 z-40">
+          {!isCreating && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="destructive" 
+                  size="lg"
+                  className="shadow-lg"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Author
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Author</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete "{author?.fullName}"? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => deleteAuthorMutation.mutate()}
+                    className="bg-destructive hover:bg-destructive/90"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+          
+          <Button 
+            onClick={handleGlobalSave}
+            disabled={
+              (isCreating ? createAuthorMutation.isPending : updateAuthorMutation.isPending) ||
+              updateBiographyMutation.isPending ||
+              (isCreating && (!authorForm.firstName || !authorForm.lastName))
+            }
+            size="lg"
+            className="shadow-lg"
+            style={{ 
+              backgroundColor: 'var(--kdp-secondary-orange)', 
+              color: 'white',
+              border: 'none'
+            }}
+          >
+            <Save className="w-4 h-4 mr-2" />
+            {isCreating ? 
+              (createAuthorMutation.isPending ? "Creating..." : "Create Author") :
+              ((updateAuthorMutation.isPending || updateBiographyMutation.isPending) ? "Saving..." : "Save Changes")
+            }
+          </Button>
         </div>
       </div>
     </Layout>
