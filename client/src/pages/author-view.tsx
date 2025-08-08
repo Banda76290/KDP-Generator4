@@ -540,7 +540,15 @@ export default function AuthorViewPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
-                    <User className="w-5 h-5" />
+                    {!isCreating && author?.profileImageUrl ? (
+                      <img 
+                        src={author.profileImageUrl} 
+                        alt={`${author.fullName}'s profile`}
+                        className="w-6 h-6 rounded-full object-cover border border-gray-200"
+                      />
+                    ) : (
+                      <User className="w-5 h-5" />
+                    )}
                     Author Information
                   </CardTitle>
                   <Button
@@ -694,22 +702,6 @@ export default function AuthorViewPage() {
                           <p className="text-sm text-gray-600">
                             Click Edit to modify author information
                           </p>
-
-                          {/* Profile Image Upload */}
-                          <div className="mt-2">
-                            <ObjectUploader
-                              maxNumberOfFiles={1}
-                              maxFileSize={5242880} // 5MB
-                              onGetUploadParameters={handleGetUploadParameters}
-                              onComplete={handleUploadComplete}
-                              buttonClassName="text-sm px-3 py-1"
-                            >
-                              <div className="flex items-center gap-2">
-                                <Camera className="w-3 h-3" />
-                                <span>Change Photo</span>
-                              </div>
-                            </ObjectUploader>
-                          </div>
                         </div>
                       </div>
                     )}
