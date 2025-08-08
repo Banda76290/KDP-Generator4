@@ -595,11 +595,6 @@ export default function AuthorViewPage() {
                       <User className="w-5 h-5" />
                     )}
                     Author Information
-                    {pendingProfileImage && (
-                      <span className="text-sm text-orange-600 font-medium ml-2">
-                        (New image pending)
-                      </span>
-                    )}
                   </CardTitle>
                   <Button
                     variant="outline"
