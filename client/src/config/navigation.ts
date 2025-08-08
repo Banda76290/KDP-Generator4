@@ -19,8 +19,7 @@ import {
   DollarSign,
   Target,
   Star,
-  Megaphone,
-  Package
+  Megaphone
 } from "lucide-react";
 
 interface NavigationItem {
@@ -33,16 +32,10 @@ interface NavigationItem {
 
 export const navigation: NavigationItem[] = [
   { name: "Dashboard", href: "/", icon: BarChart3 },
-  { 
-    name: "Production", 
-    icon: Package, 
-    children: [
-      { name: "Projects", href: "/projects", icon: FolderOpen },
-      { name: "Books", href: "/books", icon: FileText },
-      { name: "Authors & Contributors", href: "/authors", icon: User },
-      { name: "Series", href: "/manage-series", icon: Tags },
-    ]
-  },
+  { name: "Projects", href: "/projects", icon: FolderOpen },
+  { name: "Books", href: "/books", icon: FileText },
+  { name: "Authors & Contributors", href: "/authors", icon: User },
+  { name: "Series", href: "/manage-series", icon: Tags },
   { 
     name: "Marketing", 
     icon: Megaphone, 
