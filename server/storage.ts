@@ -1733,7 +1733,7 @@ export class DatabaseStorage implements IStorage {
       .where(and(
         eq(books.userId, userId),
         or(
-          sql`TRIM(CONCAT(COALESCE(${books.authorPrefix}, ''), ' ', ${books.authorFirstName}, ' ', COALESCE(${books.authorMiddleName}, ''), ' ', ${books.authorLastName}, ' ', COALESCE(${books.authorSuffix}, ''))) = ${authorFullName}`,
+          sql`REGEXP_REPLACE(TRIM(CONCAT(COALESCE(${books.authorPrefix}, ''), ' ', ${books.authorFirstName}, ' ', COALESCE(${books.authorMiddleName}, ''), ' ', ${books.authorLastName}, ' ', COALESCE(${books.authorSuffix}, ''))), '\\s+', ' ', 'g') = ${authorFullName}`,
         )
       ));
 
@@ -1790,7 +1790,7 @@ export class DatabaseStorage implements IStorage {
       .from(books)
       .where(and(
         eq(books.userId, userId),
-        sql`TRIM(CONCAT(COALESCE(${books.authorPrefix}, ''), ' ', ${books.authorFirstName}, ' ', COALESCE(${books.authorMiddleName}, ''), ' ', ${books.authorLastName}, ' ', COALESCE(${books.authorSuffix}, ''))) = ${authorFullName}`
+        sql`REGEXP_REPLACE(TRIM(CONCAT(COALESCE(${books.authorPrefix}, ''), ' ', ${books.authorFirstName}, ' ', COALESCE(${books.authorMiddleName}, ''), ' ', ${books.authorLastName}, ' ', COALESCE(${books.authorSuffix}, ''))), '\\s+', ' ', 'g') = ${authorFullName}`
       ));
 
     // Find books where this author is a contributor
