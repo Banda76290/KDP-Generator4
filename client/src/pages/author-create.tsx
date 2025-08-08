@@ -58,11 +58,11 @@ export default function AuthorCreatePage() {
             className="flex items-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Contributors
+            Back to Authors
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Create New Contributor</h1>
-            <p className="text-gray-600 dark:text-gray-400">Add a new contributor to your publishing portfolio</p>
+            <h1 className="text-3xl font-bold">Create New Author</h1>
+            <p className="text-gray-600 dark:text-gray-400">Add a new author to your publishing portfolio</p>
           </div>
         </div>
 
@@ -71,7 +71,7 @@ export default function AuthorCreatePage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <User className="w-5 h-5 mr-2" />
-              Contributor Information
+              Author Information
             </CardTitle>
           </CardHeader>
           <CardContent>
