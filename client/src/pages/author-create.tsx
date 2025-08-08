@@ -30,7 +30,7 @@ export default function AuthorCreatePage() {
     }),
     onSuccess: (author) => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors"] });
-      toast({ title: "Author created successfully" });
+      toast({ title: "Author created successfully", variant: "success" });
       setLocation(`/authors/${author.id}`);
     },
     onError: () => {

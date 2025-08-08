@@ -1367,9 +1367,10 @@ export default function EditBook() {
         queryClient.invalidateQueries({ queryKey: [`/api/books/${bookId}`] });
       }
       
-      toast.success({
+      toast({
         title: isCreating ? "Book Created" : "Book Updated",
         description: `Your book has been ${isCreating ? 'created' : 'updated'} successfully.`,
+        variant: "success",
       });
       
       if (isCreating && result.book) {
@@ -1409,6 +1410,7 @@ export default function EditBook() {
       toast({
         title: "Book Deleted",
         description: "Your book has been deleted successfully.",
+        variant: "success",
       });
       setLocation("/projects");
     },
@@ -1645,7 +1647,7 @@ export default function EditBook() {
         toast({
           title: "Warning",
           description: `No categories found for ${marketplace}`,
-          variant: "destructive"
+          variant: "default"
         });
       }
     } catch (error) {
