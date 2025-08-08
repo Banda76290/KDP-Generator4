@@ -538,13 +538,13 @@ export default function AuthorViewPage() {
               className="flex items-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
-              {sessionStorage.getItem('returnToBookEdit') ? 'Back to Book' : 'Back to Authors'}
+              {sessionStorage.getItem('returnToBookEdit') ? 'Back to Book' : 'Back to Contributors'}
             </Button>
             <div>
               <h1 className="text-3xl font-bold">
-                {isCreating ? "Create New Author" : author?.fullName}
+                {isCreating ? "Create New Contributor" : author?.fullName}
               </h1>
-              <p className="text-gray-600">Author profile and multilingual biographies</p>
+              <p className="text-gray-600">Contributor profile and multilingual biographies</p>
             </div>
           </div>
 
@@ -611,7 +611,7 @@ export default function AuthorViewPage() {
                     ) : (
                       <User className="w-5 h-5" />
                     )}
-                    Author Information
+                    Contributor Information
                   </CardTitle>
                   <Button
                     variant="outline"
