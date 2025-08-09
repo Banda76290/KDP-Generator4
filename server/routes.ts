@@ -22,6 +22,7 @@ import {
   ObjectNotFoundError,
 } from "./objectStorage.js";
 import { ObjectPermission } from "./objectAcl.js";
+import { runDeploymentHealthCheck } from "./utils/deploymentHealth.js";
 
 // Global logs storage for persistent logging
 interface LogEntry {
@@ -3537,6 +3538,42 @@ Please respond with only a JSON object containing the translated fields. For key
       console.error("Error creating Amazon Ads performance data:", error);
       res.status(500).json({ message: "Failed to create performance data" });
     }
+  });
+
+  // Deployment Health Check Endpoint
+  app.get('/api/health/deployment', async (req: Request, res: Response) => {
+    try {
+      const healthCheck = await runDeploymentHealthCheck();
+      
+      // Set appropriate HTTP status based on health
+      const statusCode = healthCheck.overall === 'healthy' ? 200 :
+                        healthCheck.overall === 'degraded' ? 206 : 503;
+      
+      res.status(statusCode).json({
+        status: healthCheck.overall,
+        timestamp: healthCheck.timestamp,
+        checks: healthCheck.checks,
+        environment: process.env.NODE_ENV || 'unknown',
+        version: process.env.npm_package_version || '1.0.0'
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        message: 'Health check failed',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
+  // Basic Health Check (Lightweight)
+  app.get('/api/health', (req: Request, res: Response) => {
+    res.json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'unknown',
+      uptime: process.uptime()
+    });
   });
 
   const httpServer = createServer(app);

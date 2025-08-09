@@ -3,6 +3,8 @@ import { registerRoutes } from "./routes.js";
 import { setupVite, serveStatic, log } from "./vite.js";
 import { seedDatabase } from "./seedDatabase.js";
 import { cronService } from "./services/cronService.js";
+import { runMigration } from "./scripts/migrate.js";
+import { runDeploymentHealthCheck, formatHealthCheckForLog } from "./utils/deploymentHealth.js";
 
 const app = express();
 // Increase payload limit to handle rich text content (10MB)
@@ -40,8 +42,41 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Database seeding is now manual-only via Admin System page
-  // await seedDatabase(); // Disabled automatic seeding - use Admin System page for manual control
+  // Handle database migration for production deployment
+  if (process.env.NODE_ENV === 'production') {
+    log('Production environment detected - running database migration');
+    try {
+      await runMigration();
+      log('Database migration completed successfully');
+      
+      // Run comprehensive health check
+      const healthCheck = await runDeploymentHealthCheck();
+      log(formatHealthCheckForLog(healthCheck));
+      
+      if (healthCheck.overall === 'unhealthy') {
+        log('⚠️  DEPLOYMENT HEALTH WARNING: Critical issues detected');
+      } else if (healthCheck.overall === 'degraded') {
+        log('⚠️  DEPLOYMENT HEALTH NOTICE: Minor issues detected');
+      } else {
+        log('✅ DEPLOYMENT HEALTH: All systems operational');
+      }
+      
+    } catch (error) {
+      log(`Database migration failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      log('Server startup will continue, but database may not be properly initialized');
+      
+      // Still run health check to see what's working
+      try {
+        const healthCheck = await runDeploymentHealthCheck();
+        log(formatHealthCheckForLog(healthCheck));
+      } catch (healthError) {
+        log(`Health check also failed: ${healthError instanceof Error ? healthError.message : 'Unknown error'}`);
+      }
+    }
+  } else {
+    // Database seeding is now manual-only via Admin System page in development
+    // await seedDatabase(); // Disabled automatic seeding - use Admin System page for manual control
+  }
   
   const server = await registerRoutes(app);
   
