@@ -1,6 +1,6 @@
 import { storage } from '../storage';
 import { KdpImportService, type ParsedKdpData } from './kdpImportService';
-import type { KdpImport, InsertKdpImportData } from '../../shared/schema';
+import type { KdpImport, InsertKdpImportData } from '@shared/schema';
 
 export interface ProcessingProgress {
   currentStep: string;
@@ -58,16 +58,21 @@ export class KdpImportProcessor {
         const columnMapping = KdpImportService.createColumnMapping(sheetData.headers);
 
         // Process each row
-        sheetData.data.forEach((rowData: any, rowIndex: number) => {
+        sheetData.data.forEach((rowData, rowIndex) => {
           try {
             // Skip empty rows
-            if (rowData.every((cell: any) => !cell || cell === '')) {
+            if (rowData.every(cell => !cell || cell === '')) {
               return;
             }
 
             const normalizedData = KdpImportService.normalizeRowData(
               rowData,
-              columnMapping
+              sheetData.headers,
+              columnMapping,
+              this.importId,
+              this.userId,
+              sheetName,
+              rowIndex + 2 // +2 because rowIndex is 0-based and we skip header row
             );
 
             allImportData.push(normalizedData);

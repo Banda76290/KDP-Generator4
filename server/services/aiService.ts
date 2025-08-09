@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { storage } from "../storage";
-import { ContentRecommendation, Book } from "../../shared/schema";
+import { ContentRecommendation, Book } from "@shared/schema";
 
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY 
@@ -67,16 +67,12 @@ class AIService {
 
     } catch (error) {
       console.error("OpenAI API error:", error);
-      throw new Error(`AI generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(`AI generation failed: ${error.message}`);
     }
   }
 
   async generateBookCover(prompt: string, bookTitle?: string): Promise<{ url: string }> {
     try {
-      if (!openai) {
-        throw new Error('OpenAI client not initialized');
-      }
-      
       const coverPrompt = `Create a professional book cover design for "${bookTitle || "a book"}". ${prompt}. The image should be suitable for a book cover with clear title space and professional appearance.`;
 
       const response = await openai.images.generate({
@@ -87,19 +83,15 @@ class AIService {
         quality: "standard",
       });
 
-      return { url: response.data?.[0]?.url || "" };
+      return { url: response.data[0].url || "" };
     } catch (error) {
       console.error("OpenAI image generation error:", error);
-      throw new Error(`Cover generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(`Cover generation failed: ${error.message}`);
     }
   }
 
   async improvText(text: string, improvements: string): Promise<AIGenerationResult> {
     try {
-      if (!openai) {
-        throw new Error('OpenAI client not initialized');
-      }
-      
       const completion = await openai.chat.completions.create({
         model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
         messages: [
@@ -125,7 +117,7 @@ class AIService {
       };
     } catch (error) {
       console.error("OpenAI text improvement error:", error);
-      throw new Error(`Text improvement failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(`Text improvement failed: ${error.message}`);
     }
   }
 
@@ -177,7 +169,7 @@ class AIService {
               title: recType.title,
               suggestion: response.suggestion,
               reasoning: response.reasoning,
-              confidence: Math.min(1, Math.max(0, response.confidence || 0.7)).toString(),
+              confidence: Math.min(1, Math.max(0, response.confidence || 0.7)),
               aiModel: "gpt-4o",
               tokensUsed,
               metadata: { originalValue: this.getOriginalValue(book, recType.type) }
@@ -194,7 +186,7 @@ class AIService {
       return recommendations;
     } catch (error) {
       console.error("Error generating content recommendations:", error);
-      throw new Error(`Content recommendations generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(`Content recommendations generation failed: ${error.message}`);
     }
   }
 

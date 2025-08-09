@@ -16,29 +16,49 @@ import {
   Server,
   User,
   MessageSquare,
-  DollarSign
+  DollarSign,
+  Target,
+  Star,
+  Megaphone,
+  Package
 } from "lucide-react";
 
 interface NavigationItem {
   name: string;
-  href: string;
+  href?: string;
   icon: LucideIcon;
   badge?: string;
+  children?: NavigationItem[];
 }
 
 export const navigation: NavigationItem[] = [
   { name: "Dashboard", href: "/", icon: BarChart3 },
-  { name: "Projects", href: "/projects", icon: FolderOpen },
-  { name: "Books", href: "/books", icon: FileText },
-  { name: "Authors", href: "/authors", icon: User },
-  { name: "Series", href: "/manage-series", icon: Tags },
-  { name: "Sales Analytics", href: "/analytics", icon: TrendingUp },
-  { name: "Livres Maîtres", href: "/master-books", icon: FileText, badge: "ASIN" },
+  { 
+    name: "Production", 
+    icon: Package, 
+    children: [
+      { name: "Projects", href: "/projects", icon: FolderOpen },
+      { name: "Books", href: "/books", icon: FileText },
+      { name: "Authors & Contributors", href: "/authors", icon: User },
+      { name: "Series", href: "/manage-series", icon: Tags },
+    ]
+  },
+  { 
+    name: "Marketing", 
+    icon: Megaphone, 
+    children: [
+      { name: "Sales Analytics", href: "/analytics", icon: TrendingUp },
+      { name: "A+ Content", href: "/a-content", icon: Star },
+      { name: "Amazon Ads", href: "/amazon-ads", icon: Target },
+    ]
+  },
+
   { name: "Exchange Rates", href: "/exchange-rates", icon: DollarSign },
   { name: "KDP Reports", href: "/kdp-reports", icon: Upload },
   { name: "Import Management", href: "/import-management", icon: Download, badge: "NEW" },
   { name: "AI Assistant", href: "/ai-assistant", icon: Bot, badge: "PRO" },
   { name: "AI Functions", href: "/ai-functions", icon: Zap, badge: "NEW" },
+  { name: "KDP Gen Method Pro Assist", href: "/kdp-gen-method", icon: Bot, badge: "PRO" },
 ];
 
 export const accountNavigation: NavigationItem[] = [

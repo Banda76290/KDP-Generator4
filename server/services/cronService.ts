@@ -1,6 +1,6 @@
 import { exchangeRateService } from "./exchangeRateService";
 import { db } from "../db";
-import { cronJobs, cronJobLogs, type CronJob, type InsertCronJobLog } from "../../shared/schema.js";
+import { cronJobs, cronJobLogs, type CronJob, type InsertCronJobLog } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 
 export class CronService {
@@ -48,7 +48,7 @@ export class CronService {
         name: 'Exchange Rates Update',
         description: 'Updates currency exchange rates from external API',
         enabled: false, // Disabled by default
-        intervalHours: "24",
+        intervalHours: 24,
       }
     ];
 
@@ -98,7 +98,7 @@ export class CronService {
       clearInterval(this.intervals.get(job.jobType)!);
     }
     
-    const intervalMs = (parseFloat(job.intervalHours || "24")) * 60 * 60 * 1000;
+    const intervalMs = (job.intervalHours || 24) * 60 * 60 * 1000;
     
     console.log(`[CRON] Starting job: ${job.name} (every ${job.intervalHours}h)`);
     
@@ -178,7 +178,7 @@ export class CronService {
       });
 
       // Update job status and next run
-      const nextRun = new Date(Date.now() + ((parseFloat(job[0].intervalHours || "24")) * 60 * 60 * 1000));
+      const nextRun = new Date(Date.now() + ((job[0].intervalHours || 24) * 60 * 60 * 1000));
       await db.update(cronJobs)
         .set({ 
           lastStatus: 'completed',
@@ -290,7 +290,7 @@ export class CronService {
     // Restart job if enabled to apply new interval
     if (job[0].enabled) {
       await this.stopJob(job[0].jobType);
-      await this.startJob({ ...job[0], intervalHours: intervalHours.toString() });
+      await this.startJob({ ...job[0], intervalHours });
     }
 
     console.log(`[CRON] Job ${job[0].name} interval updated to ${intervalHours} hours`);

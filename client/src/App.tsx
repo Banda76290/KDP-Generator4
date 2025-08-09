@@ -38,12 +38,14 @@ import SeriesEdit from "@/pages/series-edit";
 import SeriesCreate from "@/pages/series-create";
 import SeriesSetup from "@/pages/series-setup";
 import AuthorsListPage from "@/pages/authors-list";
-import AuthorCreateNewPage from "@/pages/author-create-new";
+import AContentPage from "@/pages/AContentPage";
+import AmazonAdsPage from "@/pages/AmazonAdsPage";
 import AuthorViewPage from "@/pages/author-view";
 import ImportManagement from "@/pages/ImportManagement";
 import RoyaltiesEstimatorTest from "@/pages/royalties-estimator-test";
 import ExchangeRates from "@/pages/ExchangeRates";
-import MasterBooksPage from "@/pages/master-books";
+import KdpGenMethodPage from "@/pages/kdp-gen-method";
+
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -58,21 +60,24 @@ function Router() {
       <Route path="/projects" component={Projects} />
       <Route path="/books" component={Books} />
       <Route path="/authors" component={AuthorsListPage} />
-      <Route path="/authors/create" component={AuthorCreateNewPage} />
+      <Route path="/authors/create" component={AuthorViewPage} />
       <Route path="/authors/:authorId" component={AuthorViewPage} />
+      <Route path="/a-content" component={AContentPage} />
+      <Route path="/amazon-ads" component={AmazonAdsPage} />
       <Route path="/manage-series" component={ManageSeries} />
       <Route path="/series-create" component={SeriesCreate} />
       <Route path="/series-setup" component={SeriesSetup} />
       <Route path="/series-setup/:seriesId" component={SeriesSetup} />
       <Route path="/series-edit/:seriesId" component={SeriesEdit} />
       <Route path="/analytics" component={Analytics} />
-      <Route path="/master-books" component={MasterBooksPage} />
+
       <Route path="/exchange-rates" component={ExchangeRates} />
       <Route path="/kdp-reports" component={KDPReports} />
       <Route path="/import-management" component={ImportManagement} />
       <Route path="/royalties-estimator-test" component={RoyaltiesEstimatorTest} />
       <Route path="/ai-assistant" component={AIAssistant} />
       <Route path="/ai-functions" component={AIFunctions} />
+      <Route path="/kdp-gen-method" component={KdpGenMethodPage} />
       <Route path="/admin/ai-variables" component={AIVariables} />
       <Route path="/subscription" component={Subscription} />
       <Route path="/settings" component={Settings} />

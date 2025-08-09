@@ -13,16 +13,6 @@ export enum KdpFileType {
   UNKNOWN = 'unknown'
 }
 
-export interface ParsedKdpData {
-  detectedType: KdpFileType;
-  summary: {
-    estimatedRecords: number;
-    processedSheets: string[];
-  };
-  data: any[];
-  sheets: Record<string, any>;
-}
-
 export interface ImportResult {
   fileType: KdpFileType;
   processedRecords: number;
@@ -36,26 +26,8 @@ export class KdpImportService {
   private kdpImportProcessor: KdpImportProcessor;
 
   constructor(private storage: IStorage) {
-    this.royaltiesEstimatorProcessor = new KdpRoyaltiesEstimatorProcessor();
-    this.kdpImportProcessor = new KdpImportProcessor('', '', undefined);
-  }
-
-  // Add missing static methods
-  static createColumnMapping(sheetData: any): any {
-    return {};
-  }
-
-  static normalizeRowData(data: any, mapping: any): any {
-    // Create a basic normalized data structure for the import
-    return {
-      importId: '',
-      userId: '',
-      sheetName: '',
-      rowIndex: 0,
-      originalData: data,
-      processedData: {},
-      isDuplicate: false
-    };
+    this.royaltiesEstimatorProcessor = new KdpRoyaltiesEstimatorProcessor(storage);
+    this.kdpImportProcessor = new KdpImportProcessor(storage);
   }
 
   /**
@@ -63,7 +35,7 @@ export class KdpImportService {
    */
   public detectFileType(workbook: XLSX.WorkBook): KdpFileType {
     // 1. Test pour KDP_Royalties_Estimator (priorité haute - nouveau système)
-    if (KdpRoyaltiesEstimatorProcessor.detectKdpRoyaltiesEstimator(workbook)) {
+    if (KdpRoyaltiesEstimatorProcessor.detectFileType(workbook)) {
       console.log('[KDP_IMPORT] Fichier détecté: KDP_Royalties_Estimator');
       return KdpFileType.ROYALTIES_ESTIMATOR;
     }
@@ -123,23 +95,20 @@ export class KdpImportService {
 
       switch (fileType) {
         case KdpFileType.ROYALTIES_ESTIMATOR:
-          const royaltiesResult = await KdpRoyaltiesEstimatorProcessor.processKdpRoyaltiesEstimator(
+          result = await this.royaltiesEstimatorProcessor.processFile(
             workbook,
             importRecord.id,
             userId
           );
-          result = {
-            processedRecords: royaltiesResult.totalProcessed,
-            errorRecords: royaltiesResult.errors.length
-          };
           break;
 
         default:
-          // Pour les autres types, utiliser un traitement de base
-          result = {
-            processedRecords: 0,
-            errorRecords: 0
-          };
+          // Utiliser l'ancien processeur pour les autres types
+          result = await this.kdpImportProcessor.processFileData(
+            workbook,
+            importRecord.id,
+            userId
+          );
           break;
       }
 
@@ -147,7 +116,8 @@ export class KdpImportService {
       await this.storage.updateKdpImport(importRecord.id, {
         status: 'completed',
         processedRecords: result.processedRecords,
-        errorRecords: result.errorRecords
+        errorRecords: result.errorRecords,
+        completedAt: new Date()
       });
 
       return {
