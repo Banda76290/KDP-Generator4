@@ -1,16 +1,16 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
-import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
-import { exchangeRateService } from "./services/exchangeRateService";
-import { cronService } from "./services/cronService";
-import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema, insertAuthorSchema, insertAuthorBiographySchema, insertContentRecommendationSchema, insertAiPromptTemplateSchema, insertKdpImportSchema, insertKdpImportDataSchema, insertAContentSchema } from "@shared/schema";
-import { aiService } from "./services/aiService";
-import { parseKDPReport } from "./services/kdpParser";
-import { KdpImportProcessor } from "./services/kdpImportProcessor";
-import { KdpRoyaltiesEstimatorProcessor } from "./services/kdpRoyaltiesEstimatorProcessor";
-import { generateUniqueIsbnPlaceholder, ensureIsbnPlaceholder } from "./utils/isbnGenerator";
+import { storage } from "./storage.js";
+import { setupAuth, isAuthenticated } from "./replitAuth.js";
+import { exchangeRateService } from "./services/exchangeRateService.js";
+import { cronService } from "./services/cronService.js";
+import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema, insertAuthorSchema, insertAuthorBiographySchema, insertContentRecommendationSchema, insertAiPromptTemplateSchema, insertKdpImportSchema, insertKdpImportDataSchema, insertAContentSchema } from "../shared/schema.js";
+import { aiService } from "./services/aiService.js";
+import { parseKDPReport } from "./services/kdpParser.js";
+import { KdpImportProcessor } from "./services/kdpImportProcessor.js";
+import { KdpRoyaltiesEstimatorProcessor } from "./services/kdpRoyaltiesEstimatorProcessor.js";
+import { generateUniqueIsbnPlaceholder, ensureIsbnPlaceholder } from "./utils/isbnGenerator.js";
 import XLSX from 'xlsx';
 import path from 'path';
 import fs from 'fs';
@@ -20,8 +20,8 @@ import OpenAI from "openai";
 import {
   ObjectStorageService,
   ObjectNotFoundError,
-} from "./objectStorage";
-import { ObjectPermission } from "./objectAcl";
+} from "./objectStorage.js";
+import { ObjectPermission } from "./objectAcl.js";
 
 // Global logs storage for persistent logging
 interface LogEntry {
