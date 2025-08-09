@@ -42,37 +42,79 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Handle database migration for production deployment
+  // Enhanced database migration system for production deployment
   if (process.env.NODE_ENV === 'production') {
-    log('Production environment detected - running database migration');
-    try {
-      await runMigration();
-      log('Database migration completed successfully');
+    log('=== Production Deployment Migration System ===');
+    log('Environment: Production');
+    log(`Timestamp: ${new Date().toISOString()}`);
+    
+    // Validate essential environment variables first
+    const requiredEnvVars = ['DATABASE_URL'];
+    const missingVars = requiredEnvVars.filter(variable => !process.env[variable]);
+    
+    if (missingVars.length > 0) {
+      log(`❌ CRITICAL: Missing required environment variables: ${missingVars.join(', ')}`);
+      log('Server will start in degraded state - database functionality will be limited');
+    } else {
+      log('✅ Environment variables validated');
+      log('Production environment detected - proceeding with migration');
       
-      // Run comprehensive health check
-      const healthCheck = await runDeploymentHealthCheck();
-      log(formatHealthCheckForLog(healthCheck));
-      
-      if (healthCheck.overall === 'unhealthy') {
-        log('⚠️  DEPLOYMENT HEALTH WARNING: Critical issues detected');
-      } else if (healthCheck.overall === 'degraded') {
-        log('⚠️  DEPLOYMENT HEALTH NOTICE: Minor issues detected');
-      } else {
-        log('✅ DEPLOYMENT HEALTH: All systems operational');
-      }
-      
-    } catch (error) {
-      log(`Database migration failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      log('Server startup will continue, but database may not be properly initialized');
-      
-      // Still run health check to see what's working
       try {
+        log('🔄 Starting database migration process...');
+        await runMigration();
+        log('✅ Database migration completed successfully');
+        
+        // Run comprehensive health check
+        log('🔍 Running deployment health check...');
         const healthCheck = await runDeploymentHealthCheck();
         log(formatHealthCheckForLog(healthCheck));
-      } catch (healthError) {
-        log(`Health check also failed: ${healthError instanceof Error ? healthError.message : 'Unknown error'}`);
+        
+        if (healthCheck.overall === 'unhealthy') {
+          log('⚠️  DEPLOYMENT HEALTH WARNING: Critical issues detected');
+          log('   Deployment may have limited functionality');
+        } else if (healthCheck.overall === 'degraded') {
+          log('⚠️  DEPLOYMENT HEALTH NOTICE: Minor issues detected');
+          log('   Some features may be affected');
+        } else {
+          log('✅ DEPLOYMENT HEALTH: All systems operational');
+          log('   Application is ready for production use');
+        }
+        
+      } catch (error) {
+        log(`❌ Database migration failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        
+        // Provide detailed error information
+        if (error instanceof Error) {
+          log(`Error details: ${error.stack}`);
+          
+          // Specific error handling recommendations
+          if (error.message.includes('DATABASE_URL')) {
+            log('💡 Fix: Ensure DATABASE_URL is properly set in production secrets');
+          } else if (error.message.includes('connection')) {
+            log('💡 Fix: Check database connectivity and network configuration');
+          } else if (error.message.includes('permission')) {
+            log('💡 Fix: Verify database user has sufficient privileges');
+          } else if (error.message.includes('SSL')) {
+            log('💡 Fix: Check SSL configuration for database connection');
+          }
+        }
+        
+        log('🔄 Server startup will continue in degraded mode');
+        log('📋 Manual database setup may be required');
+        
+        // Still run health check to see what's working
+        try {
+          log('🔍 Running partial health check...');
+          const healthCheck = await runDeploymentHealthCheck();
+          log(formatHealthCheckForLog(healthCheck));
+        } catch (healthError) {
+          log(`❌ Health check also failed: ${healthError instanceof Error ? healthError.message : 'Unknown error'}`);
+          log('⚠️  Application may have significant functionality issues');
+        }
       }
     }
+    
+    log('=== Migration System Complete ===');
   } else {
     // Database seeding is now manual-only via Admin System page in development
     // await seedDatabase(); // Disabled automatic seeding - use Admin System page for manual control

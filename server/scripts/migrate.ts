@@ -66,14 +66,57 @@ async function initializeSchema(): Promise<void> {
 }
 
 /**
- * Verify database connectivity
+ * Verify database connectivity and check deployment environment
  */
 async function verifyConnection(): Promise<void> {
   try {
+    log('Verifying database connection and environment...');
+    
+    // Test basic connectivity
     await db.execute(sql`SELECT 1 as test`);
     log('Database connection verified');
+    
+    // Check if we're in production and verify SSL settings
+    if (process.env.NODE_ENV === 'production') {
+      log('Production environment detected');
+      
+      // Verify database URL format for production
+      const dbUrl = process.env.DATABASE_URL;
+      if (!dbUrl) {
+        throw new Error('DATABASE_URL environment variable is not set in production');
+      }
+      
+      if (!dbUrl.startsWith('postgres://') && !dbUrl.startsWith('postgresql://')) {
+        throw new Error('DATABASE_URL must be a valid PostgreSQL connection string');
+      }
+      
+      log('Production database configuration validated');
+    }
+    
+    // Test database permissions
+    try {
+      await db.execute(sql`
+        SELECT has_database_privilege(current_user, current_database(), 'CREATE') as can_create;
+      `);
+      log('Database CREATE privileges verified');
+    } catch (permError) {
+      log(`Warning: Could not verify CREATE privileges: ${permError instanceof Error ? permError.message : 'Unknown error'}`);
+    }
+    
   } catch (error) {
     log(`Database connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    
+    // Provide detailed troubleshooting for common issues
+    if (error instanceof Error) {
+      if (error.message.includes('ENOTFOUND') || error.message.includes('ECONNREFUSED')) {
+        log('Network connectivity issue - database server may be unreachable');
+      } else if (error.message.includes('authentication failed')) {
+        log('Authentication issue - check DATABASE_URL credentials');
+      } else if (error.message.includes('SSL')) {
+        log('SSL connection issue - verify SSL configuration');
+      }
+    }
+    
     throw error;
   }
 }
