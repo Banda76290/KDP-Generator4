@@ -29,11 +29,10 @@ export default function AuthorViewPage() {
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const { authorId } = useParams<{ authorId: string }>();
-  const isCreating = !authorId || authorId === "create";
   const [selectedLanguage, setSelectedLanguage] = useState<string>("English");
   const [biography, setBiography] = useState<string>("");
   const [isEditing, setIsEditing] = useState(false);
-  const [isEditingAuthor, setIsEditingAuthor] = useState(isCreating);
+  const [isEditingAuthor, setIsEditingAuthor] = useState(false);
   const [authorForm, setAuthorForm] = useState({
     prefix: "",
     firstName: "",
@@ -42,32 +41,32 @@ export default function AuthorViewPage() {
     suffix: ""
   });
 
-  // Fetch author details (disabled if creating)
+  // Fetch author details
   const { data: author, isLoading: authorLoading } = useQuery({
     queryKey: ["/api/authors", authorId],
     queryFn: () => apiRequest(`/api/authors/${authorId}`),
-    enabled: !!authorId && !isCreating,
+    enabled: !!authorId,
   });
 
-  // Fetch biography for selected language (disabled if creating)
+  // Fetch biography for selected language
   const { data: biographyData, isLoading: biographyLoading } = useQuery({
     queryKey: ["/api/authors", authorId, "biography", selectedLanguage],
     queryFn: () => apiRequest(`/api/authors/${authorId}/biography/${selectedLanguage}`),
-    enabled: !!authorId && !isCreating,
+    enabled: !!authorId,
   });
 
-  // Fetch author projects (disabled if creating)
+  // Fetch author projects
   const { data: authorProjects = [] } = useQuery({
     queryKey: ["/api/authors", authorId, "projects"],
     queryFn: () => apiRequest(`/api/authors/${authorId}/projects`),
-    enabled: !!authorId && !isCreating,
+    enabled: !!authorId,
   });
 
-  // Fetch author books (disabled if creating)
+  // Fetch author books  
   const { data: authorBooks = [] } = useQuery({
     queryKey: ["/api/authors", authorId, "books"],
     queryFn: () => apiRequest(`/api/authors/${authorId}/books`),
-    enabled: !!authorId && !isCreating,
+    enabled: !!authorId,
   });
 
   // Biography WYSIWYG functions (matching Book Description editor)
@@ -247,74 +246,27 @@ export default function AuthorViewPage() {
     }
   }, [author, biographyData, selectedLanguage]);
 
-  // Create author mutation (for creation mode)
-  const createAuthorMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("POST", "/api/authors", data),
-    onSuccess: (newAuthor) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/authors"] });
-      toast({ title: "Author created successfully", variant: "success" });
-      
-      // If biography is provided, save it after creating the author
-      if (biography.trim()) {
-        updateBiographyMutation.mutate({ 
-          biography: biography.trim(),
-          newAuthorId: newAuthor.id 
-        });
-      } else {
-        // Navigate to the new author's page or back
-        const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
-        if (returnToBookEdit) {
-          sessionStorage.removeItem('returnToBookEdit');
-          if (returnToBookEdit === 'new') {
-            setLocation('/books/create');
-          } else {
-            setLocation(`/books/edit/${returnToBookEdit}`);
-          }
-        } else {
-          setLocation(`/authors/${newAuthor.id}`);
-        }
-      }
-    },
-    onError: () => {
-      toast({ title: "Failed to create author", variant: "destructive" });
-    },
-  });
-
   // Update biography mutation
   const updateBiographyMutation = useMutation({
-    mutationFn: ({ biography, newAuthorId }: { biography: string; newAuthorId?: string }) => {
-      const targetAuthorId = newAuthorId || authorId;
-      return apiRequest("PUT", `/api/authors/${targetAuthorId}/biography/${selectedLanguage}`, { biography });
-    },
-    onSuccess: (_, variables) => {
-      if (variables.newAuthorId) {
-        // Biography was saved after creating author, navigate accordingly
-        toast({ title: "Author and biography saved successfully", variant: "success" });
-        const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
-        if (returnToBookEdit) {
-          sessionStorage.removeItem('returnToBookEdit');
-          if (returnToBookEdit === 'new') {
-            setLocation('/books/create');
-          } else {
-            setLocation(`/books/edit/${returnToBookEdit}`);
-          }
+    mutationFn: ({ biography }: { biography: string }) =>
+      apiRequest(`/api/authors/${authorId}/biography/${selectedLanguage}`, {
+        method: "PUT",
+        body: { biography }
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId, "biography", selectedLanguage] });
+      setIsEditing(false);
+      toast({ title: "Biography saved successfully" });
+      
+      // Check if we need to return to book edit page (like in series-edit.tsx)
+      const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
+      if (returnToBookEdit) {
+        // Clear the flag and return to book edit page
+        sessionStorage.removeItem('returnToBookEdit');
+        if (returnToBookEdit === 'new') {
+          setLocation('/books/create');
         } else {
-          setLocation(`/authors/${variables.newAuthorId}`);
-        }
-      } else {
-        // Regular biography update
-        queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId, "biography", selectedLanguage] });
-        setIsEditing(false);
-        toast({ title: "Biography saved successfully", variant: "success" });
-        
-        const returnToBookEdit = sessionStorage.getItem('returnToBookEdit');
-        if (returnToBookEdit) {
-          sessionStorage.removeItem('returnToBookEdit');
-          if (returnToBookEdit === 'new') {
-            setLocation('/books/create');
-          } else {
-            setLocation(`/books/edit/${returnToBookEdit}`);
-          }
+          setLocation(`/books/edit/${returnToBookEdit}`);
         }
       }
     },
@@ -326,7 +278,10 @@ export default function AuthorViewPage() {
   // Update author mutation
   const updateAuthorMutation = useMutation({
     mutationFn: (authorData: typeof authorForm) =>
-      apiRequest("PUT", `/api/authors/${authorId}`, authorData),
+      apiRequest(`/api/authors/${authorId}`, {
+        method: "PUT",
+        body: authorData
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors", authorId] });
       setIsEditingAuthor(false);
@@ -351,7 +306,9 @@ export default function AuthorViewPage() {
 
   // Delete author mutation
   const deleteAuthorMutation = useMutation({
-    mutationFn: () => apiRequest("DELETE", `/api/authors/${authorId}`),
+    mutationFn: () => apiRequest(`/api/authors/${authorId}`, {
+      method: "DELETE"
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/authors"] });
       toast({ title: "Author deleted successfully" });
@@ -367,15 +324,7 @@ export default function AuthorViewPage() {
   };
 
   const handleSaveAuthor = () => {
-    if (isCreating) {
-      if (!authorForm.firstName.trim() || !authorForm.lastName.trim()) {
-        toast({ title: "First name and last name are required", variant: "destructive" });
-        return;
-      }
-      createAuthorMutation.mutate(authorForm);
-    } else {
-      updateAuthorMutation.mutate(authorForm);
-    }
+    updateAuthorMutation.mutate(authorForm);
   };
 
   const handleAuthorFormChange = (field: keyof typeof authorForm, value: string) => {
@@ -387,7 +336,7 @@ export default function AuthorViewPage() {
     setIsEditing(false);
   };
 
-  if (authorLoading && !isCreating) {
+  if (authorLoading) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[400px]">
@@ -397,7 +346,7 @@ export default function AuthorViewPage() {
     );
   }
 
-  if (!author && !isCreating) {
+  if (!author) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[400px]">
@@ -436,39 +385,35 @@ export default function AuthorViewPage() {
               {sessionStorage.getItem('returnToBookEdit') ? 'Back to Book' : 'Back to Authors'}
             </Button>
             <div>
-              <h1 className="text-3xl font-bold">
-                {isCreating ? "Create New Author" : author?.fullName}
-              </h1>
-              <p className="text-gray-600">Author profile and multilingual biographies</p>
+              <h1 className="text-3xl font-bold">{author.fullName}</h1>
+              <p className="text-gray-600 dark:text-gray-400">Author profile and multilingual biographies</p>
             </div>
           </div>
-          {!isCreating && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete Author
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Author</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to delete "{author?.fullName}"? This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => deleteAuthorMutation.mutate()}
-                    className="bg-destructive hover:bg-destructive/90"
-                  >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm">
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Author
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Author</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete "{author.fullName}"? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => deleteAuthorMutation.mutate()}
+                  className="bg-destructive hover:bg-destructive/90"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -486,10 +431,9 @@ export default function AuthorViewPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => setIsEditingAuthor(!isEditingAuthor)}
-                    disabled={isCreating}
                   >
                     <Edit3 className="w-4 h-4 mr-1" />
-                    {isCreating ? 'Cancel' : (isEditingAuthor ? 'Cancel' : 'Edit')}
+                    {isEditingAuthor ? 'Cancel' : 'Edit'}
                   </Button>
                 </div>
               </CardHeader>
@@ -552,32 +496,24 @@ export default function AuthorViewPage() {
                     <div className="flex justify-end pt-4">
                       <Button 
                         onClick={handleSaveAuthor} 
-                        disabled={isCreating ? createAuthorMutation.isPending : updateAuthorMutation.isPending || !authorForm.firstName || !authorForm.lastName}
+                        disabled={updateAuthorMutation.isPending || !authorForm.firstName || !authorForm.lastName}
                         className="kdp-btn-primary"
                       >
                         <Save className="w-4 h-4 mr-2" />
-                        {isCreating 
-                          ? (createAuthorMutation.isPending ? "Creating..." : "Create Author")
-                          : (updateAuthorMutation.isPending ? "Saving..." : "Save Author Info")
-                        }
+                        {updateAuthorMutation.isPending ? "Saving..." : "Save Author Info"}
                       </Button>
                     </div>
                   </>
                 ) : (
                   <div className="space-y-2">
                     <div className="text-lg font-medium">
-                      {isCreating 
-                        ? "New Author - Fill in the fields and click Save"
-                        : [authorForm.prefix, authorForm.firstName, authorForm.middleName, authorForm.lastName, authorForm.suffix]
-                            .filter(Boolean)
-                            .join(' ')
-                      }
+                      {[authorForm.prefix, authorForm.firstName, authorForm.middleName, authorForm.lastName, authorForm.suffix]
+                        .filter(Boolean)
+                        .join(' ')}
                     </div>
-                    {!isCreating && (
-                      <p className="text-sm text-gray-600">
-                        Click Edit to modify author information
-                      </p>
-                    )}
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Click Edit to modify author information
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -587,7 +523,7 @@ export default function AuthorViewPage() {
             <Card className="border-2" style={{ borderColor: 'var(--kdp-secondary-orange)', backgroundColor: '#fff9f0' }}>
               <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-[#1a1a1a]">Biography - {isCreating ? "New Author" : author?.fullName}</h3>
+                <h3 className="text-lg font-semibold text-[#1a1a1a]">Biography - {author.fullName}</h3>
                 <Select value={selectedLanguage} onValueChange={handleLanguageChange}>
                   <SelectTrigger className="w-48">
                     <SelectValue />
@@ -690,7 +626,7 @@ export default function AuthorViewPage() {
                       }}
                       onInput={updateBiographyFromHTML}
                       onBlur={updateBiographyFromHTML}
-                      data-placeholder={`Enter ${isCreating ? "author's" : author?.fullName + "'s"} biography in ${selectedLanguage}...`}
+                      data-placeholder={`Enter ${author.fullName}'s biography in ${selectedLanguage}...`}
                       suppressContentEditableWarning={true}
                     />
                     <div className="flex justify-end">
