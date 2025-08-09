@@ -1,6 +1,6 @@
-import { storage } from '../storage';
-import { KdpImportService, type ParsedKdpData } from './kdpImportService';
-import type { KdpImport, InsertKdpImportData } from '@shared/schema';
+import { storage } from '../storage.ts';
+import { KdpImportService, type ParsedKdpData } from './kdpImportService.ts';
+import type { KdpImport, InsertKdpImportData } from '../../shared/schema.ts';
 
 export interface ProcessingProgress {
   currentStep: string;

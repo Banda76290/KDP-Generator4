@@ -1,5 +1,5 @@
-import { db } from "../db";
-import { exchangeRates, type InsertExchangeRate } from "../../shared/schema";
+import { db } from "../db.ts";
+import { exchangeRates, type InsertExchangeRate } from "../../shared/schema.ts";
 import { eq, and, desc } from "drizzle-orm";
 
 export class ExchangeRateService {

@@ -1,6 +1,6 @@
 import OpenAI from "openai";
-import { storage } from "../storage";
-import { ContentRecommendation, Book } from "@shared/schema";
+import { storage } from "../storage.ts";
+import { ContentRecommendation, Book } from "../../shared/schema.ts";
 
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY 

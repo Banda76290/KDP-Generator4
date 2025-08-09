@@ -1,6 +1,6 @@
-import { exchangeRateService } from "./exchangeRateService";
-import { db } from "../db";
-import { cronJobs, cronJobLogs, type CronJob, type InsertCronJobLog } from "@shared/schema";
+import { exchangeRateService } from "./exchangeRateService.ts";
+import { db } from "../db.ts";
+import { cronJobs, cronJobLogs, type CronJob, type InsertCronJobLog } from "../../shared/schema.ts";
 import { eq, desc } from "drizzle-orm";
 
 export class CronService {
