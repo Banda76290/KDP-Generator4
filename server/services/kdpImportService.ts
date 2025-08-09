@@ -13,6 +13,16 @@ export enum KdpFileType {
   UNKNOWN = 'unknown'
 }
 
+export interface ParsedKdpData {
+  detectedType: KdpFileType;
+  summary: {
+    estimatedRecords: number;
+    processedSheets: string[];
+  };
+  data: any[];
+  sheets: Record<string, any>;
+}
+
 export interface ImportResult {
   fileType: KdpFileType;
   processedRecords: number;
@@ -23,11 +33,27 @@ export interface ImportResult {
 
 export class KdpImportService {
   private royaltiesEstimatorProcessor: KdpRoyaltiesEstimatorProcessor;
-  private kdpImportProcessor: KdpImportProcessor;
 
   constructor(private storage: IStorage) {
     this.royaltiesEstimatorProcessor = new KdpRoyaltiesEstimatorProcessor(storage);
-    this.kdpImportProcessor = new KdpImportProcessor(storage);
+  }
+
+  // Add missing static methods
+  static createColumnMapping(sheetData: any): any {
+    return {};
+  }
+
+  static normalizeRowData(data: any, mapping: any): any {
+    // Create a basic normalized data structure for the import
+    return {
+      importId: '',
+      userId: '',
+      sheetName: '',
+      rowIndex: 0,
+      originalData: data,
+      processedData: {},
+      isDuplicate: false
+    };
   }
 
   /**

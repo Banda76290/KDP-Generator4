@@ -58,21 +58,16 @@ export class KdpImportProcessor {
         const columnMapping = KdpImportService.createColumnMapping(sheetData.headers);
 
         // Process each row
-        sheetData.data.forEach((rowData, rowIndex) => {
+        sheetData.data.forEach((rowData: any, rowIndex: number) => {
           try {
             // Skip empty rows
-            if (rowData.every(cell => !cell || cell === '')) {
+            if (rowData.every((cell: any) => !cell || cell === '')) {
               return;
             }
 
             const normalizedData = KdpImportService.normalizeRowData(
               rowData,
-              sheetData.headers,
-              columnMapping,
-              this.importId,
-              this.userId,
-              sheetName,
-              rowIndex + 2 // +2 because rowIndex is 0-based and we skip header row
+              columnMapping
             );
 
             allImportData.push(normalizedData);

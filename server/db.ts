@@ -1,9 +1,10 @@
 import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
-import * as schema from "@shared/schema";
+import * as schema from "../shared/schema.js";
 
-neonConfig.webSocketConstructor = ws;
+// Use require for ws to avoid TypeScript module resolution issues
+const WebSocket = require("ws");
+neonConfig.webSocketConstructor = WebSocket;
 
 if (!process.env.DATABASE_URL) {
   throw new Error(

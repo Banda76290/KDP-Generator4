@@ -72,7 +72,7 @@ export async function parseKDPReport(buffer: Buffer, mimeType: string): Promise<
           records.push(record);
         }
       } catch (rowError) {
-        console.warn(`Skipping invalid row ${i}:`, rowError.message);
+        console.warn(`Skipping invalid row ${i}:`, rowError instanceof Error ? rowError.message : 'Unknown error');
         continue;
       }
     }
@@ -85,7 +85,7 @@ export async function parseKDPReport(buffer: Buffer, mimeType: string): Promise<
 
   } catch (error) {
     console.error('KDP parsing error:', error);
-    throw new Error(`Failed to parse KDP report: ${error.message}`);
+    throw new Error(`Failed to parse KDP report: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 

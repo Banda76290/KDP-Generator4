@@ -5,7 +5,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { exchangeRateService } from "./services/exchangeRateService";
 import { cronService } from "./services/cronService";
-import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema, insertAuthorSchema, insertAuthorBiographySchema, insertContentRecommendationSchema, insertAiPromptTemplateSchema, insertKdpImportSchema, insertKdpImportDataSchema } from "@shared/schema";
+import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema, insertAuthorSchema, insertAuthorBiographySchema, insertContentRecommendationSchema, insertAiPromptTemplateSchema, insertKdpImportSchema, insertKdpImportDataSchema } from "../shared/schema.js";
 import { aiService } from "./services/aiService";
 import { parseKDPReport } from "./services/kdpParser";
 import { KdpImportProcessor } from "./services/kdpImportProcessor";
@@ -14,7 +14,7 @@ import { generateUniqueIsbnPlaceholder, ensureIsbnPlaceholder } from "./utils/is
 import XLSX from 'xlsx';
 import path from 'path';
 import fs from 'fs';
-import { seedDatabase, forceSeedDatabase } from "./seedDatabase.js";
+import { seedDatabase, forceSeedDatabase } from "./seedDatabase";
 import { z } from "zod";
 import OpenAI from "openai";
 
