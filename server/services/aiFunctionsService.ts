@@ -1,5 +1,5 @@
 import { storage } from '../storage';
-import type { AiPromptTemplate } from '@shared/schema';
+import type { AiPromptTemplate } from '../../shared/schema';
 
 // Service for managing AI functions dynamically based on database templates
 export interface AIFunction {

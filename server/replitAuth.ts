@@ -7,8 +7,7 @@ import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
-// Import our type definitions
-import "./types/passport";
+// Type definitions are properly handled by @types packages
 
 // Type definition for verify function
 type VerifyFunction = (issuer: any, profile: any, done: (error: any, user?: any) => void) => void;

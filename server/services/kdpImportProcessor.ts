@@ -1,6 +1,6 @@
 import { storage } from '../storage';
 import { KdpImportService, type ParsedKdpData } from './kdpImportService';
-import type { KdpImport, InsertKdpImportData } from '@shared/schema';
+import type { KdpImport, InsertKdpImportData } from '../../shared/schema';
 
 export interface ProcessingProgress {
   currentStep: string;

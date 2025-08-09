@@ -1,7 +1,7 @@
 import XLSX from 'xlsx';
 import { storage } from '../storage';
 import { ExchangeRateService } from './exchangeRateService';
-import type { InsertKdpRoyaltiesEstimatorData } from '@shared/schema';
+import type { InsertKdpRoyaltiesEstimatorData } from '../../shared/schema';
 
 interface KdpRoyaltiesSheet {
   name: string;
