@@ -131,7 +131,15 @@ export default function Analytics() {
 
   const { data: salesTrends, isLoading: trendsLoading } = useQuery<SalesTrend[]>({
     queryKey: ['/api/analytics/sales-trends', selectedPeriod, analyticsCurrency],
-    queryFn: () => fetch(`/api/analytics/sales-trends?period=${selectedPeriod}&currency=${analyticsCurrency}`).then(res => res.json()),
+    queryFn: async () => {
+      const response = await fetch(`/api/analytics/sales-trends?period=${selectedPeriod}&currency=${analyticsCurrency}`);
+      if (!response.ok) {
+        console.error('Failed to fetch sales trends:', response.status);
+        return [];
+      }
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
+    },
     enabled: isAuthenticated && !!analyticsCurrency,
     staleTime: 0, // Always refetch fresh data
     refetchOnMount: true, // Refetch when component mounts
@@ -139,7 +147,15 @@ export default function Analytics() {
 
   const { data: topPerformers, isLoading: performersLoading } = useQuery<TopPerformer[]>({
     queryKey: ['/api/analytics/top-performers', analyticsCurrency],
-    queryFn: () => fetch(`/api/analytics/top-performers?currency=${analyticsCurrency}`).then(res => res.json()),
+    queryFn: async () => {
+      const response = await fetch(`/api/analytics/top-performers?currency=${analyticsCurrency}`);
+      if (!response.ok) {
+        console.error('Failed to fetch top performers:', response.status);
+        return [];
+      }
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
+    },
     enabled: isAuthenticated && !!analyticsCurrency,
     staleTime: 0, // Always refetch fresh data
     refetchOnMount: true, // Refetch when component mounts
@@ -147,7 +163,15 @@ export default function Analytics() {
 
   const { data: marketplaceData, isLoading: marketplaceLoading } = useQuery<MarketplaceData[]>({
     queryKey: ['/api/analytics/marketplace-breakdown', analyticsCurrency],
-    queryFn: () => fetch(`/api/analytics/marketplace-breakdown?currency=${analyticsCurrency}`).then(res => res.json()),
+    queryFn: async () => {
+      const response = await fetch(`/api/analytics/marketplace-breakdown?currency=${analyticsCurrency}`);
+      if (!response.ok) {
+        console.error('Failed to fetch marketplace breakdown:', response.status);
+        return [];
+      }
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
+    },
     enabled: isAuthenticated && !!analyticsCurrency,
     staleTime: 0, // Always refetch fresh data
     refetchOnMount: true, // Refetch when component mounts
@@ -425,7 +449,7 @@ export default function Analytics() {
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={salesTrends}>
+                  <LineChart data={salesTrends || []}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 
                       dataKey="date" 
@@ -481,28 +505,28 @@ export default function Analytics() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {royaltiesByCurrency?.map((currency) => (
-                    <div key={currency.currency} className="p-4 border rounded-lg bg-gradient-to-r from-blue-50 to-orange-50">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium text-lg">{currency.currency}</h4>
-                        <Badge variant="secondary">
-                          {currency.transactions} transactions
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="text-2xl font-bold text-secondary">
-                            {formatCurrency(currency.amount, currency.currency)}
+                  {Array.isArray(royaltiesByCurrency) && royaltiesByCurrency.length > 0 ? (
+                    royaltiesByCurrency.map((currency) => (
+                      <div key={currency.currency} className="p-4 border rounded-lg bg-gradient-to-r from-blue-50 to-orange-50">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-lg">{currency.currency}</h4>
+                          <Badge variant="secondary">
+                            {currency.transactions} transactions
+                          </Badge>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-2xl font-bold text-secondary">
+                              {formatCurrency(currency.amount, currency.currency)}
+                            </div>
                           </div>
-
-                        </div>
-                        <div className="text-sm text-gray-600 text-right">
-                          <div>Average: {formatCurrency(currency.amount / currency.transactions, currency.currency)}</div>
+                          <div className="text-sm text-gray-600 text-right">
+                            <div>Average: {formatCurrency(currency.amount / currency.transactions, currency.currency)}</div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                  {royaltiesByCurrency.length === 0 && (
+                    ))
+                  ) : (
                     <div className="text-center py-8 text-gray-500">
                       No revenue data available
                     </div>
@@ -537,7 +561,7 @@ export default function Analytics() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {topPerformers?.slice(0, 10).map((book, index) => (
+                  {Array.isArray(topPerformers) ? topPerformers.slice(0, 10).map((book, index) => (
                     <div key={book.asin} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
                       <div className="flex items-center space-x-4">
                         <div className="flex-shrink-0">
@@ -563,7 +587,11 @@ export default function Analytics() {
                         </div>
                       </div>
                     </div>
-                  ))}
+                  )) : (
+                    <div className="text-center text-gray-500 py-8">
+                      No performance data available
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -598,7 +626,7 @@ export default function Analytics() {
                           `${marketplace} (${(percent * 100).toFixed(1)}%)`
                         }
                       >
-                        {marketplaceData?.map((entry, index) => (
+                        {(marketplaceData || []).map((entry, index) => (
                           <Cell 
                             key={`cell-${index}`} 
                             fill={MARKETPLACE_COLORS[entry.marketplace as keyof typeof MARKETPLACE_COLORS] || '#8884d8'} 
@@ -627,7 +655,7 @@ export default function Analytics() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {marketplaceData?.map((marketplace) => (
+                    {(marketplaceData || []).map((marketplace) => (
                       <div key={`${marketplace.marketplace}-${marketplace.currency}`} className="p-4 border rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <h4 className="font-medium">{marketplace.marketplace}</h4>
