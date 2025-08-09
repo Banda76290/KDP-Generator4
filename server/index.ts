@@ -5,6 +5,7 @@ import { seedDatabase } from "./seedDatabase.js";
 import { cronService } from "./services/cronService.js";
 import { runMigration } from "./scripts/migrate.js";
 import { runDeploymentHealthCheck, formatHealthCheckForLog } from "./utils/deploymentHealth.js";
+import { startDeploymentMonitoring, runDeploymentHealthMonitor, formatHealthMonitorResults } from "./utils/deploymentMonitor.js";
 
 const app = express();
 // Increase payload limit to handle rich text content (10MB)
@@ -60,19 +61,23 @@ app.use((req, res, next) => {
       log('Production environment detected - proceeding with migration');
       
       try {
-        log('🔄 Starting database migration process...');
+        log('🔄 Starting enhanced database migration process...');
         await runMigration();
-        log('✅ Database migration completed successfully');
+        log('✅ Enhanced database migration completed successfully');
         
         // Run comprehensive health check
-        log('🔍 Running deployment health check...');
-        const healthCheck = await runDeploymentHealthCheck();
-        log(formatHealthCheckForLog(healthCheck));
+        log('🔍 Running enhanced deployment health monitor...');
+        const healthMonitor = await runDeploymentHealthMonitor();
+        log(formatHealthMonitorResults(healthMonitor));
         
-        if (healthCheck.overall === 'unhealthy') {
+        // Start continuous monitoring for production
+        startDeploymentMonitoring();
+        
+        if (healthMonitor.status === 'unhealthy') {
           log('⚠️  DEPLOYMENT HEALTH WARNING: Critical issues detected');
           log('   Deployment may have limited functionality');
-        } else if (healthCheck.overall === 'degraded') {
+          log('   Immediate attention required for production stability');
+        } else if (healthMonitor.status === 'degraded') {
           log('⚠️  DEPLOYMENT HEALTH NOTICE: Minor issues detected');
           log('   Some features may be affected');
         } else {

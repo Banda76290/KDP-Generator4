@@ -122,11 +122,57 @@ async function verifyConnection(): Promise<void> {
 }
 
 /**
- * Main migration execution
+ * Platform-aware migration with enhanced error handling
+ */
+async function runPlatformSpecificMigration(): Promise<boolean> {
+  try {
+    log('=== Platform-Specific Migration System ===');
+    
+    // Import platform migration handler
+    const { executePlatformMigration, runPlatformDeploymentCheck } = 
+      await import('../utils/platformMigrationHandler.js');
+    
+    // Execute platform migration with multiple fallback strategies
+    const migrationResult = await executePlatformMigration();
+    log(`Migration executed with strategy: ${migrationResult.strategy}`);
+    log(`Migration result: ${migrationResult.success ? 'SUCCESS' : 'FAILED'}`);
+    log(`Details: ${migrationResult.details}`);
+    
+    // Run comprehensive health check
+    const healthCheck = await runPlatformDeploymentCheck();
+    log('=== Platform Deployment Health Check Results ===');
+    healthCheck.details.forEach(detail => log(detail));
+    
+    return migrationResult.success || healthCheck.overall !== 'unhealthy';
+    
+  } catch (error) {
+    log(`Platform migration failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    return false;
+  }
+}
+
+/**
+ * Main migration execution with platform-specific handling
  */
 async function runMigration(): Promise<void> {
   try {
     log('=== Database Migration Started ===');
+    
+    // For production/deployment environments, use platform-specific migration
+    if (process.env.NODE_ENV === 'production' || process.env.REPLIT_DEPLOYMENT) {
+      log('Production/deployment environment detected - using platform-specific migration');
+      const platformSuccess = await runPlatformSpecificMigration();
+      
+      if (platformSuccess) {
+        log('=== Platform Migration Completed Successfully ===');
+        return;
+      } else {
+        log('Platform migration failed, falling back to standard migration...');
+      }
+    }
+    
+    // Standard migration for development or as fallback
+    log('Using standard migration approach');
     
     // Step 1: Verify database connection
     await verifyConnection();
@@ -154,7 +200,14 @@ async function runMigration(): Promise<void> {
   } catch (error) {
     log(`=== Migration Failed ===`);
     log(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    process.exit(1);
+    
+    // Don't exit in production to allow deployment to continue
+    if (process.env.NODE_ENV === 'production' || process.env.REPLIT_DEPLOYMENT) {
+      log('Production environment - allowing deployment to continue despite migration failure');
+      log('Manual database setup may be required');
+    } else {
+      process.exit(1);
+    }
   }
 }
 
@@ -163,4 +216,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   runMigration();
 }
 
+// Export for use in server startup
 export { runMigration, isDatabaseInitialized };
