@@ -1,19 +1,17 @@
 import XLSX from 'xlsx';
-import { KdpRoyaltiesEstimatorProcessor } from './kdpRoyaltiesEstimatorProcessor.ts';
-import { KdpImportProcessor } from './kdpImportProcessor.ts';
-import { IStorage } from '../storage.ts';
+import { KdpRoyaltiesEstimatorProcessor } from './kdpRoyaltiesEstimatorProcessor';
+import { KdpImportProcessor } from './kdpImportProcessor';
+import { IStorage } from '../storage';
 
-export const KdpFileType = {
-  ROYALTIES_ESTIMATOR: 'royalties_estimator',
-  PAYMENTS: 'payments',
-  PRIOR_MONTH_ROYALTIES: 'prior_month_royalties',
-  KENP_READ: 'kenp_read',
-  DASHBOARD: 'dashboard',
-  ORDERS: 'orders',
-  UNKNOWN: 'unknown'
-} as const;
-
-export type KdpFileType = typeof KdpFileType[keyof typeof KdpFileType];
+export enum KdpFileType {
+  ROYALTIES_ESTIMATOR = 'royalties_estimator',
+  PAYMENTS = 'payments',
+  PRIOR_MONTH_ROYALTIES = 'prior_month_royalties',
+  KENP_READ = 'kenp_read',
+  DASHBOARD = 'dashboard',
+  ORDERS = 'orders',
+  UNKNOWN = 'unknown'
+}
 
 export interface ImportResult {
   fileType: KdpFileType;
@@ -26,10 +24,8 @@ export interface ImportResult {
 export class KdpImportService {
   private royaltiesEstimatorProcessor: KdpRoyaltiesEstimatorProcessor;
   private kdpImportProcessor: KdpImportProcessor;
-  private storage: IStorage;
 
-  constructor(storage: IStorage) {
-    this.storage = storage;
+  constructor(private storage: IStorage) {
     this.royaltiesEstimatorProcessor = new KdpRoyaltiesEstimatorProcessor(storage);
     this.kdpImportProcessor = new KdpImportProcessor(storage);
   }

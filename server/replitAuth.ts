@@ -6,7 +6,7 @@ import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
-import { storage } from "./storage.ts";
+import { storage } from "./storage";
 
 // REPLIT_DOMAINS is optional for development
 

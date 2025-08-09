@@ -1,5 +1,5 @@
-import { db } from "../db.ts";
-import { books } from "../../shared/schema.ts";
+import { db } from "../db";
+import { books } from "@shared/schema";
 import { sql } from "drizzle-orm";
 
 /**

@@ -68,10 +68,10 @@ import {
   insertConsolidatedSalesDataSchema,
   type MasterBook,
   type InsertMasterBook,
-} from "../shared/schema.ts";
-import { db } from "./db.ts";
+} from "@shared/schema";
+import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, sum, count, like, or, isNotNull, asc, inArray } from "drizzle-orm";
-import { generateUniqueIsbnPlaceholder } from "./utils/isbnGenerator.ts";
+import { generateUniqueIsbnPlaceholder } from "./utils/isbnGenerator";
 import { nanoid } from "nanoid";
 
 export interface IStorage {

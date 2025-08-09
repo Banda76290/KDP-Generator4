@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
-import { db } from './db.ts';
-import { marketplaceCategories } from '../shared/schema.ts';
+import { db } from './db.js';
+import { marketplaceCategories } from '@shared/schema';
 import { sql } from 'drizzle-orm';
 
 /**
