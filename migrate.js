@@ -89,7 +89,7 @@ async function testDatabaseConnection() {
 }
 
 /**
- * Execute migration with enhanced error handling
+ * Execute migration with enhanced error handling and critical recovery
  */
 async function executeMigrationScript() {
   log('Attempting to execute migration script...');
@@ -104,8 +104,8 @@ async function executeMigrationScript() {
       
       execSync(command, {
         stdio: 'inherit',
-        env: { ...process.env, NODE_ENV: 'production' },
-        timeout: 30000 // 30 second timeout
+        env: { ...process.env, NODE_ENV: 'production', REPLIT_DEPLOYMENT: 'true' },
+        timeout: 60000 // Increased to 60 second timeout
       });
       
       log('Migration executed successfully with tsx');
@@ -123,8 +123,8 @@ async function executeMigrationScript() {
     
     execSync(command, {
       stdio: 'inherit',
-      env: { ...process.env, NODE_ENV: 'production' },
-      timeout: 30000
+      env: { ...process.env, NODE_ENV: 'production', REPLIT_DEPLOYMENT: 'true' },
+      timeout: 60000
     });
     
     log('Migration executed successfully with compiled script');
@@ -132,8 +132,26 @@ async function executeMigrationScript() {
   } catch (error) {
     warn(`Compiled script execution failed: ${error.message}`);
   }
+
+  // Try critical deployment recovery using direct Node.js execution
+  try {
+    log('Attempting critical deployment recovery with direct execution...');
+    
+    const { executeCriticalDeploymentRecovery } = await import('./server/utils/criticalDeploymentHandler.js');
+    const recoveryResult = await executeCriticalDeploymentRecovery();
+    
+    log('=== Direct Critical Recovery Results ===');
+    recoveryResult.details.forEach(detail => log(detail));
+    
+    if (recoveryResult.success) {
+      log('Critical deployment recovery successful');
+      return true;
+    }
+  } catch (directError) {
+    warn(`Direct critical recovery failed: ${directError.message}`);
+  }
   
-  throw new Error('All migration execution methods failed');
+  throw new Error('All migration execution methods failed, including critical recovery');
 }
 
 /**

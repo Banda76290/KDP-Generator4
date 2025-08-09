@@ -138,6 +138,24 @@ async function runPlatformSpecificMigration(): Promise<boolean> {
     log(`Migration result: ${migrationResult.success ? 'SUCCESS' : 'FAILED'}`);
     log(`Details: ${migrationResult.details}`);
     
+    // If platform migration fails, attempt critical recovery
+    if (!migrationResult.success) {
+      log('Platform migration failed - attempting critical deployment recovery');
+      
+      const { executeCriticalDeploymentRecovery } = await import('../utils/criticalDeploymentHandler.js');
+      const recoveryResult = await executeCriticalDeploymentRecovery();
+      
+      log('=== Critical Deployment Recovery Results ===');
+      recoveryResult.details.forEach(detail => log(detail));
+      
+      if (recoveryResult.recommendations.length > 0) {
+        log('=== Recovery Recommendations ===');
+        recoveryResult.recommendations.forEach(rec => log(`• ${rec}`));
+      }
+      
+      return recoveryResult.success;
+    }
+    
     // Run comprehensive health check
     const healthCheck = await runPlatformDeploymentCheck();
     log('=== Platform Deployment Health Check Results ===');
@@ -147,7 +165,21 @@ async function runPlatformSpecificMigration(): Promise<boolean> {
     
   } catch (error) {
     log(`Platform migration failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    return false;
+    
+    // Last resort: attempt critical recovery
+    try {
+      log('Attempting emergency critical recovery as last resort...');
+      const { executeCriticalDeploymentRecovery } = await import('../utils/criticalDeploymentHandler.js');
+      const emergencyResult = await executeCriticalDeploymentRecovery();
+      
+      log('=== Emergency Recovery Results ===');
+      emergencyResult.details.forEach(detail => log(detail));
+      
+      return emergencyResult.success;
+    } catch (emergencyError) {
+      log(`Emergency recovery failed: ${emergencyError instanceof Error ? emergencyError.message : 'Unknown error'}`);
+      return false;
+    }
   }
 }
 

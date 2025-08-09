@@ -6,6 +6,7 @@ import { cronService } from "./services/cronService.js";
 import { runMigration } from "./scripts/migrate.js";
 import { runDeploymentHealthCheck, formatHealthCheckForLog } from "./utils/deploymentHealth.js";
 import { startDeploymentMonitoring, runDeploymentHealthMonitor, formatHealthMonitorResults } from "./utils/deploymentMonitor.js";
+import { runPreDeploymentValidation, testCriticalRecoverySystem } from "./utils/deploymentValidator.js";
 
 const app = express();
 // Increase payload limit to handle rich text content (10MB)
@@ -45,23 +46,34 @@ app.use((req, res, next) => {
 (async () => {
   // Enhanced database migration system for production deployment
   if (process.env.NODE_ENV === 'production') {
-    log('=== Production Deployment Migration System ===');
+    log('=== Production Deployment System Enhanced ===');
     log('Environment: Production');
     log(`Timestamp: ${new Date().toISOString()}`);
     
-    // Validate essential environment variables first
-    const requiredEnvVars = ['DATABASE_URL'];
-    const missingVars = requiredEnvVars.filter(variable => !process.env[variable]);
+    // Pre-deployment validation
+    log('🔍 Running pre-deployment validation...');
+    const preDeployValidation = await runPreDeploymentValidation();
     
-    if (missingVars.length > 0) {
-      log(`❌ CRITICAL: Missing required environment variables: ${missingVars.join(', ')}`);
-      log('Server will start in degraded state - database functionality will be limited');
+    if (!preDeployValidation.ready) {
+      log('⚠️ Pre-deployment validation issues detected:');
+      preDeployValidation.issues.forEach(issue => log(`  • ${issue}`));
+      log('Recommendations:');
+      preDeployValidation.recommendations.forEach(rec => log(`  • ${rec}`));
     } else {
-      log('✅ Environment variables validated');
-      log('Production environment detected - proceeding with migration');
+      log('✅ Pre-deployment validation passed');
+    }
+    
+    // Test critical recovery system
+    log('🧪 Testing critical recovery system...');
+    const recoveryTest = await testCriticalRecoverySystem();
+    log(`Critical recovery system: ${recoveryTest.available ? 'AVAILABLE' : 'NOT AVAILABLE'}`);
+    recoveryTest.details.forEach(detail => log(`  • ${detail}`));
+    
+    if (preDeployValidation.ready) {
+      log('Production environment validated - proceeding with migration');
       
       try {
-        log('🔄 Starting enhanced database migration process...');
+        log('🔄 Starting enhanced database migration with critical recovery...');
         await runMigration();
         log('✅ Enhanced database migration completed successfully');
         
