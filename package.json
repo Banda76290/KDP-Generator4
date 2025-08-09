@@ -11,6 +11,7 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
+    "@babel/traverse": "^7.28.0",
     "@google-cloud/storage": "^7.16.0",
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",
@@ -117,7 +118,6 @@
     "esbuild": "^0.25.8",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.17",
-    "tsx": "^4.20.3",
     "typescript": "^5.9.2"
   },
   "optionalDependencies": {
