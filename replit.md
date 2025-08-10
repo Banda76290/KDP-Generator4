@@ -104,8 +104,9 @@ The application follows a modern full-stack architecture with clear separation b
 - **Stripe**: Payment processing and subscription management.
 
 ### Production Deployment
-- **Database Seeding**: Automatic initialization with 249 marketplace categories from `complete-categories.sql` on first startup.
-- **Replit Deployments**: Configured for autoscale deployment with build/run commands optimized for database seeding.
+- **Database Seeding**: Manual initialization via Admin System page - automatic seeding disabled for deployment compatibility.
+- **Replit Deployments**: Configured for autoscale deployment with graceful database fallback and deployment-aware error handling.
+- **Deployment Fixes**: Applied comprehensive fixes for Cloud Run deployment issues including database operation deferral, health check endpoints, and graceful degradation (August 2025).
 
 ### Key Libraries
 - **Frontend**: React, TanStack Query, React Hook Form, Recharts, Radix UI.

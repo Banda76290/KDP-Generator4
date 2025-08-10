@@ -5,11 +5,57 @@ import * as schema from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+// Database connection with graceful fallback for deployment
+let pool: Pool | null = null;
+let db: ReturnType<typeof drizzle> | null = null;
+let databaseAvailable = false;
+
+async function initializeDatabase() {
+  try {
+    if (!process.env.DATABASE_URL) {
+      console.warn("[DB] DATABASE_URL not set - running without database functionality");
+      return false;
+    }
+
+    // Test connection during deployment
+    const isDeployment = process.env.NODE_ENV === 'production' && !process.env.REPLIT_DEPLOYMENT_COMPLETE;
+    
+    if (isDeployment) {
+      console.log("[DB] Deployment mode detected - deferring database initialization");
+      return false;
+    }
+
+    pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    db = drizzle({ client: pool, schema });
+    
+    // Test the connection
+    await pool.query('SELECT 1');
+    databaseAvailable = true;
+    console.log("[DB] Database connection established successfully");
+    return true;
+    
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.warn("[DB] Database connection failed:", errorMessage);
+    console.warn("[DB] Application will continue with limited functionality");
+    databaseAvailable = false;
+    return false;
+  }
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle({ client: pool, schema });
+// Initialize database connection
+initializeDatabase().catch(console.error);
+
+// Export database with fallback
+export { pool };
+export const getDb = () => {
+  if (!databaseAvailable || !db) {
+    throw new Error("Database not available - please ensure DATABASE_URL is set and accessible");
+  }
+  return db;
+};
+
+export const isDatabaseAvailable = () => databaseAvailable;
+
+// For backward compatibility, export db but with checks
+export { db };

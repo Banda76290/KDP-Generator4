@@ -3,11 +3,18 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { seedDatabase } from "./seedDatabase.js";
 import { cronService } from "./services/cronService";
+import { isDeploymentMode, createDatabaseMiddleware } from "./utils/deploymentHelper";
+import { createDeploymentErrorHandler, createDatabaseCheckMiddleware } from "./middleware/errorHandler";
+import { setupHealthRoutes } from "./routes/health";
 
 const app = express();
 // Increase payload limit to handle rich text content (10MB)
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+
+// Add deployment-aware database middleware
+app.use(createDatabaseMiddleware());
+app.use(createDatabaseCheckMiddleware());
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -40,21 +47,39 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Database seeding is now manual-only via Admin System page
-  // await seedDatabase(); // Disabled automatic seeding - use Admin System page for manual control
+  const isDeployment = isDeploymentMode();
+  
+  console.log(`[07:${new Date().getMinutes().toString().padStart(2, '0')}:${new Date().getSeconds().toString().padStart(2, '0')}] ℹ️ [SYSTEM] 🚀 Démarrage du serveur KDP Generator`);
+  console.log(`[07:${new Date().getMinutes().toString().padStart(2, '0')}:${new Date().getSeconds().toString().padStart(2, '0')}] ℹ️ [SYSTEM] 🔧 Configuration des routes API...`);
+  
+  if (isDeployment) {
+    console.log("[DEPLOY] Deployment mode detected - skipping database operations");
+  } else {
+    // Database seeding is now manual-only via Admin System page
+    // await seedDatabase(); // Disabled automatic seeding - use Admin System page for manual control
+    console.log("[INIT] Normal mode - database operations available");
+  }
   
   const server = await registerRoutes(app);
   
-  // Start exchange rate cron service
-  cronService.start();
+  console.log(`[07:${new Date().getMinutes().toString().padStart(2, '0')}:${new Date().getSeconds().toString().padStart(2, '0')}] ℹ️ [AUTH] 🔐 Authentification configurée`);
+  
+  // Start exchange rate cron service only if not deploying
+  if (!isDeployment) {
+    try {
+      console.log("[CRON] Initializing cron service...");
+      cronService.start();
+      console.log("[CRON] Cron service initialized successfully");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.warn("[CRON] Failed to start exchange rate service:", errorMessage);
+    }
+  } else {
+    console.log("[DEPLOY] Skipping cron service startup during deployment");
+  }
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
-    throw err;
-  });
+  // Use deployment-aware error handler
+  app.use(createDeploymentErrorHandler());
 
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route

@@ -6,6 +6,8 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { exchangeRateService } from "./services/exchangeRateService";
 import { cronService } from "./services/cronService";
 import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema, insertAuthorSchema, insertAuthorBiographySchema, insertContentRecommendationSchema, insertAiPromptTemplateSchema, insertKdpImportSchema, insertKdpImportDataSchema } from "@shared/schema";
+import { isDatabaseAvailable } from "./db";
+import { isDeploymentMode } from "./utils/deploymentHelper";
 import { aiService } from "./services/aiService";
 import { parseKDPReport } from "./services/kdpParser";
 import { KdpImportProcessor } from "./services/kdpImportProcessor";
@@ -118,6 +120,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize system logs
   systemLog('🚀 Démarrage du serveur KDP Generator', 'info', 'SYSTEM');
   systemLog('🔧 Configuration des routes API...', 'info', 'SYSTEM');
+  
+  // Health Check Routes (must be first, before authentication)
+  app.get('/health', (req: Request, res: Response) => {
+    const isDeployment = isDeploymentMode();
+    const dbAvailable = isDatabaseAvailable();
+    
+    const status = {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      deployment: isDeployment,
+      database: dbAvailable,
+      services: {
+        api: 'healthy',
+        database: dbAvailable ? 'connected' : 'unavailable'
+      }
+    };
+    
+    if (isDeployment) {
+      res.status(503).json({
+        ...status,
+        status: 'deploying',
+        message: 'Application is currently deploying'
+      });
+    } else if (!dbAvailable) {
+      res.status(503).json({
+        ...status,
+        status: 'degraded',
+        message: 'Application is running with limited functionality'
+      });
+    } else {
+      res.status(200).json(status);
+    }
+  });
+  
+  app.get('/ready', (req: Request, res: Response) => {
+    const isDeployment = isDeploymentMode();
+    const dbAvailable = isDatabaseAvailable();
+    
+    if (isDeployment) {
+      res.status(503).json({
+        ready: false,
+        reason: 'deployment_in_progress'
+      });
+    } else if (!dbAvailable) {
+      res.status(503).json({
+        ready: false,
+        reason: 'database_unavailable'
+      });
+    } else {
+      res.status(200).json({
+        ready: true,
+        services: ['api', 'database']
+      });
+    }
+  });
+  
+  app.get('/live', (req: Request, res: Response) => {
+    res.status(200).json({
+      alive: true,
+      timestamp: new Date().toISOString()
+    });
+  });
   
   // Setup authentication
   await setupAuth(app);
