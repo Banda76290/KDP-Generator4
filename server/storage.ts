@@ -69,18 +69,10 @@ import {
   type MasterBook,
   type InsertMasterBook,
 } from "@shared/schema";
-import { getDb, isDatabaseAvailable } from "./db";
+import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, sum, count, like, or, isNotNull, asc, inArray } from "drizzle-orm";
 import { generateUniqueIsbnPlaceholder } from "./utils/isbnGenerator";
 import { nanoid } from "nanoid";
-
-// Safe database accessor with deployment mode handling
-function getSafeDb() {
-  if (!isDatabaseAvailable()) {
-    throw new Error("Database operations not available during deployment or when database is disconnected");
-  }
-  return getDb();
-}
 
 export interface IStorage {
   // User operations
@@ -240,12 +232,12 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
-    const [user] = await getSafeDb().select().from(users).where(eq(users.id, id));
+    const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
 
   async upsertUser(userData: UpsertUser & { id: string }): Promise<User> {
-    const [user] = await getSafeDb()
+    const [user] = await db
       .insert(users)
       .values(userData)
       .onConflictDoUpdate({
@@ -260,7 +252,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUserStripeInfo(userId: string, stripeCustomerId: string, stripeSubscriptionId?: string): Promise<User> {
-    const [user] = await getSafeDb()
+    const [user] = await db
       .update(users)
       .set({
         stripeCustomerId,
@@ -273,17 +265,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserProjects(userId: string): Promise<ProjectWithRelations[]> {
-    const userProjects = await getSafeDb().select().from(projects).where(eq(projects.userId, userId));
+    const userProjects = await db.select().from(projects).where(eq(projects.userId, userId));
     
     // Get books for each project with sales data
     const projectsWithBooks = await Promise.all(userProjects.map(async (project) => {
       // Get books for this project
-      const projectBooks = await getSafeDb().select().from(books).where(eq(books.projectId, project.id));
+      const projectBooks = await db.select().from(books).where(eq(books.projectId, project.id));
       
       // Calculate revenue and sales for each book
       const booksWithStats = await Promise.all(projectBooks.map(async (book) => {
         // Get sales data for this book
-        const bookSales = await getSafeDb().select().from(salesData).where(eq(salesData.bookId, book.id));
+        const bookSales = await db.select().from(salesData).where(eq(salesData.bookId, book.id));
         
         const totalRevenue = bookSales.reduce((sum, sale) => sum + parseFloat(sale.royalty || '0'), 0);
         const totalSales = bookSales.reduce((sum, sale) => sum + (sale.unitsSold || 0), 0);
@@ -335,16 +327,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProject(projectId: string, userId: string): Promise<ProjectWithRelations | undefined> {
-    const [project] = await getSafeDb().select().from(projects).where(and(eq(projects.id, projectId), eq(projects.userId, userId)));
+    const [project] = await db.select().from(projects).where(and(eq(projects.id, projectId), eq(projects.userId, userId)));
     if (!project) return undefined;
     
     // Get books for this project with full data
-    const projectBooks = await getSafeDb().select().from(books).where(eq(books.projectId, project.id));
+    const projectBooks = await db.select().from(books).where(eq(books.projectId, project.id));
     
     // Calculate revenue and sales for each book
     const booksWithStats = await Promise.all(projectBooks.map(async (book) => {
       // Get sales data for this book
-      const bookSales = await getSafeDb().select().from(salesData).where(eq(salesData.bookId, book.id));
+      const bookSales = await db.select().from(salesData).where(eq(salesData.bookId, book.id));
       
       const totalRevenue = bookSales.reduce((sum, sale) => sum + parseFloat(sale.royalty || '0'), 0);
       const totalSales = bookSales.reduce((sum, sale) => sum + (sale.unitsSold || 0), 0);
@@ -393,7 +385,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProject(project: InsertProject): Promise<Project> {
-    const [newProject] = await getSafeDb().insert(projects).values(project).returning();
+    const [newProject] = await db.insert(projects).values(project).returning();
     return newProject;
   }
 
@@ -409,21 +401,21 @@ export class DatabaseStorage implements IStorage {
   async deleteProject(projectId: string, userId: string, deleteBooks = false): Promise<void> {
     if (deleteBooks) {
       // First delete contributors associated with books in this project
-      await getSafeDb().delete(contributors).where(
+      await db.delete(contributors).where(
         sql`book_id IN (SELECT id FROM books WHERE project_id = ${projectId} AND user_id = ${userId})`
       );
       
       // Then delete the books themselves
-      await getSafeDb().delete(books).where(and(eq(books.projectId, projectId), eq(books.userId, userId)));
+      await db.delete(books).where(and(eq(books.projectId, projectId), eq(books.userId, userId)));
     } else {
       // Just unlink books from the project
-      await getSafeDb().update(books)
+      await db.update(books)
         .set({ projectId: null })
         .where(and(eq(books.projectId, projectId), eq(books.userId, userId)));
     }
     
     // Finally delete the project
-    await getSafeDb().delete(projects).where(and(eq(projects.id, projectId), eq(projects.userId, userId)));
+    await db.delete(projects).where(and(eq(projects.id, projectId), eq(projects.userId, userId)));
   }
 
   async duplicateProject(projectId: string, userId: string): Promise<ProjectWithRelations> {
@@ -596,15 +588,15 @@ export class DatabaseStorage implements IStorage {
 
   // Book operations
   async getUserBooks(userId: string): Promise<Book[]> {
-    return await getSafeDb().select().from(books).where(eq(books.userId, userId)).orderBy(desc(books.updatedAt));
+    return await db.select().from(books).where(eq(books.userId, userId)).orderBy(desc(books.updatedAt));
   }
 
   async getBook(bookId: string, userId: string): Promise<(Book & { contributors?: Contributor[] }) | undefined> {
-    const [book] = await getSafeDb().select().from(books).where(and(eq(books.id, bookId), eq(books.userId, userId)));
+    const [book] = await db.select().from(books).where(and(eq(books.id, bookId), eq(books.userId, userId)));
     if (!book) return undefined;
     
     // Get contributors for this book
-    const bookContributors = await getSafeDb().select().from(contributors).where(eq(contributors.bookId, bookId));
+    const bookContributors = await db.select().from(contributors).where(eq(contributors.bookId, bookId));
     
     return {
       ...book,
@@ -618,7 +610,7 @@ export class DatabaseStorage implements IStorage {
       book.isbnPlaceholder = await generateUniqueIsbnPlaceholder();
     }
     
-    const [newBook] = await getSafeDb().insert(books).values(book).returning();
+    const [newBook] = await db.insert(books).values(book).returning();
     return newBook;
   }
 
@@ -633,7 +625,7 @@ export class DatabaseStorage implements IStorage {
 
     // Get all books in the same project to avoid title conflicts
     const projectBooks = originalBook.projectId 
-      ? await getSafeDb().select().from(books).where(eq(books.projectId, originalBook.projectId))
+      ? await db.select().from(books).where(eq(books.projectId, originalBook.projectId))
       : [];
     
     // Generate unique book name
@@ -734,31 +726,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteBook(bookId: string, userId: string): Promise<void> {
-    await getSafeDb().delete(books).where(and(eq(books.id, bookId), eq(books.userId, userId)));
+    await db.delete(books).where(and(eq(books.id, bookId), eq(books.userId, userId)));
   }
 
   async checkIsbnExists(isbn: string, excludeBookId?: string): Promise<Book | undefined> {
     if (excludeBookId) {
-      const result = await getSafeDb().select().from(books)
+      const result = await db.select().from(books)
         .where(and(eq(books.isbn, isbn), sql`${books.id} != ${excludeBookId}`));
       return result[0];
     }
     
-    const result = await getSafeDb().select().from(books).where(eq(books.isbn, isbn));
+    const result = await db.select().from(books).where(eq(books.isbn, isbn));
     return result[0];
   }
 
   async getBookContributors(bookId: string): Promise<Contributor[]> {
-    return await getSafeDb().select().from(contributors).where(eq(contributors.bookId, bookId));
+    return await db.select().from(contributors).where(eq(contributors.bookId, bookId));
   }
 
   async addContributor(contributor: InsertContributor): Promise<Contributor> {
-    const [newContributor] = await getSafeDb().insert(contributors).values(contributor).returning();
+    const [newContributor] = await db.insert(contributors).values(contributor).returning();
     return newContributor;
   }
 
   async removeContributor(contributorId: string, bookId: string): Promise<void> {
-    await getSafeDb().delete(contributors).where(
+    await db.delete(contributors).where(
       and(eq(contributors.id, contributorId), eq(contributors.bookId, bookId))
     );
   }
@@ -767,7 +759,7 @@ export class DatabaseStorage implements IStorage {
     let query;
     
     if (startDate && endDate) {
-      query = getSafeDb().select().from(salesData).where(
+      query = db.select().from(salesData).where(
         and(
           eq(salesData.userId, userId),
           gte(salesData.reportDate, startDate),
@@ -775,14 +767,14 @@ export class DatabaseStorage implements IStorage {
         )
       );
     } else {
-      query = getSafeDb().select().from(salesData).where(eq(salesData.userId, userId));
+      query = db.select().from(salesData).where(eq(salesData.userId, userId));
     }
 
     return await query.orderBy(desc(salesData.reportDate));
   }
 
   async addSalesData(data: InsertSalesData): Promise<SalesData> {
-    const [newSalesData] = await getSafeDb().insert(salesData).values(data).returning();
+    const [newSalesData] = await db.insert(salesData).values(data).returning();
     return newSalesData;
   }
 
@@ -864,11 +856,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserAiGenerations(userId: string): Promise<AiGeneration[]> {
-    return await getSafeDb().select().from(aiGenerations).where(eq(aiGenerations.userId, userId)).orderBy(desc(aiGenerations.createdAt));
+    return await db.select().from(aiGenerations).where(eq(aiGenerations.userId, userId)).orderBy(desc(aiGenerations.createdAt));
   }
 
   async addAiGeneration(generation: InsertAiGeneration): Promise<AiGeneration> {
-    const [newGeneration] = await getSafeDb().insert(aiGenerations).values(generation).returning();
+    const [newGeneration] = await db.insert(aiGenerations).values(generation).returning();
     return newGeneration;
   }
 
@@ -884,12 +876,12 @@ export class DatabaseStorage implements IStorage {
     }
 
     const [userList, totalResult] = await Promise.all([
-      getSafeDb().select().from(users)
+      db.select().from(users)
         .where(whereCondition)
         .limit(limit)
         .offset(offset)
         .orderBy(desc(users.createdAt)),
-      getSafeDb().select({ count: count() }).from(users).where(whereCondition)
+      db.select({ count: count() }).from(users).where(whereCondition)
     ]);
 
     return {
@@ -927,8 +919,8 @@ export class DatabaseStorage implements IStorage {
 
   async getAllProjects(limit = 50, offset = 0): Promise<{projects: ProjectWithRelations[], total: number}> {
     const [projectList, totalResult] = await Promise.all([
-      getSafeDb().select().from(projects).limit(limit).offset(offset).orderBy(desc(projects.createdAt)),
-      getSafeDb().select({ count: count() }).from(projects)
+      db.select().from(projects).limit(limit).offset(offset).orderBy(desc(projects.createdAt)),
+      db.select({ count: count() }).from(projects)
     ]);
 
     return {
@@ -945,14 +937,14 @@ export class DatabaseStorage implements IStorage {
   async backupMarketplaceCategories(): Promise<boolean> {
     try {
       // Create backup table if it doesn't exist
-      await getSafeDb().execute(sql`
+      await db.execute(sql`
         CREATE TABLE IF NOT EXISTS marketplace_categories_backup AS 
         SELECT * FROM marketplace_categories
       `);
       
       // Clear and repopulate backup
-      await getSafeDb().execute(sql`DELETE FROM marketplace_categories_backup`);
-      await getSafeDb().execute(sql`
+      await db.execute(sql`DELETE FROM marketplace_categories_backup`);
+      await db.execute(sql`
         INSERT INTO marketplace_categories_backup 
         SELECT * FROM marketplace_categories
       `);
@@ -1005,7 +997,7 @@ export class DatabaseStorage implements IStorage {
   async rollbackMarketplaceCategories(): Promise<boolean> {
     try {
       // Check if backup exists
-      const backupExists = await getSafeDb().execute(sql`
+      const backupExists = await db.execute(sql`
         SELECT EXISTS (
           SELECT FROM information_schema.tables 
           WHERE table_name = 'marketplace_categories_backup'
@@ -1018,8 +1010,8 @@ export class DatabaseStorage implements IStorage {
       }
 
       // Restore from backup
-      await getSafeDb().execute(sql`DELETE FROM marketplace_categories`);
-      await getSafeDb().execute(sql`
+      await db.execute(sql`DELETE FROM marketplace_categories`);
+      await db.execute(sql`
         INSERT INTO marketplace_categories 
         SELECT * FROM marketplace_categories_backup
       `);
@@ -1100,7 +1092,7 @@ export class DatabaseStorage implements IStorage {
       }
 
       // Step 4: Perform the complete replacement in a transaction
-      await getSafeDb().transaction(async (tx) => {
+      await db.transaction(async (tx) => {
         // Delete all existing categories
         await tx.delete(marketplaceCategories);
         console.log(`[MIGRATION] Deleted all existing categories`);
@@ -1143,12 +1135,12 @@ export class DatabaseStorage implements IStorage {
       activeUsersResult,
       recentSignupsResult,
     ] = await Promise.all([
-      getSafeDb().select({ count: count() }).from(users),
-      getSafeDb().select({ count: count() }).from(projects),
-      getSafeDb().select({ total: sum(salesData.revenue) }).from(salesData),
-      getSafeDb().select({ count: count() }).from(aiGenerations),
-      getSafeDb().select({ count: count() }).from(users).where(eq(users.isActive, true)),
-      getSafeDb().select({ count: count() }).from(users).where(gte(users.createdAt, thirtyDaysAgo)),
+      db.select({ count: count() }).from(users),
+      db.select({ count: count() }).from(projects),
+      db.select({ total: sum(salesData.revenue) }).from(salesData),
+      db.select({ count: count() }).from(aiGenerations),
+      db.select({ count: count() }).from(users).where(eq(users.isActive, true)),
+      db.select({ count: count() }).from(users).where(gte(users.createdAt, thirtyDaysAgo)),
     ]);
 
     return {
@@ -1162,7 +1154,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSystemConfig(): Promise<SystemConfig[]> {
-    return await getSafeDb().select().from(systemConfig).orderBy(systemConfig.key);
+    return await db.select().from(systemConfig).orderBy(systemConfig.key);
   }
 
   async updateSystemConfig(key: string, value: string, description?: string, updatedBy?: string): Promise<SystemConfig> {
@@ -1178,19 +1170,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async addAuditLog(log: InsertAuditLog): Promise<AuditLog> {
-    const [auditLog] = await getSafeDb().insert(adminAuditLog).values(log).returning();
+    const [auditLog] = await db.insert(adminAuditLog).values(log).returning();
     return auditLog;
   }
 
   async getAuditLogs(limit = 100, offset = 0): Promise<{logs: AuditLog[], total: number}> {
     const [logs, totalResult] = await Promise.all([
-      getSafeDb().query.adminAuditLog.findMany({
+      db.query.adminAuditLog.findMany({
         with: { user: true },
         limit,
         offset,
         orderBy: [desc(adminAuditLog.createdAt)],
       }),
-      getSafeDb().select({ count: count() }).from(adminAuditLog)
+      db.select({ count: count() }).from(adminAuditLog)
     ]);
 
     return {
@@ -1201,11 +1193,11 @@ export class DatabaseStorage implements IStorage {
 
   // Blog operations
   async getBlogCategories(): Promise<BlogCategory[]> {
-    return await getSafeDb().select().from(blogCategories).orderBy(blogCategories.name);
+    return await db.select().from(blogCategories).orderBy(blogCategories.name);
   }
 
   async createBlogCategory(category: InsertBlogCategory): Promise<BlogCategory> {
-    const [newCategory] = await getSafeDb().insert(blogCategories).values(category).returning();
+    const [newCategory] = await db.insert(blogCategories).values(category).returning();
     return newCategory;
   }
 
@@ -1219,7 +1211,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteBlogCategory(id: string): Promise<void> {
-    await getSafeDb().delete(blogCategories).where(eq(blogCategories.id, id));
+    await db.delete(blogCategories).where(eq(blogCategories.id, id));
   }
 
   async getBlogPosts(filters?: {
@@ -1254,7 +1246,7 @@ export class DatabaseStorage implements IStorage {
     const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
 
     const [posts, totalResult] = await Promise.all([
-      getSafeDb().query.blogPosts.findMany({
+      db.query.blogPosts.findMany({
         where: whereClause,
         with: {
           author: true,
@@ -1265,7 +1257,7 @@ export class DatabaseStorage implements IStorage {
         offset,
         orderBy: [desc(blogPosts.createdAt)],
       }),
-      getSafeDb().select({ count: count() }).from(blogPosts).where(whereClause)
+      db.select({ count: count() }).from(blogPosts).where(whereClause)
     ]);
 
     return {
@@ -1275,7 +1267,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getBlogPost(id: string): Promise<BlogPostWithRelations | undefined> {
-    const post = await getSafeDb().query.blogPosts.findFirst({
+    const post = await db.query.blogPosts.findFirst({
       where: eq(blogPosts.id, id),
       with: {
         author: true,
@@ -1287,7 +1279,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createBlogPost(post: InsertBlogPost): Promise<BlogPost> {
-    const [newPost] = await getSafeDb().insert(blogPosts).values(post).returning();
+    const [newPost] = await db.insert(blogPosts).values(post).returning();
     return newPost;
   }
 
@@ -1301,7 +1293,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteBlogPost(id: string): Promise<void> {
-    await getSafeDb().delete(blogPosts).where(eq(blogPosts.id, id));
+    await db.delete(blogPosts).where(eq(blogPosts.id, id));
   }
 
   async updateBlogPostStatus(id: string, status: string): Promise<BlogPost> {
@@ -1462,7 +1454,7 @@ export class DatabaseStorage implements IStorage {
 
   async exportAllMarketplaceCategories(): Promise<any[]> {
     try {
-      const categories = await getSafeDb().select().from(marketplaceCategories).orderBy(
+      const categories = await db.select().from(marketplaceCategories).orderBy(
         marketplaceCategories.marketplace,
         marketplaceCategories.level,
         marketplaceCategories.sortOrder,
@@ -1582,8 +1574,8 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(authors.userId, userId), eq(authors.isActive, true)));
 
     return await Promise.all(userAuthors.map(async (author) => {
-      const [user] = await getSafeDb().select().from(users).where(eq(users.id, author.userId));
-      const biographies = await getSafeDb().select().from(authorBiographies).where(eq(authorBiographies.authorId, author.id));
+      const [user] = await db.select().from(users).where(eq(users.id, author.userId));
+      const biographies = await db.select().from(authorBiographies).where(eq(authorBiographies.authorId, author.id));
       
       return {
         ...author,
@@ -1600,8 +1592,8 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(authors.userId, userId), eq(authors.isActive, true)));
 
     return await Promise.all(userAuthors.map(async (author) => {
-      const [user] = await getSafeDb().select().from(users).where(eq(users.id, author.userId));
-      const biographies = await getSafeDb().select().from(authorBiographies).where(eq(authorBiographies.authorId, author.id));
+      const [user] = await db.select().from(users).where(eq(users.id, author.userId));
+      const biographies = await db.select().from(authorBiographies).where(eq(authorBiographies.authorId, author.id));
       
       // Count books for this author
       const authorBooks = await db
@@ -1648,8 +1640,8 @@ export class DatabaseStorage implements IStorage {
 
     if (!author) return undefined;
 
-    const [user] = await getSafeDb().select().from(users).where(eq(users.id, author.userId));
-    const biographies = await getSafeDb().select().from(authorBiographies).where(eq(authorBiographies.authorId, author.id));
+    const [user] = await db.select().from(users).where(eq(users.id, author.userId));
+    const biographies = await db.select().from(authorBiographies).where(eq(authorBiographies.authorId, author.id));
 
     return {
       ...author,
@@ -1807,7 +1799,7 @@ export class DatabaseStorage implements IStorage {
         .map(contrib => contrib.bookId)
         .filter(Boolean)
         .map(async (bookId) => {
-          const [book] = await getSafeDb().select().from(books).where(and(eq(books.id, bookId!), eq(books.userId, userId)));
+          const [book] = await db.select().from(books).where(and(eq(books.id, bookId!), eq(books.userId, userId)));
           return book;
         })
     );
@@ -1947,7 +1939,7 @@ export class DatabaseStorage implements IStorage {
       .limit(limit);
 
     return await Promise.all(userImports.map(async (importRecord) => {
-      const [user] = await getSafeDb().select().from(users).where(eq(users.id, importRecord.userId));
+      const [user] = await db.select().from(users).where(eq(users.id, importRecord.userId));
       // Don't load import data by default for performance - only on demand
       
       return {
@@ -1974,8 +1966,8 @@ export class DatabaseStorage implements IStorage {
 
     if (!importRecord) return undefined;
 
-    const [user] = await getSafeDb().select().from(users).where(eq(users.id, importRecord.userId));
-    const importData = await getSafeDb().select().from(kdpImportData).where(eq(kdpImportData.importId, importRecord.id));
+    const [user] = await db.select().from(users).where(eq(users.id, importRecord.userId));
+    const importData = await db.select().from(kdpImportData).where(eq(kdpImportData.importId, importRecord.id));
 
     return {
       ...importRecord,
@@ -2006,7 +1998,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteKdpImport(importId: string, userId: string): Promise<void> {
     // Delete related import data first
-    await getSafeDb().delete(kdpImportData).where(eq(kdpImportData.importId, importId));
+    await db.delete(kdpImportData).where(eq(kdpImportData.importId, importId));
     
     // Delete the main import record
     await db
@@ -2141,11 +2133,11 @@ export class DatabaseStorage implements IStorage {
 
   // KDP Analytics methods - using real imported data with currency handling
   async getAnalyticsOverview(userId: string): Promise<any> {
-    const totalImports = await getSafeDb().select({
+    const totalImports = await db.select({
       count: sql<number>`count(*)`
     }).from(kdpImports).where(eq(kdpImports.userId, userId));
 
-    const totalRecords = await getSafeDb().select({
+    const totalRecords = await db.select({
       count: sql<number>`count(*)`
     }).from(kdpRoyaltiesEstimatorData)
     .innerJoin(kdpImports, eq(kdpRoyaltiesEstimatorData.importId, kdpImports.id))
@@ -2155,7 +2147,7 @@ export class DatabaseStorage implements IStorage {
     ));
 
     // Using kdp_royalties_estimator_data for analytics
-    const royaltiesByCurrency = await getSafeDb().select({
+    const royaltiesByCurrency = await db.select({
       currency: kdpRoyaltiesEstimatorData.currency,
       sum: sql<number>`coalesce(sum(${kdpRoyaltiesEstimatorData.royalty}), 0)`,
       count: sql<number>`count(*)`
@@ -2169,7 +2161,7 @@ export class DatabaseStorage implements IStorage {
     ))
     .groupBy(kdpRoyaltiesEstimatorData.currency);
 
-    const uniqueBooks = await getSafeDb().select({
+    const uniqueBooks = await db.select({
       count: sql<number>`count(distinct ${kdpRoyaltiesEstimatorData.asin})`
     }).from(kdpRoyaltiesEstimatorData)
     .innerJoin(kdpImports, eq(kdpRoyaltiesEstimatorData.importId, kdpImports.id))
@@ -2181,7 +2173,7 @@ export class DatabaseStorage implements IStorage {
     ));
 
     // Nouveau calcul du Total Revenue en USD
-    const totalRevenueUSD = await getSafeDb().select({
+    const totalRevenueUSD = await db.select({
       sum: sql<number>`coalesce(sum(${kdpRoyaltiesEstimatorData.royaltyUsd}::decimal), 0)`
     }).from(kdpRoyaltiesEstimatorData)
     .innerJoin(kdpImports, eq(kdpRoyaltiesEstimatorData.importId, kdpImports.id))
@@ -2210,7 +2202,7 @@ export class DatabaseStorage implements IStorage {
    */
   async getTotalRevenue(userId: string, targetCurrency: string = 'USD'): Promise<{ totalRevenue: number; currency: string }> {
     // D'abord récupérer le total en USD - INCLUT TOUTES les royalties (positives ET négatives)
-    const totalRevenueUSD = await getSafeDb().select({
+    const totalRevenueUSD = await db.select({
       sum: sql<number>`coalesce(sum(${kdpRoyaltiesEstimatorData.royaltyUsd}::decimal), 0)`
     }).from(kdpRoyaltiesEstimatorData)
     .innerJoin(kdpImports, eq(kdpRoyaltiesEstimatorData.importId, kdpImports.id))
@@ -2242,7 +2234,7 @@ export class DatabaseStorage implements IStorage {
 
   async getSalesTrends(userId: string, days: number): Promise<any[]> {
     // Group by import type and date to understand data better
-    const salesData = await getSafeDb().select({
+    const salesData = await db.select({
       date: sql<string>`date(${kdpImports.createdAt})`,
       importType: kdpImports.detectedType,
       sales: sql<number>`count(*)`,
@@ -2276,7 +2268,7 @@ export class DatabaseStorage implements IStorage {
 
   async getTopPerformers(userId: string, limit: number): Promise<any[]> {
     // Get top performers with currency information to avoid mixing currencies
-    const topBooks = await getSafeDb().select({
+    const topBooks = await db.select({
       title: kdpRoyaltiesEstimatorData.title,
       asin: kdpRoyaltiesEstimatorData.asin,
       currency: kdpRoyaltiesEstimatorData.currency,  
@@ -2312,7 +2304,7 @@ export class DatabaseStorage implements IStorage {
 
   async getMarketplaceBreakdown(userId: string): Promise<any[]> {
     // Group by marketplace AND currency to avoid mixing currencies
-    const marketplaceData = await getSafeDb().select({
+    const marketplaceData = await db.select({
       marketplace: kdpRoyaltiesEstimatorData.marketplace,
       currency: kdpRoyaltiesEstimatorData.currency,
       totalSales: sql<number>`count(*)`,
@@ -2477,7 +2469,7 @@ export class DatabaseStorage implements IStorage {
     
     // Les données "payments" sont des paiements agrégés par devise et marketplace
     // On va consolider par devise et marketplace plutôt que par ASIN
-    const rawData = await getSafeDb().select({
+    const rawData = await db.select({
       currency: kdpImportData.currency,
       marketplace: kdpImportData.marketplace,
       totalRoyalty: sql<number>`COALESCE(SUM(${kdpImportData.royalty}), 0)`,
@@ -2573,7 +2565,7 @@ export class DatabaseStorage implements IStorage {
     console.log(`[CONSOLIDATION] Récupération overview pour utilisateur: ${userId}`);
     
     // Récupérer les données consolidées par devise
-    const salesByCurrency = await getSafeDb().select({
+    const salesByCurrency = await db.select({
       currency: consolidatedSalesData.currency,
       totalRoyalty: sql<number>`COALESCE(SUM(${consolidatedSalesData.totalRoyalty}::decimal), 0)`,
       totalRoyaltyUSD: sql<number>`COALESCE(SUM(${consolidatedSalesData.totalRoyaltyUSD}::decimal), 0)`,
@@ -2586,7 +2578,7 @@ export class DatabaseStorage implements IStorage {
     console.log(`[CONSOLIDATION] Trouvé ${salesByCurrency.length} devises`);
 
     // Statistiques générales
-    const totalStats = await getSafeDb().select({
+    const totalStats = await db.select({
       totalRecords: sql<number>`COUNT(*)`,
       uniqueBooks: sql<number>`COUNT(DISTINCT ${consolidatedSalesData.asin})`,
       totalUSDRevenue: sql<number>`COALESCE(SUM(${consolidatedSalesData.totalRoyaltyUSD}::decimal), 0)`,
@@ -2612,14 +2604,14 @@ export class DatabaseStorage implements IStorage {
 
   // Master Books operations
   async getMasterBooks(userId: string): Promise<MasterBook[]> {
-    return await getSafeDb().select()
+    return await db.select()
       .from(masterBooks)
       .where(eq(masterBooks.userId, userId))
       .orderBy(sql`${masterBooks.totalRoyaltiesUSD} DESC`);
   }
 
   async getMasterBookByAsin(asin: string): Promise<MasterBook | null> {
-    const result = await getSafeDb().select()
+    const result = await db.select()
       .from(masterBooks)
       .where(eq(masterBooks.asin, asin))
       .limit(1);
@@ -2636,7 +2628,7 @@ export class DatabaseStorage implements IStorage {
 
   // Clear all KDP royalties estimator data for user before full historical import
   async clearAllKdpRoyaltiesEstimatorData(userId: string): Promise<number> {
-    const result = await getSafeDb().delete(kdpRoyaltiesEstimatorData)
+    const result = await db.delete(kdpRoyaltiesEstimatorData)
       .where(eq(kdpRoyaltiesEstimatorData.userId, userId));
     
     return result.rowCount || 0;
