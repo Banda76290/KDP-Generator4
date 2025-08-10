@@ -11,8 +11,8 @@ export function isDeploymentMode(): boolean {
   const deploymentComplete = process.env.REPLIT_DEPLOYMENT_COMPLETE === 'true';
   const isBuildPhase = process.env.REPLIT_BUILD === 'true';
   
-  // We're deploying if we're in build phase or in production without deployment complete
-  return isBuildPhase || (isProduction && (isCloudRun || isReplit) && !deploymentComplete);
+  // More restrictive: Any sign of build or deployment without explicit completion
+  return isBuildPhase || (isProduction && !deploymentComplete);
 }
 
 export function shouldSkipDatabaseOps(): boolean {

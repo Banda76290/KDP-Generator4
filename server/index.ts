@@ -48,16 +48,18 @@ app.use((req, res, next) => {
 
 (async () => {
   const isDeployment = isDeploymentMode();
+  const isBuildPhase = process.env.REPLIT_BUILD === 'true';
   
-  console.log(`[07:${new Date().getMinutes().toString().padStart(2, '0')}:${new Date().getSeconds().toString().padStart(2, '0')}] ℹ️ [SYSTEM] 🚀 Démarrage du serveur KDP Generator`);
-  console.log(`[07:${new Date().getMinutes().toString().padStart(2, '0')}:${new Date().getSeconds().toString().padStart(2, '0')}] ℹ️ [SYSTEM] 🔧 Configuration des routes API...`);
+  console.log(`[${new Date().toTimeString().split(' ')[0]}] [SYSTEM] Starting KDP Generator server`);
+  console.log(`[${new Date().toTimeString().split(' ')[0]}] [SYSTEM] Environment: ${process.env.NODE_ENV || 'development'}`);
   
-  if (isDeployment) {
-    console.log("[DEPLOY] Deployment mode detected - skipping database operations");
+  if (isBuildPhase) {
+    console.log("[BUILD] Build phase detected - all database and service operations bypassed");
+    console.log("[BUILD] Server will run in minimal mode for deployment");
+  } else if (isDeployment) {
+    console.log("[DEPLOY] Deployment mode detected - database operations deferred");
   } else {
-    // Database seeding is now manual-only via Admin System page
-    // await seedDatabase(); // Disabled automatic seeding - use Admin System page for manual control
-    console.log("[INIT] Normal mode - database operations available");
+    console.log("[INIT] Normal mode - full functionality available");
   }
   
   const server = await registerRoutes(app);

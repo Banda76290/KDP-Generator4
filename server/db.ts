@@ -44,11 +44,14 @@ async function initializeDatabase() {
   }
 }
 
-// Initialize database connection only if not in build phase
-if (process.env.REPLIT_BUILD !== 'true') {
+// Completely skip database initialization during any form of deployment
+const isBuildOrDeploy = process.env.REPLIT_BUILD === 'true' || 
+                       (process.env.NODE_ENV === 'production' && !process.env.REPLIT_DEPLOYMENT_COMPLETE);
+
+if (!isBuildOrDeploy) {
   initializeDatabase().catch(console.error);
 } else {
-  console.log("[DB] Build phase detected - skipping database initialization");
+  console.log("[DB] Build/deployment phase detected - completely skipping database initialization");
 }
 
 // Export database with fallback

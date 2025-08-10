@@ -1,4 +1,4 @@
-# Deployment Fixes Applied (Updated August 2025)
+# Deployment Fixes Applied (Updated August 10, 2025)
 
 ## Problem
 Database migration failed during deployment due to underlying platform issue:
@@ -8,13 +8,39 @@ Database migration failed during deployment due to underlying platform issue:
 
 ## Solutions Implemented
 
-### 1. Database Connection with Graceful Fallback
+### 1. Database Connection with Graceful Fallback  
 - **File**: `server/db.ts`
 - **Changes**: 
   - Added deployment mode detection
   - Graceful database initialization with error handling
   - Database availability checks before operations
   - Deferred initialization during deployment
+  - **Update (Aug 10, 2025)**: Enhanced with build-phase detection using `REPLIT_BUILD` environment variable
+
+### 6. **NEW** Build-Safe Storage Implementation
+- **File**: `server/storage.ts`
+- **Changes**:
+  - Replaced direct database imports with `getSafeDb()` function calls
+  - All database operations now check availability before execution
+  - Prevents crashes during build phase when database is unavailable
+  - Automatic fallback to error messages during deployment
+
+### 7. **NEW** Comprehensive Build-Safe Server
+- **File**: `server/buildSafeIndex.ts`
+- **Purpose**: Alternative entry point that completely bypasses all database and service operations
+- **Features**:
+  - Zero database dependencies during build
+  - Health endpoints return appropriate build status
+  - All API routes return deployment status
+  - Graceful error handling for Cloud Run compatibility
+
+### 8. **NEW** Deployment Script
+- **File**: `deploy.sh`
+- **Purpose**: Automated deployment preparation with proper environment setup
+- **Features**:
+  - Sets required environment variables (`REPLIT_BUILD=true`)
+  - Runs build with deployment-safe configuration
+  - Provides clear deployment status and next steps
 
 ### 2. Deployment Helper Utilities
 - **File**: `server/utils/deploymentHelper.ts`
