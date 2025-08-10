@@ -1,14 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes.js";
-import { setupVite, serveStatic, log } from "./vite.js";
+import { registerRoutes } from "./routes";
+import { setupVite, serveStatic, log } from "./vite";
 import { seedDatabase } from "./seedDatabase.js";
-import { cronService } from "./services/cronService.js";
-import { runMigration } from "./scripts/migrate.js";
-import { runDeploymentHealthCheck, formatHealthCheckForLog } from "./utils/deploymentHealth.js";
-import { startDeploymentMonitoring, runDeploymentHealthMonitor, formatHealthMonitorResults } from "./utils/deploymentMonitor.js";
-import { runPreDeploymentValidation, testCriticalRecoverySystem } from "./utils/deploymentValidator.js";
-import { executeDeploymentBypass } from "./utils/deploymentBypass.js";
-import { finalizeDeployment, generateDeploymentReport } from "./utils/deploymentFinalizer.js";
+import { cronService } from "./services/cronService";
 
 const app = express();
 // Increase payload limit to handle rich text content (10MB)
@@ -46,115 +40,8 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Enhanced database system for production deployment with bypass strategy
-  if (process.env.NODE_ENV === 'production' || process.env.REPLIT_DEPLOYMENT) {
-    log('=== Production Deployment System Enhanced ===');
-    log('Environment: Production');
-    log(`Timestamp: ${new Date().toISOString()}`);
-    
-    // Pre-deployment validation
-    log('🔍 Running pre-deployment validation...');
-    const preDeployValidation = await runPreDeploymentValidation();
-    
-    if (!preDeployValidation.ready) {
-      log('⚠️ Pre-deployment validation issues detected:');
-      preDeployValidation.issues.forEach(issue => log(`  • ${issue}`));
-      log('Recommendations:');
-      preDeployValidation.recommendations.forEach(rec => log(`  • ${rec}`));
-    } else {
-      log('✅ Pre-deployment validation passed');
-    }
-    
-    // Test critical recovery system
-    log('🧪 Testing critical recovery system...');
-    const recoveryTest = await testCriticalRecoverySystem();
-    log(`Critical recovery system: ${recoveryTest.available ? 'AVAILABLE' : 'NOT AVAILABLE'}`);
-    recoveryTest.details.forEach(detail => log(`  • ${detail}`));
-    
-    // Use deployment bypass strategy to avoid platform migration limitations
-    log('🔄 Activating deployment bypass strategy...');
-    try {
-      const bypassResult = await executeDeploymentBypass();
-      
-      if (bypassResult.success) {
-        log('✅ Deployment bypass successful - runtime schema initialization complete');
-        bypassResult.details.forEach(detail => log(`  ${detail}`));
-        
-        // Run health monitor after successful bypass
-        log('🔍 Running deployment health monitor...');
-        const healthMonitor = await runDeploymentHealthMonitor();
-        log(formatHealthMonitorResults(healthMonitor));
-        
-        // Start continuous monitoring for production
-        startDeploymentMonitoring();
-        
-        if (healthMonitor.status === 'unhealthy') {
-          log('⚠️  DEPLOYMENT HEALTH WARNING: Critical issues detected');
-          log('   Deployment may have limited functionality');
-        } else if (healthMonitor.status === 'degraded') {
-          log('⚠️  DEPLOYMENT HEALTH NOTICE: Minor issues detected');
-          log('   Some features may be affected');
-        } else {
-          log('✅ DEPLOYMENT HEALTH: All systems operational');
-          log('   Application is ready for production use');
-        }
-        
-      } else {
-        log('⚠️ Deployment bypass encountered issues - attempting fallback migration');
-        bypassResult.details.forEach(detail => log(`  ${detail}`));
-        
-        // Fallback to enhanced migration if bypass fails
-        if (preDeployValidation.ready) {
-          log('🔄 Starting fallback enhanced database migration...');
-          await runMigration();
-          log('✅ Fallback database migration completed successfully');
-        }
-      }
-      
-    } catch (error) {
-        log(`❌ Database migration failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        
-        // Provide detailed error information
-        if (error instanceof Error) {
-          log(`Error details: ${error.stack}`);
-          
-          // Specific error handling recommendations
-          if (error.message.includes('DATABASE_URL')) {
-            log('💡 Fix: Ensure DATABASE_URL is properly set in production secrets');
-          } else if (error.message.includes('connection')) {
-            log('💡 Fix: Check database connectivity and network configuration');
-          } else if (error.message.includes('permission')) {
-            log('💡 Fix: Verify database user has sufficient privileges');
-          } else if (error.message.includes('SSL')) {
-            log('💡 Fix: Check SSL configuration for database connection');
-          }
-        }
-        
-        log('🔄 Server startup will continue in degraded mode');
-        log('📋 Manual database setup may be required');
-        
-        // Still run health check to see what's working
-        try {
-          log('🔍 Running partial health check...');
-          const healthCheck = await runDeploymentHealthCheck();
-          log(formatHealthCheckForLog(healthCheck));
-        } catch (healthError) {
-          log(`❌ Health check also failed: ${healthError instanceof Error ? healthError.message : 'Unknown error'}`);
-          log('⚠️  Application may have significant functionality issues');
-      }
-    }
-    
-    // Final deployment verification
-    log('🏁 Running deployment finalization...');
-    const finalization = await finalizeDeployment();
-    const deploymentReport = generateDeploymentReport(finalization);
-    log(deploymentReport);
-    
-    log('=== Deployment System Complete ===');
-  } else {
-    // Database seeding is now manual-only via Admin System page in development
-    // await seedDatabase(); // Disabled automatic seeding - use Admin System page for manual control
-  }
+  // Database seeding is now manual-only via Admin System page
+  // await seedDatabase(); // Disabled automatic seeding - use Admin System page for manual control
   
   const server = await registerRoutes(app);
   

@@ -1,28 +1,22 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
-import { storage } from "./storage.js";
-import { setupAuth, isAuthenticated } from "./replitAuth.js";
-import { exchangeRateService } from "./services/exchangeRateService.js";
-import { cronService } from "./services/cronService.js";
-import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema, insertAuthorSchema, insertAuthorBiographySchema, insertContentRecommendationSchema, insertAiPromptTemplateSchema, insertKdpImportSchema, insertKdpImportDataSchema, insertAContentSchema } from "../shared/schema.js";
-import { aiService } from "./services/aiService.js";
-import { parseKDPReport } from "./services/kdpParser.js";
-import { KdpImportProcessor } from "./services/kdpImportProcessor.js";
-import { KdpRoyaltiesEstimatorProcessor } from "./services/kdpRoyaltiesEstimatorProcessor.js";
-import { generateUniqueIsbnPlaceholder, ensureIsbnPlaceholder } from "./utils/isbnGenerator.js";
+import { storage } from "./storage";
+import { setupAuth, isAuthenticated } from "./replitAuth";
+import { exchangeRateService } from "./services/exchangeRateService";
+import { cronService } from "./services/cronService";
+import { insertProjectSchema, insertContributorSchema, insertSalesDataSchema, insertBookSchema, insertSeriesSchema, insertAuthorSchema, insertAuthorBiographySchema, insertContentRecommendationSchema, insertAiPromptTemplateSchema, insertKdpImportSchema, insertKdpImportDataSchema } from "@shared/schema";
+import { aiService } from "./services/aiService";
+import { parseKDPReport } from "./services/kdpParser";
+import { KdpImportProcessor } from "./services/kdpImportProcessor";
+import { KdpRoyaltiesEstimatorProcessor } from "./services/kdpRoyaltiesEstimatorProcessor";
+import { generateUniqueIsbnPlaceholder, ensureIsbnPlaceholder } from "./utils/isbnGenerator";
 import XLSX from 'xlsx';
 import path from 'path';
 import fs from 'fs';
 import { seedDatabase, forceSeedDatabase } from "./seedDatabase.js";
 import { z } from "zod";
 import OpenAI from "openai";
-import {
-  ObjectStorageService,
-  ObjectNotFoundError,
-} from "./objectStorage.js";
-import { ObjectPermission } from "./objectAcl.js";
-import { runDeploymentHealthCheck } from "./utils/deploymentHealth.js";
 
 // Global logs storage for persistent logging
 interface LogEntry {
@@ -1715,119 +1709,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Object Storage routes for image uploads
-  
-  // Endpoint for serving public assets
-  app.get("/public-objects/:filePath(*)", async (req, res) => {
-    const filePath = req.params.filePath;
-    const objectStorageService = new ObjectStorageService();
-    try {
-      const file = await objectStorageService.searchPublicObject(filePath);
-      if (!file) {
-        return res.status(404).json({ error: "File not found" });
-      }
-      objectStorageService.downloadObject(file, res);
-    } catch (error) {
-      console.error("Error searching for public object:", error);
-      return res.status(500).json({ error: "Internal server error" });
-    }
-  });
-
-  // Endpoint for serving private objects (with ACL check)
-  app.get("/objects/:objectPath(*)", isAuthenticated, async (req: AuthenticatedRequest, res) => {
-    const userId = req.user?.claims?.sub;
-    const objectStorageService = new ObjectStorageService();
-    try {
-      const objectFile = await objectStorageService.getObjectEntityFile(
-        req.path,
-      );
-      
-      // For newly uploaded images in uploads folder, allow access to authenticated user
-      if (req.path.includes('/uploads/')) {
-        // Allow temporary access for uploaded images (before ACL is set)
-        return objectStorageService.downloadObject(objectFile, res);
-      }
-      
-      // For other objects, check ACL policy
-      const canAccess = await objectStorageService.canAccessObjectEntity({
-        objectFile,
-        userId: userId,
-        requestedPermission: ObjectPermission.READ,
-      });
-      
-      if (!canAccess) {
-        return res.sendStatus(401);
-      }
-      objectStorageService.downloadObject(objectFile, res);
-    } catch (error) {
-      console.error("Error checking object access:", error);
-      if (error instanceof ObjectNotFoundError) {
-        return res.sendStatus(404);
-      }
-      return res.sendStatus(500);
-    }
-  });
-
-  // Endpoint for getting upload URL for author profile images
-  app.post("/api/objects/upload", isAuthenticated, async (req: AuthenticatedRequest, res) => {
-    const objectStorageService = new ObjectStorageService();
-    try {
-      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
-      res.json({ uploadURL });
-    } catch (error) {
-      console.error("Error getting upload URL:", error);
-      res.status(500).json({ error: "Failed to generate upload URL" });
-    }
-  });
-
-  // Endpoint for setting author profile image after upload
-  app.put("/api/authors/:authorId/profile-image", isAuthenticated, async (req: AuthenticatedRequest, res) => {
-    console.log("Profile image request body:", req.body);
-    console.log("Profile image request body type:", typeof req.body);
-    
-    if (!req.body.profileImageURL) {
-      return res.status(400).json({ error: "profileImageURL is required" });
-    }
-
-    const userId = req.user?.claims?.sub;
-    const { authorId } = req.params;
-
-    if (!userId) {
-      return res.status(401).json({ message: "User not authenticated" });
-    }
-
-    try {
-      // Verify user owns the author
-      const author = await storage.getAuthor(authorId, userId);
-      if (!author) {
-        return res.status(404).json({ message: "Author not found" });
-      }
-
-      const objectStorageService = new ObjectStorageService();
-      const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
-        req.body.profileImageURL,
-        {
-          owner: userId,
-          visibility: "public", // Author profile images are public
-        },
-      );
-
-      // Update author with profile image URL
-      const updatedAuthor = await storage.updateAuthor(authorId, userId, {
-        profileImageUrl: objectPath
-      });
-
-      res.status(200).json({
-        message: "Profile image updated successfully",
-        author: updatedAuthor,
-        objectPath: objectPath,
-      });
-    } catch (error) {
-      console.error("Error setting profile image:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  });
-
   // New AI Configuration routes for database fields
   app.post("/api/ai/generate-configured", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -3185,8 +3066,89 @@ Please respond with only a JSON object containing the translated fields. For key
     }
   });
 
+  // Master Books routes
+  app.get('/api/master-books', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const masterBooks = await storage.getMasterBooks(userId);
+      res.json(masterBooks);
+    } catch (error) {
+      console.error('Error fetching master books:', error);
+      res.status(500).json({ error: 'Failed to fetch master books' });
+    }
+  });
 
+  app.get('/api/master-books/:asin', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { asin } = req.params;
+      const masterBook = await storage.getMasterBookByAsin(asin);
+      
+      if (!masterBook) {
+        return res.status(404).json({ error: 'Master book not found' });
+      }
+      
+      res.json(masterBook);
+    } catch (error) {
+      console.error('Error fetching master book:', error);
+      res.status(500).json({ error: 'Failed to fetch master book' });
+    }
+  });
 
+  app.post('/api/master-books/update/:importId', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const { importId } = req.params;
+      
+      // Update master books from import
+      // await storage.updateMasterBooksFromImport(userId, importId);
+      
+      res.json({ message: 'Master books updated successfully' });
+    } catch (error) {
+      console.error('Error updating master books:', error);
+      res.status(500).json({ error: 'Failed to update master books' });
+    }
+  });
+
+  // Rebuild master books from all existing imports
+  app.post('/api/test/rebuild-master-books', async (req, res) => {
+    try {
+      const { MasterBooksService } = await import('./services/masterBooksService');
+      await MasterBooksService.init();
+      
+      // Get all imports for the user
+      const imports = await storage.getAllKdpImportsForUser('dev-user-123');
+      
+      systemLog(`Rebuilding master books from ${imports.length} imports`, 'info', 'REBUILD');
+      
+      for (const importRecord of imports) {
+        try {
+          await MasterBooksService.updateFromImportData('dev-user-123', importRecord.id);
+          systemLog(`Processed import ${importRecord.id.slice(0, 8)}`, 'info', 'REBUILD');
+        } catch (error) {
+          systemLog(`Error processing import ${importRecord.id.slice(0, 8)}: ${error}`, 'error', 'REBUILD');
+        }
+      }
+      
+      // Get final count
+      const masterBooks = await storage.getMasterBooks('dev-user-123');
+      systemLog(`Rebuild complete: ${masterBooks.length} master books created`, 'info', 'REBUILD');
+      
+      res.json({ 
+        message: 'Master books rebuilt successfully',
+        importCount: imports.length,
+        masterBooksCount: masterBooks.length
+      });
+    } catch (error) {
+      systemLog(`Rebuild failed: ${error}`, 'error', 'REBUILD');
+      res.status(500).json({ error: 'Failed to rebuild master books' });
+    }
+  });
 
   // Test route for KDP_Royalties_Estimator - Simple version
   app.post('/api/test-royalties-estimator', async (req: Request, res: Response) => {
@@ -3255,325 +3217,6 @@ Please respond with only a JSON object containing the translated fields. For key
         error: error instanceof Error ? error.message : 'Erreur inconnue'
       });
     }
-  });
-
-  // A+ Content Management Routes
-  app.get('/api/a-content', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      
-      const aContents = await storage.getAContents(userId);
-      res.json(aContents);
-    } catch (error) {
-      console.error("Error fetching A+ Contents:", error);
-      res.status(500).json({ message: "Failed to fetch A+ Contents" });
-    }
-  });
-
-  app.get('/api/a-content/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      
-      const aContent = await storage.getAContent(req.params.id, userId);
-      if (!aContent) {
-        return res.status(404).json({ message: "A+ Content not found" });
-      }
-      
-      res.json(aContent);
-    } catch (error) {
-      console.error("Error fetching A+ Content:", error);
-      res.status(500).json({ message: "Failed to fetch A+ Content" });
-    }
-  });
-
-  app.post('/api/a-content', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      
-      const validatedData = insertAContentSchema.parse({
-        ...req.body,
-        userId
-      });
-      
-      const aContent = await storage.createAContent(validatedData);
-      res.status(201).json(aContent);
-    } catch (error) {
-      console.error("Error creating A+ Content:", error);
-      res.status(500).json({ 
-        message: error instanceof Error ? error.message : "Failed to create A+ Content" 
-      });
-    }
-  });
-
-  app.put('/api/a-content/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      
-      const updates = insertAContentSchema.partial().parse(req.body);
-      const aContent = await storage.updateAContent(req.params.id, userId, updates);
-      
-      if (!aContent) {
-        return res.status(404).json({ message: "A+ Content not found" });
-      }
-      
-      res.json(aContent);
-    } catch (error) {
-      console.error("Error updating A+ Content:", error);
-      res.status(500).json({ 
-        message: error instanceof Error ? error.message : "Failed to update A+ Content" 
-      });
-    }
-  });
-
-  app.delete('/api/a-content/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      
-      const success = await storage.deleteAContent(req.params.id, userId);
-      if (!success) {
-        return res.status(404).json({ message: "A+ Content not found" });
-      }
-      
-      res.json({ message: "A+ Content deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting A+ Content:", error);
-      res.status(500).json({ message: "Failed to delete A+ Content" });
-    }
-  });
-
-  // Amazon Ads Management Routes
-  app.get('/api/amazon-ads/campaigns', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      const campaigns = await storage.getAmazonAdsCampaigns(userId);
-      res.json(campaigns);
-    } catch (error) {
-      console.error("Error fetching Amazon Ads campaigns:", error);
-      res.status(500).json({ message: "Failed to fetch campaigns" });
-    }
-  });
-
-  app.get('/api/amazon-ads/campaigns/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      const campaign = await storage.getAmazonAdsCampaign(req.params.id, userId);
-      if (!campaign) {
-        return res.status(404).json({ message: "Campaign not found" });
-      }
-      res.json(campaign);
-    } catch (error) {
-      console.error("Error fetching Amazon Ads campaign:", error);
-      res.status(500).json({ message: "Failed to fetch campaign" });
-    }
-  });
-
-  app.post('/api/amazon-ads/campaigns', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      
-      const campaignData = { ...req.body, userId };
-      const campaign = await storage.createAmazonAdsCampaign(campaignData);
-      res.status(201).json(campaign);
-    } catch (error) {
-      console.error("Error creating Amazon Ads campaign:", error);
-      res.status(500).json({ message: "Failed to create campaign" });
-    }
-  });
-
-  app.put('/api/amazon-ads/campaigns/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      
-      const campaign = await storage.updateAmazonAdsCampaign(req.params.id, userId, req.body);
-      if (!campaign) {
-        return res.status(404).json({ message: "Campaign not found" });
-      }
-      res.json(campaign);
-    } catch (error) {
-      console.error("Error updating Amazon Ads campaign:", error);
-      res.status(500).json({ message: "Failed to update campaign" });
-    }
-  });
-
-  app.delete('/api/amazon-ads/campaigns/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      
-      const deleted = await storage.deleteAmazonAdsCampaign(req.params.id, userId);
-      if (!deleted) {
-        return res.status(404).json({ message: "Campaign not found" });
-      }
-      res.json({ message: "Campaign deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting Amazon Ads campaign:", error);
-      res.status(500).json({ message: "Failed to delete campaign" });
-    }
-  });
-
-  // Amazon Ads Keywords Routes
-  app.get('/api/amazon-ads/campaigns/:campaignId/keywords', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      
-      const keywords = await storage.getAmazonAdsKeywords(req.params.campaignId, userId);
-      res.json(keywords);
-    } catch (error) {
-      console.error("Error fetching Amazon Ads keywords:", error);
-      res.status(500).json({ message: "Failed to fetch keywords" });
-    }
-  });
-
-  app.post('/api/amazon-ads/keywords', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      
-      const keyword = await storage.createAmazonAdsKeyword(req.body);
-      res.status(201).json(keyword);
-    } catch (error) {
-      console.error("Error creating Amazon Ads keyword:", error);
-      res.status(500).json({ message: "Failed to create keyword" });
-    }
-  });
-
-  app.put('/api/amazon-ads/keywords/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      
-      const { campaignId } = req.body;
-      const keyword = await storage.updateAmazonAdsKeyword(req.params.id, campaignId, userId, req.body);
-      if (!keyword) {
-        return res.status(404).json({ message: "Keyword not found" });
-      }
-      res.json(keyword);
-    } catch (error) {
-      console.error("Error updating Amazon Ads keyword:", error);
-      res.status(500).json({ message: "Failed to update keyword" });
-    }
-  });
-
-  app.delete('/api/amazon-ads/keywords/:id', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      
-      const { campaignId } = req.body;
-      const deleted = await storage.deleteAmazonAdsKeyword(req.params.id, campaignId, userId);
-      if (!deleted) {
-        return res.status(404).json({ message: "Keyword not found" });
-      }
-      res.json({ message: "Keyword deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting Amazon Ads keyword:", error);
-      res.status(500).json({ message: "Failed to delete keyword" });
-    }
-  });
-
-  // Amazon Ads Performance Routes
-  app.get('/api/amazon-ads/campaigns/:campaignId/performance', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      
-      const performance = await storage.getAmazonAdsPerformance(req.params.campaignId, userId);
-      res.json(performance);
-    } catch (error) {
-      console.error("Error fetching Amazon Ads performance:", error);
-      res.status(500).json({ message: "Failed to fetch performance data" });
-    }
-  });
-
-  app.post('/api/amazon-ads/performance', isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      
-      const performance = await storage.createAmazonAdsPerformance(req.body);
-      res.status(201).json(performance);
-    } catch (error) {
-      console.error("Error creating Amazon Ads performance data:", error);
-      res.status(500).json({ message: "Failed to create performance data" });
-    }
-  });
-
-  // Deployment Health Check Endpoint
-  app.get('/api/health/deployment', async (req: Request, res: Response) => {
-    try {
-      const healthCheck = await runDeploymentHealthCheck();
-      
-      // Set appropriate HTTP status based on health
-      const statusCode = healthCheck.overall === 'healthy' ? 200 :
-                        healthCheck.overall === 'degraded' ? 206 : 503;
-      
-      res.status(statusCode).json({
-        status: healthCheck.overall,
-        timestamp: healthCheck.timestamp,
-        checks: healthCheck.checks,
-        environment: process.env.NODE_ENV || 'unknown',
-        version: process.env.npm_package_version || '1.0.0'
-      });
-    } catch (error) {
-      res.status(500).json({
-        status: 'error',
-        message: 'Health check failed',
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
-      });
-    }
-  });
-
-  // Basic Health Check (Lightweight)
-  app.get('/api/health', (req: Request, res: Response) => {
-    res.json({
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'unknown',
-      uptime: process.uptime()
-    });
   });
 
   const httpServer = createServer(app);
