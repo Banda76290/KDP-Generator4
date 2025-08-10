@@ -1,9 +1,10 @@
-# Deployment Fixes Applied
+# Deployment Fixes Applied (Updated August 2025)
 
 ## Problem
 Database migration failed during deployment due to underlying platform issue:
 - Application uses database seeding/migration functionality that conflicts with Cloud Run deployment
 - Database operations are being attempted during the build/deployment phase
+- Drizzle ORM attempts to connect to database during build which fails in Cloud Run environment
 
 ## Solutions Implemented
 
@@ -66,7 +67,18 @@ The system detects deployment state using:
 - `NODE_ENV=production`
 - `K_SERVICE` (Cloud Run)
 - `REPLIT_DOMAINS` (Replit)
+- `REPLIT_BUILD` (set to "true" during build phase)
 - `REPLIT_DEPLOYMENT_COMPLETE` (set to "true" after deployment)
+
+## Additional Files Created
+
+### Deployment Start Script
+- **File**: `server/deploymentStart.ts`
+- **Purpose**: Alternative entry point for deployment that completely bypasses database operations
+- **Features**: 
+  - No database initialization
+  - Health endpoints return 503 during deployment
+  - All API routes return deployment status
 
 ## Testing Deployment
 

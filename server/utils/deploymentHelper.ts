@@ -9,9 +9,10 @@ export function isDeploymentMode(): boolean {
   const isReplit = process.env.REPLIT_DOMAINS !== undefined;
   const isCloudRun = process.env.K_SERVICE !== undefined;
   const deploymentComplete = process.env.REPLIT_DEPLOYMENT_COMPLETE === 'true';
+  const isBuildPhase = process.env.REPLIT_BUILD === 'true';
   
-  // We're deploying if we're in production on Cloud Run and deployment isn't complete
-  return isProduction && (isCloudRun || isReplit) && !deploymentComplete;
+  // We're deploying if we're in build phase or in production without deployment complete
+  return isBuildPhase || (isProduction && (isCloudRun || isReplit) && !deploymentComplete);
 }
 
 export function shouldSkipDatabaseOps(): boolean {

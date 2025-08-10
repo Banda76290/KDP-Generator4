@@ -19,9 +19,10 @@ async function initializeDatabase() {
 
     // Test connection during deployment
     const isDeployment = process.env.NODE_ENV === 'production' && !process.env.REPLIT_DEPLOYMENT_COMPLETE;
+    const isBuildPhase = process.env.REPLIT_BUILD === 'true';
     
-    if (isDeployment) {
-      console.log("[DB] Deployment mode detected - deferring database initialization");
+    if (isDeployment || isBuildPhase) {
+      console.log("[DB] Deployment/Build mode detected - deferring database initialization");
       return false;
     }
 
@@ -43,8 +44,12 @@ async function initializeDatabase() {
   }
 }
 
-// Initialize database connection
-initializeDatabase().catch(console.error);
+// Initialize database connection only if not in build phase
+if (process.env.REPLIT_BUILD !== 'true') {
+  initializeDatabase().catch(console.error);
+} else {
+  console.log("[DB] Build phase detected - skipping database initialization");
+}
 
 // Export database with fallback
 export { pool };
