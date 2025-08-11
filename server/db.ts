@@ -20,7 +20,59 @@ if (databaseUrl) {
   // Create a mock database that doesn't crash the app
   pool = null as any;
   db = new Proxy({}, {
-    get() {
+    get(target, prop) {
+      // Mock common database operations with proper method chaining
+      if (prop === 'insert') {
+        return () => ({
+          values: () => ({
+            returning: () => ({
+              execute: () => Promise.resolve([])
+            }),
+            onConflictDoUpdate: () => ({
+              returning: () => ({
+                execute: () => Promise.resolve([])
+              }),
+              execute: () => Promise.resolve([])
+            }),
+            execute: () => Promise.resolve([])
+          }),
+          execute: () => Promise.resolve([])
+        });
+      }
+      if (prop === 'select') {
+        return () => ({
+          from: () => ({
+            where: () => ({
+              execute: () => Promise.resolve([])
+            }),
+            execute: () => Promise.resolve([])
+          }),
+          execute: () => Promise.resolve([])
+        });
+      }
+      if (prop === 'update') {
+        return () => ({
+          set: () => ({
+            where: () => ({
+              returning: () => ({
+                execute: () => Promise.resolve([])
+              }),
+              execute: () => Promise.resolve([])
+            }),
+            execute: () => Promise.resolve([])
+          }),
+          execute: () => Promise.resolve([])
+        });
+      }
+      if (prop === 'delete') {
+        return () => ({
+          where: () => ({
+            execute: () => Promise.resolve([])
+          }),
+          execute: () => Promise.resolve([])
+        });
+      }
+      // Default fallback for any other methods
       return () => Promise.resolve([]);
     }
   });
