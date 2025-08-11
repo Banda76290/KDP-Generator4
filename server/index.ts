@@ -43,10 +43,21 @@ app.use((req, res, next) => {
   // Database seeding is now manual-only via Admin System page
   // await seedDatabase(); // Disabled automatic seeding - use Admin System page for manual control
   
-  const server = await registerRoutes(app);
+  try {
+    const server = await registerRoutes(app);
+    
+    // Start exchange rate cron service only if database is available
+    if (process.env.DATABASE_URL || process.env.REPLIT_DB_URL) {
+      cronService.start();
+    }
+  } catch (error) {
+    console.error("Error setting up routes:", error);
+    // Continue anyway to show at least the static site
+  }
   
-  // Start exchange rate cron service
-  cronService.start();
+  const server = app.listen(parseInt(process.env.PORT || '5000', 10), "0.0.0.0", () => {
+    log(`serving on port ${parseInt(process.env.PORT || '5000', 10)}`);
+  });
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
