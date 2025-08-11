@@ -60,7 +60,7 @@ async function upsertUser(
     email: claims["email"],
     firstName: claims["first_name"],
     lastName: claims["last_name"],
-    profileImageUrl: claims["profile_image_url"],
+    profileImageUrl: claims["profile_image_url"] || "",
   });
 }
 
@@ -78,7 +78,7 @@ export async function setupAuth(app: Express) {
         email: "dev@example.com",
         firstName: "Developer",
         lastName: "User",
-        profileImageUrl: null,
+        profileImageUrl: "",
         role: "superadmin",
         subscriptionTier: "premium"
       });
