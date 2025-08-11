@@ -127,6 +127,8 @@ export default function Analytics() {
     enabled: isAuthenticated && !!analyticsCurrency,
     staleTime: 0, // Always refetch fresh data
     refetchOnMount: true, // Refetch when component mounts
+    retry: 3,
+    retryDelay: 1000,
   });
 
   const { data: salesTrends, isLoading: trendsLoading } = useQuery<SalesTrend[]>({

@@ -10,6 +10,9 @@ export default function KPICards() {
   
   const { data: stats, isLoading, error } = useQuery({
     queryKey: ["/api/dashboard/stats"],
+    staleTime: 0,
+    refetchOnMount: true,
+    retry: 3,
   });
 
   useEffect(() => {

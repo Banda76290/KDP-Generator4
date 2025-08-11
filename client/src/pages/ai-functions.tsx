@@ -72,12 +72,16 @@ export default function AIFunctions() {
   const { data: aiFunctions, isLoading: functionsLoading } = useQuery({
     queryKey: ['/api/ai/functions'],
     enabled: isAuthenticated,
+    staleTime: 0,
+    refetchOnMount: true,
   });
 
   // Fetch database fields for variable preview
   const { data: databaseFields } = useQuery({
     queryKey: ['/api/ai/database-fields'],
     enabled: isAuthenticated,
+    staleTime: 0,
+    refetchOnMount: true,
   });
 
   // Fetch user's books

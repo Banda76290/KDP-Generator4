@@ -15,6 +15,9 @@ export default function ProjectsTable() {
   
   const { data: projects, isLoading, error } = useQuery({
     queryKey: ["/api/projects"],
+    staleTime: 0,
+    refetchOnMount: true,
+    retry: 3,
   });
 
   useEffect(() => {

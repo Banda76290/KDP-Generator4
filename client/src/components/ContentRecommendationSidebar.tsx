@@ -68,6 +68,8 @@ export default function ContentRecommendationSidebar({
   const { data: recommendations = [], isLoading, error } = useQuery({
     queryKey: ['/api/books', bookId, 'recommendations'],
     enabled: !!bookId && isVisible,
+    staleTime: 0,
+    refetchOnMount: true,
   });
 
   const generateMutation = useMutation({
